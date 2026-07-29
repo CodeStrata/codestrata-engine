@@ -16,36 +16,13 @@ class ExampleEntry:
     notes: str
 
 
+# Only advertise samples available through published Community repositories.
 OFFICIAL_EXAMPLES: tuple[ExampleEntry, ...] = (
     ExampleEntry(
         name="sample-js-app",
         kind="test-fixture",
         location="test-fixtures/sample-js-app",
         notes="Bundled with Engine for offline quick start",
-    ),
-    ExampleEntry(
-        name="sample-python-app",
-        kind="test-fixture",
-        location="test-fixtures/sample-python-app",
-        notes="Python language sample (monorepo / fixture pack)",
-    ),
-    ExampleEntry(
-        name="sample-java-app",
-        kind="test-fixture",
-        location="test-fixtures/sample-java-app",
-        notes="Java / Maven language sample",
-    ),
-    ExampleEntry(
-        name="sample-php-app",
-        kind="test-fixture",
-        location="test-fixtures/sample-php-app",
-        notes="PHP language sample",
-    ),
-    ExampleEntry(
-        name="sample-csharp-app",
-        kind="test-fixture",
-        location="test-fixtures/sample-csharp-app",
-        notes="C# / .NET language sample",
     ),
     ExampleEntry(
         name="codestrata-examples",
@@ -107,6 +84,11 @@ def format_examples(*, json_output: bool = False) -> str:
     lines.append(
         "  codestrata assess --repo test-fixtures/sample-js-app --output reports --no-ai"
     )
+    lines.append("")
+    lines.append("Real-world showcases:")
+    lines.append("  git clone https://github.com/CodeStrata/codestrata-examples.git")
+    lines.append("  cd codestrata-examples")
+    lines.append("  python real-world/scripts/run_showcase.py spring-petclinic")
     return "\n".join(lines)
 
 

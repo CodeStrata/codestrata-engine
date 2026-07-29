@@ -67,11 +67,17 @@ cd codestrata-engine
 python3.12 -m venv .venv
 source .venv/bin/activate   # Windows: .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-python -m pip install -e '.[mcp]'
+python -m pip install -e .
 codestrata version
 codestrata init
 codestrata doctor
 codestrata assess --repo test-fixtures/sample-js-app --output reports --no-ai
+```
+
+Optional MCP server support (not required for Quick Start):
+
+```bash
+python -m pip install -e '.[mcp]'
 ```
 
 If you see `ModuleNotFoundError: codestrata`, confirm the active interpreter:
@@ -81,6 +87,27 @@ python -c "import codestrata; print(codestrata.__file__)"
 ```
 
 Open the newest `reports/sample-js-app/<timestamp>/report.html`.
+
+### Real-world showcases
+
+Install Engine first (commands above), then:
+
+```bash
+git clone https://github.com/CodeStrata/codestrata-examples.git
+cd codestrata-examples
+python real-world/scripts/run_showcase.py spring-petclinic
+```
+
+Or fetch + assess separately (this repository ships `codestrata.toml`):
+
+```bash
+python real-world/scripts/fetch_example.py spring-petclinic
+codestrata assess \
+  --repo .codestrata-examples/spring-petclinic \
+  --output reports/showcases/spring-petclinic \
+  --profile community \
+  --no-ai
+```
 
 Assess your own tree:
 
