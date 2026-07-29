@@ -1,0 +1,1 @@
+"""Inventory builder pipeline tests."""

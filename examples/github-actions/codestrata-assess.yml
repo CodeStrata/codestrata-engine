@@ -1,0 +1,60 @@
+# Sample Community Edition workflow: deterministic assess (no AI).
+#
+# Copy into your application repository as:
+#   .github/workflows/codestrata-assess.yml
+#
+# Requires the CodeStrata Engine package available to pip (PyPI or path install).
+
+name: CodeStrata Assess
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  assess:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install CodeStrata Engine
+        run: |
+          python -m pip install --upgrade pip
+          # Published package (preferred when available):
+          #   python -m pip install "codestrata>=0.1.0"
+          # From a checkout of codestrata-engine in the same job, use:
+          #   python -m pip install -e .
+          python -m pip install "codestrata>=0.1.0" || python -m pip install -e .
+
+      - name: Init config (if missing)
+        run: |
+          if [ ! -f codestrata.toml ]; then
+            codestrata init
+          fi
+
+      - name: Doctor
+        run: codestrata doctor --output reports
+
+      - name: Assess (deterministic)
+        run: |
+          codestrata assess \
+            --repo . \
+            --output reports \
+            --no-ai \
+            --quiet \
+            --json-summary
+
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: codestrata-reports
+          path: reports/**
+          if-no-files-found: error

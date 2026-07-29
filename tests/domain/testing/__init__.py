@@ -1,0 +1,1 @@
+"""Test Intelligence domain tests."""

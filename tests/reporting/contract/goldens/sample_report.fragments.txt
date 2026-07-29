@@ -1,0 +1,7 @@
+id="executive-summary"
+id="leadership-verdict"
+id="findings"
+id="priority-actions"
+id="key-takeaways"
+Urgent rec
+A finding

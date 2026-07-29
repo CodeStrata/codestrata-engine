@@ -1,0 +1,1 @@
+"""Report contract tests package."""

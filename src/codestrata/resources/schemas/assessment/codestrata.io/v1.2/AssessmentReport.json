@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/assessment/v1.2/AssessmentReport.json",
+  "title": "CodeStrata Assessment Report",
+  "type": "object",
+  "required": ["schema_version", "report_version", "assessment"],
+  "properties": {
+    "schema_version": { "type": "string", "const": "1.2" },
+    "report_version": { "type": "string" },
+    "manifest": {
+      "type": "object",
+      "required": [
+        "schema_version",
+        "report_version",
+        "codestrata_version",
+        "generation_mode",
+        "enabled_sections"
+      ],
+      "properties": {
+        "contract_version": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "report_version": { "type": "string" },
+        "html_report_version": { "type": "string" },
+        "codestrata_version": { "type": "string" },
+        "repository_id": { "type": ["string", "null"] },
+        "scan_id": { "type": ["string", "null"] },
+        "enabled_sections": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "generation_mode": { "type": "string" },
+        "generated_at": { "type": ["string", "null"] },
+        "volatile_fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "assessment": {
+      "type": "object",
+      "required": ["mode", "repository", "summary", "findings", "deterministic_recommendations"],
+      "properties": {
+        "mode": { "type": "string" },
+        "generated_at": { "type": "string" },
+        "repository": { "type": "object" },
+        "summary": { "type": "object" },
+        "findings": { "type": "array" },
+        "deterministic_recommendations": { "type": "array" },
+        "technologies": { "type": "array" },
+        "roadmap": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

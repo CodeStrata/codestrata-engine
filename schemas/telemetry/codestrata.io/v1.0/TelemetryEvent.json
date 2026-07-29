@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/telemetry/v1.0/TelemetryEvent.json",
+  "title": "CodeStrataTelemetryEvent",
+  "description": "Anonymous, opt-in Community telemetry event (schema 1.0.0). Never includes source code, repository identity, findings, prompts, or credentials.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "event",
+    "installation_id",
+    "codestrata_version",
+    "os",
+    "python_version",
+    "timestamp"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "event": {
+      "type": "string",
+      "enum": [
+        "installation_created",
+        "telemetry_enabled",
+        "telemetry_disabled",
+        "assessment_started",
+        "assessment_completed",
+        "assessment_failed",
+        "report_opened",
+        "ai_used",
+        "version_check",
+        "upgrade_completed"
+      ]
+    },
+    "installation_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Random UUID v4; never derived from username, hostname, MAC, email, Git identity, or repository."
+    },
+    "codestrata_version": { "type": "string", "maxLength": 64 },
+    "os": { "type": "string", "maxLength": 64 },
+    "python_version": { "type": "string", "maxLength": 32 },
+    "command": { "type": "string", "maxLength": 64 },
+    "enabled_assessment_domains": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 64, "pattern": "^[a-z0-9_-]+$" },
+      "maxItems": 32
+    },
+    "language_categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["python", "java", "javascript", "typescript", "go", "csharp", "rust"]
+      },
+      "uniqueItems": true,
+      "maxItems": 16
+    },
+    "repository_size_band": {
+      "type": "string",
+      "enum": ["0-100", "101-500", "501-1000", "1001-5000", "5001-10000", "10000+"]
+    },
+    "duration_band": {
+      "type": "string",
+      "enum": ["0-5s", "5-30s", "30-60s", "1-5m", "5-15m", "15m+"]
+    },
+    "ai_enabled": { "type": "boolean" },
+    "success": { "type": "boolean" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "previous_version": { "type": "string", "maxLength": 32 },
+    "queue_depth": { "type": "integer", "minimum": 0, "maximum": 10000 }
+  }
+}

@@ -1,0 +1,449 @@
+# CodeStrata Core Engineering Knowledge Catalog (seed)
+# Curated, versioned concepts only. No lifecycle dates or current-version claims.
+# Rule condition_expression values are inert strings and are never evaluated here.
+# Deliberately small: proves contracts without modeling the entire industry.
+
+catalog_id: codestrata-core
+catalog_version: "1.0.0"
+name: CodeStrata Core Engineering Knowledge
+description: >
+  Small curated seed catalog of reusable engineering concepts for CodeStrata.
+  Intentionally limited; not an industry-wide knowledge base.
+published_at: "2026-01-01T00:00:00Z"
+source: codestrata-builtin
+schema_version: "1.0.0"
+
+nodes:
+  - node_type: language
+    canonical_key: java
+    properties:
+      name: Java
+      description: Statically typed general-purpose programming language.
+      paradigm: [object-oriented, imperative]
+      compiled: true
+      managed_runtime: true
+
+  - node_type: runtime
+    canonical_key: jvm
+    properties:
+      name: Java Virtual Machine
+      description: Managed runtime that executes Java bytecode and compatible languages.
+      tags: [runtime, managed]
+
+  - node_type: language
+    canonical_key: javascript
+    properties:
+      name: JavaScript
+      description: High-level scripting language commonly used for web clients and servers.
+      paradigm: [multi-paradigm, event-driven]
+      compiled: false
+      managed_runtime: true
+
+  - node_type: runtime
+    canonical_key: nodejs
+    properties:
+      name: Node.js
+      description: JavaScript runtime built for server-side and tooling workloads.
+      tags: [runtime, javascript]
+
+  - node_type: language
+    canonical_key: python
+    properties:
+      name: Python
+      description: High-level general-purpose language with broad ecosystem support.
+      paradigm: [object-oriented, imperative]
+      compiled: false
+      managed_runtime: true
+
+  - node_type: technology
+    canonical_key: spring
+    properties:
+      name: Spring
+      description: Family of JVM application frameworks and related libraries.
+      category: application-framework
+      vendor: VMware
+      lifecycle_status: unknown
+
+  - node_type: framework
+    canonical_key: spring-framework
+    properties:
+      name: Spring Framework
+      description: Foundational dependency injection and application framework for the JVM.
+      ecosystem: java
+      vendor: VMware
+      lifecycle_status: unknown
+
+  - node_type: framework
+    canonical_key: spring-boot
+    properties:
+      name: Spring Boot
+      description: Convention-oriented framework for building Spring applications.
+      ecosystem: java
+      vendor: VMware
+      lifecycle_status: unknown
+
+  - node_type: framework
+    canonical_key: react
+    properties:
+      name: React
+      description: Component-oriented library commonly used as a UI framework.
+      ecosystem: javascript
+      lifecycle_status: unknown
+
+  - node_type: framework
+    canonical_key: django
+    properties:
+      name: Django
+      description: Batteries-included web framework for Python.
+      ecosystem: python
+      lifecycle_status: unknown
+
+  - node_type: build_tool
+    canonical_key: maven
+    properties:
+      name: Maven
+      description: JVM build and dependency management tool.
+      tags: [build, java]
+
+  - node_type: build_tool
+    canonical_key: gradle
+    properties:
+      name: Gradle
+      description: Flexible build automation tool commonly used for JVM projects.
+      tags: [build, java]
+
+  - node_type: architecture_style
+    canonical_key: monolith
+    properties:
+      name: Monolith
+      description: Single deployable unit containing most application capabilities.
+      benefits: [simplicity, local-reasoning]
+      tradeoffs: [deployment-coupling]
+
+  - node_type: architecture_style
+    canonical_key: modular-monolith
+    properties:
+      name: Modular Monolith
+      description: Monolithic deployment with explicit internal module boundaries.
+      benefits: [modularity, simpler-operations]
+      tradeoffs: [shared-runtime]
+
+  - node_type: architecture_style
+    canonical_key: microservices
+    properties:
+      name: Microservices
+      description: Independently deployable services collaborating over the network.
+      benefits: [independent-scaling, team-autonomy]
+      tradeoffs: [distributed-complexity]
+
+  - node_type: quality_attribute
+    canonical_key: maintainability
+    properties:
+      name: Maintainability
+      description: Ease of understanding, changing, and evolving software.
+      definition: Ability to modify the system efficiently and safely over time.
+
+  - node_type: quality_attribute
+    canonical_key: scalability
+    properties:
+      name: Scalability
+      description: Ability to handle increased load by scaling resources.
+      definition: Ability to sustain required performance as demand grows.
+
+  - node_type: quality_attribute
+    canonical_key: security
+    properties:
+      name: Security
+      description: Protection of assets against unauthorized use or disclosure.
+      definition: Ability to protect confidentiality, integrity, and availability.
+
+  - node_type: quality_attribute
+    canonical_key: testability
+    properties:
+      name: Testability
+      description: Ease of verifying behavior through automated and manual tests.
+      definition: Ability to observe and control the system for verification.
+
+  - node_type: quality_attribute
+    canonical_key: operability
+    properties:
+      name: Operability
+      description: Ease of operating, monitoring, and recovering the system.
+      definition: Ability to run and support the system in production effectively.
+
+  - node_type: engineering_practice
+    canonical_key: automated-testing
+    properties:
+      name: Automated Testing
+      description: Practice of verifying behavior with automated test suites.
+      maturity_level: established
+      outcomes: [regression-detection, faster-feedback]
+
+  - node_type: engineering_practice
+    canonical_key: continuous-integration
+    properties:
+      name: Continuous Integration
+      description: Practice of frequently integrating and verifying changes.
+      maturity_level: established
+      outcomes: [early-defect-detection]
+
+  - node_type: engineering_practice
+    canonical_key: observability
+    properties:
+      name: Observability
+      description: Practice of exposing telemetry to understand runtime behavior.
+      maturity_level: established
+      outcomes: [faster-diagnosis]
+
+  - node_type: anti_pattern
+    canonical_key: tight-coupling
+    properties:
+      name: Tight Coupling
+      description: Components depend on each other's internals, reducing change isolation.
+      intent: Avoid excessive inter-component dependency.
+      liabilities: [fragile-change, hard-testing]
+
+  - node_type: anti_pattern
+    canonical_key: shared-database
+    properties:
+      name: Shared Database
+      description: Multiple services or modules share one mutable database schema.
+      intent: Prefer clear data ownership boundaries.
+      liabilities: [deployment-coupling, schema-contention]
+
+  - node_type: anti_pattern
+    canonical_key: distributed-monolith
+    properties:
+      name: Distributed Monolith
+      description: Separately deployed units that remain tightly coupled in practice.
+      intent: Avoid distributed deployment without true independence.
+      liabilities: [operational-complexity, fragile-releases]
+
+  - node_type: risk_type
+    canonical_key: end-of-support-technology
+    properties:
+      name: End-of-Support Technology
+      description: Risk from relying on technologies that no longer receive support.
+      default_severity: high
+      consequences: [security-exposure, support-gaps]
+
+  - node_type: risk_type
+    canonical_key: operational-complexity
+    properties:
+      name: Operational Complexity
+      description: Risk from runtime topologies that are hard to operate and diagnose.
+      default_severity: medium
+      consequences: [incident-cost, slow-recovery]
+
+  - node_type: risk_type
+    canonical_key: low-maintainability
+    properties:
+      name: Low Maintainability
+      description: Risk that changes become slow, error-prone, or unsafe.
+      default_severity: medium
+      consequences: [delivery-drag, defect-rate]
+
+  - node_type: modernization_strategy
+    canonical_key: replatform
+    properties:
+      name: Replatform
+      description: Move to a new runtime or platform with limited application change.
+      strategy_kind: replatform
+
+  - node_type: modernization_strategy
+    canonical_key: refactor
+    properties:
+      name: Refactor
+      description: Restructure internal design while preserving external behavior.
+      strategy_kind: refactor
+
+  - node_type: modernization_strategy
+    canonical_key: rearchitect
+    properties:
+      name: Rearchitect
+      description: Materially change architecture to meet new quality goals.
+      strategy_kind: rearchitect
+
+  - node_type: modernization_strategy
+    canonical_key: replace
+    properties:
+      name: Replace
+      description: Substitute a capability with a different implementation or product.
+      strategy_kind: replace
+
+  - node_type: modernization_strategy
+    canonical_key: strangler-fig
+    properties:
+      name: Strangler Fig Migration
+      description: Incrementally replace legacy capabilities behind a stable facade.
+      strategy_kind: rearchitect
+      aliases: [strangler-fig-migration]
+
+  - node_type: rule
+    canonical_key: unsupported-runtime-risk
+    properties:
+      name: Unsupported Runtime Risk
+      description: Flag reliance on runtimes that lack ongoing support posture.
+      rationale: Unsupported runtimes increase security and operability risk.
+      rule_kind: lifecycle
+      condition_expression: "runtime.lifecycle_status in {end_of_support, obsolete}"
+      recommendation_text: Prefer replatform or replace for unsupported runtimes.
+      default_severity: high
+
+  - node_type: rule
+    canonical_key: tight-coupling-modernization
+    properties:
+      name: Tight Coupling Modernization
+      description: Recommend modernization responses when tight coupling is present.
+      rationale: Tight coupling reduces maintainability and slows safe change.
+      rule_kind: modernization
+      condition_expression: "anti_pattern.tight_coupling.detected"
+      recommendation_text: Prefer refactor or strangler-fig migration to reduce coupling.
+      default_severity: medium
+
+  - node_type: rule
+    canonical_key: low-testability-risk
+    properties:
+      name: Low Testability Risk
+      description: Recommend automated testing when testability is weak.
+      rationale: Low testability increases regression risk during change.
+      rule_kind: maintainability
+      condition_expression: "quality_attribute.testability.score < threshold"
+      recommendation_text: Adopt automated testing as a foundational practice.
+      default_severity: medium
+
+  - node_type: rule
+    canonical_key: distributed-monolith-risk
+    properties:
+      name: Distributed Monolith Risk
+      description: Flag distributed deployments that retain monolithic coupling.
+      rationale: Distributed monoliths combine network cost with tight coupling.
+      rule_kind: architecture
+      condition_expression: "anti_pattern.distributed_monolith.detected"
+      recommendation_text: Prefer rearchitect toward clearer service boundaries.
+      default_severity: high
+
+relationships:
+  - relationship_type: is_a
+    source: framework:spring-framework
+    target: technology:spring
+
+  - relationship_type: is_a
+    source: framework:spring-boot
+    target: technology:spring
+
+  - relationship_type: depends_on
+    source: framework:spring-boot
+    target: language:java
+
+  - relationship_type: depends_on
+    source: framework:spring-boot
+    target: runtime:jvm
+
+  - relationship_type: depends_on
+    source: framework:spring-framework
+    target: language:java
+
+  - relationship_type: supports
+    source: framework:spring-boot
+    target: architecture_style:microservices
+
+  - relationship_type: supports
+    source: framework:spring-boot
+    target: architecture_style:modular-monolith
+
+  - relationship_type: depends_on
+    source: build_tool:maven
+    target: language:java
+
+  - relationship_type: depends_on
+    source: build_tool:gradle
+    target: language:java
+
+  - relationship_type: depends_on
+    source: framework:react
+    target: language:javascript
+
+  - relationship_type: depends_on
+    source: framework:django
+    target: language:python
+
+  - relationship_type: impacts
+    source: architecture_style:microservices
+    target: quality_attribute:scalability
+
+  - relationship_type: increases_risk
+    source: architecture_style:microservices
+    target: risk_type:operational-complexity
+
+  - relationship_type: mitigates
+    source: engineering_practice:observability
+    target: risk_type:operational-complexity
+
+  - relationship_type: supports
+    source: engineering_practice:automated-testing
+    target: quality_attribute:testability
+
+  - relationship_type: supports
+    source: engineering_practice:continuous-integration
+    target: quality_attribute:maintainability
+
+  - relationship_type: supports
+    source: engineering_practice:observability
+    target: quality_attribute:operability
+
+  - relationship_type: impacts
+    source: anti_pattern:tight-coupling
+    target: quality_attribute:maintainability
+
+  - relationship_type: increases_risk
+    source: anti_pattern:tight-coupling
+    target: risk_type:low-maintainability
+
+  - relationship_type: increases_risk
+    source: anti_pattern:distributed-monolith
+    target: risk_type:operational-complexity
+
+  - relationship_type: increases_risk
+    source: anti_pattern:shared-database
+    target: risk_type:operational-complexity
+
+  - relationship_type: addresses
+    source: modernization_strategy:strangler-fig
+    target: anti_pattern:tight-coupling
+
+  - relationship_type: addresses
+    source: modernization_strategy:refactor
+    target: anti_pattern:tight-coupling
+
+  - relationship_type: addresses
+    source: modernization_strategy:rearchitect
+    target: anti_pattern:distributed-monolith
+
+  - relationship_type: recommends
+    source: rule:unsupported-runtime-risk
+    target: modernization_strategy:replatform
+
+  - relationship_type: recommends
+    source: rule:unsupported-runtime-risk
+    target: modernization_strategy:replace
+
+  - relationship_type: recommends
+    source: rule:low-testability-risk
+    target: engineering_practice:automated-testing
+
+  - relationship_type: recommends
+    source: rule:tight-coupling-modernization
+    target: modernization_strategy:refactor
+
+  - relationship_type: recommends
+    source: rule:distributed-monolith-risk
+    target: modernization_strategy:rearchitect
+
+  - relationship_type: addresses
+    source: rule:tight-coupling-modernization
+    target: anti_pattern:tight-coupling
+
+  - relationship_type: addresses
+    source: rule:distributed-monolith-risk
+    target: anti_pattern:distributed-monolith

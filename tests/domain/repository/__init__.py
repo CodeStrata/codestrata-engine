@@ -1,0 +1,1 @@
+"""Repository inventory domain tests."""

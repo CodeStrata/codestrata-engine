@@ -1,0 +1,192 @@
+[repository]
+# Local sample app shipped with CodeStrata for onboarding (no network required).
+# Replace with your own repository:
+#   path = "/absolute/or/relative/path/to/your-repo"
+# Or clone from GitHub (also required for `codestrata scan`):
+#   url = "https://github.com/YOUR_ORG/YOUR_REPO"
+#   branch = "main"
+path = "test-fixtures/sample-js-app"
+
+# Execution profile (Phase 5.20). Default when omitted: community.
+# Allowed: community | local | enterprise | bedrock | openai
+# Precedence: --profile > CODESTRATA_PROFILE > this value > profile defaults.
+profile = "community"
+
+# Optional private-repository authentication (for GitHub URL clones).
+# Never place token values in this file.
+#
+# [repository.authentication]
+# type = "github_token"
+# token_env = "CODESTRATA_GITHUB_TOKEN"
+#
+# [repository.authentication]
+# type = "ssh_agent"
+
+[workspace]
+directory = ".codestrata/workspace"
+clean_before_clone = true
+
+# Engineering knowledge store (Phase 2) + Repository Knowledge Layer (Phase 5).
+# Independent of report retention under reports/.
+[knowledge]
+directory = ".codestrata/knowledge"
+enabled = false
+
+[knowledge.projection]
+enabled = false
+include_repository_files = true
+include_findings = true
+include_recommendations = true
+include_evidence = true
+include_assessments = true
+include_report_sections = true
+write_corpus_artifact = false
+
+[knowledge.chunking]
+enabled = false
+strategy = "deterministic"
+max_characters = 4000
+overlap_characters = 400
+preserve_logical_units = true
+
+[knowledge.embedding]
+enabled = false
+provider = "deterministic"
+model = "deterministic-test-embedding"
+# model_version defaults to 1.0.0 in settings
+dimension = 384
+batch_size = 32
+max_input_characters = 12000
+
+[knowledge.indexing]
+enabled = false
+delete_stale_records = true
+write_manifest = false
+manifest_filename = "repository-knowledge-index.json"
+
+[knowledge.retrieval]
+enabled = false
+mode = "vector"  # vector | lexical | hybrid
+vector_weight = 1.0
+lexical_weight = 1.0
+top_k = 10
+# result_limit = 10  # optional alias for top_k
+candidate_limit = 30
+minimum_score = 0.0
+rrf_k = 60
+max_query_characters = 4000
+max_context_characters = 30000
+max_chunks_per_document = 3
+max_chunks_per_file = 3
+max_chunks_per_source_type = 5
+include_content = true
+include_metadata = true
+include_traceability = true
+write_result_artifact = false
+result_filename = "repository-retrieval-result.json"
+
+[knowledge.answering]
+enabled = false
+provider = "deterministic_extractive"
+style = "concise"
+max_answer_characters = 12000
+max_statements = 20
+minimum_supporting_sources = 1
+require_citations = true
+fail_on_insufficient_evidence = false
+include_evidence = true
+include_retrieval_context = false
+include_diagnostics = true
+write_answer_artifact = false
+answer_filename = "repository-grounded-answer.json"
+
+[knowledge.answering.deterministic_extractive]
+max_excerpt_characters = 800
+max_statements_per_source = 2
+preserve_source_sentences = true
+
+[knowledge.vector_store]
+# memory (default, zero setup) or pgvector (Docker / hosted PostgreSQL).
+provider = "memory"
+# Prefer CODESTRATA_DATABASE_URL in the environment — never commit real credentials.
+connection_string_env = "CODESTRATA_DATABASE_URL"
+schema = "codestrata"
+hnsw = true
+connect_timeout_seconds = 10
+
+[mcp]
+enabled = false
+transport = "stdio"
+host = "127.0.0.1"
+port = 8765
+server_name = "codestrata"
+max_result_characters = 50000
+include_diagnostics = true
+include_traceability = true
+allow_artifact_paths = false
+log_level = "INFO"
+
+[mcp.tools]
+repository_search = true
+repository_answer = true
+repository_findings = true
+repository_recommendations = true
+repository_assessments = true
+repository_files = true
+repository_architecture = true
+repository_security = true
+repository_dependencies = true
+repository_tests = true
+repository_cloud = true
+repository_ai_readiness = true
+repository_performance = true
+repository_health = true
+
+[static_analysis]
+# PMD is Java-oriented. Keep enabled=false for non-Java samples, or enable for Java repos.
+enabled = false
+fail_on_provider_error = false
+
+[static_analysis.pmd]
+enabled = true
+executable = "pmd"
+profile = "standard"
+rulesets = [
+  "category/java/bestpractices.xml",
+  "category/java/errorprone.xml",
+  "category/java/design.xml",
+]
+minimum_priority = 5
+timeout_seconds = 120
+
+# Optional AWS session for --with-ai.
+# Prefer machine-local credentials (standard AWS provider chain):
+#   export AWS_REGION=us-east-1
+#   export AWS_PROFILE=<your-profile>   # optional; omit to use the default chain
+# Do not commit developer-specific profile names in shared repositories.
+[aws]
+region = "us-east-1"
+# profile = "<your-profile>"  # optional override only; prefer AWS_PROFILE env
+
+# Bedrock Converse defaults for --with-ai, plus independent knowledge providers.
+[ai]
+provider = "bedrock"
+embedding_provider = "deterministic"
+answer_provider = "deterministic_extractive"
+
+[ai.bedrock]
+model_id = "amazon.nova-lite-v1:0"
+region = "us-east-1"
+embedding_model = "amazon.titan-embed-text-v2:0"
+answer_model = ""
+timeout_seconds = 60
+max_retries = 3
+
+[ai.openai]
+api_key_env = "OPENAI_API_KEY"
+base_url = ""
+embedding_model = "text-embedding-3-small"
+answer_model = "gpt-4o-mini"
+embedding_dimensions = 0
+timeout_seconds = 60
+max_retries = 3

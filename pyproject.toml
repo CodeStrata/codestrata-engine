@@ -1,0 +1,182 @@
+[build-system]
+requires = ["setuptools>=75.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "codestrata"
+version = "0.1.0"
+description = "CodeStrata Engine: deterministic Engineering Assessment and Engineering Intelligence for software repositories."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Satish Nampally" }
+]
+keywords = [
+    "codestrata",
+    "artificial-intelligence",
+    "application-modernization",
+    "legacy-code",
+    "static-analysis",
+    "software-architecture",
+    "developer-tools",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Typing :: Typed",
+]
+
+dependencies = [
+    "pydantic>=2.10,<3.0",
+    "PyYAML>=6.0,<7.0",
+    "rich>=13.9,<15.0",
+    "typer>=0.15,<1.0",
+]
+
+
+[project.optional-dependencies]
+bedrock = [
+    "boto3>=1.35,<2.0",
+]
+openai = [
+    "openai>=1.40,<2.0",
+]
+mcp = [
+    "mcp>=1.27,<2",
+]
+development = [
+    "boto3>=1.35,<2.0",
+    "openai>=1.40,<2.0",
+    "mcp>=1.27,<2",
+    "build>=1.2,<2.0",
+    "mypy>=1.14,<2.0",
+    "pytest>=9.0.3,<10.0",
+    "pytest-cov>=6.0,<7.0",
+    "ruff>=0.9,<1.0",
+    "types-PyYAML>=6.0,<7.0",
+]
+# Alias kept for existing docs/CI.
+dev = [
+    "boto3>=1.35,<2.0",
+    "openai>=1.40,<2.0",
+    "mcp>=1.27,<2",
+    "build>=1.2,<2.0",
+    "mypy>=1.14,<2.0",
+    "pytest>=9.0.3,<10.0",
+    "pytest-cov>=6.0,<7.0",
+    "ruff>=0.9,<1.0",
+    "types-PyYAML>=6.0,<7.0",
+]
+
+
+[project.scripts]
+codestrata = "codestrata.cli:app"
+
+
+[project.urls]
+Homepage = "https://github.com/CodeStrata/codestrata-engine"
+Repository = "https://github.com/CodeStrata/codestrata-engine"
+Documentation = "https://github.com/CodeStrata/codestrata-engine#readme"
+Issues = "https://github.com/CodeStrata/codestrata-engine/issues"
+
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+include-package-data = true
+
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["codestrata*"]
+
+
+[tool.setuptools.package-data]
+codestrata = [
+    "resources/**/*.toml",
+    "resources/**/*.yaml",
+    "resources/**/*.yml",
+    "resources/**/*.json",
+    "resources/**/*.md",
+    "reporting/assets/*.png",
+    "application/rules/data/*.json",
+]
+
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+norecursedirs = [".git", ".venv", ".codestrata", "fixtures", "__pycache__", "*.egg-info"]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+markers = [
+    "docker: requires Docker Compose and a running daemon (skipped when unavailable)",
+]
+
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+exclude = [
+    "**/complexity/fixtures/**",
+]
+
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "B",
+    "UP",
+]
+ignore = []
+
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+mypy_path = ["src"]
+explicit_package_bases = true
+pretty = true
+show_error_codes = true
+warn_unused_configs = true
+
+[[tool.mypy.overrides]]
+module = [
+    "boto3",
+    "botocore.*",
+    "mcp.*",
+    "openai",
+]
+ignore_missing_imports = true
+
+
+[tool.coverage.run]
+source = ["codestrata"]
+branch = true
+
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = true
+fail_under = 80

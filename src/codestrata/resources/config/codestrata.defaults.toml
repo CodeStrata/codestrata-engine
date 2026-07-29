@@ -1,0 +1,41 @@
+# Packaged default configuration for clean installs (Phase 5.14).
+# Copy to codestrata.toml and set [repository].path before running assess/onboard.
+# Deterministic mode requires no cloud credentials.
+
+[repository]
+path = "."
+
+[workspace]
+directory = ".codestrata/workspace"
+clean_before_clone = true
+
+[knowledge]
+directory = ".codestrata/knowledge"
+enabled = false
+
+[knowledge.embedding]
+enabled = false
+provider = "deterministic"
+model = "deterministic-test-embedding"
+dimension = 384
+
+[knowledge.vector_store]
+provider = "memory"
+
+[mcp]
+enabled = false
+transport = "stdio"
+
+[ai]
+embedding_provider = "deterministic"
+answer_provider = "deterministic_extractive"
+
+[static_analysis]
+enabled = false
+
+[report]
+title = "CodeStrata Engineering Assessment"
+organization_name = "CodeStrata"
+
+[report.sections.roadmap]
+enabled = false

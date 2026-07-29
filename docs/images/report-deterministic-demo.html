@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'; img-src data:; font-src 'none'; connect-src 'none'; object-src 'none'; script-src 'none'; style-src 'unsafe-inline'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CodeStrata Engineering Assessment — sample-js-app</title>
+<style>
+:root {
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --ink: #1a1f24;
+  --muted: #5b6773;
+  --border: #e2e8ee;
+  --accent: #b57b48;
+  --accent-soft: #f6efe8;
+  --teal: #68a691;
+  --shadow: 0 10px 30px rgba(26, 31, 36, 0.06);
+  --radius: 14px;
+  --critical: #b42318;
+  --high: #c4320a;
+  --medium: #a15c07;
+  --low: #0f7b6c;
+  --info: #3e4c59;
+  --ai: #0b6e99;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 500px at 10% -10%, #efe6dc 0%, transparent 55%),
+    radial-gradient(900px 400px at 100% 0%, #e7eef2 0%, transparent 50%),
+    var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 "Source Sans 3", "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+.page { max-width: 1120px; margin: 0 auto; padding: 1.75rem 1.25rem 3rem; }
+.hero {
+  background: linear-gradient(180deg, #fff 0%, #fbfcfd 100%);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: var(--shadow);
+  padding: 1.5rem 1.6rem 1.35rem;
+  margin-bottom: 1.25rem;
+}
+.hero-brand { margin-bottom: 1.1rem; }
+.brand-logo {
+  display: block;
+  width: 140px;
+  height: 40px;
+  max-width: 140px;
+  object-fit: contain;
+  margin-bottom: 0.85rem;
+}
+.brand-name {
+  margin: 0;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 650;
+}
+.report-title {
+  margin: 0.2rem 0 0;
+  font-size: clamp(1.55rem, 2.4vw, 2.05rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  font-family: "Fraunces", "Iowan Old Style", Georgia, serif;
+  font-weight: 650;
+}
+.hero-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.1rem;
+  padding: 0.85rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.meta-item { display: flex; flex-direction: column; gap: 0.15rem; }
+.meta-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 650;
+}
+.meta-value { font-weight: 650; word-break: break-word; }
+.hero-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.75rem;
+}
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+}
+.kpi-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 650;
+}
+.kpi-value {
+  margin: 0.35rem 0 0;
+  font-size: 1.55rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.kpi-hint { color: var(--muted); font-size: 0.85rem; }
+.kpi-score .kpi-value { color: var(--teal); }
+.kpi-severity-critical .kpi-value { color: var(--critical); }
+.kpi-severity-high .kpi-value { color: var(--high); }
+.kpi-severity-medium .kpi-value { color: var(--medium); }
+.kpi-severity-low .kpi-value { color: var(--low); }
+.kpi-severity-informational .kpi-value,
+.kpi-severity-none-detected .kpi-value,
+.kpi-severity-unknown .kpi-value { color: var(--info); }
+.stat-hint {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+.section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.2rem 1.3rem 1.35rem;
+  margin: 0 0 1rem;
+}
+.section-head h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+.section-note, .muted, .provenance { color: var(--muted); }
+.section-note { margin: 0.35rem 0 0.9rem; font-size: 0.9rem; }
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+}
+.stat-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 0.95rem;
+  background: linear-gradient(180deg, #fff, #fafbfc);
+}
+.stat-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 650;
+}
+.stat-value {
+  margin: 0.35rem 0 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.tech-badges { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-bottom: 1rem; }
+.tech-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f8fafb;
+  font-weight: 650;
+}
+.tech-badge em {
+  font-style: normal;
+  color: var(--muted);
+  font-weight: 550;
+  font-size: 0.85em;
+}
+.table-card { margin-top: 0.5rem; }
+.severity-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+.severity-card {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 0.85rem 0.7rem;
+  text-align: center;
+  background: #fafbfc;
+}
+.severity-label {
+  margin: 0;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  font-weight: 700;
+}
+.severity-count {
+  margin: 0.35rem 0 0;
+  font-size: 1.6rem;
+  font-weight: 750;
+}
+.severity-critical { background: #fef3f2; }
+.severity-critical .severity-count { color: var(--critical); }
+.severity-high { background: #fff4ed; }
+.severity-high .severity-count { color: var(--high); }
+.severity-medium { background: #fffaeb; }
+.severity-medium .severity-count { color: var(--medium); }
+.severity-low { background: #edfcf7; }
+.severity-low .severity-count { color: var(--low); }
+.severity-informational { background: #f4f6f8; }
+.card-stack { display: grid; gap: 0.7rem; }
+.item-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: #fff;
+}
+.item-header { margin-bottom: 0.45rem; }
+.card-desc { margin: 0.35rem 0 0.55rem; }
+.chip-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.35rem 0 0.55rem; }
+.chip {
+  display: inline-flex;
+  gap: 0.35rem;
+  align-items: baseline;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  border: 1px solid #ead9c8;
+  font-size: 0.82rem;
+}
+.chip em {
+  font-style: normal;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+}
+.outcome { margin: 0; color: var(--ink); }
+.outcome em {
+  font-style: normal;
+  color: var(--muted);
+  margin-right: 0.35rem;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+.roadmap { display: grid; gap: 1rem; }
+.roadmap-lane h3 { margin: 0 0 0.55rem; font-size: 1rem; }
+.count-pill {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.05rem 0.45rem;
+  border-radius: 999px;
+  background: #eef2f6;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.section-ai {
+  border-color: #9cc5d9;
+  background: linear-gradient(180deg, #f4fafc, #fff);
+}
+.ai-panel { padding: 0.15rem; }
+.ai-banner {
+  background: #e6f4f8;
+  color: var(--ai);
+  border: 1px solid #9cc5d9;
+  border-radius: 10px;
+  padding: 0.7rem 0.85rem;
+  margin: 0 0 0.9rem;
+  font-weight: 600;
+}
+.ai-headline { margin: 0 0 0.45rem; font-size: 1.2rem; }
+.badge {
+  display: inline-block;
+  padding: 0.12rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.severity-critical,
+.priority-immediate,
+.priority-critical { background: #fde8e8; color: var(--critical); }
+.severity-high, .priority-high { background: #feecdc; color: var(--high); }
+.severity-medium, .priority-medium { background: #fbf1de; color: var(--medium); }
+.severity-low,
+.priority-low,
+.severity-informational,
+.severity-info { background: #e1f5f0; color: var(--low); }
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.35rem 1rem;
+  margin: 0.5rem 0;
+}
+.meta dt {
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+.meta dd { margin: 0.1rem 0 0; }
+code, .cmd {
+  font-family: "IBM Plex Mono", ui-monospace, monospace;
+  font-size: 0.85em;
+  word-break: break-word;
+}
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+th, td {
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  padding: 0.5rem 0.35rem;
+  vertical-align: top;
+}
+th { color: var(--muted); font-weight: 650; }
+.evidence { margin-top: 0.45rem; }
+.evidence summary, .tech-block summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 650;
+}
+.tech-block {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  margin: 0 0 0.7rem;
+  background: #fbfcfd;
+}
+.tech-block summary { list-style: none; }
+.tech-block summary::-webkit-details-marker { display: none; }
+.ids { color: var(--muted); font-size: 0.85rem; margin-top: 0.2rem; }
+.actions { padding-left: 1.2rem; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.plain { margin: 0; padding-left: 1.1rem; }
+.more-note { margin-top: 0.75rem; }
+.site-footer {
+  margin-top: 1.5rem;
+  padding: 1.25rem 0.25rem 0.5rem;
+  text-align: center;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+.site-footer p { margin: 0.15rem 0; font-size: 0.9rem; }
+.site-footer strong { color: var(--ink); }
+.copyright { margin-top: 0.45rem !important; opacity: 0.85; }
+@media (max-width: 820px) {
+  .severity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .split { grid-template-columns: 1fr; }
+}
+@media (max-width: 560px) {
+  .page { padding: 1rem 0.85rem 2rem; }
+}
+@media print {
+  body { background: #fff; }
+  .page { max-width: none; padding: 0; }
+  .section, .hero, .item-card { break-inside: avoid; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="hero" id="hero">
+<div class="hero-brand">
+<img class="brand-logo" src="data:image/png;base64,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" alt="CodeStrata" width="140" height="40">
+<p class="brand-name">CodeStrata</p>
+<h1 class="report-title">Engineering Assessment</h1>
+</div>
+<div class="hero-meta">
+<div class="meta-item"><span class="meta-label">Repository</span><span class="meta-value">sample-<wbr>js-<wbr>app</span></div>
+<div class="meta-item"><span class="meta-label">Generated</span><span class="meta-value">2026-07-22T21:00:00Z</span></div>
+<div class="meta-item"><span class="meta-label">Version</span><span class="meta-value">v0.1.0</span></div>
+<div class="meta-item"><span class="meta-label">Mode</span><span class="meta-value">Deterministic</span></div>
+<div class="meta-item"><span class="meta-label">Source</span><span class="meta-value">local</span></div>
+</div>
+<div class="hero-kpis">
+<article class="kpi kpi-severity-medium"><p class="kpi-label">Highest Finding Severity</p><p class="kpi-value">Medium</p></article>
+<article class="kpi kpi-cloud"><p class="kpi-label">Cloud Enablement Signals</p><p class="kpi-value">0 of 7</p><span class="kpi-hint">Not detected</span></article>
+<article class="kpi kpi-cicd"><p class="kpi-label">CI/CD</p><p class="kpi-value">Not detected</p></article>
+<article class="kpi kpi-mode"><p class="kpi-label">Assessment mode</p><p class="kpi-value">Deterministic</p></article>
+</div>
+</header>
+<section class="section" id="executive">
+<div class="section-head"><h2>Executive Summary</h2></div>
+<div class="stat-grid">
+<article class="stat-card"><p class="stat-label">Files</p><p class="stat-value">3</p></article>
+<article class="stat-card"><p class="stat-label">Technologies</p><p class="stat-value">5</p></article>
+<article class="stat-card"><p class="stat-label">Findings</p><p class="stat-value">5</p></article>
+<article class="stat-card"><p class="stat-label">Recommendations</p><p class="stat-value">4</p></article>
+<article class="stat-card"><p class="stat-label">Test Files Detected</p><p class="stat-value">0</p></article>
+<article class="stat-card"><p class="stat-label">CI/CD</p><p class="stat-value">Not detected</p></article>
+<article class="stat-card"><p class="stat-label">Cloud Enablement Signals</p><p class="stat-value">0 of 7</p><p class="stat-hint">Not detected</p></article>
+<article class="stat-card"><p class="stat-label">Repository Size</p><p class="stat-value">3 files</p></article>
+<article class="stat-card"><p class="stat-label">Highest Finding Severity</p><p class="stat-value">Medium</p></article>
+</div>
+</section>
+<section class="section" id="technology">
+<div class="section-head"><h2>Technology Overview</h2></div>
+<div class="tech-badges"><span class="tech-badge">npm</span><span class="tech-badge">Express<em>^4.21.0</em></span><span class="tech-badge">JavaScript</span><span class="tech-badge">Node.js</span><span class="tech-badge">Jest<em>^29.7.0</em></span></div>
+
+</section>
+<section class="section" id="findings">
+<div class="section-head"><h2>Findings Overview</h2></div>
+<p class="section-note">Deterministic Assessment Graph findings.</p><div class="severity-grid"><article class="severity-card severity-critical"><p class="severity-label">critical</p><p class="severity-count">0</p></article>
+<article class="severity-card severity-high"><p class="severity-label">high</p><p class="severity-count">0</p></article>
+<article class="severity-card severity-medium"><p class="severity-label">medium</p><p class="severity-count">3</p></article>
+<article class="severity-card severity-low"><p class="severity-label">low</p><p class="severity-count">1</p></article>
+<article class="severity-card severity-informational"><p class="severity-label">info</p><p class="severity-count">1</p></article>
+</div>
+<h3>Priority findings</h3>
+<div class="card-stack">
+<article class="item-card finding" id="finding-finding:codestrata-rule-npm-lockfile-missing:9759ef00ff4389cf">
+<header class="item-header"><span class="badge severity-medium">medium</span> <strong>NPM lockfile missing</strong></header>
+
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-missing-license:0c795c2dfa7db589">
+<header class="item-header"><span class="badge severity-medium">medium</span> <strong>Missing LICENSE</strong></header>
+
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-missing-tests:643ce6d6c29a6fe7">
+<header class="item-header"><span class="badge severity-medium">medium</span> <strong>Missing tests</strong></header>
+
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-missing-ci-workflow:6bf587a321816add">
+<header class="item-header"><span class="badge severity-low">low</span> <strong>Missing CI workflow</strong></header>
+
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-node-engine-detected:c9e03456e5563be4">
+<header class="item-header"><span class="badge severity-informational">informational</span> <strong>Node engine &gt;=18 declared</strong></header>
+
+</article>
+</div>
+</section>
+<section class="section" id="recommendations">
+<div class="section-head"><h2>Modernization Roadmap</h2></div>
+<p class="section-note">Deterministic recommendations derived from findings.</p><div class="roadmap">
+<div class="roadmap-lane">
+<h3>Near Term <span class="count-pill">3</span></h3>
+<div class="card-stack"><article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-npm-lockfile-missing:b33dba7eb6954832">
+<header class="item-header"><span class="badge priority-medium">medium</span> <strong>Commit an npm lockfile</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> medium</span>
+<span class="chip"><em>Business Value</em> Medium</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Add package-lock.json (or yarn/pnpm lock) for reproducible installs.</p>
+</article>
+<article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-missing-license:7a6e78917084d306">
+<header class="item-header"><span class="badge priority-medium">medium</span> <strong>Add an explicit LICENSE</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> medium</span>
+<span class="chip"><em>Business Value</em> Medium</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Choose and commit a license file so consumers know usage terms.</p>
+</article>
+<article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-missing-tests:be1c5d5a347fc347">
+<header class="item-header"><span class="badge priority-medium">medium</span> <strong>Establish a test baseline</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> medium</span>
+<span class="chip"><em>Business Value</em> Medium</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Introduce automated tests for critical paths and wire them into CI.</p>
+</article></div>
+</div>
+<div class="roadmap-lane">
+<h3>Future <span class="count-pill">1</span></h3>
+<div class="card-stack"><article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-missing-ci-workflow:120159d9a263526a">
+<header class="item-header"><span class="badge priority-low">low</span> <strong>Add a CI workflow</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> low</span>
+<span class="chip"><em>Business Value</em> Incremental</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Add CI (for example GitHub Actions) for build and test on every change.</p>
+</article></div>
+</div>
+</div>
+</section>
+<section class="section" id="technical-details">
+<div class="section-head"><h2>Technical Details</h2></div>
+<p class="section-note">Engineering reference: evidence, graphs, artifacts, and metadata.</p><details class="tech-block" id="repository" open>
+<summary>Repository Profile</summary>
+<dl class="meta"><div><dt>Name</dt><dd>sample-<wbr>js-<wbr>app</dd></div><div><dt>Source</dt><dd>local</dd></div><div><dt>Files</dt><dd>3</dd></div></dl>
+</details>
+<details class="tech-block" id="assessment-summary">
+<summary>Assessment Summary</summary>
+<p>5 deterministic finding(s) and 4 deterministic recommendation(s).</p>
+<div class="split">
+<div>
+<p><strong>Rules evaluated:</strong> 9</p>
+<p><strong>Findings:</strong> 5</p>
+<p><strong>Recommendations:</strong> 4</p>
+</div>
+<div>
+<h3>By severity</h3>
+<ul class="plain"><li>medium: 3</li><li>low: 1</li><li>informational: 1</li></ul>
+<h3>By priority</h3>
+<ul class="plain"><li>medium: 3</li><li>low: 1</li></ul>
+</div>
+</div>
+</details>
+<details class="tech-block" id="findings-full">
+<summary>All Findings (with evidence)</summary>
+<article class="item-card finding" id="finding-finding:codestrata-rule-npm-lockfile-missing:9759ef00ff4389cf">
+<header class="item-header"><span class="badge severity-medium">medium</span> <strong>NPM lockfile missing</strong></header>
+<p class="card-desc">package.json is present, but no npm/yarn/pnpm lockfile was found in the repository inventory.</p>
+<dl class="meta">
+<div><dt>Finding ID</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>npm-<wbr>lockfile-<wbr>missing:<wbr>9759ef00ff4389cf</code></dd></div>
+<div><dt>Rule ID</dt><dd><code>codestrata-<wbr>rule-<wbr>npm-<wbr>lockfile-<wbr>missing</code></dd></div>
+<div><dt>Category</dt><dd>dependency</dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — path <code>package.<wbr>json</code> — package.json without lockfile</li></ul></details>
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-missing-license:0c795c2dfa7db589">
+<header class="item-header"><span class="badge severity-medium">medium</span> <strong>Missing LICENSE</strong></header>
+<p class="card-desc">No LICENSE file was found in the repository inventory.</p>
+<dl class="meta">
+<div><dt>Finding ID</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>license:<wbr>0c795c2dfa7db589</code></dd></div>
+<div><dt>Rule ID</dt><dd><code>codestrata-<wbr>rule-<wbr>missing-<wbr>license</code></dd></div>
+<div><dt>Category</dt><dd>governance</dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — LICENSE basename not present in inventory paths</li></ul></details>
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-missing-tests:643ce6d6c29a6fe7">
+<header class="item-header"><span class="badge severity-medium">medium</span> <strong>Missing tests</strong></header>
+<p class="card-desc">No test files or conventional test directories were found while source files are present.</p>
+<dl class="meta">
+<div><dt>Finding ID</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>tests:<wbr>643ce6d6c29a6fe7</code></dd></div>
+<div><dt>Rule ID</dt><dd><code>codestrata-<wbr>rule-<wbr>missing-<wbr>tests</code></dd></div>
+<div><dt>Category</dt><dd>testing</dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — source_files=1 test_files=0</li></ul></details>
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-missing-ci-workflow:6bf587a321816add">
+<header class="item-header"><span class="badge severity-low">low</span> <strong>Missing CI workflow</strong></header>
+<p class="card-desc">No GitHub Actions workflow paths were found under .github/workflows/.</p>
+<dl class="meta">
+<div><dt>Finding ID</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>ci-<wbr>workflow:<wbr>6bf587a321816add</code></dd></div>
+<div><dt>Rule ID</dt><dd><code>codestrata-<wbr>rule-<wbr>missing-<wbr>ci-<wbr>workflow</code></dd></div>
+<div><dt>Category</dt><dd>build</dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — no paths under .github/workflows/</li></ul></details>
+</article>
+<article class="item-card finding" id="finding-finding:codestrata-rule-node-engine-detected:c9e03456e5563be4">
+<header class="item-header"><span class="badge severity-informational">informational</span> <strong>Node engine &gt;=18 declared</strong></header>
+<p class="card-desc">package.json declares engines.node as &gt;=18.</p>
+<dl class="meta">
+<div><dt>Finding ID</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>node-<wbr>engine-<wbr>detected:<wbr>c9e03456e5563be4</code></dd></div>
+<div><dt>Rule ID</dt><dd><code>codestrata-<wbr>rule-<wbr>node-<wbr>engine-<wbr>detected</code></dd></div>
+<div><dt>Category</dt><dd>dependency</dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>dependency_version</strong> — <code>dependency:<wbr>nodejs:<wbr>nodejs</code> — path <code>package.<wbr>json</code> — engines.node=&gt;=18</li></ul></details>
+</article>
+</details>
+<details class="tech-block" id="recommendations-full">
+<summary>All Recommendations (with actions)</summary>
+<article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-npm-lockfile-missing:b33dba7eb6954832">
+<header class="item-header"><span class="badge priority-medium">medium</span> <strong>Commit an npm lockfile</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> medium</span>
+<span class="chip"><em>Business Value</em> Medium</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Add package-lock.json (or yarn/pnpm lock) for reproducible installs.</p>
+<p><em>Rationale:</em> package.json is present, but no npm/yarn/pnpm lockfile was found in the repository inventory.</p>
+<dl class="meta">
+<div><dt>Recommendation ID</dt><dd><code>recommendation:<wbr>codestrata-<wbr>rec-<wbr>npm-<wbr>lockfile-<wbr>missing:<wbr>b33dba7eb6954832</code></dd></div>
+<div><dt>Category</dt><dd>dependency</dd></div>
+<div><dt>Related finding IDs</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>npm-<wbr>lockfile-<wbr>missing:<wbr>9759ef00ff4389cf</code></dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<h4>Actions</h4>
+<ol class="actions"><li><strong>1. Generate lockfile</strong> — Run the package manager install and commit the produced lockfile. <code class="cmd">npm install -<wbr>-<wbr>package-<wbr>lock-<wbr>only</code></li><li><strong>2. Use ci installs in pipelines</strong> — Prefer npm ci (or yarn/pnpm frozen lockfile installs) in CI.</li></ol>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>finding</strong> — <code>finding:<wbr>codestrata-<wbr>rule-<wbr>npm-<wbr>lockfile-<wbr>missing:<wbr>9759ef00ff4389cf</code> — NPM lockfile missing</li><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — path <code>package.<wbr>json</code> — package.json without lockfile</li></ul></details>
+</article>
+<article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-missing-license:7a6e78917084d306">
+<header class="item-header"><span class="badge priority-medium">medium</span> <strong>Add an explicit LICENSE</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> medium</span>
+<span class="chip"><em>Business Value</em> Medium</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Choose and commit a license file so consumers know usage terms.</p>
+<p><em>Rationale:</em> No LICENSE file was found in the repository inventory.</p>
+<dl class="meta">
+<div><dt>Recommendation ID</dt><dd><code>recommendation:<wbr>codestrata-<wbr>rec-<wbr>missing-<wbr>license:<wbr>7a6e78917084d306</code></dd></div>
+<div><dt>Category</dt><dd>governance</dd></div>
+<div><dt>Related finding IDs</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>license:<wbr>0c795c2dfa7db589</code></dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<h4>Actions</h4>
+<ol class="actions"><li><strong>1. Select a license</strong> — Agree on an open-source or proprietary license with stakeholders.</li><li><strong>2. Add LICENSE file</strong> — Commit LICENSE (or LICENSE.md) at the repository root.</li></ol>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>finding</strong> — <code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>license:<wbr>0c795c2dfa7db589</code> — Missing LICENSE</li><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — LICENSE basename not present in inventory paths</li></ul></details>
+</article>
+<article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-missing-tests:be1c5d5a347fc347">
+<header class="item-header"><span class="badge priority-medium">medium</span> <strong>Establish a test baseline</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> medium</span>
+<span class="chip"><em>Business Value</em> Medium</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Introduce automated tests for critical paths and wire them into CI.</p>
+<p><em>Rationale:</em> No test files or conventional test directories were found while source files are present.</p>
+<dl class="meta">
+<div><dt>Recommendation ID</dt><dd><code>recommendation:<wbr>codestrata-<wbr>rec-<wbr>missing-<wbr>tests:<wbr>be1c5d5a347fc347</code></dd></div>
+<div><dt>Category</dt><dd>testing</dd></div>
+<div><dt>Related finding IDs</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>tests:<wbr>643ce6d6c29a6fe7</code></dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<h4>Actions</h4>
+<ol class="actions"><li><strong>1. Establish test baseline</strong> — Create a minimal automated test suite that can run locally.</li><li><strong>2. Prioritize critical paths</strong> — Cover authentication, data mutations, and other high-risk flows first.</li><li><strong>3. Add test execution to CI</strong> — Fail the pipeline when tests fail so regressions are caught early.</li></ol>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>finding</strong> — <code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>tests:<wbr>643ce6d6c29a6fe7</code> — Missing tests</li><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — source_files=1 test_files=0</li></ul></details>
+</article>
+<article class="item-card recommendation" id="recommendation-recommendation:codestrata-rec-missing-ci-workflow:120159d9a263526a">
+<header class="item-header"><span class="badge priority-low">low</span> <strong>Add a CI workflow</strong></header>
+<div class="chip-row">
+<span class="chip"><em>Priority</em> low</span>
+<span class="chip"><em>Business Value</em> Incremental</span>
+<span class="chip"><em>Effort</em> Medium</span>
+</div>
+<p class="outcome"><em>Expected Outcome</em> Add CI (for example GitHub Actions) for build and test on every change.</p>
+<p><em>Rationale:</em> No GitHub Actions workflow paths were found under .github/workflows/.</p>
+<dl class="meta">
+<div><dt>Recommendation ID</dt><dd><code>recommendation:<wbr>codestrata-<wbr>rec-<wbr>missing-<wbr>ci-<wbr>workflow:<wbr>120159d9a263526a</code></dd></div>
+<div><dt>Category</dt><dd>build</dd></div>
+<div><dt>Related finding IDs</dt><dd><code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>ci-<wbr>workflow:<wbr>6bf587a321816add</code></dd></div>
+<div><dt>Affected nodes</dt><dd><span class="muted">None</span></dd></div>
+</dl>
+<h4>Actions</h4>
+<ol class="actions"><li><strong>1. Create workflow directory</strong> — Add .github/workflows/ that installs dependencies and runs tests.</li><li><strong>2. Gate merges on CI</strong> — Require the workflow to pass before merging protected branches.</li></ol>
+<details class="evidence"><summary>Evidence</summary><ul><li><strong>finding</strong> — <code>finding:<wbr>codestrata-<wbr>rule-<wbr>missing-<wbr>ci-<wbr>workflow:<wbr>6bf587a321816add</code> — Missing CI workflow</li><li><strong>repository_manifest</strong> — <code>sample-<wbr>js-<wbr>app</code> — no paths under .github/workflows/</li></ul></details>
+</article>
+</details>
+<details class="tech-block" id="artifacts">
+<summary>Graph and Artifact References</summary>
+<div class="table-wrap"><table>
+<thead><tr><th>Artifact</th><th>Relative path</th></tr></thead>
+<tbody><tr><td>Findings</td><td><code>findings.<wbr>json</code></td></tr><tr><td>Recommendations</td><td><code>recommendations.<wbr>json</code></td></tr><tr><td>Assessment JSON</td><td><code>report.<wbr>json</code></td></tr><tr><td>Repository Graph</td><td><code>graphs/<wbr>repository-<wbr>graph.<wbr>json</code></td></tr><tr><td>Assessment Graph</td><td><code>graphs/<wbr>assessment-<wbr>graph.<wbr>json</code></td></tr><tr><td>Graph Summary</td><td><code>graphs/<wbr>graph-<wbr>summary.<wbr>json</code></td></tr></tbody>
+</table></div>
+</details>
+<details class="tech-block" id="metadata">
+<summary>Assessment Metadata</summary>
+<dl class="meta"><div><dt>Generated at (UTC)</dt><dd>2026-07-22T21:00:00Z</dd></div><div><dt>Report title</dt><dd>Engineering Assessment</dd></div><div><dt>Report version</dt><dd>2.0</dd></div><div><dt>AI status</dt><dd>not_requested</dd></div><div><dt>Model ID</dt><dd>—</dd></div><div><dt>Total ms</dt><dd>—</dd></div><div><dt>Scan ms</dt><dd>—</dd></div><div><dt>Analysis ms</dt><dd>—</dd></div><div><dt>AI ms</dt><dd>—</dd></div><div><dt>Report ms</dt><dd>—</dd></div></dl>
+<h3>Warnings</h3>
+<ul><li>None</li></ul>
+</details>
+<p class="provenance">Deterministic findings and recommendations are produced by CodeStrata rules and recommendation engines. AI enrichment, when present, is interpretive only and does not modify deterministic results.</p>
+</section>
+<footer class="site-footer">
+<p>Generated by CodeStrata Community Edition</p>
+<p>Version 0.1.0</p>
+<p class="copyright">© CodeStrata</p>
+</footer>
+</div>
+</body>
+</html>

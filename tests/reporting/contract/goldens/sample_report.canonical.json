@@ -1,0 +1,263 @@
+{
+  "assessment": {
+    "ai": {
+      "candidate_finding_count": null,
+      "estimated_input_tokens": null,
+      "evidence_coverage": null,
+      "executed": false,
+      "executive_summary": null,
+      "failure_code": null,
+      "failure_detail": null,
+      "failure_message": null,
+      "fallback_used": false,
+      "included_finding_count": null,
+      "input_tokens": null,
+      "internal_execution_artifact": null,
+      "key_risks": [],
+      "limitations": [],
+      "model_id": null,
+      "omitted_informational_count": null,
+      "output_tokens": null,
+      "overall_assessment": null,
+      "phases": [],
+      "provider": null,
+      "provider_invoked": false,
+      "recommendations": [],
+      "result_included": false,
+      "stages_completed": [],
+      "static_analysis_profile": null,
+      "status": "not_requested",
+      "stop_reason": null,
+      "total_tokens": null
+    },
+    "ai_enrichment": null,
+    "comparison": null,
+    "coverage": {
+      "ai_interpretation": "not_requested",
+      "deterministic_analysis": "completed",
+      "static_analysis": "disabled"
+    },
+    "deterministic_recommendations": [
+      {
+        "actions": [
+          "a",
+          "b"
+        ],
+        "category": "security",
+        "dependencies": [],
+        "description": "d",
+        "effort": "m",
+        "evidence": [],
+        "id": "672b18af-845d-5ce6-9b18-d87bc75ab2f6",
+        "presentation_bucket": "future",
+        "priority": "high",
+        "priority_score": 68.0,
+        "rationale": "r",
+        "related_finding_ids": [],
+        "risk": "high",
+        "rule_id": "REC001",
+        "title": "Urgent rec"
+      },
+      {
+        "actions": [
+          "a"
+        ],
+        "category": "testing",
+        "dependencies": [],
+        "description": "d",
+        "effort": "s",
+        "evidence": [],
+        "id": "e2a6d3f7-6d64-51ee-b5f0-35d69a78eeb7",
+        "presentation_bucket": "future",
+        "priority": "low",
+        "priority_score": 31.0,
+        "rationale": "r",
+        "related_finding_ids": [],
+        "risk": "low",
+        "rule_id": "REC002",
+        "title": "Later rec"
+      }
+    ],
+    "executive_summary": {
+      "ci_detected": null,
+      "cloud_capabilities": [],
+      "critical_high_finding_count": 1,
+      "file_count": 2,
+      "finding_count": 2,
+      "findings_by_severity": {
+        "critical": 0,
+        "high": 1,
+        "info": 0,
+        "low": 0,
+        "medium": 1
+      },
+      "recommendation_count": 2,
+      "recommendations_by_priority": {
+        "critical": 0,
+        "high": 1,
+        "low": 1,
+        "medium": 0
+      },
+      "summary_text": "Analyzed repository 'sample-app' with 2 scanned file(s). Detected 2 finding(s) (0 critical) and 2 recommendation(s) (1 critical/high priority).",
+      "technology_count": 2,
+      "tests_detected": null
+    },
+    "findings": [
+      {
+        "affected_file_count": null,
+        "affected_technologies": [],
+        "category": "security",
+        "customer_visibility": null,
+        "description": "First",
+        "evidence": [
+          {
+            "column_number": null,
+            "description": "x",
+            "file_path": "src/App.py",
+            "line_number": 2
+          }
+        ],
+        "group_id": null,
+        "id": "d32e2442-b9d5-585e-993d-1981cc68ae27",
+        "metadata": {},
+        "modernization_relevance": null,
+        "occurrence_count": null,
+        "provider_category": null,
+        "provider_name": null,
+        "provider_priority": null,
+        "rule_id": "TEST001",
+        "severity": "high",
+        "source": "deterministic",
+        "title": "A finding"
+      },
+      {
+        "affected_file_count": null,
+        "affected_technologies": [],
+        "category": "testing",
+        "customer_visibility": null,
+        "description": "Second",
+        "evidence": [
+          {
+            "column_number": null,
+            "description": "a",
+            "file_path": "tests/test_a.py",
+            "line_number": null
+          }
+        ],
+        "group_id": null,
+        "id": "3de48705-da3e-502d-97a2-7850fe88b871",
+        "metadata": {},
+        "modernization_relevance": null,
+        "occurrence_count": null,
+        "provider_category": null,
+        "provider_name": null,
+        "provider_priority": null,
+        "rule_id": "TEST002",
+        "severity": "medium",
+        "source": "deterministic",
+        "title": "B finding"
+      }
+    ],
+    "mode": "deterministic",
+    "organization_name": null,
+    "report_title": "Engineering Assessment",
+    "repository": {
+      "default_branch": "main",
+      "file_count": 2,
+      "name": "sample-app",
+      "reference": "sample-app",
+      "source_type": "local"
+    },
+    "repository_facts": {
+      "architecture": null,
+      "build": null,
+      "cicd": null,
+      "cloud": null,
+      "dependencies": null,
+      "security": null,
+      "structure": {
+        "application_count": null,
+        "architecture_layers": [],
+        "file_count": 2,
+        "has_tests": null,
+        "source_file_count": 1,
+        "test_file_count": 0
+      },
+      "technology": null
+    },
+    "summary": {
+      "ai_executed": false,
+      "ai_recommendation_count": 0,
+      "ci_detected": null,
+      "cloud_capabilities": [],
+      "critical_high_finding_count": 1,
+      "deterministic_recommendation_count": 2,
+      "finding_count": 2,
+      "findings_by_severity": {
+        "critical": 0,
+        "high": 1,
+        "info": 0,
+        "low": 0,
+        "medium": 1
+      },
+      "phase_count": 0,
+      "recommendation_count": 2,
+      "recommendations_by_priority": {
+        "critical": 0,
+        "high": 1,
+        "low": 1,
+        "medium": 0
+      },
+      "static_analysis_status": "disabled",
+      "summary_text": "Analyzed repository 'sample-app' with 2 scanned file(s). Detected 2 finding(s) (0 critical) and 2 recommendation(s) (1 critical/high priority).",
+      "technology_count": 2,
+      "tests_detected": null
+    },
+    "technologies": [
+      {
+        "category": "framework",
+        "confidence": 1.0,
+        "name": "FastAPI",
+        "source": "test",
+        "version": null
+      },
+      {
+        "category": "language",
+        "confidence": 1.0,
+        "name": "Python",
+        "source": "test",
+        "version": "3.12"
+      }
+    ],
+    "warnings": []
+  },
+  "manifest": {
+    "brand_report_name": "Engineering Assessment",
+    "codestrata_version": "TEST",
+    "contract_version": "1.0.0",
+    "edition": "community",
+    "enabled_sections": [
+      "executive_summary",
+      "technologies",
+      "findings",
+      "recommendations"
+    ],
+    "generation_mode": "deterministic",
+    "html_report_version": "3.0",
+    "product_name": "CodeStrata",
+    "report_type": "engineering_assessment",
+    "report_version": "1.2",
+    "repository_id": "repo-sample",
+    "scan_id": "run-sample",
+    "schema_version": "1.2",
+    "volatile_fields": [
+      "assessment.generated_at",
+      "assessment.timing",
+      "assessment.ai.latency_ms",
+      "assessment.static_analysis",
+      "manifest.generated_at"
+    ]
+  },
+  "report_version": "1.2",
+  "schema_version": "1.2"
+}

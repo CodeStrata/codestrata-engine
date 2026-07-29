@@ -1,0 +1,5 @@
+flask>=3.0; python_version >= "3.10"
+requests[security]>=2.31.0
+-e ./localpkg
+-r requirements-extra.txt
+--index-url https://example.invalid/simple

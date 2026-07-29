@@ -1,0 +1,19 @@
+{
+  "name": "sample-js-app",
+  "version": "1.0.0",
+  "description": "Minimal JavaScript sample used by CodeStrata onboarding and tests",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

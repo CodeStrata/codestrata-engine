@@ -1,0 +1,12 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.3.0'
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter:3.3.0'
+    implementation group: 'com.google.guava', name: 'guava', version: '33.0.0-jre'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    implementation project(':shared')
+    implementation files('libs/custom.jar')
+}

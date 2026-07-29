@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/enterprise/v1alpha1/Enterprise.json",
+  "title": "Enterprise",
+  "type": "object",
+  "required": ["apiVersion", "kind", "metadata", "spec"],
+  "additionalProperties": false,
+  "properties": {
+    "apiVersion": {
+      "const": "codestrata.io/v1alpha1"
+    },
+    "kind": {
+      "const": "Enterprise"
+    },
+    "metadata": {
+      "type": "object",
+      "required": ["id", "name"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string" },
+        "labels": { "type": "object", "additionalProperties": { "type": "string" } },
+        "annotations": { "type": "object", "additionalProperties": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "schemaVersion": { "type": "string" },
+        "defaultOrganization": { "type": "string" },
+        "repositoryResolution": { "type": "object" },
+        "validation": { "type": "object" }
+      },
+      "additionalProperties": true
+    }
+  }
+}
