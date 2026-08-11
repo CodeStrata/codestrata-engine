@@ -12,6 +12,7 @@ from codestrata.domain.performance.assessment.identifiers import (
 )
 from codestrata.domain.performance.assessment.models import PerformanceAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
+from codestrata.artifacts.heads import resolve_head_path
 
 
 class PerformanceAssessmentArtifactWriteResult(BaseModel):
@@ -38,7 +39,8 @@ def write_performance_assessment_artifact(
     """Write deterministic performance-assessment.json under the run directory."""
 
     run_directory.mkdir(parents=True, exist_ok=True)
-    path = run_directory / PERFORMANCE_ASSESSMENT_FILENAME
+    path = resolve_head_path(run_directory, legacy_filename=PERFORMANCE_ASSESSMENT_FILENAME)
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = dumps_stable_json(performance_assessment_payload(section))
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(text, encoding="utf-8")

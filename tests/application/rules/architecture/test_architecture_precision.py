@@ -39,7 +39,36 @@ def _rules():
     return {str(rule.metadata.rule_id): rule for rule in architecture_rules()}
 
 
-def test_select_primary_unit_layer_aware_and_reverse_dns() -> None:
+def test_test_only_dependency_edges_excluded_from_primary_graph() -> None:
+    texts = {
+        "src/main/java/com/example/domain/Core.java": (
+            "package com.example.domain;\npublic class Core {}\n"
+        ),
+        "src/main/java/com/example/application/App.java": (
+            "package com.example.application;\n"
+            "import com.example.domain.Core;\n"
+            "public class App {}\n"
+        ),
+        "src/test/java/com/example/application/AppTest.java": (
+            "package com.example.application;\n"
+            "import com.example.persistence.Repo;\n"
+            "public class AppTest {}\n"
+        ),
+        "src/main/java/com/example/persistence/Repo.java": (
+            "package com.example.persistence;\npublic class Repo {}\n"
+        ),
+    }
+    view = build_architecture_analysis_view(
+        relative_paths=sorted(texts),
+        file_texts=texts,
+    )
+    edges = {
+        (edge.source_unit_id, edge.target_unit_id): edge.evidence_paths
+        for edge in view.included_edges()
+    }
+    assert ("com.example.application", "com.example.domain") in edges
+    assert ("com.example.application", "com.example.persistence") not in edges
+    assert "test_only_dependency_edges_excluded" in view.normalization_notes
     assert (
         select_primary_unit("codestrata.application.rules.architecture")
         == "codestrata.application"

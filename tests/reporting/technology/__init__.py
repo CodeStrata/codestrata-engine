@@ -1,0 +1,1 @@
+"""Technology inventory reporting tests."""

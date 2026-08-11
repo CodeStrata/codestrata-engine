@@ -51,6 +51,12 @@ class RoadmapReportInitiativeView(BaseModel):
     depends_on_initiative_ids: tuple[str, ...] = ()
     supporting_finding_ids: tuple[str, ...] = ()
     supporting_recommendation_ids: tuple[str, ...] = ()
+    # Epic 2 Slice 2.6 — additive Priority Action traceability (presentation dump).
+    supporting_priority_action_ids: tuple[str, ...] = ()
+    primary_priority_action_id: str | None = None
+    initiative_type: str = "legacy"
+    evidence_completeness: str = "legacy"
+    limitations: tuple[str, ...] = ()
     evidence_references: tuple[RoadmapReportEvidenceView, ...] = ()
     confidence: str
     category: str
@@ -78,7 +84,9 @@ class RoadmapReportInitiativeView(BaseModel):
         "depends_on_initiative_ids",
         "supporting_finding_ids",
         "supporting_recommendation_ids",
+        "supporting_priority_action_ids",
         "evidence_references",
+        "limitations",
         mode="before",
     )
     @classmethod

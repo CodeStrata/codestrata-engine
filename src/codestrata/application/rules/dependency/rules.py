@@ -38,7 +38,7 @@ from codestrata.domain.evidence.dependency.enums import (
 from codestrata.domain.evidence.dependency.models import DependencyDeclarationEvidence
 from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
-from codestrata.domain.rules.enums import RuleConfidence, RuleSeverity, RuleSkipReason
+from codestrata.domain.rules.enums import MatchEvidenceConfidence, RuleSeverity, RuleSkipReason
 from codestrata.domain.rules.metadata import RuleMetadata
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 
@@ -148,7 +148,7 @@ class UnresolvedVersionRule:
                         "supported local resolution contract."
                     ),
                     severity=RuleSeverity.MEDIUM,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_declaration(
                             item=item,
@@ -227,7 +227,7 @@ class MutableVersionRule:
                         f"'{expression}', which may select changing artifacts."
                     ),
                     severity=RuleSeverity.MEDIUM,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_declaration(
                             item=item,
@@ -344,7 +344,7 @@ class UnboundedRequirementRule:
                         "the selected version."
                     ),
                     severity=RuleSeverity.MEDIUM,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_declaration(
                             item=item,
@@ -439,7 +439,7 @@ class ConflictingExactVersionsRule:
                         f"({locations})."
                     ),
                     severity=RuleSeverity.HIGH,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=tuple(
                         evidence_declaration(
                             item=item,
@@ -522,7 +522,7 @@ class DuplicateDeclarationRule:
                         f"'{ordered[0].source.path}'."
                     ),
                     severity=RuleSeverity.LOW,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=tuple(
                         evidence_declaration(
                             item=item,

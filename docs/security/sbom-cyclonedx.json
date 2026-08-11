@@ -723,7 +723,7 @@
         {
           "comment": "PackageSource: Local",
           "type": "distribution",
-          "url": "file:///Users/satish_byndr/Documents/workspace-ai/codestrata-platform/engine"
+          "url": "file:///codestrata-engine"
         },
         {
           "comment": "from packaging metadata Project-URL: Documentation",

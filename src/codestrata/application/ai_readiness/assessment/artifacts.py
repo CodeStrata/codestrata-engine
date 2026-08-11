@@ -12,6 +12,7 @@ from codestrata.domain.ai_readiness.assessment.identifiers import (
 )
 from codestrata.domain.ai_readiness.assessment.models import AiReadinessAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
+from codestrata.artifacts.heads import resolve_head_path
 
 
 class AiReadinessAssessmentArtifactWriteResult(BaseModel):
@@ -38,7 +39,8 @@ def write_ai_readiness_assessment_artifact(
     """Write deterministic ai-readiness-assessment.json under the run directory."""
 
     run_directory.mkdir(parents=True, exist_ok=True)
-    path = run_directory / AI_READINESS_ASSESSMENT_FILENAME
+    path = resolve_head_path(run_directory, legacy_filename=AI_READINESS_ASSESSMENT_FILENAME)
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = dumps_stable_json(ai_readiness_assessment_payload(section))
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(text, encoding="utf-8")

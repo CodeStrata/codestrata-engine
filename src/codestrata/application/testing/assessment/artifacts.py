@@ -12,6 +12,7 @@ from codestrata.domain.testing.assessment.identifiers import (
 )
 from codestrata.domain.testing.assessment.models import TestAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
+from codestrata.artifacts.heads import resolve_head_path
 
 
 class TestingAssessmentArtifactWriteResult(BaseModel):
@@ -40,7 +41,8 @@ def write_testing_assessment_artifact(
     """Write deterministic testing-assessment.json under the run directory."""
 
     run_directory.mkdir(parents=True, exist_ok=True)
-    path = run_directory / TESTING_ASSESSMENT_FILENAME
+    path = resolve_head_path(run_directory, legacy_filename=TESTING_ASSESSMENT_FILENAME)
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = dumps_stable_json(testing_assessment_payload(section))
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(text, encoding="utf-8")

@@ -12,6 +12,7 @@ from codestrata.application.rules.registry import RuleRegistry
 from codestrata.application.rules.security.helpers import (
     authentication_disabled,
     debug_enabled,
+    evidence_configuration,
     has_private_key_material,
     hostname_verification_disabled,
     is_literal_credential,
@@ -244,14 +245,56 @@ def test_credential_literal_and_placeholder_precision() -> None:
     assert not is_literal_credential(placeholder)
     assert is_placeholder_credential(placeholder)
 
+    ci_expr = _fact(
+        path=".github/workflows/ci.yml",
+        key="api_token",
+        family=ConfigurationKeyFamily.SECRET,
+        value_kind=ValueKind.ENVIRONMENT_REFERENCE,
+        placeholder=PlaceholderStatus.ENVIRONMENT_INTERPOLATION,
+        redacted="${{ secrets.API_TOKEN }}",
+    )
+    assert not is_literal_credential(ci_expr)
+
     result = CredentialLiteralRule().evaluate(
-        _context(_bundle(facts=(literal, token, env_ref, empty, placeholder)))
+        _context(_bundle(facts=(literal, token, env_ref, empty, placeholder, ci_expr)))
     )
     assert len(result.matches) == 2
     serialized = dumps_stable_json(
         {"m": [item.summary for item in result.matches]}
     )
     assert "super-secret" not in serialized
+    for item in result.matches:
+        assert item.severity.value == "high"
+        assert "Context: Production source" in item.summary
+        assert item.evidence[0].attributes.get("security_context") == "production"
+
+
+def test_credential_literal_ci_expression_is_not_a_live_credential() -> None:
+    from codestrata.domain.rules.enums import RuleResultStatus
+
+    gha = _fact(
+        path=".github/workflows/pr.yml",
+        key="env_github_token",
+        family=ConfigurationKeyFamily.SECRET,
+        value_kind=ValueKind.ENVIRONMENT_REFERENCE,
+        placeholder=PlaceholderStatus.ENVIRONMENT_INTERPOLATION,
+        redacted="${{ secrets.GITHUB_TOKEN }}",
+    )
+    # Even a mis-tagged literal kind must not fire when preview is a CI expression.
+    gha_misclassified = _fact(
+        path=".github/workflows/pr.yml",
+        key="env_github_token",
+        family=ConfigurationKeyFamily.SECRET,
+        value_kind=ValueKind.LITERAL,
+        redacted="${{ secrets.GITHUB_TOKEN }}",
+    )
+    assert not is_literal_credential(gha)
+    assert not is_literal_credential(gha_misclassified)
+    result = CredentialLiteralRule().evaluate(
+        _context(_bundle(facts=(gha, gha_misclassified)))
+    )
+    assert result.status is RuleResultStatus.NOT_MATCHED
+    assert result.matches == ()
 
 
 def test_transport_auth_cors_debug_rules() -> None:
@@ -406,6 +449,36 @@ def test_finding_category_mapping_and_no_raw_values(tmp_path: Path) -> None:
     assert "security_score" not in body
     assert "recommendation_groups" not in body
     assert section.synthesis.status.value in {"succeeded", "empty"}
+
+
+def test_evidence_configuration_sets_line_end_with_line_start() -> None:
+    from codestrata.domain.security.taxonomy import SecurityCategory
+
+    item = ConfigurationFactEvidence(
+        evidence_id="cfg:app.properties:debug",
+        path="config/app.properties",
+        classification=SourceClassification.SOURCE,
+        format=ConfigurationFormat.PROPERTIES,
+        normalized_key="debug",
+        key_family=ConfigurationKeyFamily.DEBUG,
+        redacted_preview="true",
+        value_fingerprint="abc",
+        value_length=4,
+        value_kind=ValueKind.BOOLEAN,
+        placeholder_status=PlaceholderStatus.NOT_APPLICABLE,
+        is_empty=False,
+        literal_boolean=True,
+        is_wildcard_origin=False,
+        line_start=3,
+        provenance=_prov(),
+    )
+    evidence = evidence_configuration(
+        item=item,
+        message="debug enabled",
+        security_category=SecurityCategory.CONFIGURATION,
+    )
+    assert evidence.line_start == 3
+    assert evidence.line_end == 3
 
 
 def test_gates_and_evidence_independence(tmp_path: Path) -> None:

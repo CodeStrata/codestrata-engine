@@ -11,7 +11,8 @@ _SEVERITY_ALIASES = {
     "low": "low",
 }
 _PRIORITY_ALIASES = {
-    "immediate": "immediate",
+    # Customer-facing critical band aliases Immediate RecommendationPriority.
+    "immediate": "critical",
     "critical": "critical",
     "high": "high",
     "medium": "medium",

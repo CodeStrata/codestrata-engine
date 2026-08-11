@@ -27,12 +27,13 @@ def _finding(
     severity: str,
     category: str,
     finding_id: str = "f1",
+    description: str = "desc",
 ) -> FindingView:
     return FindingView(
         finding_id=finding_id,
         rule_id="rule-1",
         title=title,
-        description="desc",
+        description=description,
         severity=severity,
         category=category,
     )
@@ -67,6 +68,32 @@ def test_filters_informational_language_detection() -> None:
         category="technology",
     )
     assert is_leadership_signal_finding(finding) is False
+
+
+def test_filters_non_actionable_security_context_markers() -> None:
+    finding = _finding(
+        title="Credential literal in configuration",
+        severity="low",
+        category="security",
+        description=(
+            "Configuration key holds a literal. "
+            "Context: CI secret reference (ci-secret-expression)."
+        ),
+    )
+    assert is_leadership_signal_finding(finding) is False
+
+
+def test_keeps_actionable_production_security_finding() -> None:
+    finding = _finding(
+        title="Credential literal in configuration",
+        severity="high",
+        category="security",
+        description=(
+            "Configuration key holds a literal. "
+            "Context: Production source (path-production)."
+        ),
+    )
+    assert is_leadership_signal_finding(finding) is True
 
 
 def test_key_takeaways_prefer_engineering_risk_and_priority_action() -> None:
@@ -202,7 +229,7 @@ def test_assessment_scope_sanitizes_config_paths() -> None:
     assert "Performance" in reasons
 
 
-def test_priority_actions_require_finding_links_and_synthesize_near_term() -> None:
+def test_priority_actions_are_recommendation_backed_not_finding_synthesized() -> None:
     findings = (
         _finding(
             title="Framework symbol in domain boundary",
@@ -243,8 +270,31 @@ def test_priority_actions_require_finding_links_and_synthesize_near_term() -> No
     assert all(item.related_finding_ids for item in actions)
     assert all("Kubernetes" not in item.title for item in actions)
     assert any(item.presentation_bucket == "near_term" for item in actions)
+    # Uncovered findings must not become Priority Actions (Engineering Risks only).
+    assert all(not item.recommendation_id.startswith("presentation:finding:") for item in actions)
+    assert [item.recommendation_id for item in actions] == ["test-1"]
     titles = [item.title for item in actions]
-    assert any("framework" in title.lower() or "Contain framework" in title for title in titles)
+    assert not any("framework" in title.lower() or "Contain framework" in title for title in titles)
+
+
+def test_uncovered_findings_remain_engineering_risks_not_priority_actions() -> None:
+    findings = (
+        _finding(
+            title="Framework symbol in domain boundary",
+            severity="medium",
+            category="architecture",
+            finding_id="arch-1",
+        ),
+    )
+    actions = build_priority_actions_for_leadership(
+        findings=findings,
+        recommendations=(),
+    )
+    assert actions == ()
+    risks = build_engineering_risks(findings)
+    assert risks
+    flat = " ".join(item for _theme, items in risks for item in items).lower()
+    assert "framework" in flat
 
 
 def test_roadmap_order_matches_priority_actions() -> None:

@@ -86,7 +86,7 @@ def register_onboard_command(app: typer.Typer) -> None:
 
         Orchestrates existing assessment, knowledge, and reporting services:
 
-            codestrata onboard ./my-repo --config codestrata.toml --output reports
+            codestrata onboard ./my-repo --config codestrata.toml
         """
 
         configure_logging(level="DEBUG" if verbose else "WARNING")

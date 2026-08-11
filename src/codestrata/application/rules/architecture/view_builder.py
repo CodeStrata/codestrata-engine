@@ -452,6 +452,11 @@ def finalize_architecture_view(
         if source_primary == target_primary:
             excluded_count += 1
             continue
+        # Test/fixture-only evidence must not inflate the production primary graph.
+        if paths and all(_is_test_or_fixture_path(path) for path in paths):
+            excluded_count += 1
+            notes.append("test_only_dependency_edges_excluded")
+            continue
         primary_key = (source_primary, target_primary)
         if primary_key in seen_primary:
             continue
@@ -892,6 +897,23 @@ def incident_edge_shares(view: ArchitectureAnalysisView) -> dict[str, float]:
         incident[edge.target_unit_id] += 1
     total = float(len(edges) * 2)
     return {unit: count / total for unit, count in incident.items()}
+
+
+def _is_test_or_fixture_path(path: str) -> bool:
+    """Return True when a dependency evidence path is test/fixture/generated-only."""
+
+    lower = path.replace("\\", "/").lower()
+    markers = (
+        "/test/",
+        "/tests/",
+        "/__tests__/",
+        "/src/test/",
+        "/fixtures/",
+        "/fixture/",
+        "/generated/",
+        "/.generated/",
+    )
+    return any(marker in lower for marker in markers)
 
 
 def _is_source_path(path: str, *, ignore_markers: Sequence[str]) -> bool:

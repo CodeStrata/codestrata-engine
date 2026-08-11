@@ -40,6 +40,12 @@ _TESTING_PACKAGES: dict[str, str] = {
     "nose2": "nose2",
 }
 
+# Major libraries / SDKs that are not application frameworks.
+_LIBRARY_PACKAGES: dict[str, str] = {
+    "openai": "OpenAI",
+    "anthropic": "Anthropic",
+}
+
 
 class PythonTechnologyDetector:
     """Detects Python ecosystem technologies across nested workspace layouts."""
@@ -108,6 +114,7 @@ class PythonTechnologyDetector:
         package_versions = self._collect_package_versions(repository, manifest_paths)
         seen_frameworks: set[str] = set()
         seen_tests: set[str] = set()
+        seen_libraries: set[str] = set()
 
         for package_name, version in package_versions.items():
             lower = package_name.lower()
@@ -131,6 +138,18 @@ class PythonTechnologyDetector:
                         name=test_tool,
                         version=version,
                         category=TechnologyCategory.TESTING,
+                        confidence=1.0,
+                        source="python_manifest_dependency",
+                    )
+                )
+            library = _LIBRARY_PACKAGES.get(lower)
+            if library is not None and library not in seen_libraries:
+                seen_libraries.add(library)
+                technologies.append(
+                    Technology(
+                        name=library,
+                        version=version,
+                        category=TechnologyCategory.LIBRARY,
                         confidence=1.0,
                         source="python_manifest_dependency",
                     )
@@ -166,6 +185,17 @@ class PythonTechnologyDetector:
                 Technology(
                     name="Django",
                     category=TechnologyCategory.FRAMEWORK,
+                    confidence=0.9,
+                    source="python_source_import",
+                )
+            )
+        if "OpenAI" not in seen_libraries and self._source_mentions(
+            repository, py_files, ("from openai", "import openai")
+        ):
+            technologies.append(
+                Technology(
+                    name="OpenAI",
+                    category=TechnologyCategory.LIBRARY,
                     confidence=0.9,
                     source="python_source_import",
                 )

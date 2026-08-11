@@ -461,7 +461,7 @@ def register_doctor_command(app: typer.Typer) -> None:
             raise typer.Exit(code=1)
 
         success("All doctor checks passed.")
-        tip("Next: codestrata assess --repo . --output reports --no-ai")
+        tip("Next: codestrata assess --repo . --no-ai")
 
 
 __all__ = [

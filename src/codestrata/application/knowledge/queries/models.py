@@ -158,6 +158,12 @@ class FindingView(BaseModel):
     evidence: tuple[EvidenceView, ...] = ()
     recommendation_ids: tuple[str, ...] = ()
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Epic 2 Slice 2.8 — preserve domain EvidenceRef traceability (additive).
+    evidence_refs: tuple[dict[str, Any], ...] = ()
+    primary_evidence_id: str | None = None
+    synthesized_from_evidence_ids: tuple[str, ...] = ()
+    evidence_completeness: str = "legacy"
+    limitations: tuple[str, ...] = ()
 
 
 class RecommendationActionView(BaseModel):
@@ -190,6 +196,12 @@ class RecommendationView(BaseModel):
     actions: tuple[RecommendationActionView, ...] = ()
     roadmap_phase: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+    # Epic 2 Slice 2.8 — preserve finding traceability (additive).
+    supporting_finding_ids: tuple[str, ...] = ()
+    primary_finding_id: str | None = None
+    recommendation_type: str = "legacy"
+    evidence_completeness: str = "legacy"
+    limitations: tuple[str, ...] = ()
 
 
 class GraphNodeView(BaseModel):

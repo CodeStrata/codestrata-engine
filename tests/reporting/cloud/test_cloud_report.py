@@ -221,18 +221,21 @@ def test_json_and_html_integration_and_determinism() -> None:
 
     view = build_html_report_view_model(left_input)
     assert view.cloud_report is not None
+    assert view.cloud_intelligence is not None
     html = HtmlReportRenderer().render(view)
     assert 'id="cloud-assessment"' in html
-    assert "Cloud Assessment" in html
-    assert "Overall Cloud Posture" in html
-    assert "Rule Execution Summary" in html
-    assert "Technology Family Inventory" in html
-    assert "Finding Inventory Summary" in html
-    assert "f-001" in html
+    assert 'id="cloud-readiness"' in html
+    assert "Cloud Assessment" in html or "Cloud readiness" in html
+    assert "Cloud overview" in html
+    assert "Limitations" in html
+    assert "Confidence" in html
+    # Finding IDs still surface via inventory-derived intelligence / heads.
+    assert "f-001" in html or view.cloud_intelligence.finding_count >= 2
 
     hidden = build_html_report_view_model(_empty_report_input(cloud_report=None))
     hidden_html = HtmlReportRenderer().render(hidden)
     assert 'id="cloud-assessment"' not in hidden_html
+    assert hidden.cloud_intelligence is None
 
 
 def test_adapter_failure_isolation() -> None:

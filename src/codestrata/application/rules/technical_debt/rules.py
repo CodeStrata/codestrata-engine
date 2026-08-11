@@ -11,13 +11,14 @@ from codestrata.application.rules.technical_debt.helpers import (
     evidence_callable,
     evidence_type,
     exceeds_threshold,
+    is_production_complexity_subject,
     make_metadata,
     match,
     severity_for_ratio,
 )
 from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
-from codestrata.domain.rules.enums import RuleConfidence, RuleSkipReason
+from codestrata.domain.rules.enums import MatchEvidenceConfidence, RuleSkipReason
 from codestrata.domain.rules.metadata import RuleMetadata
 from codestrata.domain.rules.results import SharedRuleEvaluationResult
 from codestrata.domain.technical_debt.ids import (
@@ -77,6 +78,8 @@ class LargeCallableRule:
             )
         matches = []
         for item in evidence.callables:
+            if not is_production_complexity_subject(item.classification):
+                continue
             if not exceeds_threshold(item.physical_line_count, threshold=self._threshold):
                 continue
             value = int(item.physical_line_count.value or 0)
@@ -89,7 +92,7 @@ class LargeCallableRule:
                         f"{value}, which exceeds threshold {self._threshold}."
                     ),
                     severity=severity_for_ratio(value=value, threshold=self._threshold),
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_callable(
                             item=item,
@@ -151,6 +154,8 @@ class ExcessiveBranchingRule:
             )
         matches = []
         for item in evidence.callables:
+            if not is_production_complexity_subject(item.classification):
+                continue
             if not exceeds_threshold(item.branch_point_count, threshold=self._threshold):
                 continue
             value = int(item.branch_point_count.value or 0)
@@ -163,7 +168,7 @@ class ExcessiveBranchingRule:
                         f"{value}, which exceeds threshold {self._threshold}."
                     ),
                     severity=severity_for_ratio(value=value, threshold=self._threshold),
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_callable(
                             item=item,
@@ -225,6 +230,8 @@ class DeepNestingRule:
             )
         matches = []
         for item in evidence.callables:
+            if not is_production_complexity_subject(item.classification):
+                continue
             if not exceeds_threshold(item.max_nesting_depth, threshold=self._threshold):
                 continue
             value = int(item.max_nesting_depth.value or 0)
@@ -237,7 +244,7 @@ class DeepNestingRule:
                         f"{value}, which exceeds threshold {self._threshold}."
                     ),
                     severity=severity_for_ratio(value=value, threshold=self._threshold),
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_callable(
                             item=item,
@@ -299,6 +306,8 @@ class ExcessiveParametersRule:
             )
         matches = []
         for item in evidence.callables:
+            if not is_production_complexity_subject(item.classification):
+                continue
             if not exceeds_threshold(item.parameter_count, threshold=self._threshold):
                 continue
             value = int(item.parameter_count.value or 0)
@@ -311,7 +320,7 @@ class ExcessiveParametersRule:
                         f"{value}, which exceeds threshold {self._threshold}."
                     ),
                     severity=severity_for_ratio(value=value, threshold=self._threshold),
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_callable(
                             item=item,
@@ -373,6 +382,8 @@ class OversizedTypeRule:
             )
         matches = []
         for item in evidence.types:
+            if not is_production_complexity_subject(item.classification):
+                continue
             if not exceeds_threshold(item.physical_line_count, threshold=self._threshold):
                 continue
             value = int(item.physical_line_count.value or 0)
@@ -385,7 +396,7 @@ class OversizedTypeRule:
                         f"{value}, which exceeds threshold {self._threshold}."
                     ),
                     severity=severity_for_ratio(value=value, threshold=self._threshold),
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_type(
                             item=item,

@@ -8,12 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-04
+
 ### Added
 
-* Community Edition documentation cleanup for the public Engine repository
-* Opt-in anonymous telemetry (`codestrata telemetry`)
-* Optional Analysis Intelligence packs (disabled by default) with Shared Rule
-  Platform contributor docs
+* Release-validation System Verification (SV.1–SV.16) evidence for the curated
+  22-repository public OSS dataset
+* Assessment schema 1.2 customer-safe report projection and Platform Engineering
+  Intelligence / website-export release artifacts
+
+### Changed
+
+* Engine package version aligned to the v0.2.0 release cut
 
 ## [0.1.0] - 2026-07-22
 

@@ -12,7 +12,7 @@ from codestrata.domain.architecture.conclusions.enums import (
 from codestrata.domain.architecture.conclusions.identifiers import validate_category_id
 from codestrata.domain.architecture.conclusions.relationships import SeveritySummary
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
-from codestrata.domain.rules.enums import RuleConfidence
+from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
 
 class ArchitectureConclusion(BaseModel):
@@ -38,7 +38,7 @@ class ArchitectureConclusion(BaseModel):
     related_finding_ids: tuple[str, ...] = ()
     severity_summary: SeveritySummary
     business_impact: str = "unknown"
-    confidence: RuleConfidence = RuleConfidence.MEDIUM
+    confidence: MatchEvidenceConfidence = MatchEvidenceConfidence.MEDIUM
     coverage: dict[str, str] = Field(default_factory=dict)
     materiality: ConclusionMateriality = ConclusionMateriality.UNDETERMINED
     modernization_relevance: ModernizationWave = ModernizationWave.WAVE_2_FOUNDATION
@@ -121,7 +121,7 @@ class ConsolidatedRecommendation(BaseModel):
     validation_steps: tuple[str, ...] = ()
     sequencing_guidance: str = ""
     modernization_wave: ModernizationWave = ModernizationWave.WAVE_2_FOUNDATION
-    confidence: RuleConfidence = RuleConfidence.MEDIUM
+    confidence: MatchEvidenceConfidence = MatchEvidenceConfidence.MEDIUM
     limitations: tuple[str, ...] = ()
 
     @field_validator(

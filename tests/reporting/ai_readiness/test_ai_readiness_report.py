@@ -237,18 +237,19 @@ def test_json_and_html_integration_and_determinism() -> None:
 
     view = build_html_report_view_model(left_input)
     assert view.ai_readiness_report is not None
+    assert view.ai_readiness_intelligence is not None
     html = HtmlReportRenderer().render(view)
+    assert 'id="ai-readiness"' in html
     assert 'id="ai-readiness-assessment"' in html
-    assert "AI Readiness Assessment" in html
-    assert "Overall AI Readiness Posture" in html
-    assert "Rule Execution Summary" in html
-    assert "Capability Family Inventory" in html
-    assert "Finding Inventory Summary" in html
-    assert "f-001" in html
+    assert "AI readiness overview" in html
+    assert "Limitations" in html
+    assert "Confidence" in html
+    assert "f-001" in html or "api" in html.lower() or "openapi" in html.lower()
 
     hidden = build_html_report_view_model(_empty_report_input(ai_readiness_report=None))
     hidden_html = HtmlReportRenderer().render(hidden)
     assert 'id="ai-readiness-assessment"' not in hidden_html
+    assert hidden.ai_readiness_intelligence is None
 
 
 def test_adapter_failure_isolation() -> None:

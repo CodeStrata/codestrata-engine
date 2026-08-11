@@ -41,6 +41,85 @@ If you see `ModuleNotFoundError: No module named 'codestrata'`, the package is
 not installed in the active environment. Activate `.venv` and re-run
 `python -m pip install -e .`.
 
+## Clean installation verification (SV.2)
+
+Maintainers can reproduce a **first-time Community install** (fresh venv, no
+editable install, no developer `PYTHONPATH`) with:
+
+```bash
+cd engine
+python -m verification.cli_installation --method pip_wheel
+# or (faster in CI):
+python -m verification.cli_installation --method pip_path_non_editable
+```
+
+See [`../verification/cli_installation/README.md`](../verification/cli_installation/README.md).
+This is verification only — it does not change packaging or CLI behavior.
+
+## Initialization verification (SV.3)
+
+Verify first-time `codestrata init` behavior (existing-config refusal, nested cwd,
+non-interactive defaults, source integrity, determinism):
+
+```bash
+cd engine
+python -m verification.cli_initialization --method pip_path_non_editable
+```
+
+See [`../verification/cli_initialization/README.md`](../verification/cli_initialization/README.md).
+
+## Repository assessment verification (SV.4)
+
+Verify a clean non-editable CLI can initialize and assess a repository
+(deterministic `--no-ai`, telemetry off / no transmission, structural artifact checks):
+
+```bash
+cd engine
+python -m verification.repository_assessment --local-only
+```
+
+Canonical customer command:
+
+```bash
+codestrata assess --repo . --no-ai --no-ai
+```
+
+Optional process-local telemetry consent (not saved; no transmission in this
+release):
+
+```bash
+codestrata assess --repo . --no-ai --no-ai --telemetry-deny
+codestrata assess --repo . --no-ai --no-ai --telemetry-allow
+```
+
+See [telemetry-cli-consent-flags.md](telemetry-cli-consent-flags.md).
+
+Catalog-backed remote runs require a `qualified_revision` (full commit SHA) in
+`validation/repository-catalog/catalog.json`. Validate pins with:
+
+```bash
+python validation/repository-catalog/validate_catalog.py --write-report
+cd engine
+python -m verification.repository_assessment --with-catalog-network
+```
+
+See [`../verification/repository_assessment/README.md`](../verification/repository_assessment/README.md).
+
+## Assessment report verification (SV.5)
+
+Verify assessment artifact quality after SV.4 (schema 1.2, parity, HTML structure,
+traceability, credibility, privacy, determinism):
+
+```bash
+cd engine
+python -m verification.assessment_report --local-only
+# catalog-backed CleanArchitecture (policy-selected):
+python -m verification.assessment_report --with-catalog-network
+```
+
+See [`../verification/assessment_report/README.md`](../verification/assessment_report/README.md).
+Does not start CLI UX verification (SV.6).
+
 ## Install from a built wheel
 
 For a clean machine (no editable checkout):

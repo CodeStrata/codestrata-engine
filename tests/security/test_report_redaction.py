@@ -17,6 +17,14 @@ def test_assignment_password_and_api_key_redaction() -> None:
     assert REDACTED in sanitized
 
 
+def test_private_key_header_only_redaction() -> None:
+    header = "-----BEGIN RSA PRIVATE KEY-----"
+    sanitized = redact_secrets(f"Private key material detected in keys/demo.pem: {header}")
+    assert "BEGIN" not in sanitized
+    assert "-----" not in sanitized
+    assert REDACTED in sanitized
+
+
 def test_private_key_block_redaction() -> None:
     pem = (
         "-----BEGIN RSA PRIVATE KEY-----\n"
@@ -25,6 +33,13 @@ def test_private_key_block_redaction() -> None:
     )
     sanitized = redact_secrets(f"key={pem}")
     assert "BEGIN RSA PRIVATE KEY" not in sanitized
+    assert REDACTED in sanitized
+
+
+def test_pem_begin_fence_without_end_redacted() -> None:
+    text = "marker -----BEGIN CERTIFICATE----- remains"
+    sanitized = redact_secrets(text)
+    assert "-----BEGIN" not in sanitized
     assert REDACTED in sanitized
 
 

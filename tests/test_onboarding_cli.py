@@ -286,8 +286,10 @@ def test_cli_help_mentions_canonical_workflow() -> None:
     assert result.exit_code == 0
     assert "codestrata init" in result.output
     assert "codestrata doctor" in result.output
-    assert "codestrata assess --repo . --output reports --no-ai" in result.output
+    assert "codestrata assess --repo ." in result.output
     assert "Engineering Assessment" in result.output
+    assert "--telemetry-allow" in result.output or "telemetry-allow" in result.output
+    assert "report publish" in result.output
 
     assess_help = runner.invoke(app, ["assess", "--help"])
     assert assess_help.exit_code == 0
@@ -299,18 +301,22 @@ def test_cli_help_mentions_canonical_workflow() -> None:
 
 def test_readme_documents_canonical_workflow() -> None:
     readme = (ENGINE_ROOT / "README.md").read_text(encoding="utf-8")
-    assert "codestrata assess --config codestrata.toml --output reports --with-ai" in readme
-    assert "spring-petclinic" not in readme.lower()
-    assert "spring petclinic" not in readme.lower()
+    assert "codestrata assess --config codestrata.toml --with-ai" in readme
+    assert ".codestrata-artifacts/assessments" in readme
+    assert "--telemetry-allow" in readme
+    assert "report publish" in readme
+    assert "reports.codestrata.ai/r/" in readme
     assert ".codestrata/workspace/spring-petclinic" not in readme
     assert "ModuleNotFoundError" in readme
     assert "python -m pip install -e " in readme
     assert 'python -c "import codestrata; print(codestrata.__file__)"' in readme
     assert "confirm the active interpreter" in readme
-    assert "Amazon Bedrock" in readme or "OpenAI" in readme
+    assert "Amazon Bedrock" in readme or "OpenAI" in readme or "Bedrock" in readme
     assert "codestrata help" not in readme
     assert "test-fixtures/sample-js-app" in readme
     assert "docs/quick-start.md" in readme
+    assert "--output reports" not in readme
+    assert "report.html" not in readme or "assessment.html" in readme
 
 
 def test_shipped_codestrata_toml_uses_sample_js_not_petclinic() -> None:

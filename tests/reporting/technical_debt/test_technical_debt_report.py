@@ -312,21 +312,26 @@ def test_report_json_and_html_include_technical_debt_when_present(
     assert "test_observation" in section
 
     html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
+    assert 'id="technical-debt-intelligence"' in html
     assert 'id="technical-debt-assessment"' in html
+    assert "Technical Debt Intelligence" in html
     assert "Technical Debt Assessment" in html
-    assert "Top production hotspots" in html
-    assert "Test-maintainability observation" in html
-    assert "not production health" in html.lower()
-    assert "priority ranking" in html.lower() or "not a priority" in html.lower()
+    assert "Technical debt overview" in html
+    assert "broader technical debt" in html.lower() or "static complexity" in html.lower()
+    assert "no significant" not in html.lower()
+    assert "production-facing debt signals" not in html.lower()
     assert "/Users/" not in html
-    assert "financial" in html.lower() or "composite" in html.lower()
+    assert "financial" in html.lower() or "composite" in html.lower() or (
+        "zero findings do not" in html.lower()
+    )
     escaped = HtmlReportRenderer().render(
         build_html_report_view_model(
             report_input.model_copy(
                 update={
                     "technical_debt_report": debt_report.model_copy(
                         update={
-                            "executive_summary": '<script>alert("x")</script> debt'
+                            "executive_summary": '<script>alert("x")</script> debt',
+                            "status_summary": '<script>alert("x")</script> debt',
                         }
                     )
                 }

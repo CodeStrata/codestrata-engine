@@ -13,7 +13,7 @@ from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
     RuleCategory,
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -23,7 +23,20 @@ from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
 from codestrata.domain.rules.models import Rule, RuleContext, RuleResult
+from codestrata.domain.rules.rule_confidence import (
+    RuleConfidence,
+    RuleConfidenceBasis,
+    RuleConfidenceCalibrationStatus,
+    RuleConfidenceLevel,
+)
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
+
+_LEGACY_CONFIDENCE = RuleConfidence(
+    level=RuleConfidenceLevel.UNAVAILABLE,
+    basis=(RuleConfidenceBasis.LEGACY_RULE,),
+    limitations=("Phase-1 legacy rule outside Shared Rule Confidence contract.",),
+    calibration_status=RuleConfidenceCalibrationStatus.UNAVAILABLE,
+)
 
 
 class LegacyRuleAdapter:
@@ -65,6 +78,7 @@ class LegacyRuleAdapter:
             description=self._rule.description(),
             category=self._category,
             default_severity=RuleSeverity.MEDIUM,
+            confidence=_LEGACY_CONFIDENCE,
             supported_languages=languages,
             tags=("legacy", "assessment-graph"),
             remediation_summary=None,
@@ -133,7 +147,11 @@ class LegacyRuleAdapter:
         if not result.findings:
             return SharedRuleEvaluationResult.not_matched()
         matches = tuple(
-            _finding_to_match(finding, version=self._version)
+            _finding_to_match(
+                finding,
+                version=self._version,
+                rule_confidence=self.metadata.confidence,
+            )
             for finding in result.findings
         )
         return SharedRuleEvaluationResult.matched(matches)
@@ -157,7 +175,12 @@ def _legacy_context(context: RuleExecutionContext) -> RuleContext | None:
     return None
 
 
-def _finding_to_match(finding: Finding, *, version: RuleVersion) -> RuleMatch:
+def _finding_to_match(
+    finding: Finding,
+    *,
+    version: RuleVersion,
+    rule_confidence: RuleConfidence,
+) -> RuleMatch:
     """Best-effort RuleMatch view of a Finding (not used for ID-preserving assess)."""
 
     evidence = tuple(
@@ -185,7 +208,8 @@ def _finding_to_match(finding: Finding, *, version: RuleVersion) -> RuleMatch:
         rule_id=RuleId(finding.rule_id),
         rule_version=version,
         severity=finding.severity,
-        confidence=RuleConfidence.CERTAIN,
+        confidence=MatchEvidenceConfidence.CERTAIN,
+        rule_confidence=rule_confidence,
         title=finding.title,
         summary=finding.description,
         evidence=evidence,

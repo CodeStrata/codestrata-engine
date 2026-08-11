@@ -19,6 +19,7 @@ from typing import Any, Literal
 PROFILE_ENV_VAR = "CODESTRATA_PROFILE"
 BEDROCK_MODEL_ENV_VAR = "CODESTRATA_BEDROCK_MODEL_ID"
 OPENAI_API_KEY_ENV_OVERRIDE = "CODESTRATA_OPENAI_API_KEY_ENV"
+OPENROUTER_MODEL_ENV_VAR = "CODESTRATA_OPENROUTER_MODEL_ID"
 
 ProfileSource = Literal["cli", "environment", "configuration", "default"]
 
@@ -174,6 +175,12 @@ def apply_environment_overlays(
         out.setdefault("ai", {})
         out["ai"].setdefault("openai", {})
         out["ai"]["openai"]["api_key_env"] = openai_env_name
+
+    openrouter_model = str(env.get(OPENROUTER_MODEL_ENV_VAR, "") or "").strip()
+    if openrouter_model:
+        out.setdefault("ai", {})
+        out["ai"].setdefault("openrouter", {})
+        out["ai"]["openrouter"]["model"] = openrouter_model
 
     platform_enabled = str(env.get("CODESTRATA_PLATFORM_ENABLED", "") or "").strip().lower()
     if platform_enabled in {"1", "true", "yes", "on"}:
@@ -507,6 +514,7 @@ __all__ = [
     "DEFAULT_PROFILE",
     "ExecutionProfile",
     "OPENAI_API_KEY_ENV_OVERRIDE",
+    "OPENROUTER_MODEL_ENV_VAR",
     "PROFILE_ENV_VAR",
     "ProfileSource",
     "apply_environment_overlays",

@@ -53,7 +53,7 @@ from codestrata.domain.rules.context import (
 )
 from codestrata.domain.rules.enums import (
     RuleCategory,
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleResultStatus,
     RuleSkipReason,
     RuleSuppressionSource,
@@ -295,7 +295,7 @@ def test_framework_leakage() -> None:
     rule = {str(r.metadata.rule_id): r for r in architecture_rules()}[RULE_FRAMEWORK_LEAKAGE]
     result = rule.evaluate(context)
     assert result.status is RuleResultStatus.MATCHED
-    assert result.matches[0].confidence is RuleConfidence.HIGH
+    assert result.matches[0].confidence is MatchEvidenceConfidence.HIGH
 
 
 def test_enterprise_standard_mismatch() -> None:

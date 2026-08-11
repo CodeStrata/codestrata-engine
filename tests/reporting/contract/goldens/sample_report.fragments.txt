@@ -1,6 +1,8 @@
-id="executive-summary"
 id="leadership-verdict"
-id="findings"
+id="engineering-intelligence-summary"
+id="assessment-results"
+id="technology-inventory"
+id="security-intelligence"
 id="priority-actions"
 id="key-takeaways"
 Urgent rec

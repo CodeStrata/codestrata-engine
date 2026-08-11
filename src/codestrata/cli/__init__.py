@@ -81,16 +81,26 @@ app = typer.Typer(
     name="codestrata",
     help=(
         "CodeStrata Engine (Community Edition) — deterministic Engineering "
-        "Assessment and Engineering Intelligence for software repositories.\n\n"
+        "Assessment for software repositories (single-repository). Portfolio "
+        "Engineering Intelligence Reports (EIR) are a separate multi-repository "
+        "capability.\n\n"
         "Common workflows:\n"
         "  codestrata init\n"
         "  codestrata doctor\n"
-        "  codestrata assess --repo . --output reports --no-ai\n"
+        "  codestrata assess --repo .\n"
         "  codestrata open\n\n"
         "Optional AI advisor (your own supported provider):\n"
         "  codestrata ai\n"
         "  codestrata ai doctor\n"
-        "  codestrata assess --repo . --output reports --with-ai\n\n"
+        "  codestrata assess --repo . --with-ai\n\n"
+        "Optional Community telemetry (disabled by default until you choose;\n"
+        "  explicit Yes/No is stored locally):\n"
+        "  codestrata telemetry status|enable|disable\n"
+        "  codestrata assess --repo . --telemetry-allow\n"
+        "  codestrata assess --repo . --telemetry-deny\n\n"
+        "Optional explicit public report publish (not telemetry):\n"
+        "  codestrata report publish --type assessment --confirm-public-publish\n\n"
+        "Artifacts default under .codestrata-artifacts/assessments/<repository-id>/current/\n"
         "Primary workflow: assess (HTML + JSON Engineering Assessment).\n"
         "Legacy/advanced: scan (clone+analyze; prefer assess).\n"
         "Automation: --quiet / --json-summary · exit 0 success · 1 failure · "
@@ -206,7 +216,7 @@ def scan(
 
     Prefer the primary workflow:
 
-        codestrata assess --repo <path-or-url> --output reports --no-ai
+        codestrata assess --repo <path-or-url> --no-ai
 
     ``scan`` requires ``[repository].url`` and writes text/json/html via the
     older analysis reporters.
@@ -237,7 +247,7 @@ def scan(
                     '  url = "https://github.com/YOUR_ORG/YOUR_REPO"\n'
                     '  branch = "main"\n'
                     "For a local checkout, prefer:\n"
-                    "  codestrata assess --repo /path/to/repo --output reports"
+                    "  codestrata assess --repo /path/to/repo --no-ai"
                 ),
             ),
             fg=typer.colors.RED,

@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
 from codestrata.domain.rules.applicability import RuleSuppression
 from codestrata.domain.rules.enums import (
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleResultStatus,
     RuleSeverity,
     RuleSkipReason,
@@ -18,6 +18,7 @@ from codestrata.domain.rules.errors import RuleResultValidationError
 from codestrata.domain.rules.evidence import RuleEvidence, as_evidence_tuple, dedupe_evidence
 from codestrata.domain.rules.identifiers import RuleId, validate_rule_id
 from codestrata.domain.rules.metadata import RuleVersion
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 
 
 class RuleMatch(BaseModel):
@@ -28,7 +29,8 @@ class RuleMatch(BaseModel):
     rule_id: RuleId
     rule_version: RuleVersion
     severity: RuleSeverity
-    confidence: RuleConfidence
+    confidence: MatchEvidenceConfidence
+    rule_confidence: RuleConfidence | None = None
     title: str
     summary: str
     evidence: tuple[RuleEvidence, ...]
@@ -36,6 +38,10 @@ class RuleMatch(BaseModel):
     affected_entities: tuple[str, ...] = ()
     provenance: str = "shared_rule_platform"
     subject_keys: tuple[str, ...] = ()
+    # Epic 5 Slice 5.13 — optional calibrated severity envelope (additive).
+    base_severity: RuleSeverity | None = None
+    calibrated_severity: RuleSeverity | None = None
+    severity_basis: tuple[str, ...] = ()
 
     @field_validator("rule_id", mode="before")
     @classmethod
@@ -87,6 +93,21 @@ class RuleMatch(BaseModel):
                 }
             )
         )
+
+    @field_validator("severity_basis", mode="before")
+    @classmethod
+    def normalize_severity_basis(cls, value: object) -> tuple[str, ...]:
+        if value is None:
+            return ()
+        seen: set[str] = set()
+        out: list[str] = []
+        for item in as_tuple(value):
+            text = require_nonblank(str(item), label="severity_basis").strip()
+            if text in seen:
+                continue
+            seen.add(text)
+            out.append(text)
+        return tuple(out)
 
 
 class RuleDiagnostic(BaseModel):

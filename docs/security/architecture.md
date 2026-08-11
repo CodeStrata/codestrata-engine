@@ -16,9 +16,14 @@
 | Content reader | Normalize relative paths; refuse symlink files; root bound |
 | GitHub clone | Credential-free URL; askpass temp 0700; redacted errors |
 | Config / profiles | Community defaults; effective dump redaction |
-| Reports | Branding; no credential fields; path hygiene |
+| Reports | Branding; no credential fields; path hygiene; customer-safe text projection (`customer_safe_text` / redaction) so PEM headers and secret-shaped values do not reach customer fields |
 | MCP | Localhost; result size caps; mapping redaction; optional artifact paths off |
 | Enterprise KG | Config-gated; omitted from Community export; extension hook preserved |
+
+Customer-facing Finding / Recommendation text uses the Engine customer-safe text
+contract (`codestrata.security.customer_safe_text`). Platform Engineering
+Intelligence ingestion independently rejects unsafe customer fields — Engine
+serialization must satisfy that gate without weakening it.
 
 ## Extension point
 

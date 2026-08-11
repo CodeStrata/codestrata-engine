@@ -9,6 +9,7 @@ from codestrata.domain.roadmap.constants import (
 from codestrata.domain.roadmap.enums import (
     RoadmapConfidence,
     RoadmapEffort,
+    RoadmapInitiativeType,
     RoadmapPhaseName,
     RoadmapPriority,
     RoadmapRisk,
@@ -43,6 +44,7 @@ __all__ = [
     "RoadmapEffort",
     "RoadmapEvidenceReference",
     "RoadmapInitiative",
+    "RoadmapInitiativeType",
     "RoadmapPhaseName",
     "RoadmapPhasePlan",
     "RoadmapPriority",

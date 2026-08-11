@@ -44,7 +44,7 @@ from codestrata.domain.rules.context import (
     RuleExecutionContext,
     RuleExecutionPolicy,
 )
-from codestrata.domain.rules.enums import RuleCategory, RuleConfidence, RuleResultStatus
+from codestrata.domain.rules.enums import RuleCategory, MatchEvidenceConfidence, RuleResultStatus
 from codestrata.domain.technical_debt.ids import (
     COMPLEXITY_RULE_IDS,
     PACK_ID,
@@ -299,7 +299,7 @@ def test_deterministic_ordering_and_finding_ids() -> None:
     assert all(item.category is FindingCategory.TECHNICAL_DEBT for item in findings_one)
     assert all(item.metadata.get("pack_id") == PACK_ID for item in findings_one)
     assert all(
-        item.metadata.get("confidence") == RuleConfidence.HIGH.value
+        item.metadata.get("confidence") == MatchEvidenceConfidence.HIGH.value
         for item in findings_one
     )
     assert all(item.metadata.get("remediation") for item in findings_one)

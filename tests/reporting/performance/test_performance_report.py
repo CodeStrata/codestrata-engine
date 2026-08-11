@@ -264,7 +264,7 @@ def test_json_and_html_integration_and_determinism() -> None:
     view = build_html_report_view_model(left_input)
     assert view.performance_report is not None
     html = HtmlReportRenderer().render(view)
-    assert 'id="performance-assessment"' in html
+    assert 'id="additional-domain-packs"' in html
     assert "Performance Assessment" in html
     assert "Overall Performance Posture" in html
     assert "Rule Execution Summary" in html
@@ -274,7 +274,7 @@ def test_json_and_html_integration_and_determinism() -> None:
 
     hidden = build_html_report_view_model(_empty_report_input(performance_report=None))
     hidden_html = HtmlReportRenderer().render(hidden)
-    assert 'id="performance-assessment"' not in hidden_html
+    assert "Performance Assessment" not in hidden_html
 
 
 def test_adapter_failure_isolation() -> None:

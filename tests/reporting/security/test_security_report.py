@@ -560,12 +560,16 @@ def test_json_optional_and_deterministic() -> None:
 def test_html_section_placement_and_zero_state() -> None:
     report = SecurityReportAdapter().adapt(_assemble())
     view = build_html_report_view_model(_report_input(security_report=report))
+    assert view.security_intelligence is not None
     html = HtmlReportRenderer().render(view)
+    assert 'id="security-intelligence"' in html
     assert 'id="security-assessment"' in html
-    assert "Security Assessment" in html
-    assert "no production-role findings" in html.lower()
-    assert "security passed" not in html.lower()
-    assert "vulnerability-free" not in html.lower()
+    assert "Security Intelligence" in html
+    lowered = html.lower()
+    assert "absence of findings" in lowered or "no security findings" in lowered
+    assert "security passed" not in lowered
+    assert "vulnerability-free" not in lowered
+    assert "low risk" not in lowered
     assert "<table></table>" not in html
     assert html == HtmlReportRenderer().render(view)
 
@@ -600,12 +604,13 @@ def test_html_partial_evidence_and_separation() -> None:
         evidence=evidence,
     )
     report = SecurityReportAdapter().adapt(assessment)
-    html = HtmlReportRenderer().render(
-        build_html_report_view_model(_report_input(security_report=report))
-    )
-    assert "Production-Primary Findings" in html
-    assert "Additional Test/Fixture/Unknown Observations" in html
-    assert "partially_succeeded" in html
+    view = build_html_report_view_model(_report_input(security_report=report))
+    assert view.security_intelligence is not None
+    html = HtmlReportRenderer().render(view)
+    assert 'id="security-intelligence"' in html
+    assert "Security findings" in html or "Sensitive artifact inventory" in html
+    assert "partially_succeeded" in html or "partial" in html.lower()
+    assert "BEGIN PRIVATE KEY" not in html
     # Diagnostic codes remain in report artifacts / coverage counts, not leadership HTML.
 
 

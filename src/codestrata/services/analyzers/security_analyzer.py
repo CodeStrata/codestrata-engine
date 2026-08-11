@@ -18,6 +18,13 @@ from codestrata.models import (
     Technology,
 )
 from codestrata.models.normalized_facts import SecurityFacts
+from codestrata.security.customer_safe_text import PRIVATE_KEY_FINDING_EVIDENCE
+
+
+def _private_key_customer_evidence() -> str:
+    """Customer-safe evidence text for SEC002 (never embed PEM headers)."""
+
+    return PRIVATE_KEY_FINDING_EVIDENCE
 
 
 class SecurityAnalyzer:
@@ -328,13 +335,15 @@ class SecurityAnalyzer:
 
         for marker in self._PRIVATE_KEY_MARKERS:
             if marker in content:
+                # Never embed PEM header text in customer-facing description/
+                # evidence. Use categorical wording; raw material stays redacted.
                 return [
                     self._finding(
                         rule_id="SEC002",
                         title="Private key material detected",
                         severity=Severity.CRITICAL,
                         relative_path=relative_path,
-                        evidence=marker,
+                        evidence=_private_key_customer_evidence(),
                         metadata={
                             "secret_type": "private-key",
                         },
@@ -469,16 +478,34 @@ class SecurityAnalyzer:
         evidence: str,
         metadata: dict[str, object],
     ) -> Finding:
-        """Create a security finding."""
+        """Create a security finding with repository context classification."""
 
-        description = f"{title} in {relative_path}: {evidence}"
+        from codestrata.application.security.context import (
+            adjust_phase1_severity,
+            classify_security_context,
+            contextual_summary_suffix,
+        )
+
+        decision = classify_security_context(
+            path=relative_path,
+            value=str(evidence),
+            redacted_preview=str(evidence),
+        )
+        adjusted = adjust_phase1_severity(severity, decision)
+        # Preserve critical production private-key / known-secret severity.
+        if decision.context.value == "production" and severity is Severity.CRITICAL:
+            adjusted = Severity.CRITICAL
+        description = (
+            f"{title} in {relative_path}: {evidence}"
+            f"{contextual_summary_suffix(decision)}"
+        )
 
         return Finding(
             rule_id=rule_id,
             title=title,
             description=description,
             category=FindingCategory.SECURITY,
-            severity=severity,
+            severity=adjusted,
             source=FindingSource.STATIC_ANALYSIS,
             evidence=[
                 Evidence(
@@ -490,6 +517,9 @@ class SecurityAnalyzer:
             affected_technologies=[],
             metadata={
                 "path": relative_path,
+                "security_context": decision.context.value,
+                "security_context_reasons": ",".join(decision.reasons),
+                "classification": decision.path_role or "unknown",
                 **metadata,
             },
         )

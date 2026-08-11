@@ -1,19 +1,24 @@
-"""Deterministic recommendation prioritization (Phase 7.1.3).
+"""Deterministic recommendation prioritization (Phase 7.1.3 / Slice 5.14).
 
 Presentation-layer scoring over the customer recommendation universe.
-No AI. Uses only existing recommendation and finding metadata.
+When a calibrated ``priority_assessment`` is present (0–100), that score and
+bucket policy are authoritative. Legacy composite scoring remains only as a
+compatibility fallback for payloads without assessment.
 """
 
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
+from codestrata.application.recommendations.priority_calibration import (
+    presentation_bucket_for_calibrated_score,
+)
 from codestrata.reporting.customer_universe import (
     CustomerFinding,
     CustomerRecommendation,
 )
 
-# Fixed weights — documented for explainability; keep stable across releases.
+# Legacy composite weights — used only when priority_assessment is absent.
 _SEVERITY_POINTS = {
     "critical": 100,
     "high": 80,
@@ -35,7 +40,6 @@ _RISK_POINTS = {
     "low": 5,
     "unknown": 8,
 }
-# Smaller effort scores higher so comparable risks prefer quicker wins.
 _EFFORT_POINTS = {
     "small": 15,
     "xs": 15,
@@ -60,7 +64,7 @@ _CATEGORY_POINTS = {
     "ai_readiness": 2,
 }
 
-# Bucket thresholds on the composite score.
+# Legacy bucket thresholds on the composite score.
 _IMMEDIATE_MIN = 140.0
 _NEAR_TERM_MIN = 80.0
 
@@ -80,7 +84,19 @@ def compute_priority_score(
     *,
     finding_severity_by_id: Mapping[str, str],
 ) -> float:
-    """Compute a deterministic priority score for one recommendation."""
+    """Compute a deterministic priority score for one recommendation.
+
+    Prefers calibrated ``priority_assessment.score`` (0–100). Falls back to the
+    legacy composite only when assessment is unavailable.
+    """
+
+    assessment = getattr(recommendation, "priority_assessment", None)
+    if assessment is not None:
+        score = getattr(assessment, "score", None)
+        if score is None and isinstance(assessment, Mapping):
+            score = assessment.get("score")
+        if score is not None:
+            return float(score)
 
     severities = [
         finding_severity_by_id[fid]
@@ -90,7 +106,6 @@ def compute_priority_score(
     if severities:
         severity_points = max(_SEVERITY_POINTS.get(_norm(s), 0) for s in severities)
     else:
-        # Ungrounded recommendations stay low so they sort after finding-backed ones.
         severity_points = 0
 
     priority_points = _PRIORITY_POINTS.get(_norm(recommendation.priority), 5)
@@ -98,10 +113,9 @@ def compute_priority_score(
     effort_points = _EFFORT_POINTS.get(_norm(recommendation.effort), 8)
     category_points = _CATEGORY_POINTS.get(_norm(recommendation.category), 1)
 
-    # Dependencies delay work: each listed dependency soft-penalizes ordering.
     dependency_penalty = min(20, 5 * len(recommendation.dependencies))
-
-    # Breadth: more related findings → slightly higher (capped).
+    # Breadth uses distinct related Finding IDs only as a soft legacy signal.
+    # Calibrated path does not use Finding count as an unbounded escalator.
     breadth_points = min(10, 2 * len(recommendation.related_finding_ids))
 
     return float(
@@ -116,8 +130,13 @@ def compute_priority_score(
 
 
 def presentation_bucket_for_score(score: float) -> str:
-    """Map a score onto Immediate / Near Term / Future buckets."""
+    """Map a score onto Immediate / Near Term / Future buckets.
 
+    Scores in 0–100 use calibrated bands; legacy composite scores use 140/80.
+    """
+
+    if 0.0 <= score <= 100.0:
+        return presentation_bucket_for_calibrated_score(score)
     if score >= _IMMEDIATE_MIN:
         return BUCKET_IMMEDIATE
     if score >= _NEAR_TERM_MIN:
@@ -139,6 +158,19 @@ def prioritize_customer_recommendations(
             finding_severity_by_id=severity_by_id,
         )
         bucket = presentation_bucket_for_score(score)
+        # Keep priority projection aligned with calibrated assessment when present.
+        priority = item.priority
+        assessment = getattr(item, "priority_assessment", None)
+        if assessment is not None:
+            assessed_priority = getattr(assessment, "priority", None)
+            if assessed_priority is None and isinstance(assessment, Mapping):
+                assessed_priority = assessment.get("priority")
+            if assessed_priority is not None:
+                from codestrata.reporting.contract.enums import normalize_priority
+
+                priority = normalize_priority(
+                    getattr(assessed_priority, "value", assessed_priority)
+                )
         scored.append(
             CustomerRecommendation(
                 id=item.id,
@@ -146,7 +178,7 @@ def prioritize_customer_recommendations(
                 title=item.title,
                 description=item.description,
                 rationale=item.rationale,
-                priority=item.priority,
+                priority=priority,
                 category=item.category,
                 effort=item.effort,
                 risk=item.risk,
@@ -157,6 +189,14 @@ def prioritize_customer_recommendations(
                 phase1=item.phase1,
                 priority_score=score,
                 presentation_bucket=bucket,
+                supporting_finding_ids=item.supporting_finding_ids,
+                primary_finding_id=item.primary_finding_id,
+                recommendation_type=item.recommendation_type,
+                evidence_completeness=item.evidence_completeness,
+                limitations=item.limitations,
+                recommendation_confidence=item.recommendation_confidence,
+                priority_assessment=item.priority_assessment,
+                provider_id=item.provider_id,
             )
         )
 

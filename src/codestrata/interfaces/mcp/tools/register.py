@@ -20,6 +20,9 @@ from codestrata.interfaces.mcp.tools.architecture_conclusions import (
 from codestrata.interfaces.mcp.tools.architecture_report import (
     register_architecture_report_tools,
 )
+from codestrata.interfaces.mcp.tools.assessment_report import (
+    register_assessment_report_tools,
+)
 from codestrata.interfaces.mcp.tools.artifacts import register_artifact_tools
 from codestrata.interfaces.mcp.tools.assessments import register_assessment_tools
 from codestrata.interfaces.mcp.tools.components import register_component_tools
@@ -89,6 +92,7 @@ def register_all_tools(
     )
     register_architecture_assessment_tools(server)
     register_architecture_report_tools(server)
+    register_assessment_report_tools(server)
 
     for register in load_mcp_extensions():
         register(

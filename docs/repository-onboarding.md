@@ -8,7 +8,6 @@ CodeStrata knowledge base by **orchestrating existing services**.
 ```bash
 codestrata onboard <repository> \
   --config codestrata.toml \
-  --output reports \
   [--force-reindex] \
   [--skip-report] \
   [--skip-index] \

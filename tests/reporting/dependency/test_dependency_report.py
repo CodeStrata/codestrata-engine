@@ -629,14 +629,16 @@ def test_html_placement_anchor_and_identity(tmp_path: Path) -> None:
         generated_at_utc=datetime.now(UTC),
         dependency_report=dep_report,
     )
-    html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
+    document = build_html_report_view_model(report_input)
+    assert document.dependency_intelligence is not None
+    html = HtmlReportRenderer().render(document)
+    assert 'id="dependency-intelligence"' in html
     assert 'id="dependency-assessment"' in html
-    assert "Dependency Assessment" in html
-    assert "Executive Summary" in html
-    assert "Production Dependency Hygiene" in html
-    assert "Test and Fixture Observations" in html
-    assert _NONE_DETECTED in html
-    assert "do not contribute to the production-primary view" in html
+    assert "Dependency Intelligence" in html
+    assert "Dependency overview" in html
+    assert "Limitations" in html
+    assert "Confidence" in html
+    assert "declaration hygiene" in html.lower() or "registry lookups" in html.lower()
     assert "/Users/" not in html
     assert all(claim not in html.lower() for claim in ("secure dependencies", "low risk"))
 
@@ -650,6 +652,8 @@ def test_html_placement_anchor_and_identity(tmp_path: Path) -> None:
     )
     html_omitted = HtmlReportRenderer().render(build_html_report_view_model(omitted))
     assert 'id="dependency-assessment"' not in html_omitted
+    assert "Dependency overview" not in html_omitted
+    assert "registry lookups" not in html_omitted.lower()
 
 
 def test_adapter_failure_isolation_pattern() -> None:

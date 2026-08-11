@@ -115,11 +115,26 @@ def test_responsive_layouts_no_overflow(tmp_path: Path) -> None:
         if cols >= 50:
             assert "Assess + AI" in out
             assert "codestrata assess --repo . --with-ai" in out
-            assert "AI Setup" in out
-            assert "codestrata ai" in out
+            assert "codestrata assess --repo ." in out
+            assert "Open Report" in out
+            assert "Telemetry" in out
+            assert "Disabled by default" in out
+            assert "--telemetry-allow" in out
+            assert "--telemetry-deny" in out
+            assert "Share Report" in out
+            assert "Reports are local by default" in out
+            assert "report publish" in out
+            assert "reports.codestrata.ai/r/<opaque-id>" in out or "r/<opaque-id>" in out
+            assert PRODUCT_CATEGORY == "Engineering Assessment"
+            assert "Engineering Assessment" in out
+            assert "Engineering Intelligence" not in out
         else:
             assert "assess --repo . --with-ai" in out
-            assert "codestrata ai" in out
+            assert "assess --repo ." in out
+            assert "Telemetry" in out
+            assert "Disabled by default" in out
+            assert "--telemetry-allow" in out or "telemetry-allow" in out
+            assert "Engineering Intelligence" not in out
         i_brand = out.index(BRAND_STATEMENT)
         i_cat = out.index(PRODUCT_CATEGORY)
         i_ed = out.index(EDITION)
@@ -182,9 +197,16 @@ def test_start_here_context_aware(tmp_path: Path) -> None:
     ctx = detect_start_here_context(cwd=tmp_path)
     content = start_here_content(ctx, columns=100)
     assert "Engineering Assessment" in content.headline
-    assert "codestrata assess" in content.command
+    assert content.command == "codestrata assess --repo ."
 
-    report = tmp_path / "reports" / "run" / "report.html"
+    report = (
+        tmp_path
+        / ".codestrata-artifacts"
+        / "assessments"
+        / "demo"
+        / "current"
+        / "assessment.html"
+    )
     report.parent.mkdir(parents=True)
     report.write_text("<html></html>", encoding="utf-8")
     ctx = detect_start_here_context(cwd=tmp_path)
@@ -283,4 +305,49 @@ def test_no_color_monochrome_readable(tmp_path: Path, monkeypatch) -> None:
     out = _render(100, cwd=tmp_path)
     assert BRAND_STATEMENT in out
     assert "Start Here" in out
+    assert "Telemetry" in out
+    assert "Share Report" in out
+    assert "Engine " in out
     assert "\x1b[" not in out
+
+
+def test_landing_palette_is_ansi_high_contrast() -> None:
+    from dataclasses import asdict
+
+    from codestrata.cli.landing import LANDING_PALETTE, _FORBIDDEN_CLI_HEX
+
+    values = list(asdict(LANDING_PALETTE).values())
+    blob = " ".join(values)
+    for hex_color in _FORBIDDEN_CLI_HEX:
+        assert hex_color.lower() not in blob.lower()
+    # Named ANSI styles only (no truecolor RGB / hex).
+    assert "#" not in blob
+    assert "rgb(" not in blob.lower()
+    assert "bright_yellow" in LANDING_PALETTE.section_heading
+    assert "bright_cyan" in LANDING_PALETTE.command
+    assert "bright_white" in LANDING_PALETTE.explanatory
+    assert "dim" not in LANDING_PALETTE.explanatory.split()
+
+
+def test_colored_landing_avoids_dark_teal_truecolor(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("CODESTRATA_FORCE_COLOR", "1")
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setattr("codestrata.cli.landing._color_allowed", lambda: True)
+    out = _render(100, cwd=tmp_path, force_mono=False, no_color=False)
+    # Truecolor / hex teal must not appear in ANSI stream.
+    assert "0f5d54" not in out.lower()
+    assert "16756a" not in out.lower()
+    assert "38;2;" not in out  # no RGB truecolor from welcome palette
+    assert BRAND_STATEMENT in _ANSI_RE.sub("", out)
+    assert "Engineering Assessment" in _ANSI_RE.sub("", out)
+    assert "Disabled by default" in _ANSI_RE.sub("", out)
+
+
+def test_landing_does_not_force_background(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("CODESTRATA_FORCE_COLOR", "1")
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setattr("codestrata.cli.landing._color_allowed", lambda: True)
+    out = _render(100, cwd=tmp_path, force_mono=False, no_color=False)
+    # No background / reverse fills.
+    assert "48;" not in out  # ANSI background
+    assert "7m" not in out or "\x1b[7m" not in out

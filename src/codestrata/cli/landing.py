@@ -1,8 +1,7 @@
 """CodeStrata branded CLI landing page (presentation only).
 
 Shown for bare ``codestrata`` and ``codestrata welcome`` in interactive
-terminals. Never changes assessment behavior, schemas, or AI. May prompt once
-for optional anonymous telemetry (default No).
+terminals. Never changes assessment behavior, schemas, or AI.
 """
 
 from __future__ import annotations
@@ -27,20 +26,53 @@ from codestrata.cli.ux import (
     onboarding_completed,
 )
 from codestrata.package_metadata import get_package_version
-from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 
-# Design-system amber (governance/assets/DESIGN-SYSTEM.md).
-# Foreground colors only — never bgcolor / reverse / screen fills.
-AMBER = "#d98a3d"
-AMBER_BRIGHT = "#eca860"
-AMBER_DIM = "#b06a24"  # --amber-deep; panel borders
-BRIGHT_WHITE = "bold bright_white"
-WHITE = "white"
-DIM = "dim"
-CYAN = "cyan"
+# ---------------------------------------------------------------------------
+# Terminal-compatible semantic palette (ANSI named styles only — never RGB).
+#
+# Web design-system teal must not be used as CLI chrome (low contrast on
+# green/dark/saturated terminals). Foreground ANSI styles only — never
+# bgcolor / reverse / screen fills.
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True, slots=True)
+class LandingPalette:
+    """Semantic CLI welcome styles for high contrast across common terminals."""
+
+    brand_logo: str = "bold bright_cyan"
+    brand_statement: str = "bold bright_white"
+    product_category: str = "bold bright_white"
+    edition: str = "bright_white"
+    section_heading: str = "bold bright_yellow"
+    command_label: str = "bold bright_yellow"
+    command: str = "bold bright_cyan"
+    primary_text: str = "bright_white"
+    explanatory: str = "bright_white"
+    footer: str = "bright_white"
+    panel_border: str = "bright_cyan"
+    panel_title: str = "bold bright_yellow"
+
+
+LANDING_PALETTE = LandingPalette()
+
+# Public aliases (historical importers). Map to high-contrast ANSI — not web teal.
+ACCENT = LANDING_PALETTE.section_heading
+ACCENT_BRIGHT = LANDING_PALETTE.brand_logo
+ACCENT_DIM = LANDING_PALETTE.panel_border
+AMBER = ACCENT
+AMBER_BRIGHT = ACCENT_BRIGHT
+AMBER_DIM = ACCENT_DIM
+BRIGHT_WHITE = LANDING_PALETTE.brand_statement
+WHITE = LANDING_PALETTE.primary_text
+DIM = LANDING_PALETTE.explanatory  # no longer Rich "dim" — too low-contrast
+CYAN = LANDING_PALETTE.command
+
+# Forbidden in CLI welcome styling (web design-system teal, digits only).
+_FORBIDDEN_CLI_HEX = frozenset({"0f5d54", "16756a"})
 
 BRAND_STATEMENT = "CODE. UNDERSTOOD."
-PRODUCT_CATEGORY = "Engineering Intelligence"
+PRODUCT_CATEGORY = "Engineering Assessment"
 EDITION = "Community Edition"
 
 
@@ -190,7 +222,7 @@ def detect_start_here_context(
     *,
     cwd: Path | None = None,
     config_name: str = "codestrata.toml",
-    reports_dirname: str = "reports",
+    reports_dirname: str = ".codestrata-artifacts/assessments",
 ) -> StartHereContext:
     """Inspect local files only — never scan repository contents."""
 
@@ -200,7 +232,7 @@ def detect_start_here_context(
     has_report = False
     if reports_dir.is_dir():
         try:
-            has_report = any(reports_dir.rglob("report.html"))
+            has_report = any(reports_dir.rglob("assessment.html"))
         except OSError:
             has_report = False
     return StartHereContext(
@@ -231,7 +263,7 @@ def start_here_content(
         assess_cmd = "codestrata assess --repo ."
         headline = "Generate your first assessment."
     else:
-        assess_cmd = "codestrata assess --repo . --output reports --no-ai"
+        assess_cmd = "codestrata assess --repo ."
         headline = "Generate your first Engineering Assessment."
     return StartHereContent(
         headline=headline,
@@ -329,24 +361,28 @@ def render_landing(
         art = _WORDMARK_COMPACT
 
     use_color = not active.no_color and _color_allowed() and not force_mono
+    palette = LANDING_PALETTE
 
-    wordmark = _center_styled(art, AMBER, width, enabled=use_color)
-    brand = _center_styled(BRAND_STATEMENT, BRIGHT_WHITE, width, enabled=use_color)
-    category = _center_styled(PRODUCT_CATEGORY, WHITE, width, enabled=use_color)
-    edition = _center_styled(EDITION, DIM, width, enabled=use_color)
+    wordmark = _center_styled(art, palette.brand_logo, width, enabled=use_color)
+    brand = _center_styled(BRAND_STATEMENT, palette.brand_statement, width, enabled=use_color)
+    category = _center_styled(PRODUCT_CATEGORY, palette.product_category, width, enabled=use_color)
+    edition = _center_styled(EDITION, palette.edition, width, enabled=use_color)
 
     start = start_here_content(
         detect_start_here_context(cwd=cwd),
         columns=width,
     )
     start_body = Text(justify="center")
-    start_body.append(start.headline)
+    start_body.append(
+        start.headline,
+        style=palette.primary_text if use_color else "",
+    )
     start_body.append("\n")
     start_body.append(
         start.command,
-        style=CYAN if use_color else "bold",
+        style=palette.command if use_color else "bold",
     )
-    # Panel: focal point — slightly wider horizontal padding; dim amber border.
+    # Panel: focal point — transparent content area (preserve terminal background).
     h_pad = 2 if width < 80 else 3
     needed = max(
         len(start.command) + (h_pad * 2) + 2,
@@ -356,43 +392,91 @@ def render_landing(
     panel_w = max(24, min(needed, width - 2, 72 if width >= 80 else width - 2))
     start_panel = Panel(
         Align.center(start_body),
-        title=_fg("Start Here", AMBER, enabled=use_color),
-        border_style=AMBER_DIM if use_color else "dim",
+        title=_fg("Start Here", palette.panel_title, enabled=use_color),
+        border_style=palette.panel_border if use_color else "bold",
         width=panel_w,
         padding=(1, h_pad),
-        # Transparent content area — preserve the user's terminal background.
         style="",
     )
 
     # Next Steps: fixed-width right-aligned labels for a flush command column.
-    # Longest labels: "Initialize", "Assess + AI", "Open Report" (11).
     label_width = 5 if width < 50 else 11
     steps = Table.grid(padding=(0, 2 if width >= 60 else 1), expand=False)
     steps.add_column(
         justify="right",
         width=label_width,
-        style=AMBER if use_color else "bold",
+        style=palette.command_label if use_color else "bold",
         no_wrap=True,
     )
-    steps.add_column(style=CYAN if use_color else "bold", no_wrap=True)
+    steps.add_column(style=palette.command if use_color else "bold", no_wrap=True)
     if width < 50:
-        # Abbreviated labels/commands so 40-col terminals do not overflow.
         steps.add_row("Init", "codestrata init")
         steps.add_row("Assess", "assess --repo .")
         steps.add_row("AI", "assess --repo . --with-ai")
         steps.add_row("Open", "codestrata open")
-        steps.add_row("Setup", "codestrata ai")
     else:
         steps.add_row("Initialize", "codestrata init")
         steps.add_row("Assess", "codestrata assess --repo .")
         steps.add_row("Assess + AI", "codestrata assess --repo . --with-ai")
         steps.add_row("Open Report", "codestrata open")
-        steps.add_row("AI Setup", "codestrata ai")
+
+    # Telemetry discovery — disabled by default; not required for assessment.
+    telemetry = Table.grid(padding=(0, 2 if width >= 60 else 1), expand=False)
+    telemetry.add_column(
+        justify="right",
+        width=label_width,
+        style=palette.command_label if use_color else "bold",
+        no_wrap=True,
+    )
+    telemetry.add_column(
+        style=palette.explanatory if use_color else "",
+        no_wrap=True,
+    )
+    if width < 50:
+        telemetry.add_row("Status", "Disabled by default")
+        telemetry.add_row("Opt in", "assess --telemetry-allow")
+        telemetry.add_row("Deny", "assess --telemetry-deny")
+        telemetry.add_row("Docs", "docs…/reference/telemetry")
+    elif width < 80:
+        telemetry.add_row("Status", "Disabled by default")
+        telemetry.add_row("Opt in", "assess --repo . --telemetry-allow")
+        telemetry.add_row("Deny", "assess --repo . --telemetry-deny")
+        telemetry.add_row("Docs", "docs.codestrata.ai/reference/telemetry")
+    else:
+        telemetry.add_row("Status", "Disabled by default")
+        telemetry.add_row("Opt in", "codestrata assess --repo . --telemetry-allow")
+        telemetry.add_row("Deny", "codestrata assess --repo . --telemetry-deny")
+        telemetry.add_row("Docs", "docs.codestrata.ai/reference/telemetry")
+
+    # Share Report — local by default; publish is a separate explicit action.
+    share = Table.grid(padding=(0, 2 if width >= 60 else 1), expand=False)
+    share.add_column(
+        justify="right",
+        width=label_width,
+        style=palette.command_label if use_color else "bold",
+        no_wrap=True,
+    )
+    share.add_column(
+        style=palette.explanatory if use_color else "",
+        no_wrap=True,
+    )
+    if width < 50:
+        share_note = "Reports are local by default."
+        share.add_row("Publish", "report publish --help")
+        share.add_row("URL", "reports…/r/<opaque-id>")
+    elif width < 80:
+        share_note = "Reports are local by default."
+        share.add_row("Publish", "codestrata report publish")
+        share.add_row("URL", "reports.codestrata.ai/r/<opaque-id>")
+    else:
+        share_note = "Reports are local by default."
+        share.add_row("Publish", "codestrata report publish")
+        share.add_row("Public URL", "https://reports.codestrata.ai/r/<opaque-id>")
 
     version = get_package_version()
-    meta = f"Engine {version} • {EDITION} • Schema {ASSESSMENT_JSON_SCHEMA_VERSION}"
+    meta = f"Engine {version} • {EDITION}"
     if len(meta) > width:
-        meta = f"Engine {version} · Schema {ASSESSMENT_JSON_SCHEMA_VERSION}"
+        meta = f"Engine {version}"
     docs_host = DOCS_HOME.replace("https://", "").replace("http://", "")
     site_host = WEBSITE.replace("https://", "").replace("http://", "")
     links = f"{docs_host} • {site_host} • codestrata --help"
@@ -406,10 +490,11 @@ def render_landing(
         welcome = (
             "Welcome to CodeStrata Community Edition." if width >= 42 else "Welcome to CodeStrata."
         )
-        blocks.append(_center_styled(welcome, BRIGHT_WHITE, width, enabled=use_color))
+        blocks.append(
+            _center_styled(welcome, palette.brand_statement, width, enabled=use_color)
+        )
         blocks.append(Text(""))
 
-    # Compact vertical rhythm: wordmark → hierarchy → panel → steps → footer.
     blocks.extend(
         [
             wordmark,
@@ -420,11 +505,18 @@ def render_landing(
             Text(""),
             Align.center(start_panel, width=width),
             Text(""),
-            _center_styled("Next Steps", AMBER, width, enabled=use_color),
+            _center_styled("Next Steps", palette.section_heading, width, enabled=use_color),
             Align.center(steps, width=width),
             Text(""),
-            _center_styled(meta, DIM, width, enabled=use_color),
-            _center_styled(links, DIM, width, enabled=use_color),
+            _center_styled("Telemetry", palette.section_heading, width, enabled=use_color),
+            Align.center(telemetry, width=width),
+            Text(""),
+            _center_styled("Share Report", palette.section_heading, width, enabled=use_color),
+            _center_styled(share_note, palette.explanatory, width, enabled=use_color),
+            Align.center(share, width=width),
+            Text(""),
+            _center_styled(meta, palette.footer, width, enabled=use_color),
+            _center_styled(links, palette.footer, width, enabled=use_color),
         ]
     )
 
@@ -440,7 +532,16 @@ def render_automation_fallback() -> None:
 
     version = get_package_version()
     sys.stdout.write(
-        f"CodeStrata Community Edition {version}\nRun `codestrata --help` for commands.\n"
+        f"CodeStrata Community Edition {version}\n"
+        "Engineering Assessment (single repository).\n"
+        "Assess locally: codestrata assess --repo .\n"
+        "Telemetry: disabled by default; "
+        "codestrata assess --repo . --telemetry-allow\n"
+        "Reports are local by default; "
+        "codestrata report publish --help\n"
+        "Public URL shape: https://reports.codestrata.ai/r/<opaque-id>\n"
+        "Docs: https://docs.codestrata.ai\n"
+        "Run `codestrata --help` for commands.\n"
     )
 
 
@@ -481,10 +582,14 @@ def show_landing_or_help(
 
 
 __all__ = [
+    "ACCENT",
+    "ACCENT_BRIGHT",
     "AMBER",
     "AMBER_BRIGHT",
     "BRAND_STATEMENT",
     "EDITION",
+    "LANDING_PALETTE",
+    "LandingPalette",
     "PRODUCT_CATEGORY",
     "StartHereContent",
     "StartHereContext",

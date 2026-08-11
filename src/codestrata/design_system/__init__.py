@@ -26,12 +26,23 @@ from codestrata.design_system.terminology import (
     TERM_REPOSITORY_INTELLIGENCE,
     TERM_STRATEGIC_ROADMAP,
 )
-from codestrata.design_system.tokens import DESIGN_TOKENS_CSS, DESIGN_TOKENS_VERSION
+from codestrata.design_system.tokens import (
+    BRAND_VALUES,
+    DESIGN_SYSTEM_REF,
+    DESIGN_SYSTEM_VERSION,
+    DESIGN_TOKENS_CSS,
+    DESIGN_TOKENS_VERSION,
+    LEGACY_BRAND_HEX,
+)
 
 __all__ = [
+    "BRAND_VALUES",
     "CANONICAL_TERMS",
+    "DESIGN_SYSTEM_REF",
+    "DESIGN_SYSTEM_VERSION",
     "DESIGN_TOKENS_CSS",
     "DESIGN_TOKENS_VERSION",
+    "LEGACY_BRAND_HEX",
     "TERM_ASSESSMENT",
     "TERM_CITATION",
     "TERM_CONFIDENCE",

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from codestrata.application.rules.confidence_catalog import confidence_for_rule
 from codestrata.application.rules.technical_debt.recommendations import recommendation_for
 from codestrata.application.technical_debt.evidence.complexity_projection import (
     complexity_evidence_for_debt,
@@ -17,7 +18,7 @@ from codestrata.domain.evidence.language.complexity.models import (
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
     RuleCategory,
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -25,6 +26,7 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch
 from codestrata.domain.technical_debt.ids import PACK_ID, PACK_VERSION
 
@@ -52,6 +54,7 @@ def make_metadata(
         description=description,
         category=RuleCategory.TECHNICAL_DEBT,
         default_severity=severity,
+        confidence=confidence_for_rule(rule_id),
         supported_languages=("java", "python", "php", "csharp"),
         tags=(
             "technical_debt",
@@ -80,10 +83,11 @@ def match(
     title: str,
     summary: str,
     severity: RuleSeverity,
-    confidence: RuleConfidence,
+    confidence: MatchEvidenceConfidence,
     evidence: tuple[RuleEvidence, ...],
     subject_keys: tuple[str, ...],
     remediation: str | None = None,
+    rule_confidence: RuleConfidence | None = None,
 ) -> RuleMatch:
     rec = recommendation_for(rule_id)
     return RuleMatch(
@@ -91,6 +95,7 @@ def match(
         rule_version=RuleVersion.parse("1.0.0"),
         severity=severity,
         confidence=confidence,
+        rule_confidence=rule_confidence or confidence_for_rule(rule_id),
         title=title,
         summary=summary,
         evidence=evidence,
@@ -109,6 +114,20 @@ def exceeds_threshold(metric: IntMetric, *, threshold: int) -> bool:
     """True only when the metric is available and strictly greater than threshold."""
 
     return metric_available(metric) and int(metric.value or 0) > threshold
+
+
+def is_production_complexity_subject(classification: object) -> bool:
+    """Return True when complexity evidence is production source.
+
+    Test/fixture/generated/vendor/example/documentation subjects must not
+    inflate production-facing Technical Debt findings.
+    """
+
+    from codestrata.domain.evidence.language.capabilities import SourceClassification
+
+    if isinstance(classification, SourceClassification):
+        return classification is SourceClassification.SOURCE
+    return str(classification).strip().lower() in {"source", "production"}
 
 
 SEVERITY_HIGH_MULTIPLIER = 2

@@ -96,12 +96,34 @@ def map_source_role(
     classification: str | SourceClassification | None,
     *,
     path: str | None = None,
+    security_context: str | None = None,
 ) -> SecuritySourceRole:
     """Map evidence classification / path heuristics to inventory source roles.
 
     Unknown-role findings are never treated as production.
     Test and fixture paths share the ``test`` inventory role.
+    Non-actionable security contexts (CI expressions, schema metadata, mocks)
+    map to ``test`` or ``unknown`` so production-primary reports stay clean.
     """
+
+    context = (security_context or "").strip().lower()
+    if context in {
+        "test",
+        "test_fixture",
+        "mock_credential",
+    }:
+        return SecuritySourceRole.TEST
+    if context in {
+        "documentation",
+        "sample",
+        "generated",
+        "dependency_metadata",
+        "build_artifact",
+        "configuration_schema",
+        "ci_expression",
+        "unknown",
+    }:
+        return SecuritySourceRole.UNKNOWN
 
     if isinstance(classification, SourceClassification):
         raw = classification.value
@@ -139,7 +161,12 @@ def enrich_finding_reference(finding: Finding) -> SecurityFindingReference:
     if location:
         location = str(location).replace("\\", "/")
     classification = finding.metadata.get("classification")
-    source_role = map_source_role(classification, path=path)
+    security_context = finding.metadata.get("security_context")
+    source_role = map_source_role(
+        classification,
+        path=path,
+        security_context=str(security_context) if security_context else None,
+    )
     ids: list[str] = []
     meta_ids = finding.metadata.get("participating_evidence_ids", "")
     if meta_ids:

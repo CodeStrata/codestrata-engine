@@ -256,3 +256,66 @@ def test_composite_detector_combines_supported_ecosystems(
     assert "JavaScript" in technology_names
     assert "PHP" in technology_names
     assert "Python" in technology_names
+
+
+def test_javascript_detector_reads_engines_node_version(tmp_path: Path) -> None:
+    (tmp_path / "package.json").write_text(
+        json.dumps(
+            {
+                "engines": {"node": ">=18"},
+                "dependencies": {"express": "^4.21.0"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "app.js").write_text("console.log('x');\n", encoding="utf-8")
+    technologies = JavaScriptTechnologyDetector().detect(create_repository(tmp_path))
+    node = next(item for item in technologies if item.name == "Node.js")
+    assert node.version == ">=18"
+
+
+def test_python_detector_detects_openai_as_library(tmp_path: Path) -> None:
+    (tmp_path / "requirements.txt").write_text("openai>=1.40.0\n", encoding="utf-8")
+    src = tmp_path / "src"
+    src.mkdir()
+    (src / "openai_agent.py").write_text("import openai\n", encoding="utf-8")
+    technologies = PythonTechnologyDetector().detect(create_repository(tmp_path))
+    openai = next(item for item in technologies if item.name == "OpenAI")
+    assert openai.category.value == "library"
+    assert openai.version == ">=1.40.0"
+
+
+def test_java_detector_extracts_java_and_spring_boot_versions(tmp_path: Path) -> None:
+    java_directory = tmp_path / "src" / "main" / "java"
+    java_directory.mkdir(parents=True)
+    (java_directory / "Application.java").write_text(
+        "public class Application {}",
+        encoding="utf-8",
+    )
+    (tmp_path / "pom.xml").write_text(
+        """
+        <project>
+          <parent>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-parent</artifactId>
+            <version>4.1.0</version>
+          </parent>
+          <properties>
+            <java.version>17</java.version>
+          </properties>
+          <dependencies>
+            <dependency>
+              <artifactId>spring-boot-starter-web</artifactId>
+            </dependency>
+            <dependency>
+              <artifactId>junit-jupiter</artifactId>
+            </dependency>
+          </dependencies>
+        </project>
+        """,
+        encoding="utf-8",
+    )
+    technologies = JavaTechnologyDetector().detect(create_repository(tmp_path))
+    by_name = {item.name: item for item in technologies}
+    assert by_name["Java"].version == "17"
+    assert by_name["Spring Boot"].version == "4.1.0"

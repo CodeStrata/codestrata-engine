@@ -6,7 +6,7 @@ from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
     RuleCategory,
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleSeverity,
     RuleSkipReason,
@@ -14,6 +14,12 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
+from codestrata.domain.rules.rule_confidence import (
+    RuleConfidence,
+    RuleConfidenceBasis,
+    RuleConfidenceCalibrationStatus,
+    RuleConfidenceLevel,
+)
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 
 
@@ -32,6 +38,12 @@ def _meta(
         description=description,
         category=RuleCategory.PLATFORM,
         default_severity=RuleSeverity.LOW,
+        confidence=RuleConfidence(
+            level=RuleConfidenceLevel.LIMITED,
+            basis=(RuleConfidenceBasis.STATIC_PATTERN,),
+            limitations=("Internal fixture rule; not a production confidence assignment.",),
+            calibration_status=RuleConfidenceCalibrationStatus.PROVISIONAL,
+        ),
         supported_languages=languages,
         tags=("fixture", "internal"),
         remediation_summary="Fixture rule — not a production CodeStrata rule",
@@ -59,7 +71,8 @@ class _AlwaysMatchRule:
             rule_id=self.metadata.rule_id,
             rule_version=self.metadata.version,
             severity=self.metadata.default_severity,
-            confidence=RuleConfidence.CERTAIN,
+            confidence=MatchEvidenceConfidence.CERTAIN,
+            rule_confidence=self.metadata.confidence,
             title=self.metadata.title,
             summary="Fixture matched repository",
             evidence=(
@@ -137,7 +150,8 @@ class _MultipleMatchRule:
                     rule_id=self.metadata.rule_id,
                     rule_version=self.metadata.version,
                     severity=self.metadata.default_severity,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
+                    rule_confidence=self.metadata.confidence,
                     title=f"Match {name}",
                     summary=f"Fixture match {name}",
                     evidence=(

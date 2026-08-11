@@ -5,7 +5,7 @@ from __future__ import annotations
 # Envelope versions remain 1.2 (additive top-level ``manifest`` only).
 ASSESSMENT_JSON_SCHEMA_VERSION = "1.2"
 ASSESSMENT_JSON_REPORT_VERSION = "1.2"
-REPORT_HTML_VERSION = "3.0"
+REPORT_HTML_VERSION = "3.1"
 REPORT_CONTRACT_VERSION = "1.0.0"
 
 # Paths excluded from structural determinism comparisons.

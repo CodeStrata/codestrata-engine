@@ -31,3 +31,12 @@ class RecommendationSource(StrEnum):
     """Origin of a Phase 3 recommendation."""
 
     FINDING_RULE = "finding_rule"
+
+
+class RecommendationType(StrEnum):
+    """Lightweight recommendation classification for finding traceability."""
+
+    FINDING_BACKED = "finding_backed"
+    MERGED = "merged"
+    FACT_BASED = "fact_based"
+    LEGACY = "legacy"

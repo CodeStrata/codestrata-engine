@@ -211,6 +211,8 @@ class ModernizationReportInput(BaseModel):
     knowledge_run_id: str | None = None
     # Phase 7.1.1 — smart default assessment activation plan (JSON explainability).
     assessment_activation: dict[str, Any] | None = None
+    # Epic 5 Slice 5.12 — additive Finding correlation ledger (customer-safe).
+    finding_correlations: tuple[dict[str, Any], ...] = ()
 
     @field_validator("generated_at_utc")
     @classmethod

@@ -905,6 +905,14 @@ def _to_finding_view(
     *,
     recommendation_ids: Sequence[str] = (),
 ) -> FindingView:
+    evidence_refs = tuple(
+        item.model_dump(mode="json") if hasattr(item, "model_dump") else dict(item)
+        for item in getattr(finding, "evidence_refs", ()) or ()
+    )
+    completeness = getattr(finding, "evidence_completeness", None)
+    completeness_value = (
+        completeness.value if hasattr(completeness, "value") else str(completeness or "legacy")
+    )
     return FindingView(
         finding_id=finding.id,
         rule_id=finding.rule_id,
@@ -916,6 +924,13 @@ def _to_finding_view(
         evidence=tuple(_to_evidence_view(item) for item in finding.evidence),
         recommendation_ids=tuple(sorted(recommendation_ids)),
         metadata=dict(finding.metadata),
+        evidence_refs=evidence_refs,
+        primary_evidence_id=getattr(finding, "primary_evidence_id", None),
+        synthesized_from_evidence_ids=tuple(
+            getattr(finding, "synthesized_from_evidence_ids", ()) or ()
+        ),
+        evidence_completeness=completeness_value or "legacy",
+        limitations=tuple(getattr(finding, "limitations", ()) or ()),
     )
 
 
@@ -928,6 +943,20 @@ def _roadmap_phase(metadata: Mapping[str, Any]) -> str | None:
 
 
 def _to_recommendation_view(recommendation: Recommendation) -> RecommendationView:
+    supporting = tuple(
+        getattr(recommendation, "supporting_finding_ids", None)
+        or recommendation.related_finding_ids
+        or ()
+    )
+    related = tuple(recommendation.related_finding_ids or supporting)
+    completeness = getattr(recommendation, "evidence_completeness", None)
+    completeness_value = (
+        completeness.value if hasattr(completeness, "value") else str(completeness or "legacy")
+    )
+    rec_type = getattr(recommendation, "recommendation_type", None)
+    rec_type_value = (
+        rec_type.value if hasattr(rec_type, "value") else str(rec_type or "legacy")
+    )
     return RecommendationView(
         recommendation_id=recommendation.id,
         provider_id=recommendation.provider_id,
@@ -936,7 +965,12 @@ def _to_recommendation_view(recommendation: Recommendation) -> RecommendationVie
         title=recommendation.title,
         summary=recommendation.summary,
         rationale=recommendation.rationale,
-        related_finding_ids=tuple(recommendation.related_finding_ids),
+        related_finding_ids=related,
+        supporting_finding_ids=supporting,
+        primary_finding_id=getattr(recommendation, "primary_finding_id", None),
+        recommendation_type=rec_type_value or "legacy",
+        evidence_completeness=completeness_value or "legacy",
+        limitations=tuple(getattr(recommendation, "limitations", ()) or ()),
         affected_node_ids=tuple(str(node_id) for node_id in recommendation.affected_node_ids),
         evidence=tuple(_to_evidence_view(item) for item in recommendation.evidence),
         actions=tuple(

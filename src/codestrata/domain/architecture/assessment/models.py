@@ -20,7 +20,7 @@ from codestrata.domain.architecture.conclusions.models import (
     ConsolidatedRecommendation,
 )
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
-from codestrata.domain.rules.enums import RuleConfidence
+from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
 
 class ArchitectureExecutionSummary(BaseModel):
@@ -136,7 +136,7 @@ class ArchitectureStrength(BaseModel):
     summary: str
     evidence_ids: tuple[str, ...] = ()
     affected_scope: tuple[str, ...] = ()
-    confidence: RuleConfidence = RuleConfidence.MEDIUM
+    confidence: MatchEvidenceConfidence = MatchEvidenceConfidence.MEDIUM
     coverage: dict[str, str] = Field(default_factory=dict)
     limitations: tuple[str, ...] = ()
     taxonomy_ids: tuple[str, ...] = ()

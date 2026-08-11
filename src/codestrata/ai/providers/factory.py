@@ -5,11 +5,13 @@ from __future__ import annotations
 import os
 
 from codestrata.ai.providers.base import AIModelProvider
+from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 from codestrata.config.settings import DEFAULT_BEDROCK_MODEL_ID, CodestrataSettings
 from codestrata.extensions.assess_ai import get_assess_ai_provider_registry
 
 CODESTRATA_BEDROCK_MODEL_ID_ENV = "CODESTRATA_BEDROCK_MODEL_ID"
 CODESTRATA_OPENAI_MODEL_ID_ENV = "CODESTRATA_OPENAI_MODEL_ID"
+CODESTRATA_OPENROUTER_MODEL_ID_ENV = "CODESTRATA_OPENROUTER_MODEL_ID"
 
 
 def supported_assess_ai_providers() -> frozenset[str]:
@@ -19,7 +21,7 @@ def supported_assess_ai_providers() -> frozenset[str]:
 
 
 # Back-compat: historically a frozenset constant of built-ins.
-SUPPORTED_ASSESS_AI_PROVIDERS = frozenset({"bedrock", "openai"})
+SUPPORTED_ASSESS_AI_PROVIDERS = frozenset({"bedrock", "openai", "openrouter"})
 
 
 def create_assess_ai_provider(settings: CodestrataSettings) -> AIModelProvider:
@@ -34,7 +36,11 @@ def resolve_assess_model_id(
     cli_model_id: str | None,
     settings: CodestrataSettings,
 ) -> str:
-    """Resolve assess enrichment model ID for the active provider."""
+    """Resolve assess enrichment model ID for the active provider.
+
+    OpenRouter has **no product default model**: CLI → environment →
+    ``[ai.openrouter].model`` must supply a nonempty value.
+    """
 
     if cli_model_id and cli_model_id.strip():
         return cli_model_id.strip()
@@ -48,6 +54,18 @@ def resolve_assess_model_id(
         if configured:
             return configured
         return "gpt-4o-mini"
+
+    if provider_name == "openrouter":
+        env_model = os.environ.get(CODESTRATA_OPENROUTER_MODEL_ID_ENV)
+        if env_model and env_model.strip():
+            return env_model.strip()
+        configured = (settings.ai.openrouter.model or "").strip()
+        if configured:
+            return configured
+        raise AIProviderConfigurationError(
+            "OpenRouter model is required. Set --model-id, "
+            f"{CODESTRATA_OPENROUTER_MODEL_ID_ENV}, or [ai.openrouter].model."
+        )
 
     env_model_id = os.environ.get(CODESTRATA_BEDROCK_MODEL_ID_ENV)
     if env_model_id and env_model_id.strip():
@@ -64,6 +82,7 @@ resolve_bedrock_model_id = resolve_assess_model_id
 __all__ = [
     "CODESTRATA_BEDROCK_MODEL_ID_ENV",
     "CODESTRATA_OPENAI_MODEL_ID_ENV",
+    "CODESTRATA_OPENROUTER_MODEL_ID_ENV",
     "SUPPORTED_ASSESS_AI_PROVIDERS",
     "create_assess_ai_provider",
     "resolve_assess_model_id",

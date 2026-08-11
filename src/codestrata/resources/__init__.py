@@ -49,6 +49,6 @@ def assessment_report_schema() -> Traversable:
 
 
 def branding_logo() -> Traversable:
-    """Return the packaged CodeStrata logo asset."""
+    """Return the packaged CodeStrata brand mark asset."""
 
-    return files("codestrata.reporting.assets").joinpath("codestrata-logo.png")
+    return files("codestrata.reporting.assets").joinpath("codestrata-mark-mono.svg")

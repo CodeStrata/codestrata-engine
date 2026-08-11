@@ -241,17 +241,24 @@ def merge_rule_evaluations(
     primary: RuleEvaluationResult,
     extra: RuleEvaluationResult,
 ) -> RuleEvaluationResult:
-    """Merge architecture findings into legacy evaluation without dropping either."""
+    """Merge architecture findings into legacy evaluation without dropping either.
 
-    seen: set[str] = set()
-    findings: list[Finding] = []
+    Duplicate finding IDs union EvidenceRefs (Slice 2.2) instead of first-wins.
+    """
+
+    from codestrata.application.traceability.merge import merge_finding_traceability
+
+    by_id: dict[str, Finding] = {}
+    order: list[str] = []
     for finding in (*primary.findings, *extra.findings):
-        if finding.id in seen:
+        existing = by_id.get(finding.id)
+        if existing is None:
+            by_id[finding.id] = finding
+            order.append(finding.id)
             continue
-        seen.add(finding.id)
-        findings.append(finding)
+        by_id[finding.id] = merge_finding_traceability(existing, finding)
     return RuleEvaluationResult.from_findings(
-        findings=tuple(findings),
+        findings=tuple(by_id[item_id] for item_id in order),
         rules_evaluated=tuple(
             sorted(set(primary.rules_evaluated) | set(extra.rules_evaluated))
         ),

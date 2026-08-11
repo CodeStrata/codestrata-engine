@@ -5,8 +5,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codestrata"
-version = "0.1.0"
-description = "CodeStrata Engine: deterministic Engineering Assessment and Engineering Intelligence for software repositories."
+version = "0.2.0"
+description = "CodeStrata Engine: deterministic Engineering Assessment for repositories; portfolio Engineering Intelligence Reports (EIR) where applicable."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { file = "LICENSE" }
@@ -36,6 +36,7 @@ classifiers = [
 ]
 
 dependencies = [
+    "certifi>=2024.0,<2027.0",
     "pydantic>=2.10,<3.0",
     "PyYAML>=6.0,<7.0",
     "rich>=13.9,<15.0",
@@ -106,7 +107,7 @@ codestrata = [
     "resources/**/*.yml",
     "resources/**/*.json",
     "resources/**/*.md",
-    "reporting/assets/*.png",
+    "reporting/assets/*.svg",
     "application/rules/data/*.json",
 ]
 
@@ -128,7 +129,7 @@ markers = [
 [tool.ruff]
 target-version = "py312"
 line-length = 100
-src = ["src", "tests"]
+src = ["src", "tests", "validation"]
 exclude = [
     "**/complexity/fixtures/**",
 ]

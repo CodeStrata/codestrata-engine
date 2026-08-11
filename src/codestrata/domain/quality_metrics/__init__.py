@@ -1,0 +1,101 @@
+"""Shared quality metric contracts for internal validation and calibration.
+
+Precision and Recall belong to the validation/calibration system —
+not customer assessment runtime reports.
+"""
+
+from codestrata.domain.quality_metrics.false_negatives import (
+    FalseNegativeClassification,
+    FalseNegativeEntityType,
+    FalseNegativeRecord,
+    FalseNegativeResolution,
+    FalseNegativeRootCause,
+    FalseNegativeStatus,
+    FalseNegativeSummaryCounts,
+    build_false_negative_id,
+    build_false_negative_record,
+    merge_false_negative_records,
+    summarize_false_negatives,
+)
+from codestrata.domain.quality_metrics.false_positives import (
+    FalsePositiveClassification,
+    FalsePositiveEntityType,
+    FalsePositiveRecord,
+    FalsePositiveResolution,
+    FalsePositiveRootCause,
+    FalsePositiveStatus,
+    FalsePositiveSummaryCounts,
+    SafeValidationValue,
+    build_false_positive_id,
+    build_false_positive_record,
+    merge_false_positive_records,
+    summarize_false_positives,
+)
+from codestrata.domain.quality_metrics.common import (
+    QualityMetricAvailability,
+    QualityMetricClassificationStatus,
+    QualityMetricSample,
+    QualityMetricScope,
+    QualityMetricSource,
+    format_metric_display,
+    resolve_quality_metric_source,
+    source_from_matrix_label,
+)
+from codestrata.domain.quality_metrics.precision import (
+    PrecisionMetric,
+    aggregate_precision_from_counts,
+    build_precision_metric,
+    build_precision_metric_id,
+    precision_ratio_from_counts,
+)
+from codestrata.domain.quality_metrics.recall import (
+    RecallMetric,
+    aggregate_recall_from_counts,
+    build_recall_metric,
+    build_recall_metric_id,
+    recall_ratio_from_counts,
+)
+
+__all__ = [
+    "FalseNegativeClassification",
+    "FalseNegativeEntityType",
+    "FalseNegativeRecord",
+    "FalseNegativeResolution",
+    "FalseNegativeRootCause",
+    "FalseNegativeStatus",
+    "FalseNegativeSummaryCounts",
+    "FalsePositiveClassification",
+    "FalsePositiveEntityType",
+    "FalsePositiveRecord",
+    "FalsePositiveResolution",
+    "FalsePositiveRootCause",
+    "FalsePositiveStatus",
+    "FalsePositiveSummaryCounts",
+    "PrecisionMetric",
+    "RecallMetric",
+    "QualityMetricAvailability",
+    "QualityMetricClassificationStatus",
+    "QualityMetricSample",
+    "QualityMetricScope",
+    "QualityMetricSource",
+    "SafeValidationValue",
+    "aggregate_precision_from_counts",
+    "aggregate_recall_from_counts",
+    "build_false_negative_id",
+    "build_false_negative_record",
+    "build_false_positive_id",
+    "build_false_positive_record",
+    "build_precision_metric",
+    "build_precision_metric_id",
+    "build_recall_metric",
+    "build_recall_metric_id",
+    "format_metric_display",
+    "merge_false_negative_records",
+    "merge_false_positive_records",
+    "precision_ratio_from_counts",
+    "recall_ratio_from_counts",
+    "resolve_quality_metric_source",
+    "source_from_matrix_label",
+    "summarize_false_negatives",
+    "summarize_false_positives",
+]

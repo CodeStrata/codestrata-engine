@@ -52,13 +52,28 @@ from codestrata.reporting.modernization_view import (
     repository_identifier,
     sanitize_display_path,
 )
+from codestrata.reporting.traceability import (
+    AssessmentTraceabilityError,
+    build_assessment_priority_actions,
+    build_assessment_roadmap_payload,
+    collect_assessment_evidence,
+    serialize_evidence_index,
+    serialize_priority_actions,
+    validate_assessment_traceability,
+)
 from codestrata.static_analysis.models import StaticAnalysisResult, StaticAnalysisStatus
 
 
 def build_assessment_json_document(
     report_input: ModernizationReportInput,
 ) -> dict[str, Any]:
-    """Build a sanitized, customer-safe assessment JSON document."""
+    """Build a sanitized, customer-safe assessment JSON document.
+
+    ``report.json`` is the canonical machine-readable artifact for the
+    Evidence → Finding → Recommendation → Priority Action → Roadmap chain
+    (Epic 2 Slice 2.6). Companion findings.json / recommendations.json are
+    derived from the same customer universe.
+    """
 
     analysis = report_input.analysis_result
     ai_block = _ai_block(report_input)
@@ -67,6 +82,10 @@ def build_assessment_json_document(
     repository_reference = report_input.repository_reference or repository_identifier(report_input)
     customer_findings = resolve_customer_findings(report_input)
     customer_recommendations = resolve_customer_recommendations(report_input)
+    evidence_refs = collect_assessment_evidence(customer_findings)
+    evidence_payload = serialize_evidence_index(evidence_refs)
+    priority_actions = build_assessment_priority_actions(customer_recommendations)
+    priority_actions_payload = serialize_priority_actions(priority_actions)
     executive = _executive_summary_metrics(
         analysis,
         findings=customer_findings,
@@ -93,6 +112,8 @@ def build_assessment_json_document(
                 "finding_count": len(customer_findings),
                 "deterministic_recommendation_count": len(customer_recommendations),
                 "recommendation_count": len(customer_recommendations),
+                "priority_action_count": len(priority_actions),
+                "evidence_count": len(evidence_payload),
                 "ai_recommendation_count": ai_block["recommendation_count"],
                 "phase_count": ai_block["phase_count"],
                 "ai_executed": report_input.ai_executed,
@@ -108,10 +129,13 @@ def build_assessment_json_document(
             "executive_summary": executive,
             "technologies": [_technology_payload(item) for item in technologies],
             "repository_facts": _facts_payload(analysis),
+            "evidence": evidence_payload,
             "findings": [customer_finding_json(item) for item in customer_findings],
+            "finding_correlations": _finding_correlations_payload(report_input),
             "deterministic_recommendations": [
                 customer_recommendation_json(item) for item in customer_recommendations
             ],
+            "priority_actions": priority_actions_payload,
             "comparison": comparison,
             "warnings": list(report_input.warnings),
             "static_analysis": static_analysis,
@@ -165,8 +189,67 @@ def build_assessment_json_document(
     _attach_optional_section(assessment, "cloud", report_input.cloud_report)
     _attach_optional_section(assessment, "ai_readiness", report_input.ai_readiness_report)
     _attach_optional_section(assessment, "performance", report_input.performance_report)
-    _attach_optional_section(assessment, "roadmap", report_input.roadmap_report)
-    _align_roadmap_references(assessment)
+
+    # Canonical roadmap: Priority Action-backed when actions exist; else legacy.
+    roadmap_payload = build_assessment_roadmap_payload(
+        priority_actions,
+        legacy_roadmap=report_input.roadmap_report,
+    )
+    if roadmap_payload is not None:
+        assessment["roadmap"] = roadmap_payload
+        assessment["summary"]["roadmap_initiative_count"] = int(
+            roadmap_payload.get("initiatives_total")
+            or len(roadmap_payload.get("initiatives") or [])
+        )
+    else:
+        assessment["summary"]["roadmap_initiative_count"] = 0
+
+    if priority_actions:
+        # PA-backed roadmap is already aligned to the same universe — do not
+        # silently filter supporting IDs (Slice 2.6 fail-closed policy).
+        pass
+    else:
+        _align_roadmap_references(assessment)
+
+    try:
+        validate_assessment_traceability(assessment)
+    except AssessmentTraceabilityError:
+        raise
+
+    # Slice 5.4 — additive Assessment-Head Confidence map (schema 1.2 preserved).
+    from codestrata.application.assessment_heads import (
+        build_assessment_coverage_map,
+        build_assessment_head_confidence_map,
+    )
+
+    pack_sections = {
+        "architecture": assessment.get("architecture"),
+        "technical_debt": assessment.get("technical_debt"),
+        "dependency": assessment.get("dependency"),
+        "security": assessment.get("security"),
+        "testing": assessment.get("testing"),
+        "cloud": assessment.get("cloud"),
+        "ai_readiness": assessment.get("ai_readiness"),
+        "performance": assessment.get("performance"),
+        "roadmap": assessment.get("roadmap"),
+    }
+    activation_payload = (
+        assessment.get("activation")
+        if isinstance(assessment.get("activation"), dict)
+        else None
+    )
+    assessment["assessment_coverage"] = build_assessment_coverage_map(
+        pack_sections=pack_sections,
+        technologies_present=bool(assessment.get("technologies")),
+        activation=activation_payload,
+    )
+    assessment["assessment_head_confidence"] = build_assessment_head_confidence_map(
+        findings=assessment.get("findings") or (),
+        pack_sections=pack_sections,
+        technologies_present=bool(assessment.get("technologies")),
+        activation=activation_payload,
+        assessment_coverage_map=assessment["assessment_coverage"],
+    )
 
     repository_id = (
         report_input.knowledge_repository_id
@@ -185,6 +268,21 @@ def build_assessment_json_document(
         "manifest": manifest,
         "assessment": assessment,
     }
+
+
+def _finding_correlations_payload(report_input: ModernizationReportInput) -> list[dict[str, Any]]:
+    """Serialize additive finding_correlations (Slice 5.12)."""
+
+    stored = tuple(getattr(report_input, "finding_correlations", ()) or ())
+    if stored:
+        return [dict(item) for item in stored if isinstance(item, dict)]
+    evaluation = report_input.assessment_rule_evaluation
+    if evaluation is None or not evaluation.findings:
+        return []
+    from codestrata.application.findings.correlation import correlate_findings
+
+    result = correlate_findings(evaluation.findings)
+    return [item.canonical_dict() for item in result.correlations]
 
 
 def _attach_optional_section(assessment: dict[str, Any], key: str, section: Any) -> None:
@@ -324,9 +422,9 @@ def _align_roadmap_references(assessment: dict[str, Any]) -> None:
 def assessment_json_to_text(document: dict[str, Any], *, indent: int | None = 2) -> str:
     """Serialize an assessment JSON document with stable formatting."""
 
-    from codestrata.security.redaction import redact_report_payload
+    from codestrata.security.customer_safe_text import ensure_customer_safe_report_document
 
-    sanitized = redact_report_payload(document)
+    sanitized = ensure_customer_safe_report_document(document)
     text = json.dumps(
         sanitized,
         indent=indent,

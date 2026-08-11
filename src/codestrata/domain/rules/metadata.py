@@ -4,11 +4,12 @@ from __future__ import annotations
 
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
 from codestrata.domain.rules.enums import RuleCategory, RuleIncrementalBehavior, RuleSeverity
 from codestrata.domain.rules.identifiers import RuleId, validate_rule_id
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 
 
 class RuleVersion(BaseModel):
@@ -49,6 +50,9 @@ class RuleMetadata(BaseModel):
     description: str
     category: RuleCategory
     default_severity: RuleSeverity
+    confidence: RuleConfidence
+    # Epic 5 Slice 5.13 — catalog reference (not an embedded policy object).
+    severity_policy_id: str | None = None
     supported_languages: tuple[str, ...] = ()
     supported_repository_types: tuple[str, ...] = ()
     tags: tuple[str, ...] = ()
@@ -94,7 +98,12 @@ class RuleMetadata(BaseModel):
     def normalize_sequences(cls, value: object) -> tuple[Any, ...]:
         return as_tuple(value)
 
-    @field_validator("remediation_summary", "documentation_reference", mode="before")
+    @field_validator(
+        "remediation_summary",
+        "documentation_reference",
+        "severity_policy_id",
+        mode="before",
+    )
     @classmethod
     def normalize_optional(cls, value: object) -> str | None:
         if value is None:
@@ -105,3 +114,12 @@ class RuleMetadata(BaseModel):
     @classmethod
     def normalize_tokens(cls, value: tuple[str, ...]) -> tuple[str, ...]:
         return tuple(sorted({item.strip().lower() for item in value if item and item.strip()}))
+
+    @model_validator(mode="after")
+    def default_severity_policy_id(self) -> RuleMetadata:
+        if self.severity_policy_id:
+            return self
+        # Catalog policy IDs are severity.{rule_id} for Shared Rules.
+        # Frozen model: assign via object.__setattr__.
+        object.__setattr__(self, "severity_policy_id", f"severity.{self.rule_id}")
+        return self

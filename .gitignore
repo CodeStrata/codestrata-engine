@@ -1,0 +1,38 @@
+# CodeStrata Engine — local / packaging ignores
+
+# Bytecode / caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.tox/
+.venv/
+venv/
+
+# Local runtime / assessment state
+.codestrata/
+*.sqlite
+*.db
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Packaging artifacts
+*.whl
+*.tar.gz
+
+# Generated local assessment scratch (never publish)
+.tmp-assess/
+**/.tmp-assess/

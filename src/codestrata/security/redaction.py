@@ -37,6 +37,14 @@ _PRIVATE_KEY_PATTERN = re.compile(
     r"-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----[\s\S]*?"
     r"-----END (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----",
 )
+# Header-only markers (no END block) must not reach customer-facing fields.
+# Engine SEC002 historically embedded these as evidence/description text.
+_PRIVATE_KEY_HEADER_PATTERN = re.compile(
+    r"-----BEGIN (?:RSA |OPENSSH |EC |DSA )?PRIVATE KEY-----",
+    re.IGNORECASE,
+)
+# Any remaining dashed PEM begin fence (certificate, etc.) is still secret-shaped.
+_PEM_BEGIN_FENCE_PATTERN = re.compile(r"-----BEGIN[^\n-]{0,80}-----", re.IGNORECASE)
 # Include SQLAlchemy dialect URLs (e.g. postgresql+psycopg://user:pass@host/db).
 _CONNECTION_STRING_PATTERN = re.compile(
     r"(?i)\b((?:postgres(?:ql)?(?:\+[A-Za-z0-9_]+)?|mysql(?:\+[A-Za-z0-9_]+)?|"
@@ -126,6 +134,8 @@ class Redactor:
             sanitized = sanitized.replace(path, REDACTED)
 
         sanitized = _PRIVATE_KEY_PATTERN.sub(REDACTED, sanitized)
+        sanitized = _PRIVATE_KEY_HEADER_PATTERN.sub(REDACTED, sanitized)
+        sanitized = _PEM_BEGIN_FENCE_PATTERN.sub(REDACTED, sanitized)
         sanitized = _URL_USERINFO_PATTERN.sub(rf"\1{REDACTED}:{REDACTED}@", sanitized)
         sanitized = _CONNECTION_STRING_PATTERN.sub(
             rf"\1{REDACTED}:{REDACTED}@",

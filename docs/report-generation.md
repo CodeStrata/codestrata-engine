@@ -25,10 +25,11 @@ report.html (self-contained, branded)
 | `advisor.json` | Optional Modernization Advisor narrative |
 | `advisor-execution.json` | Internal Advisor provider/model/status/errors |
 
-## Sections (HTML v3 — Design System aligned)
+## Sections (HTML v3.1 — Design System 1.0)
 
-Brand and layout follow the CodeStrata Design System (tokens mirrored in the
-public docs portal).
+Brand and layout follow `codestrata-visual-design-system:1.0` (Slice 14.1 tokens
+embedded at generation time). Policy: `codestrata-assessment-report-design-policy:1.0`.
+See [assessment-report-design.md](./assessment-report-design.md).
 
 1. Cover (brand, edition, repository, KPIs)
 2. Contents (TOC)

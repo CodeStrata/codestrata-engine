@@ -13,12 +13,12 @@ MINIMAL_CODESTRATA_TOML = """\
 #
 # Golden path (deterministic; AI not required):
 #   codestrata doctor
-#   codestrata assess --repo . --output reports --no-ai
+#   codestrata assess --repo . --no-ai
 #
 # Optional AI advisor (your own supported provider):
 #   codestrata ai
 #   codestrata ai doctor
-#   codestrata assess --repo . --output reports --with-ai
+#   codestrata assess --repo . --with-ai
 #
 # [ai] / [ai.bedrock] / [ai.openai] settings are optional and only used with --with-ai.
 # Blank AI model fields are treated as unset.
@@ -87,7 +87,7 @@ def register_init_command(app: typer.Typer) -> None:
         Next steps after init:
 
             codestrata doctor
-            codestrata assess --repo . --output reports --no-ai
+            codestrata assess --repo . --no-ai
         """
 
         try:
@@ -107,7 +107,7 @@ def register_init_command(app: typer.Typer) -> None:
         typer.echo("Success: Configuration ready.")
         typer.echo("Next:")
         typer.echo("  codestrata doctor")
-        typer.echo("  codestrata assess --repo . --output reports --no-ai")
+        typer.echo("  codestrata assess --repo . --no-ai")
         typer.echo("  codestrata open")
         typer.echo("Docs: https://docs.codestrata.ai/getting-started/")
 

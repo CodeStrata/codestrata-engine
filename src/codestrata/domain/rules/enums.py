@@ -29,7 +29,7 @@ class RuleCategory(StrEnum):
     EXPERIMENTAL = "experimental"
 
 
-class RuleConfidence(StrEnum):
+class MatchEvidenceConfidence(StrEnum):
     """Deterministic evidence certainty (not business severity)."""
 
     LOW = "low"

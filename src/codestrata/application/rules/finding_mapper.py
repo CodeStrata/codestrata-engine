@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from codestrata.domain.findings.enums import FindingCategory, FindingSeverity
 from codestrata.domain.findings.models import Finding, FindingEvidence
 from codestrata.domain.rules.enums import RuleCategory
+from codestrata.domain.rules.rule_confidence import rule_confidence_to_json
 from codestrata.domain.rules.results import RuleMatch
 
 _CATEGORY_MAP: dict[RuleCategory, FindingCategory] = {
@@ -37,7 +40,7 @@ class RuleFindingMapper:
         subjects = list(match.subject_keys) or list(match.affected_entities)
         if not subjects:
             subjects = [item.subject_reference for item in match.evidence]
-        metadata: dict[str, str] = {
+        metadata: dict[str, Any] = {
             "rule_version": str(match.rule_version),
             "confidence": match.confidence.value,
             "remediation": match.remediation or "",
@@ -46,6 +49,18 @@ class RuleFindingMapper:
             "business_impact": "unknown",
             "subject_keys": ",".join(str(item) for item in subjects),
         }
+        if match.rule_confidence is not None:
+            metadata["rule_confidence"] = rule_confidence_to_json(match.rule_confidence)
+            metadata["rule_confidence_level"] = match.rule_confidence.level.value
+            metadata["rule_confidence_basis"] = ",".join(
+                item.value for item in match.rule_confidence.basis
+            )
+            metadata["rule_confidence_limitations"] = "|".join(
+                match.rule_confidence.limitations
+            )
+            metadata["rule_confidence_calibration_status"] = (
+                match.rule_confidence.calibration_status.value
+            )
         if match.provenance == "architecture.core" or str(match.rule_id).startswith(
             "architecture."
         ):
@@ -115,16 +130,92 @@ class RuleFindingMapper:
 
             metadata.update(enrich_performance_metadata(str(match.rule_id)))
             metadata.update(_performance_evidence_metadata(match))
-        return Finding.create(
+
+        from codestrata.application.findings.finding_confidence import (
+            derive_finding_confidence,
+        )
+        from codestrata.application.traceability.evidence_confidence import (
+            evidence_confidence_summary,
+        )
+        from codestrata.application.traceability.rule_evidence import (
+            evidence_refs_from_rule_match,
+            pack_is_traceable,
+        )
+        from codestrata.application.traceability.selection import (
+            synthesize_finding_traceability,
+        )
+        from codestrata.domain.traceability import EvidenceCompleteness
+
+        if pack_is_traceable(str(match.rule_id), match.provenance):
+            raw_refs, map_limits, source_count = evidence_refs_from_rule_match(match)
+            (
+                evidence_refs,
+                primary_evidence_id,
+                synthesized_from,
+                completeness,
+                limits,
+            ) = synthesize_finding_traceability(
+                raw_refs,
+                expected_count=source_count,
+                limitations=map_limits,
+            )
+            metadata.update(
+                evidence_confidence_summary(
+                    evidence_refs,
+                    primary_evidence_id=primary_evidence_id,
+                )
+            )
+        else:
+            evidence_refs = ()
+            primary_evidence_id = None
+            synthesized_from = ()
+            completeness = EvidenceCompleteness.LEGACY
+            limits = ("evidence_ref_mapping_deferred_for_pack",)
+
+        finding_confidence = derive_finding_confidence(
+            rule_confidence=match.rule_confidence,
+            match_evidence_confidence=match.confidence,
+            evidence_refs=evidence_refs,
+            primary_evidence_id=primary_evidence_id,
+            synthesized_from_evidence_ids=synthesized_from,
+            evidence_completeness=completeness,
+            limitations=limits,
+            shared_rule_platform=True,
+        )
+
+        # Epic 5 Slice 5.13 — calibrate severity independently of Finding Confidence.
+        from codestrata.application.findings.severity_calibration import (
+            apply_severity_assessment,
+            calibrate_finding_severity,
+        )
+
+        paths = tuple(item.path for item in evidence if item.path)
+        severity_assessment = calibrate_finding_severity(
+            rule_id=str(match.rule_id),
+            emitted_severity=_map_severity(match.severity),
+            metadata=metadata,
+            evidence_paths=paths,
+            affected_subject_count=len(subjects),
+        )
+        finding = Finding.create(
             rule_id=str(match.rule_id),
             title=match.title,
             description=match.summary,
-            severity=_map_severity(match.severity),
+            severity=severity_assessment.severity,
             category=_CATEGORY_MAP.get(category, FindingCategory.UNKNOWN),
             evidence=evidence,
             metadata=metadata,
             subject_keys=tuple(subjects),
+            evidence_refs=evidence_refs,
+            primary_evidence_id=primary_evidence_id,
+            synthesized_from_evidence_ids=synthesized_from,
+            evidence_completeness=completeness,
+            limitations=limits,
+            finding_confidence=finding_confidence,
+            base_severity=severity_assessment.component_summary.base_severity,
+            severity_assessment=severity_assessment,
         )
+        return apply_severity_assessment(finding, severity_assessment)
 
     def map_matches(
         self,
@@ -245,6 +336,8 @@ _SEC_EVIDENCE_METADATA_KEYS = (
     "literal_boolean",
     "is_wildcard_origin",
     "security_category",
+    "security_context",
+    "security_context_reasons",
 )
 
 

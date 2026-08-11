@@ -33,7 +33,7 @@ from codestrata.domain.rules.architecture.ids import (
     RULE_INVALID_DEPENDENCY_DIRECTION,
     RULE_LAYER_BOUNDARY_VIOLATION,
 )
-from codestrata.domain.rules.enums import RuleConfidence
+from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
 _SEVERITY_RANK = {
     FindingSeverity.INFORMATIONAL: 0,
@@ -54,10 +54,10 @@ _RULE_PRECEDENCE = {
 }
 
 _CONFIDENCE_RANK = {
-    RuleConfidence.LOW: 0,
-    RuleConfidence.MEDIUM: 1,
-    RuleConfidence.HIGH: 2,
-    RuleConfidence.CERTAIN: 3,
+    MatchEvidenceConfidence.LOW: 0,
+    MatchEvidenceConfidence.MEDIUM: 1,
+    MatchEvidenceConfidence.HIGH: 2,
+    MatchEvidenceConfidence.CERTAIN: 3,
 }
 
 
@@ -101,9 +101,9 @@ def select_primary_finding(findings: Sequence[Finding]) -> Finding:
     def sort_key(finding: Finding) -> tuple[object, ...]:
         confidence_raw = str(finding.metadata.get("confidence", "medium")).lower()
         try:
-            confidence = RuleConfidence(confidence_raw)
+            confidence = MatchEvidenceConfidence(confidence_raw)
         except ValueError:
-            confidence = RuleConfidence.MEDIUM
+            confidence = MatchEvidenceConfidence.MEDIUM
         return (
             -_SEVERITY_RANK.get(finding.severity, 0),
             -_RULE_PRECEDENCE.get(finding.rule_id, 0),

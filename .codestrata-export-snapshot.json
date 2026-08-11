@@ -1,0 +1,10 @@
+{
+  "content_fingerprint": "0ea79ac1cdfb51654031c3ab49b271497b496e89e53453ff034626e478900091",
+  "export_name": "codestrata-engine",
+  "extraction_tooling_version": "1.0.0",
+  "file_count": 2598,
+  "generated_at": "2026-08-11T02:37:09Z",
+  "manifest_version": 2,
+  "mode": "first_time",
+  "source_commit": "15fcc99cb6edaf7c1c5bf5b7f36a343aefdcbd8e"
+}

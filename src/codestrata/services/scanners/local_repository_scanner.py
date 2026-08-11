@@ -12,6 +12,32 @@ from codestrata.scan_boundary import (
 )
 
 
+def _detect_git_origin_url(repository_path: Path) -> str | None:
+    """Return credential-free origin URL when the path is a GitHub clone."""
+
+    import os
+    import subprocess
+
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(repository_path), "config", "--get", "remote.origin.url"],
+            check=False,
+            capture_output=True,
+            text=True,
+            timeout=15,
+            env={
+                "PATH": os.environ.get("PATH", ""),
+                "GIT_TERMINAL_PROMPT": "0",
+                "GIT_CONFIG_GLOBAL": "/dev/null",
+                "GIT_CONFIG_SYSTEM": "/dev/null",
+            },
+        )
+    except Exception:  # noqa: BLE001
+        return None
+    url = (proc.stdout or "").strip()
+    return url or None
+
+
 class LocalRepositoryScanner:
     """Scans a repository located on the local file system."""
 
@@ -72,6 +98,7 @@ class LocalRepositoryScanner:
             path=resolved_path,
             files=files,
             total_files=len(files),
+            source_url=_detect_git_origin_url(resolved_path),
         )
 
     def _validate_repository_path(self, repository_path: Path) -> None:

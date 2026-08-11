@@ -1,36 +1,76 @@
-"""OpenAI Chat Completions provider for Modernization Advisor (assess enrichment)."""
+"""OpenAI provider for Modernization Advisor (assess enrichment).
+
+**Migrated (Epic 11, Slice 11.6).** This module is now a thin compatibility
+wrapper. It remains the public assess-path class — same name, same
+constructor signature, same registry key (``openai``), same
+``AIModelProvider.invoke()`` contract — but the wire work now happens in
+``codestrata.ai.provider_adapters.openai``, which implements the
+``AIProvider`` protocol and runs under ``AIProviderExecutor``.
+
+What one ``invoke()`` does:
+
+1. folds the ``PromptRequest`` into a ``ModernizationAdvisorInput`` and wraps
+   it in an ``AIProviderRequest`` (``legacy_bridge``);
+2. builds the adapter and its executor with ``DEFAULT_RETRY_POLICY``
+   (``maximum_attempts=1``, i.e. exactly one provider call per assess run)
+   and ``DEFAULT_TIMEOUT_POLICY`` (60s, declarative — the real bound is still
+   the OpenAI client's own ``timeout=``);
+3. runs the executor, which never raises for an expected provider failure;
+4. translates a non-SUCCESS outcome back into the *same* legacy exception
+   type and message the pre-migration provider raised, so
+   ``AiEnrichmentService``'s fail-soft behavior is unchanged;
+5. on success, rebuilds ``ModelInvocationResult`` — including the enrichment
+   payload short-circuit and the legacy ``AIRecommendationResult`` parse.
+
+Bedrock is migrated separately in Slice 11.7
+(``codestrata.ai.provider_adapters.bedrock``). See
+``engine/docs/ai-provider-openai.md`` and
+``engine/docs/ai-provider-bedrock.md``.
+"""
 
 from __future__ import annotations
 
 import logging
-import os
-import time
 from typing import Any
 
 from codestrata.ai.prompts.models import PromptRequest
+from codestrata.ai.provider_adapters.openai import (
+    legacy_bridge,
+    request_mapping,
+    response_mapping,
+    usage_mapping,
+)
+from codestrata.ai.provider_adapters.openai.adapter import OpenAIProvider
+from codestrata.ai.provider_adapters.openai.error_mapping import classify_sdk_exception
+from codestrata.ai.provider_adapters.openai.factory import (
+    build_openai_executor,
+    build_openai_provider,
+)
+from codestrata.ai.provider_adapters.openai.response_mapping import OpenAIInvocationDetail
+from codestrata.ai.provider_contracts.execution import ProviderExecutionStatus
+from codestrata.ai.provider_contracts.execution_models import AIProviderExecutionResult
+from codestrata.ai.provider_contracts.requests import ResponseExpectation
 from codestrata.ai.providers.base import AIModelProvider
 from codestrata.ai.providers.exceptions import (
     AIProviderConfigurationError,
     AIProviderError,
     AIProviderInvocationError,
-    AIProviderTimeoutError,
     AIResponseParsingError,
     AIResponseValidationError,
 )
 from codestrata.ai.providers.models import (
-    DEFAULT_TIMEOUT_SECONDS,
-    ModelInvocationMetadata,
     ModelInvocationOptions,
     ModelInvocationResult,
     ModelUsage,
     ModernizationModelRequest,
 )
-from codestrata.ai.providers.parsing import parse_recommendation_response, sanitize_provider_text
+from codestrata.ai.providers.parsing import parse_recommendation_response
+from codestrata.ai.providers.settings_policies import provider_timeout_seconds
 from codestrata.config.settings import CodestrataSettings, OpenAISettings
 
 logger = logging.getLogger(__name__)
 
-OPENAI_PROVIDER_NAME = "openai"
+OPENAI_PROVIDER_NAME = legacy_bridge.OPENAI_PROVIDER_NAME
 
 
 class OpenAIAIModelProvider(AIModelProvider):
@@ -41,16 +81,22 @@ class OpenAIAIModelProvider(AIModelProvider):
         *,
         settings: CodestrataSettings | None = None,
         openai_settings: OpenAISettings | None = None,
-        timeout_seconds: float = DEFAULT_TIMEOUT_SECONDS,
+        timeout_seconds: float | None = None,
         client: Any | None = None,
     ) -> None:
-        if timeout_seconds <= 0:
-            raise AIProviderConfigurationError("timeout_seconds must be positive")
         self._settings = settings
         self._openai = openai_settings or (
             settings.ai.openai if settings is not None else OpenAISettings()
         )
-        self._timeout_seconds = timeout_seconds
+        resolved_timeout = provider_timeout_seconds(
+            settings,
+            provider="openai",
+            explicit=timeout_seconds,
+            provider_settings_timeout=self._openai.timeout_seconds,
+        )
+        if resolved_timeout <= 0:
+            raise AIProviderConfigurationError("timeout_seconds must be positive")
+        self._timeout_seconds = resolved_timeout
         self._client = client
 
     def invoke(
@@ -62,31 +108,33 @@ class OpenAIAIModelProvider(AIModelProvider):
         if not model_id:
             raise AIProviderConfigurationError("model_id must be a nonempty string")
 
-        client = self._client or self._build_client()
-        messages = _chat_messages(request.prompt_request)
-        logger.info("Invoking OpenAI chat completions model_id=%s", model_id)
-
-        started = time.perf_counter()
-        try:
-            response = client.chat.completions.create(
-                model=model_id,
-                messages=messages,
-                temperature=options.temperature,
-                max_tokens=options.max_output_tokens,
-                response_format={"type": "json_object"},
-            )
-        except Exception as error:  # noqa: BLE001 - provider boundary
-            raise _map_openai_exception(error) from error
-
-        latency_ms = (time.perf_counter() - started) * 1000.0
-        raw_response_text, usage, stop_reason, request_id = _extract_chat_response(response)
-        metadata = ModelInvocationMetadata(
-            provider=OPENAI_PROVIDER_NAME,
+        details: list[OpenAIInvocationDetail] = []
+        adapter = build_openai_provider(
+            openai_settings=self._openai,
+            timeout_seconds=self._timeout_seconds,
+            client=self._client,
+            detail_sink=details.append,
+        )
+        provider_request = legacy_bridge.build_provider_request(
+            request.prompt_request,
+            options,
             model_id=model_id,
-            request_id=options.request_id or request_id,
-            latency_ms=latency_ms,
-            usage=usage,
-            stop_reason=stop_reason,
+        )
+
+        logger.info("Invoking OpenAI chat completions model_id=%s", model_id)
+        execution = build_openai_executor(adapter).execute(provider_request)
+        detail = details[-1] if details else OpenAIInvocationDetail(latency_ms=0.0)
+
+        if execution.status is not ProviderExecutionStatus.SUCCESS:
+            raise self._legacy_error(execution, adapter, detail)
+
+        provider_result = execution.provider_result
+        assert provider_result is not None and provider_result.content is not None
+        raw_response_text = provider_result.content.text or ""
+        metadata = legacy_bridge.build_model_invocation_metadata(
+            model_id=model_id,
+            detail=detail,
+            request_id_override=options.request_id,
         )
 
         from codestrata.ai.enrichment.parsing import looks_like_enrichment_payload
@@ -128,125 +176,71 @@ class OpenAIAIModelProvider(AIModelProvider):
             normalization_removals=parse_outcome.normalization_removals,
         )
 
-    def _build_client(self) -> Any:
-        try:
-            from openai import OpenAI
-        except ImportError as error:
-            raise AIProviderConfigurationError(
-                "OpenAI provider requires the optional 'openai' extra. "
-                "Install with: pip install 'codestrata[openai]'"
-            ) from error
-
-        api_key_env = self._openai.api_key_env.strip() or "OPENAI_API_KEY"
-        api_key = os.environ.get(api_key_env, "").strip()
-        if not api_key:
-            raise AIProviderConfigurationError(
-                f"OpenAI API key not found in environment variable {api_key_env}"
+    @staticmethod
+    def _legacy_error(
+        execution: AIProviderExecutionResult,
+        adapter: OpenAIProvider,
+        detail: OpenAIInvocationDetail,
+    ) -> AIProviderError:
+        provider_result = execution.provider_result
+        error = provider_result.error if provider_result is not None else None
+        if error is None:
+            return AIProviderInvocationError(
+                "OpenAI invocation did not produce a usable response"
             )
-        kwargs: dict[str, Any] = {
-            "api_key": api_key,
-            "timeout": self._timeout_seconds,
-        }
-        base_url = (self._openai.base_url or "").strip()
-        if base_url:
-            kwargs["base_url"] = base_url
-        try:
-            return OpenAI(**kwargs)
-        except Exception as error:  # noqa: BLE001
-            raise AIProviderConfigurationError(
-                "Failed to configure OpenAI client: " + sanitize_provider_text(str(error))
-            ) from error
+        return legacy_bridge.legacy_error_for(
+            error,
+            api_key_env_name=adapter.configuration.api_key_env_name,
+            legacy_detail=detail.legacy_error_detail,
+        )
 
 
 def _chat_messages(prompt_request: PromptRequest) -> list[dict[str, str]]:
-    system_parts: list[str] = []
-    user_parts: list[str] = []
-    for message in prompt_request.messages:
-        if message.role == "system":
-            system_parts.append(message.content)
-        elif message.role == "developer":
-            system_parts.append(f"Developer instructions:\n{message.content}")
-        elif message.role == "user":
-            user_parts.append(message.content)
-        else:  # pragma: no cover
-            raise AIProviderConfigurationError(f"Unsupported prompt role: {message.role}")
-    if not user_parts:
-        raise AIProviderConfigurationError(
-            "PromptRequest must include at least one user message with analysis context"
-        )
-    system_parts.append(
-        "Respond with a single JSON object only. Do not include markdown fences or prose."
+    """Build the Chat Completions message array for ``prompt_request``.
+
+    Retained as a module-level helper (and kept byte-compatible) because the
+    Slice 11.1 baseline verification characterizes this exact shape.
+    """
+
+    return request_mapping.build_chat_messages(
+        legacy_bridge.fold_prompt_request(prompt_request),
+        response_expectation=ResponseExpectation.STRUCTURED_JSON,
     )
-    messages: list[dict[str, str]] = []
-    system_text = "\n\n".join(part for part in system_parts if part.strip())
-    if system_text:
-        messages.append({"role": "system", "content": system_text})
-    messages.append(
-        {
-            "role": "user",
-            "content": "\n\n".join(part for part in user_parts if part.strip()),
-        }
-    )
-    return messages
 
 
 def _extract_chat_response(
     response: Any,
 ) -> tuple[str, ModelUsage, str | None, str | None]:
-    try:
-        choice = response.choices[0]
-        content = choice.message.content
-        if not isinstance(content, str) or not content.strip():
-            raise AIProviderInvocationError("OpenAI response did not include assistant text")
-        usage_obj = getattr(response, "usage", None)
-        usage = ModelUsage(
-            input_tokens=_optional_int(getattr(usage_obj, "prompt_tokens", None)),
-            output_tokens=_optional_int(getattr(usage_obj, "completion_tokens", None)),
-            total_tokens=_optional_int(getattr(usage_obj, "total_tokens", None)),
-        )
-        stop_reason = getattr(choice, "finish_reason", None)
-        request_id = getattr(response, "id", None)
-        return (
-            content,
-            usage,
-            str(stop_reason) if stop_reason is not None else None,
-            str(request_id) if request_id is not None else None,
-        )
-    except AIProviderError:
-        raise
-    except Exception as error:  # noqa: BLE001
-        raise AIProviderInvocationError(
-            "Failed to read OpenAI chat response: " + sanitize_provider_text(str(error))
-        ) from error
+    """Read assistant text, usage, stop reason, and request ID off an SDK response.
 
+    Raises the legacy ``AIProviderInvocationError`` on a malformed response,
+    matching the pre-migration behavior the Slice 11.1 baseline
+    characterizes. The adapter itself never raises here — it returns a
+    bounded ``invalid_response`` failure instead.
+    """
 
-def _optional_int(value: Any) -> int | None:
-    if value is None:
-        return None
-    try:
-        number = int(value)
-    except (TypeError, ValueError):
-        return None
-    if number < 0:
-        return None
-    return number
+    outcome = response_mapping.extract_chat_response(response)
+    if outcome.extracted is None:
+        assert outcome.failure is not None
+        raise legacy_bridge.legacy_error_for(
+            outcome.failure.error,
+            legacy_detail=outcome.failure.legacy_detail,
+        )
+    extracted = outcome.extracted
+    totals = usage_mapping.extract_raw_totals(extracted.usage_object)
+    usage = ModelUsage(
+        input_tokens=totals.input_tokens,
+        output_tokens=totals.output_tokens,
+        total_tokens=totals.total_tokens,
+    )
+    return extracted.text, usage, extracted.stop_reason, extracted.request_id
 
 
 def _map_openai_exception(error: Exception) -> AIProviderError:
-    message = sanitize_provider_text(str(error))
-    name = type(error).__name__
-    if name in {"AuthenticationError", "PermissionDeniedError"}:
-        return AIProviderInvocationError(
-            "OpenAI authentication failed. Verify API key and model access. "
-            f"Details: {message}"
-        )
-    if name in {"RateLimitError", "APITimeoutError", "APIConnectionError", "InternalServerError"}:
-        return AIProviderTimeoutError(f"OpenAI temporary service failure: {message}")
-    if name in {"BadRequestError", "NotFoundError", "UnprocessableEntityError"}:
-        return AIProviderInvocationError(
-            f"OpenAI invalid model or request configuration: {message}"
-        )
-    return AIProviderInvocationError(f"OpenAI invocation failed: {message}")
+    """Map an OpenAI SDK exception onto the legacy exception the wrapper raises."""
+
+    failure = classify_sdk_exception(error)
+    return legacy_bridge.legacy_error_for(failure.error, legacy_detail=failure.legacy_detail)
 
 
 __all__ = [

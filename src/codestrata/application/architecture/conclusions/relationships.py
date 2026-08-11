@@ -12,7 +12,7 @@ from codestrata.application.architecture.conclusions.rule_catalog import (
 from codestrata.domain.architecture.conclusions.enums import FindingRelationshipType
 from codestrata.domain.architecture.conclusions.relationships import FindingRelationship
 from codestrata.domain.findings import Finding
-from codestrata.domain.rules.enums import RuleConfidence
+from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
 
 def _subject_keys(finding: Finding) -> frozenset[str]:
@@ -64,9 +64,9 @@ def build_finding_relationships(
                 # Coupling reinforcing a cycle/direction only when unit shared.
                 rel_type = FindingRelationshipType.SUPPORTS
                 reason = "coupled_unit_also_in_boundary_concern"
-                confidence = RuleConfidence.LOW
+                confidence = MatchEvidenceConfidence.LOW
             else:
-                confidence = RuleConfidence.HIGH if shared else RuleConfidence.MEDIUM
+                confidence = MatchEvidenceConfidence.HIGH if shared else MatchEvidenceConfidence.MEDIUM
                 if not shared and rel_type is FindingRelationshipType.OVERLAPS:
                     # Overlaps require shared dependency scope.
                     continue

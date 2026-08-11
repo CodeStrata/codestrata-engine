@@ -11,6 +11,7 @@ from codestrata.domain.technical_debt.assessment.identifiers import (
 )
 from codestrata.domain.technical_debt.assessment.models import TechnicalDebtAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
+from codestrata.artifacts.heads import resolve_head_path
 
 
 class TechnicalDebtAssessmentArtifactWriteResult(BaseModel):
@@ -35,7 +36,8 @@ def write_technical_debt_assessment_artifact(
     """Write deterministic technical-debt-assessment.json under the run directory."""
 
     run_directory.mkdir(parents=True, exist_ok=True)
-    path = run_directory / TECHNICAL_DEBT_ASSESSMENT_FILENAME
+    path = resolve_head_path(run_directory, legacy_filename=TECHNICAL_DEBT_ASSESSMENT_FILENAME)
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = dumps_stable_json(technical_debt_assessment_payload(section))
     tmp = path.with_suffix(".json.tmp")
     tmp.write_text(text, encoding="utf-8")

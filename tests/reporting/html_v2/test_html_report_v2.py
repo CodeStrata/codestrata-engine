@@ -284,15 +284,25 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     assert isinstance(document, CustomerReportDocument)
     assert 3 <= len(document.key_takeaways) <= 5
     assert document.outline
-    assert document.outline[0].section_id == "executive-summary"
+    assert document.outline[0].section_id == "leadership-verdict"
     outline_ids = {entry.section_id for entry in document.outline}
-    assert "repository-overview" in outline_ids
-    assert "assessment-summary" in outline_ids
-    assert "engineering-assessment-conclusion" in outline_ids
-    assert "engineering-risks" in outline_ids
     assert "executive-summary" in outline_ids
-    assert "modernization-opportunities" in outline_ids
+    assert "engineering-intelligence-summary" in outline_ids
+    assert "assessment-results" in outline_ids
+    assert "technology-inventory" in outline_ids
+    assert "security-intelligence" in outline_ids
+    assert "engineering-risks" in outline_ids
+    assert "priority-actions" in outline_ids
     assert "assessment-scope" not in outline_ids
+    # Ordering: Leadership → Executive Summary → Assessment Overview
+    ordered = [entry.section_id for entry in document.outline]
+    assert ordered.index("leadership-verdict") < ordered.index("executive-summary")
+    assert ordered.index("executive-summary") < ordered.index(
+        "engineering-intelligence-summary"
+    )
+    assert ordered.index("engineering-intelligence-summary") < ordered.index(
+        "key-takeaways"
+    )
     assert document.assessment_scope is not None
     assert "Security" in document.assessment_scope.assessed_packs
     assert document.metadata.report_version == REPORT_HTML_VERSION
@@ -302,16 +312,41 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     assert document.leadership_verdict
     assert document.executive_summary is not None
     assert document.priority_actions
+    assert len(document.assessment_heads) == 8
 
     html = HtmlReportRenderer().render(document)
     assert 'id="cover"' in html
     assert 'id="contents"' in html
     assert "Leadership Verdict" in html
-    assert "Key Takeaways" in html
     assert "Executive Summary" in html
+    assert "Key Takeaways" in html
+    assert "Assessment Overview" in html
     assert "Should I care?" in html
+    assert 'id="executive-summary"' in html
+    assert 'id="engineering-intelligence-summary"' in html
+    exec_idx = html.find('id="executive-summary"')
+    eis_idx = html.find('id="engineering-intelligence-summary"')
+    assert 0 <= exec_idx < eis_idx
+    assert document.engineering_intelligence is not None
+    assert "Overall assessment status" in html
+    assert "Assessment heads assessed" in html
+    assert "Priority Action summary" in html
+    assert "Coverage" in html
+    assert "Confidence" in html
+    assert "Limitations" in html
+    assert 'data-canonical="coverage-confidence-limitations"' in html
+    assert "Based only on enabled assessment heads" in html
+    assert "Runtime behavior not evaluated" in html
+    assert "Disabled heads reduce completeness" in html
+    assert "healthy engineering organization" not in html.lower()
+    assert "production ready" not in html.lower()
+    assert "cloud ready" not in html.lower()
+    assert "ai ready" not in html.lower().replace("ai readiness", "")
+    assert "modernization ready" not in html.lower()
+    assert "enterprise ready" not in html.lower()
     assert "Engineering Risks" in html
-    assert "Modernization Opportunities" in html
+    assert "Assessment Results" in html
+    assert "Security Intelligence" in html
     assert "Priority Actions" in html
     assert "Technical Appendix" in html
     assert 'id="assessment-scope"' in html
@@ -347,10 +382,13 @@ def test_ai_enrichment_present_and_absent(tmp_path: Path) -> None:
     assert view.ai_enrichment.prompt_version == "1.1.0"
     assert "Advisor version" in with_ai
     assert "Prompt version" in with_ai
-    # Leadership narrative is present; methodology jargon is not.
+    # Leadership narrative is present; methodology jargon is not in the Advisor body.
     assert "Leadership Verdict" in with_ai
-    assert "deterministic findings" not in with_ai.lower()
-    assert "deterministic recommendations" not in with_ai.lower()
+    advisor_start = with_ai.lower().find('id="modernization-advisor"')
+    assert advisor_start >= 0
+    advisor_html = with_ai.lower()[advisor_start:]
+    assert "deterministic findings" not in advisor_html
+    assert "deterministic recommendations" not in advisor_html
 
 
 def test_report_json_unchanged_shape(tmp_path: Path) -> None:
@@ -513,9 +551,9 @@ def test_java_and_javascript_samples(tmp_path: Path, kind: str) -> None:
         report_artifacts=(ReportArtifactInput(label="Findings", relative_path="findings.json"),),
     )
     html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
-    assert "Executive Summary" in html
+    assert "Assessment Overview" in html
     assert "Leadership Verdict" in html
-    assert "Findings" in html
+    assert "Assessment Results" in html
     assert "Priority Actions" in html
     assert repository.name in html
     assert str(repository.path) not in html

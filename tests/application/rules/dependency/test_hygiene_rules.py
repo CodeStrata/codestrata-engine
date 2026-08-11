@@ -57,7 +57,7 @@ from codestrata.domain.rules.context import (
 )
 from codestrata.domain.rules.enums import (
     RuleCategory,
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleResultStatus,
     RuleSeverity,
 )
@@ -557,7 +557,7 @@ def test_duplicate_declaration_group() -> None:
     assert result.status is RuleResultStatus.MATCHED
     assert len(result.matches) == 1
     assert result.matches[0].severity is RuleSeverity.LOW
-    assert result.matches[0].confidence is RuleConfidence.HIGH
+    assert result.matches[0].confidence is MatchEvidenceConfidence.HIGH
     assert len(result.matches[0].evidence) == 2
 
 

@@ -1,0 +1,911 @@
+{
+  "catalog_id": "codestrata-privacy-first-telemetry-catalog",
+  "catalog_policy_version": "1.0",
+  "change_policy": [
+    "catalog_artifact_update_required",
+    "code_change_required",
+    "privacy_review_required",
+    "runtime_event_schema_remains_1_0_unless_serialized_event_changes",
+    "schema_or_policy_version_review_required",
+    "tests_required"
+  ],
+  "client_name": "codestrata_cli",
+  "consent_expands_fields": false,
+  "consent_persistence": "none",
+  "consent_scope": "session",
+  "cross_field_rules": [
+    {
+      "description": "client_name must equal codestrata_cli; other clients are rejected.",
+      "rule_id": "client_name_fixed"
+    },
+    {
+      "description": "Session consent cannot expand the approved field set or bypass projection.",
+      "rule_id": "consent_cannot_expand_fields"
+    },
+    {
+      "description": "enabled_assessment_heads is omitted from intake when empty.",
+      "rule_id": "empty_heads_omitted"
+    },
+    {
+      "description": "Privacy projection always injects schema_version and runtime_policy_version onto the privacy-safe payload.",
+      "rule_id": "projection_injects_versions"
+    },
+    {
+      "description": "The current privacy-first runtime applies one shared typed event shape to all event types. Event-specific requiredness beyond event_type and client_name is not enforced by validators today.",
+      "rule_id": "shared_event_shape"
+    },
+    {
+      "description": "Unknown enum values are rejected (no silent forward compatibility).",
+      "rule_id": "unknown_enum_rejected"
+    }
+  ],
+  "enums": [
+    {
+      "aliases": [],
+      "name": "arch_family",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "64-bit ARM architecture.",
+          "value": "arm64"
+        },
+        {
+          "meaning": "Other or unclassified architecture.",
+          "value": "other"
+        },
+        {
+          "meaning": "64-bit x86 architecture.",
+          "value": "x86_64"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "duration_bucket",
+      "notes": "Duration buckets are named categories only; exact duration is not retained.",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "Coarse duration category greater than about 5m.",
+          "value": "gt_5m"
+        },
+        {
+          "meaning": "Coarse duration category under one second.",
+          "value": "lt_1s"
+        },
+        {
+          "meaning": "Coarse duration category from about 1m to 5m.",
+          "value": "m_1_5"
+        },
+        {
+          "meaning": "Coarse duration category from about 10s to 60s.",
+          "value": "s_10_60"
+        },
+        {
+          "meaning": "Coarse duration category from about 1s to 10s.",
+          "value": "s_1_10"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "event_type",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "CLI application/process completed.",
+          "value": "application_completed"
+        },
+        {
+          "meaning": "CLI application/process started.",
+          "value": "application_started"
+        },
+        {
+          "meaning": "A feature or command path completed.",
+          "value": "feature_completed"
+        },
+        {
+          "meaning": "A feature or command path was invoked.",
+          "value": "feature_invoked"
+        },
+        {
+          "meaning": "An operation failed.",
+          "value": "operation_failed"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "failure_category",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "Internal error category.",
+          "value": "internal"
+        },
+        {
+          "meaning": "Timeout failure.",
+          "value": "timeout"
+        },
+        {
+          "meaning": "Dependency or capability unavailable.",
+          "value": "unavailable"
+        },
+        {
+          "meaning": "Unclassified failure.",
+          "value": "unknown"
+        },
+        {
+          "meaning": "Validation failure.",
+          "value": "validation"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "lifecycle",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "Successful/terminal completion.",
+          "value": "complete"
+        },
+        {
+          "meaning": "Failure terminal state.",
+          "value": "fail"
+        },
+        {
+          "meaning": "Start of an operation or process.",
+          "value": "start"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "operation_category",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "Assessment-related operation.",
+          "value": "assess"
+        },
+        {
+          "meaning": "Other categorical operation.",
+          "value": "other"
+        },
+        {
+          "meaning": "Report-related operation.",
+          "value": "report"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "os_family",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "Linux family operating system.",
+          "value": "linux"
+        },
+        {
+          "meaning": "macOS family operating system.",
+          "value": "macos"
+        },
+        {
+          "meaning": "Other or unclassified OS family.",
+          "value": "other"
+        },
+        {
+          "meaning": "Windows family operating system.",
+          "value": "windows"
+        }
+      ]
+    },
+    {
+      "aliases": [],
+      "name": "result",
+      "notes": "",
+      "unknown_value_behavior": "rejected",
+      "values": [
+        {
+          "meaning": "Operation cancelled.",
+          "value": "cancelled"
+        },
+        {
+          "meaning": "Operation failed.",
+          "value": "failure"
+        },
+        {
+          "meaning": "Operation succeeded.",
+          "value": "success"
+        },
+        {
+          "meaning": "Result not classified.",
+          "value": "unknown"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "event_specific_constraints": [
+        "Shared event shape; no additional event-specific requiredness is enforced by current validators."
+      ],
+      "example": {
+        "client_name": "codestrata_cli",
+        "event_type": "application_completed",
+        "runtime_policy_version": "1.0",
+        "schema_version": "1.0"
+      },
+      "lifecycle_meaning": "Process completion (lifecycle may be complete).",
+      "limitations": [
+        "transmission_not_operational",
+        "installation_identity_not_used",
+        "http_transport_requires_explicit_configuration",
+        "cloud_mapping_independently_versioned"
+      ],
+      "name": "application_completed",
+      "optional_fields": [
+        "ai_used",
+        "arch_family",
+        "cli_version",
+        "duration_bucket",
+        "enabled_assessment_heads",
+        "failure_category",
+        "lifecycle",
+        "offline_mode",
+        "operation_category",
+        "os_family",
+        "result"
+      ],
+      "privacy_notes": "Privacy projection is mandatory. Consent cannot expand fields. Transport-bound events must pass the pre-transport privacy gate. Cloud mapping is independently versioned. Default transport remains unavailable; HTTP requires explicit configuration. installation_id and wire event_id are not Engine catalog fields.",
+      "prohibited_fields_note": "Any field outside the approved allowlist is rejected. Forbidden identity/path/credential field names are rejected.",
+      "purpose": "Marks successful or terminal completion of a CLI process lifecycle.",
+      "required_fields": [
+        "client_name",
+        "event_type",
+        "runtime_policy_version",
+        "schema_version"
+      ],
+      "transmission_operational": false,
+      "usage_status": "supported_but_not_currently_emitted"
+    },
+    {
+      "event_specific_constraints": [
+        "Shared event shape; no additional event-specific requiredness is enforced by current validators."
+      ],
+      "example": {
+        "client_name": "codestrata_cli",
+        "event_type": "application_started",
+        "runtime_policy_version": "1.0",
+        "schema_version": "1.0"
+      },
+      "lifecycle_meaning": "Process start (lifecycle may be start).",
+      "limitations": [
+        "transmission_not_operational",
+        "installation_identity_not_used",
+        "http_transport_requires_explicit_configuration",
+        "cloud_mapping_independently_versioned"
+      ],
+      "name": "application_started",
+      "optional_fields": [
+        "ai_used",
+        "arch_family",
+        "cli_version",
+        "duration_bucket",
+        "enabled_assessment_heads",
+        "failure_category",
+        "lifecycle",
+        "offline_mode",
+        "operation_category",
+        "os_family",
+        "result"
+      ],
+      "privacy_notes": "Privacy projection is mandatory. Consent cannot expand fields. Transport-bound events must pass the pre-transport privacy gate. Cloud mapping is independently versioned. Default transport remains unavailable; HTTP requires explicit configuration. installation_id and wire event_id are not Engine catalog fields.",
+      "prohibited_fields_note": "Any field outside the approved allowlist is rejected. Forbidden identity/path/credential field names are rejected.",
+      "purpose": "Marks the start of a CLI process lifecycle for privacy-safe telemetry.",
+      "required_fields": [
+        "client_name",
+        "event_type",
+        "runtime_policy_version",
+        "schema_version"
+      ],
+      "transmission_operational": false,
+      "usage_status": "supported_but_not_currently_emitted"
+    },
+    {
+      "event_specific_constraints": [
+        "Shared event shape; no additional event-specific requiredness is enforced by current validators."
+      ],
+      "example": {
+        "ai_used": false,
+        "client_name": "codestrata_cli",
+        "duration_bucket": "s_1_10",
+        "event_type": "feature_completed",
+        "lifecycle": "complete",
+        "operation_category": "assess",
+        "result": "success",
+        "runtime_policy_version": "1.0",
+        "schema_version": "1.0"
+      },
+      "lifecycle_meaning": "Feature/operation completion.",
+      "limitations": [
+        "transmission_not_operational",
+        "installation_identity_not_used",
+        "http_transport_requires_explicit_configuration",
+        "cloud_mapping_independently_versioned"
+      ],
+      "name": "feature_completed",
+      "optional_fields": [
+        "ai_used",
+        "arch_family",
+        "cli_version",
+        "duration_bucket",
+        "enabled_assessment_heads",
+        "failure_category",
+        "lifecycle",
+        "offline_mode",
+        "operation_category",
+        "os_family",
+        "result"
+      ],
+      "privacy_notes": "Privacy projection is mandatory. Consent cannot expand fields. Transport-bound events must pass the pre-transport privacy gate. Cloud mapping is independently versioned. Default transport remains unavailable; HTTP requires explicit configuration. installation_id and wire event_id are not Engine catalog fields.",
+      "prohibited_fields_note": "Any field outside the approved allowlist is rejected. Forbidden identity/path/credential field names are rejected.",
+      "purpose": "Records that a categorical feature or command operation completed.",
+      "required_fields": [
+        "client_name",
+        "event_type",
+        "runtime_policy_version",
+        "schema_version"
+      ],
+      "transmission_operational": false,
+      "usage_status": "emitted_by_current_runtime"
+    },
+    {
+      "event_specific_constraints": [
+        "Shared event shape; no additional event-specific requiredness is enforced by current validators."
+      ],
+      "example": {
+        "ai_used": false,
+        "client_name": "codestrata_cli",
+        "event_type": "feature_invoked",
+        "lifecycle": "start",
+        "operation_category": "assess",
+        "runtime_policy_version": "1.0",
+        "schema_version": "1.0"
+      },
+      "lifecycle_meaning": "Feature/operation start.",
+      "limitations": [
+        "transmission_not_operational",
+        "installation_identity_not_used",
+        "http_transport_requires_explicit_configuration",
+        "cloud_mapping_independently_versioned"
+      ],
+      "name": "feature_invoked",
+      "optional_fields": [
+        "ai_used",
+        "arch_family",
+        "cli_version",
+        "duration_bucket",
+        "enabled_assessment_heads",
+        "failure_category",
+        "lifecycle",
+        "offline_mode",
+        "operation_category",
+        "os_family",
+        "result"
+      ],
+      "privacy_notes": "Privacy projection is mandatory. Consent cannot expand fields. Transport-bound events must pass the pre-transport privacy gate. Cloud mapping is independently versioned. Default transport remains unavailable; HTTP requires explicit configuration. installation_id and wire event_id are not Engine catalog fields.",
+      "prohibited_fields_note": "Any field outside the approved allowlist is rejected. Forbidden identity/path/credential field names are rejected.",
+      "purpose": "Records that a categorical feature or command operation began.",
+      "required_fields": [
+        "client_name",
+        "event_type",
+        "runtime_policy_version",
+        "schema_version"
+      ],
+      "transmission_operational": false,
+      "usage_status": "emitted_by_current_runtime"
+    },
+    {
+      "event_specific_constraints": [
+        "Shared event shape; no additional event-specific requiredness is enforced by current validators."
+      ],
+      "example": {
+        "client_name": "codestrata_cli",
+        "event_type": "operation_failed",
+        "failure_category": "unavailable",
+        "lifecycle": "fail",
+        "operation_category": "assess",
+        "result": "failure",
+        "runtime_policy_version": "1.0",
+        "schema_version": "1.0"
+      },
+      "lifecycle_meaning": "Feature/operation failure.",
+      "limitations": [
+        "transmission_not_operational",
+        "installation_identity_not_used",
+        "http_transport_requires_explicit_configuration",
+        "cloud_mapping_independently_versioned"
+      ],
+      "name": "operation_failed",
+      "optional_fields": [
+        "ai_used",
+        "arch_family",
+        "cli_version",
+        "duration_bucket",
+        "enabled_assessment_heads",
+        "failure_category",
+        "lifecycle",
+        "offline_mode",
+        "operation_category",
+        "os_family",
+        "result"
+      ],
+      "privacy_notes": "Privacy projection is mandatory. Consent cannot expand fields. Transport-bound events must pass the pre-transport privacy gate. Cloud mapping is independently versioned. Default transport remains unavailable; HTTP requires explicit configuration. installation_id and wire event_id are not Engine catalog fields.",
+      "prohibited_fields_note": "Any field outside the approved allowlist is rejected. Forbidden identity/path/credential field names are rejected.",
+      "purpose": "Records that a categorical operation failed with a bounded failure category.",
+      "required_fields": [
+        "client_name",
+        "event_type",
+        "runtime_policy_version",
+        "schema_version"
+      ],
+      "transmission_operational": false,
+      "usage_status": "emitted_by_current_runtime"
+    }
+  ],
+  "installation_identity_status": "not_used",
+  "limitations": [
+    "cloud_mapping_independently_versioned",
+    "community_cloud_contracts_separate",
+    "consent_cannot_expand_fields",
+    "derived_from_typed_runtime_models",
+    "extension_clients_deferred",
+    "http_transport_requires_explicit_configuration",
+    "installation_identity_not_used",
+    "legacy_events_excluded",
+    "pre_transport_privacy_gate_required",
+    "preview_command_available",
+    "runtime_event_schema_remains_1_0",
+    "transmission_not_operational"
+  ],
+  "max_event_size_bytes": 4096,
+  "max_property_count": 24,
+  "max_string_length": 64,
+  "never_collected": [
+    {
+      "category": "account_identifiers",
+      "description": "Account identifiers are never collected."
+    },
+    {
+      "category": "ai_responses",
+      "description": "AI responses are never collected."
+    },
+    {
+      "category": "api_keys",
+      "description": "API keys are never collected."
+    },
+    {
+      "category": "argv",
+      "description": "Raw argv is never collected."
+    },
+    {
+      "category": "authorization_headers",
+      "description": "Authorization headers are never collected."
+    },
+    {
+      "category": "command_line",
+      "description": "Full command lines are never collected."
+    },
+    {
+      "category": "cookies",
+      "description": "Cookies are never collected."
+    },
+    {
+      "category": "credentials",
+      "description": "Credentials are never collected."
+    },
+    {
+      "category": "customer_identifiers",
+      "description": "Customer identifiers are never collected."
+    },
+    {
+      "category": "cwd",
+      "description": "Current working directory is never collected."
+    },
+    {
+      "category": "email_addresses",
+      "description": "Email addresses are never collected."
+    },
+    {
+      "category": "endpoint_urls",
+      "description": "Endpoint URLs are never collected as event fields."
+    },
+    {
+      "category": "environment_variable_values",
+      "description": "Environment-variable values are never collected."
+    },
+    {
+      "category": "evidence",
+      "description": "Evidence objects are never collected."
+    },
+    {
+      "category": "exact_cost",
+      "description": "Exact cost values are never collected."
+    },
+    {
+      "category": "exact_model_ids",
+      "description": "Exact model IDs are never collected."
+    },
+    {
+      "category": "exact_token_counts",
+      "description": "Exact token counts are never collected."
+    },
+    {
+      "category": "exception_messages",
+      "description": "Exception messages are never collected."
+    },
+    {
+      "category": "file_paths",
+      "description": "File paths are never collected."
+    },
+    {
+      "category": "findings",
+      "description": "Assessment Findings are never collected."
+    },
+    {
+      "category": "hostnames",
+      "description": "Hostnames are never collected."
+    },
+    {
+      "category": "installation_identity",
+      "description": "Installation identity is not used by the privacy-first runtime."
+    },
+    {
+      "category": "ip_addresses",
+      "description": "IP addresses are never collected."
+    },
+    {
+      "category": "organization_names",
+      "description": "Organization names are never collected."
+    },
+    {
+      "category": "output_paths",
+      "description": "Output directory paths are never collected."
+    },
+    {
+      "category": "package_names",
+      "description": "Package names are never collected by the privacy-first runtime."
+    },
+    {
+      "category": "project_names",
+      "description": "Project names are never collected."
+    },
+    {
+      "category": "prompts",
+      "description": "AI prompts are never collected."
+    },
+    {
+      "category": "queue_contents",
+      "description": "Queue contents are never collected as event fields."
+    },
+    {
+      "category": "recommendations",
+      "description": "Recommendations are never collected."
+    },
+    {
+      "category": "report_paths",
+      "description": "Report paths are never collected."
+    },
+    {
+      "category": "repository_names",
+      "description": "Repository names are never collected."
+    },
+    {
+      "category": "repository_urls",
+      "description": "Repository URLs are never collected."
+    },
+    {
+      "category": "secrets",
+      "description": "Secrets are never collected."
+    },
+    {
+      "category": "source_code",
+      "description": "Source code is never collected."
+    },
+    {
+      "category": "stack_traces",
+      "description": "Stack traces are never collected."
+    },
+    {
+      "category": "usernames",
+      "description": "Usernames are never collected."
+    }
+  ],
+  "privacy_filtering_required": true,
+  "runtime_event_schema_version": "1.0",
+  "runtime_policy_version": "1.0",
+  "schema_name": "privacy-first-telemetry-catalog",
+  "schema_version": "1.0.0",
+  "shared_fields": [
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": false,
+      "field_type": "boolean",
+      "max_length": null,
+      "name": "ai_used",
+      "normalization": "boolean only; no model IDs or token counts",
+      "notes": "",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "boolean",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "command_runtime_categorical_context",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "arch_family",
+      "event_specific": false,
+      "example": "arm64",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "arch_family",
+      "normalization": "exact enum value",
+      "notes": "",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "architecture_category",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": "0.2.0",
+      "field_type": "string",
+      "max_length": 32,
+      "name": "cli_version",
+      "normalization": "trimmed; path markers rejected; max 32 chars",
+      "notes": "Package version string when supplied.",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "bounded_version",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "cli_package_metadata",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": "codestrata_cli",
+      "field_type": "string",
+      "max_length": 64,
+      "name": "client_name",
+      "normalization": "must equal codestrata_cli",
+      "notes": "Only codestrata_cli is accepted in the current runtime.",
+      "omitted_when_unavailable": false,
+      "privacy_classification": "public_constant",
+      "requiredness": "required",
+      "set_ordering_normalized": false,
+      "source": "runtime_constant",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": true,
+      "enum_ref": "duration_bucket",
+      "event_specific": false,
+      "example": "s_1_10",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "duration_bucket",
+      "normalization": "exact named category only; no exact duration retained",
+      "notes": "Runtime accepts only named categories. Exact durations are not collected by the privacy-first event model.",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "coarse_bucket",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "privacy_safe_derived_bucket",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": [
+        "architecture",
+        "security"
+      ],
+      "field_type": "array[string]",
+      "max_length": 32,
+      "name": "enabled_assessment_heads",
+      "normalization": "sorted unique strings; path markers rejected; max 32 chars each",
+      "notes": "Omitted when empty. Bounded strings (max 32 chars; path markers rejected). There is no closed assessment-head enum in the runtime; examples are illustrative categorical names only.",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "bounded_set_of_categories",
+      "requiredness": "optional",
+      "set_ordering_normalized": true,
+      "source": "assessment_configuration_category",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "event_type",
+      "event_specific": false,
+      "example": "feature_invoked",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "event_type",
+      "normalization": "exact enum value",
+      "notes": "Required on every privacy-safe projected event.",
+      "omitted_when_unavailable": false,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "required",
+      "set_ordering_normalized": false,
+      "source": "command_runtime_categorical_context",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "failure_category",
+      "event_specific": false,
+      "example": "unavailable",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "failure_category",
+      "normalization": "exact enum value",
+      "notes": "Shared optional field. Current validators do not require it only for operation_failed or forbid it on success.",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "primary_operation_result",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "lifecycle",
+      "event_specific": false,
+      "example": "start",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "lifecycle",
+      "normalization": "exact enum value",
+      "notes": "Shared optional field; not event-enforced by validators today.",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "command_runtime_categorical_context",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": true,
+      "field_type": "boolean",
+      "max_length": null,
+      "name": "offline_mode",
+      "normalization": "boolean only",
+      "notes": "",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "boolean",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "command_runtime_categorical_context",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "operation_category",
+      "event_specific": false,
+      "example": "assess",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "operation_category",
+      "normalization": "exact enum value",
+      "notes": "",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "command_runtime_categorical_context",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "os_family",
+      "event_specific": false,
+      "example": "macos",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "os_family",
+      "normalization": "exact enum value",
+      "notes": "",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "operating_system_category",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": "result",
+      "event_specific": false,
+      "example": "success",
+      "field_type": "enum",
+      "max_length": null,
+      "name": "result",
+      "normalization": "exact enum value",
+      "notes": "Shared optional field across the common event shape.",
+      "omitted_when_unavailable": true,
+      "privacy_classification": "low_cardinality_category",
+      "requiredness": "optional",
+      "set_ordering_normalized": false,
+      "source": "primary_operation_result",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": "1.0",
+      "field_type": "string",
+      "max_length": null,
+      "name": "runtime_policy_version",
+      "normalization": "injected by projection from runtime policy",
+      "notes": "Always added by privacy projection.",
+      "omitted_when_unavailable": false,
+      "privacy_classification": "public_constant",
+      "requiredness": "required",
+      "set_ordering_normalized": false,
+      "source": "runtime_constant",
+      "transmitted_currently": false
+    },
+    {
+      "bucketed": false,
+      "enum_ref": null,
+      "event_specific": false,
+      "example": "1.0",
+      "field_type": "string",
+      "max_length": null,
+      "name": "schema_version",
+      "normalization": "injected by projection as runtime event schema version",
+      "notes": "Always added by privacy projection.",
+      "omitted_when_unavailable": false,
+      "privacy_classification": "public_constant",
+      "requiredness": "required",
+      "set_ordering_normalized": false,
+      "source": "runtime_constant",
+      "transmitted_currently": false
+    }
+  ],
+  "transmission_status": "not_operational",
+  "validation_behavior": [
+    "consent_does_not_bypass_validation",
+    "enum_values_bounded",
+    "extra_fields_forbidden",
+    "forbidden_field_names_rejected",
+    "invalid_combinations_rejected_where_modeled",
+    "path_like_values_rejected_where_applicable",
+    "secret_like_values_rejected_where_applicable",
+    "unknown_fields_rejected",
+    "unsafe_value_shapes_rejected",
+    "values_not_echoed_in_errors"
+  ]
+}

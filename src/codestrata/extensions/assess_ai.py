@@ -89,8 +89,14 @@ def _bootstrap_assess_providers(registry: AssessAIProviderRegistry) -> None:
 
         return OpenAIAIModelProvider(settings=settings)
 
+    def _openrouter(settings: CodestrataSettings) -> AIModelProvider:
+        from codestrata.ai.providers.openrouter_provider import OpenRouterAIModelProvider
+
+        return OpenRouterAIModelProvider(settings=settings)
+
     registry.register("bedrock", _bedrock, api_version=EXTENSION_API_VERSION)
     registry.register("openai", _openai, api_version=EXTENSION_API_VERSION)
+    registry.register("openrouter", _openrouter, api_version=EXTENSION_API_VERSION)
 
     for ep in entry_points().select(group=ENTRY_POINT_GROUP):
         try:

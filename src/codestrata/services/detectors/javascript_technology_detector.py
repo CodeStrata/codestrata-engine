@@ -46,9 +46,13 @@ class JavaScriptTechnologyDetector:
         if "package.json" not in file_set:
             return technologies
 
+        package_data = self._read_package_json(repository)
+        node_version = self._engines_node_version(package_data)
+
         technologies.append(
             Technology(
                 name="Node.js",
+                version=node_version,
                 category=TechnologyCategory.RUNTIME,
                 confidence=0.9,
                 source="package.json",
@@ -91,8 +95,6 @@ class JavaScriptTechnologyDetector:
                     source="package.json",
                 )
             )
-
-        package_data = self._read_package_json(repository)
 
         dependencies = self._collect_dependencies(package_data)
 
@@ -173,3 +175,15 @@ class JavaScriptTechnologyDetector:
                 dependencies.update({str(name): str(version) for name, version in section.items()})
 
         return dependencies
+
+    def _engines_node_version(self, package_data: dict[str, Any]) -> str | None:
+        """Return engines.node when package.json declares a Node runtime target."""
+
+        engines = package_data.get("engines")
+        if not isinstance(engines, dict):
+            return None
+        node = engines.get("node")
+        if node is None:
+            return None
+        text = str(node).strip()
+        return text or None

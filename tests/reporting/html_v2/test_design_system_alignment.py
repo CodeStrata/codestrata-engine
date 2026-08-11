@@ -59,7 +59,7 @@ def test_generated_html_embeds_tokens_and_keeps_csp_offline(tmp_path: Path) -> N
     # deep-link anchors (pre-existing). Structural section ids must stay unique.
     structural_ids = [
         item
-        for item in re.findall(r'\bid="([^"]+)"', html)
+        for item in re.findall(r'(?<![\w-])id="([^"]+)"', html)
         if not item.startswith(("finding-", "recommendation-"))
     ]
     dupes = [item for item, count in Counter(structural_ids).items() if count > 1]

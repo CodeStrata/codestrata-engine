@@ -404,6 +404,23 @@ def test_cloud040_deployment_pipeline() -> None:
     assert "github_actions" in result.matches[0].summary
 
 
+def test_cloud040_ignores_build_only_inspected_workflows() -> None:
+    """Build-only / echo-only GHA candidates must not fire deployment findings."""
+
+    rule = CloudDeploymentPipelineDetectedRule()
+    inspected = CloudDeploymentFactEvidence(
+        evidence_id="dep:inspected",
+        system=CloudDeploymentSystem.GITHUB_ACTIONS,
+        path=".github/workflows/build.yml",
+        confirmation_level=EvidenceConfirmationLevel.STRUCTURALLY_INSPECTED,
+        provenance=_prov(),
+        detail="deployment_workflow_candidate",
+    )
+    assert rule.evaluate(_context(_bundle(deployment=(inspected,)))).status is (
+        RuleResultStatus.NOT_MATCHED
+    )
+
+
 def test_cloud050_managed_services() -> None:
     rule = ManagedCloudServicesDetectedRule()
     assert rule.evaluate(_context(_bundle())).status is RuleResultStatus.NOT_MATCHED

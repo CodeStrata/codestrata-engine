@@ -82,7 +82,7 @@ def format_examples(*, json_output: bool = False) -> str:
     lines.append("")
     lines.append("Try:")
     lines.append(
-        "  codestrata assess --repo test-fixtures/sample-js-app --output reports --no-ai"
+        "  codestrata assess --repo test-fixtures/sample-js-app --no-ai"
     )
     lines.append("")
     lines.append("Real-world showcases:")

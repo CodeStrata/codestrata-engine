@@ -201,3 +201,37 @@ def test_related_finding_ids_aligned_to_final_customer_findings(tmp_path: Path) 
     report_finding_ids = {item["id"] for item in document["assessment"]["findings"]}
     for item in document["assessment"]["deterministic_recommendations"]:
         assert set(item["related_finding_ids"]) <= report_finding_ids
+
+
+def test_shared_rule_findings_with_same_title_are_not_collapsed(tmp_path: Path) -> None:
+    """Evidence-scoped finding:* IDs must survive customer-universe merge."""
+
+    first = Phase3Finding.create(
+        rule_id="security.credential-literal",
+        title="Credential literal in configuration",
+        description="Literal A",
+        severity=FindingSeverity.HIGH,
+        category=FindingCategory.SECURITY,
+    )
+    # Force distinct stable IDs resembling production evidence-scoped IDs.
+    first = first.model_copy(update={"id": "finding:security.credential-literal:aaaa"})
+    second = Phase3Finding.create(
+        rule_id="security.credential-literal",
+        title="Credential literal in configuration",
+        description="Literal B",
+        severity=FindingSeverity.INFORMATIONAL,
+        category=FindingCategory.SECURITY,
+    )
+    second = second.model_copy(update={"id": "finding:security.credential-literal:bbbb"})
+    report_input = _report_input(
+        tmp_path,
+        phase1_findings=[],
+        phase1_recommendations=[],
+        phase3_findings=[first, second],
+    )
+    findings = resolve_customer_findings(report_input)
+    assert len(findings) == 2
+    assert {item.id for item in findings} == {
+        "finding:security.credential-literal:aaaa",
+        "finding:security.credential-literal:bbbb",
+    }

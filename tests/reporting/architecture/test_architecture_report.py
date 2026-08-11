@@ -235,11 +235,10 @@ def test_report_json_and_html_include_architecture_when_present(tmp_path: Path) 
     )
 
     html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
+    assert 'id="architecture-intelligence"' in html
     assert 'id="architecture-assessment"' in html
-    assert "Architecture Assessment" in html
-    assert "Architecture conclusions" in html
-    assert "Business impact" in html
-    assert "Strengths" not in html or architecture_report.include_strengths_heading
+    assert "Architecture conclusions" in html or "Architecture overview" in html
+    assert "no significant architecture risks" not in html.lower()
     assert "/Users/" not in html
     assert "critical business risk" not in html.lower()
 

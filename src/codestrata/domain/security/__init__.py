@@ -4,6 +4,12 @@ Taxonomy, pack identity, and assessment section contracts. Hygiene rules live
 under ``application.rules.security`` and consume repository-sensitive evidence.
 """
 
+from codestrata.domain.security.context import (
+    CONTEXT_LABELS,
+    NON_ACTIONABLE_CONTEXTS,
+    SecurityContextDecision,
+    SecurityEvidenceContext,
+)
 from codestrata.domain.security.ids import (
     PACK_DESCRIPTION,
     PACK_ID,
@@ -19,6 +25,8 @@ from codestrata.domain.security.taxonomy import (
 )
 
 __all__ = [
+    "CONTEXT_LABELS",
+    "NON_ACTIONABLE_CONTEXTS",
     "PACK_DESCRIPTION",
     "PACK_ID",
     "PACK_TITLE",
@@ -27,5 +35,7 @@ __all__ = [
     "SECURITY_CATEGORIES",
     "TAXONOMY_NAMESPACE",
     "SecurityCategory",
+    "SecurityContextDecision",
+    "SecurityEvidenceContext",
     "coerce_security_category",
 ]

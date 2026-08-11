@@ -311,9 +311,9 @@ def test_complete_report_rendering(tmp_path: Path) -> None:
     assert "Internal use only" in html
     for section in (
         "Leadership Verdict",
-        "Executive Summary",
-        "Technology Overview",
-        "Findings",
+        "Assessment Overview",
+        "Technology Inventory",
+        "Assessment Results",
         "Priority Actions",
         "Technical Appendix",
         "Repository Profile",
@@ -340,7 +340,7 @@ def test_minimal_valid_report(tmp_path: Path) -> None:
     assert "CodeStrata" in html
     assert "sample-app" in html
     assert "Leadership Verdict" in html
-    assert "Executive Summary" in html
+    assert "Assessment Overview" in html
     assert "Should I care?" in html
 
 
@@ -352,10 +352,10 @@ def test_deterministic_report_without_ai(tmp_path: Path) -> None:
     )
     html = ModernizationHTMLReportRenderer().render(report_input)
     assert "Leadership Verdict" in html
-    assert "Executive Summary" in html
+    assert "Assessment Overview" in html
     assert 'id="ai-enrichment"' not in html
     assert "Priority Actions" in html
-    assert "Findings" in html
+    assert "Assessment Results" in html
     assert "Critical finding" in html
     assert "Java" in html
     assert "AI-REC-001" not in html
@@ -426,7 +426,7 @@ def test_execution_metadata(tmp_path: Path) -> None:
 
 def test_methodology_toc_print_css_and_csp(tmp_path: Path) -> None:
     html = ModernizationHTMLReportRenderer().render(_report_input(tmp_path))
-    assert 'id="executive-summary"' in html
+    assert 'id="engineering-intelligence-summary"' in html
     assert 'id="leadership-verdict"' in html
     assert 'id="metadata"' in html
     assert "@media print" in html

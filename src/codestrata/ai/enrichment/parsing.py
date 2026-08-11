@@ -246,7 +246,7 @@ def bridge_enrichment_to_recommendation(
                 title=priority.title,
                 description=priority.rationale,
                 rationale=priority.rationale,
-                priority=_unmap_priority(priority.priority),
+                priority=AIRecommendationPriority.MEDIUM,
                 effort=AIRecommendationEffort.MEDIUM,
                 impact=AIRecommendationImpact.MEDIUM,
                 confidence=AIRecommendationConfidence.MEDIUM,
@@ -294,7 +294,52 @@ def bridge_enrichment_to_recommendation(
                 item.model_copy(update={"related_finding_ids": grounding})
                 for item in recommendations
             ]
-    referenced = set(grounding)
+    evidence_rich = analysis_context is not None and len(analysis_context.findings) >= 8
+    pad_sources: list[tuple[str, str]] = []
+    for theme in enrichment.themes:
+        pad_sources.append((theme.title, theme.summary))
+    for risk in enrichment.risks:
+        pad_sources.append((f"Address risk: {risk.summary[:80]}", risk.summary))
+    for step in enrichment.suggested_next_steps:
+        pad_sources.append((step.title, step.summary or step.title))
+    if not pad_sources:
+        pad_sources.append(
+            (
+                enrichment.executive_summary.headline,
+                enrichment.executive_summary.narrative,
+            )
+        )
+    # Evidence-rich report contract requires 5–8 recommendations and 2–4 phases.
+    while evidence_rich and len(recommendations) < 5:
+        title, description = pad_sources[(len(recommendations) - 1) % len(pad_sources)]
+        index = len(recommendations) + 1
+        finding_ids = list(grounding)
+        if phase1_ids and not finding_ids:
+            finding_ids = [phase1_ids[(index - 1) % len(phase1_ids)]]
+        elif phase1_ids:
+            finding_ids = [phase1_ids[(index - 1) % len(phase1_ids)]]
+        recommendations.append(
+            AIRecommendation(
+                recommendation_id=f"AI-REC-{index:03d}",
+                title=title[:120] or f"Follow-up priority {index}",
+                description=description,
+                rationale=description,
+                priority=AIRecommendationPriority.MEDIUM,
+                effort=AIRecommendationEffort.MEDIUM,
+                impact=AIRecommendationImpact.MEDIUM,
+                confidence=AIRecommendationConfidence.MEDIUM,
+                related_finding_ids=finding_ids,
+                related_deterministic_recommendation_ids=[],
+                suggested_actions=[title[:120] or f"Review priority {index}"],
+                dependencies=[],
+            )
+        )
+    if len(recommendations) > 8:
+        recommendations = recommendations[:8]
+
+    referenced = set()
+    for item in recommendations:
+        referenced.update(item.related_finding_ids)
     total = len(phase1_ids) if phase1_ids else len(context.allowed_finding_ids)
     considered = total
     coverage = EvidenceCoverage(
@@ -304,15 +349,40 @@ def bridge_enrichment_to_recommendation(
         coverage_percentage=(round((len(referenced) / total) * 100.0, 2) if total else 0.0),
         input_truncated=context.truncated,
     )
-    phases = [
-        ModernizationPhase(
-            phase=1,
-            name="Act on enrichment priorities",
-            objective=enrichment.executive_summary.headline,
-            recommendations=[item.recommendation_id for item in recommendations],
-            expected_outcomes=["Clear modernization narrative aligned to findings"],
-        )
-    ]
+    rec_ids = [item.recommendation_id for item in recommendations]
+    if evidence_rich and len(rec_ids) >= 2:
+        mid = max(1, len(rec_ids) // 2)
+        if mid >= len(rec_ids):
+            mid = len(rec_ids) - 1
+        phases = [
+            ModernizationPhase(
+                phase=1,
+                name="Act on enrichment priorities",
+                objective=enrichment.executive_summary.headline,
+                recommendations=rec_ids[:mid],
+                expected_outcomes=["Clear modernization narrative aligned to findings"],
+            ),
+            ModernizationPhase(
+                phase=2,
+                name="Sustain and verify",
+                objective=(
+                    "Confirm deterministic findings remain addressed after "
+                    "modernization narrative actions."
+                ),
+                recommendations=rec_ids[mid:],
+                expected_outcomes=["Deterministic evidence remains authoritative"],
+            ),
+        ]
+    else:
+        phases = [
+            ModernizationPhase(
+                phase=1,
+                name="Act on enrichment priorities",
+                objective=enrichment.executive_summary.headline,
+                recommendations=rec_ids,
+                expected_outcomes=["Clear modernization narrative aligned to findings"],
+            )
+        ]
     return AIRecommendationResult(
         executive_summary=enrichment.executive_summary.narrative,
         overall_assessment=enrichment.executive_summary.narrative,

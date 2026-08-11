@@ -160,6 +160,7 @@ def test_version_change_invalidates_fingerprint() -> None:
         description="d",
         category=RuleCategory.PLATFORM,
         default_severity=RuleSeverity.LOW,
+        confidence=fixture_rules()[0].metadata.confidence,
     )
     fp1 = rule_invalidation_fingerprint(meta, context)
     meta2 = meta.model_copy(update={"version": RuleVersion.parse("1.0.1")})

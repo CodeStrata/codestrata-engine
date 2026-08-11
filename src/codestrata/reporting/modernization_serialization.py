@@ -103,28 +103,34 @@ def write_modernization_assessment_reports(
     report_input: ModernizationReportInput,
     report_paths: ReportPaths,
 ) -> ReportPaths:
-    """Validate once, render HTML and JSON in memory, then write atomically.
+    """Validate once, render HTML, write assessment.html + lightweight assessment.json.
 
-    When ``report_input.timing`` is present, ``report_ms`` and ``total_ms`` are
-    refreshed after in-memory rendering so both artifacts stay aligned.
-
-    Phase 5.19: avoid the previous HTML+JSON double-render. HTML is rendered
-    once with finalized timing; JSON is built once and patched for measured
-    ``report_ms`` / ``total_ms``.
+    Slice 17.12: ``assessment.json`` is a manifest (not a full head merge).
+    Domain heads under ``heads/`` remain the source of truth. The full assessment
+    JSON document is built in memory only to derive manifest summary fields and
+    is not persisted as a duplicate artifact.
     """
 
     from time import perf_counter
 
+    from codestrata.artifacts.layout import manifests_directory
+    from codestrata.artifacts.manifest import (
+        build_assessment_manifest,
+        build_artifact_index_manifest,
+        write_assessment_manifest,
+        write_artifact_index_manifest,
+    )
+
     validated = validate_modernization_report_input(report_input)
     started = perf_counter()
     artifact_input = validated
+    document: dict[str, object]
 
     if validated.timing is None:
-        html, json_text = _render_artifacts(validated)
+        html = ModernizationHTMLReportRenderer().render(validated)
+        document = build_assessment_json_document(validated)
     else:
         base = validated.timing
-        # Measure a single HTML render, then build JSON once with finalized timing.
-        # Previously both HTML and JSON were rendered twice.
         provisional = validated.model_copy(
             update={
                 "timing": base.model_copy(
@@ -157,37 +163,86 @@ def write_modernization_assessment_reports(
             }
         )
         document = build_assessment_json_document(finalized)
-        json_text = assessment_json_to_text(document)
-        # Include JSON serialization cost in report_ms for honesty.
         report_ms = round((perf_counter() - started) * 1000, 2)
         total_ms = round(base.total_ms + report_ms, 2)
-        timing_payload = document.get("assessment", {}).get("timing")
+        timing_payload = document.get("assessment", {}).get("timing")  # type: ignore[union-attr]
         if isinstance(timing_payload, dict):
             timing_payload["report_ms"] = report_ms
             timing_payload["total_ms"] = total_ms
-        json_text = assessment_json_to_text(document)
         artifact_input = finalized
 
     run_directory = report_paths.run_directory
-    pairs = (
-        (report_paths.html_report_path, html),
-        (report_paths.json_report_path, json_text),
-    )
-
     run_directory.mkdir(parents=True, exist_ok=True)
+    if report_paths.heads_directory is not None:
+        report_paths.heads_directory.mkdir(parents=True, exist_ok=True)
 
     temp_paths: list[Path] = []
     renamed_paths: list[Path] = []
     try:
-        for final_path, content in pairs:
-            temp_paths.append(_write_temp_sibling(final_path, content))
-        for temp_path, (final_path, _content) in zip(temp_paths, pairs, strict=True):
-            os.replace(temp_path, final_path)
-            renamed_paths.append(final_path)
+        temp_paths.append(_write_temp_sibling(report_paths.html_report_path, html))
+        os.replace(temp_paths[0], report_paths.html_report_path)
+        renamed_paths.append(report_paths.html_report_path)
         temp_paths.clear()
-        # Align findings.json / recommendations.json with the same customer universe
-        # used by HTML and report.json (overwrite earlier Phase-3-only writes).
         write_customer_finding_artifacts(artifact_input, run_directory)
+
+        assessment_block = document.get("assessment") if isinstance(document, dict) else None
+        repo_block = document.get("repository") if isinstance(document, dict) else None
+        summary = None
+        scores: dict[str, object] = {}
+        findings_summary: dict[str, object] = {}
+        git_metadata: dict[str, object] = {}
+        if isinstance(assessment_block, dict):
+            summary = assessment_block.get("summary") or assessment_block.get("title")
+            raw_scores = assessment_block.get("scores")
+            if isinstance(raw_scores, dict):
+                scores = raw_scores
+            raw_findings = assessment_block.get("findings_summary")
+            if isinstance(raw_findings, dict):
+                findings_summary = raw_findings
+        if isinstance(repo_block, dict):
+            git_metadata = {
+                key: repo_block.get(key)
+                for key in ("commit", "branch", "remote", "name")
+                if repo_block.get(key) is not None
+            }
+
+        run_id = report_paths.run_id or run_directory.name
+        repository_name = report_paths.repository_name
+        if isinstance(repo_block, dict) and repo_block.get("name"):
+            repository_name = str(repo_block["name"])
+
+        manifest = build_assessment_manifest(
+            assessment_id=run_id,
+            repository=repository_name,
+            run_directory=run_directory,
+            overall_summary=str(summary) if summary is not None else None,
+            overall_scores=scores,
+            findings_summary=findings_summary,
+            git_metadata=git_metadata,
+        )
+        write_assessment_manifest(report_paths.json_report_path, manifest)
+        renamed_paths.append(report_paths.json_report_path)
+
+        # Refresh lightweight root index (best-effort).
+        try:
+            assessments_root = run_directory.parent
+            runs = []
+            if assessments_root.is_dir():
+                for child in sorted(assessments_root.iterdir()):
+                    if child.is_dir() and (child / "assessment.json").is_file():
+                        runs.append(
+                            {
+                                "run_id": child.name,
+                                "path": f"assessments/{child.name}",
+                            }
+                        )
+            index = build_artifact_index_manifest(assessment_runs=runs)
+            write_artifact_index_manifest(
+                manifests_directory() / "artifact-manifest.json",
+                index,
+            )
+        except OSError:
+            pass
     except Exception:
         for renamed in renamed_paths:
             try:
@@ -206,6 +261,8 @@ def write_modernization_assessment_reports(
 
 
 def _render_artifacts(report_input: ModernizationReportInput) -> tuple[str, str]:
+    """Render HTML and full JSON document text (tests / callers needing both)."""
+
     html = ModernizationHTMLReportRenderer().render(report_input)
     document = build_assessment_json_document(report_input)
     json_text = assessment_json_to_text(document)

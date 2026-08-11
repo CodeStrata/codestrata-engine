@@ -108,6 +108,16 @@ class RoadmapReportAdapter:
                 )
                 for ref in item.evidence_references[:EVIDENCE_DISPLAY_LIMIT]
             )
+        initiative_type = item.initiative_type
+        initiative_type_value = (
+            initiative_type.value
+            if hasattr(initiative_type, "value")
+            else str(initiative_type)
+        )
+        completeness = item.evidence_completeness
+        completeness_value = (
+            completeness.value if hasattr(completeness, "value") else str(completeness)
+        )
         return RoadmapReportInitiativeView(
             initiative_id=item.initiative_id,
             title=item.title,
@@ -121,6 +131,11 @@ class RoadmapReportAdapter:
             depends_on_initiative_ids=item.depends_on_initiative_ids,
             supporting_finding_ids=item.supporting_finding_ids,
             supporting_recommendation_ids=item.supporting_recommendation_ids,
+            supporting_priority_action_ids=item.supporting_priority_action_ids,
+            primary_priority_action_id=item.primary_priority_action_id,
+            initiative_type=initiative_type_value,
+            evidence_completeness=completeness_value,
+            limitations=item.limitations,
             evidence_references=evidence,
             confidence=item.confidence.value,
             category=item.category,

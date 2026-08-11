@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from codestrata.domain.architecture.assessment.identifiers import ARCHITECTURE_ASSESSMENT_FILENAME
 from codestrata.domain.architecture.assessment.models import ArchitectureAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
+from codestrata.artifacts.heads import resolve_head_path
 
 ARCHITECTURE_ASSESSMENT_FILENAME_EXPORT = ARCHITECTURE_ASSESSMENT_FILENAME
 
@@ -36,7 +37,8 @@ def write_architecture_assessment_artifact(
     """Write deterministic architecture-assessment.json under the run directory."""
 
     run_directory.mkdir(parents=True, exist_ok=True)
-    path = run_directory / ARCHITECTURE_ASSESSMENT_FILENAME
+    path = resolve_head_path(run_directory, legacy_filename=ARCHITECTURE_ASSESSMENT_FILENAME)
+    path.parent.mkdir(parents=True, exist_ok=True)
     text = dumps_stable_json(architecture_assessment_payload(section))
     # Atomic replace when possible.
     tmp = path.with_suffix(".json.tmp")

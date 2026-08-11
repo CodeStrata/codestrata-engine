@@ -42,7 +42,7 @@ from codestrata.domain.evidence.repository_testing.models import (
 from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleSeverity,
     RuleSkipReason,
@@ -192,7 +192,7 @@ class DisabledOrSkippedMarkersRule:
                     title="Disabled or skipped tests detected",
                     summary=summary,
                     severity=severity_for_marker_count(count),
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=tuple(evidence_items),
                     subject_keys=(
                         RULE_DISABLED_OR_SKIPPED,
@@ -294,7 +294,7 @@ class UnconfirmedCandidatesRule:
                         "not be structurally confirmed as tests."
                     ),
                     severity=severity_for_unconfirmed_ratio(ratio),
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=tuple(evidence_items),
                     subject_keys=(
                         RULE_UNCONFIRMED_CANDIDATES,
@@ -404,7 +404,7 @@ class DeclaredWithoutObservationRule:
                         + "."
                     ),
                     severity=RuleSeverity.LOW,
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=tuple(evidence_items),
                     subject_keys=(
                         RULE_DECLARED_WITHOUT_OBSERVATION,
@@ -508,7 +508,7 @@ class CoverageWithoutCiInvocationRule:
                         "in the inspected CI configuration."
                     ),
                     severity=RuleSeverity.INFORMATIONAL,
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=evidence_items,
                     subject_keys=(
                         RULE_COVERAGE_WITHOUT_CI_INVOCATION,

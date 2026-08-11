@@ -190,3 +190,17 @@ answer_model = "gpt-4o-mini"
 embedding_dimensions = 0
 timeout_seconds = 60
 max_retries = 3
+
+# Optional OpenRouter (explicit only — never the default). Requires model +
+# OPENROUTER_API_KEY (or the env named by api_key_env). Doctor: local readiness only (Slice 11.11).
+# [ai]
+# provider = "openrouter"
+#
+# [ai.openrouter]
+# model = "openai/gpt-4o-mini"
+# api_key_env = "OPENROUTER_API_KEY"
+# base_url = ""
+# site_url = ""
+# app_name = ""
+# timeout_seconds = 60
+# max_retries = 3

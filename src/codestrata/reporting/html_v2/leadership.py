@@ -1,6 +1,8 @@
 """Leadership presentation helpers for HTML Report v3 (Phase 7.3).
 
-Presentation only — no assessment-engine or scoring-logic changes.
+Presentation only — Priority Actions are recommendation-backed (Epic 2 Slice 2.4).
+Findings without Recommendations remain Engineering Risks; they are never
+fabricated into Priority Actions here.
 """
 
 from __future__ import annotations
@@ -16,8 +18,6 @@ from codestrata.reporting.html_v2.models import (
     severity_rank,
 )
 from codestrata.reporting.roadmap.models import (
-    RoadmapReportInitiativeView,
-    RoadmapReportPhaseView,
     RoadmapReportSection,
 )
 
@@ -93,18 +93,6 @@ _CUSTOMER_TITLES: dict[str, str] = {
     ),
 }
 
-_PHASE_OBJECTIVES = {
-    "stabilize": (
-        "Restore foundational engineering hygiene so later change is safe "
-        "and observable."
-    ),
-    "secure": "Reduce security exposure before broader modernization work.",
-    "modernize": (
-        "Address structural, dependency, and platform modernization work."
-    ),
-    "optimize": "Improve performance and operational efficiency after foundations are solid.",
-}
-
 
 def is_leadership_signal_finding(finding: FindingView) -> bool:
     """Return True when a finding is meaningful for leadership risk narrative."""
@@ -112,8 +100,28 @@ def is_leadership_signal_finding(finding: FindingView) -> bool:
     severity = finding.severity.strip().lower()
     if severity in _INFORMATIONAL:
         return False
+    # Security context metadata (when present on customer FindingView.description
+    # or title) already demotes non-actionable items via informational severity.
+    # Also drop explicit non-actionable security framing in titles.
     title = finding.title.strip().lower()
     category = finding.category.strip().lower()
+    description = (finding.description or "").strip().lower()
+    if category == "security" and any(
+        marker in description
+        for marker in (
+            "context: ci secret reference",
+            "context: configuration schema",
+            "context: dependency metadata",
+            "context: mock credential",
+            "context: test fixture",
+            "context: test code",
+            "context: documentation",
+            "context: sample/example",
+            "context: generated file",
+            "context: build artifact",
+        )
+    ):
+        return False
     if category == "technology" and any(marker in title for marker in _LOW_SIGNAL_TITLE_MARKERS):
         return False
     if any(marker in title for marker in _LOW_SIGNAL_TITLE_MARKERS) and severity in {
@@ -162,28 +170,25 @@ def build_leadership_verdict(
 
     if not medium_plus:
         health = (
-            f"Overall engineering health looks stable for this repository "
-            f"(highest finding severity: {severity})."
-        )
-        risk_line = (
-            "No medium-or-higher engineering risks stood out in the leadership view."
+            f"No medium-or-higher engineering risks stood out in the leadership view "
+            f"for this repository (highest finding severity: {severity})."
         )
         next_line = (
             f"Next: {top_action}."
             if top_action
             else "Next: maintain current engineering hygiene and reassess after material change."
         )
-        return f"{health} {risk_line} {next_line}"
+        return f"{health} {next_line}"
 
     if severity.lower() in {"critical", "high"}:
         health = (
-            f"Overall engineering health requires attention "
+            f"Overall assessment signals require attention "
             f"(highest finding severity: {severity})."
         )
     else:
         health = (
-            f"Overall engineering health is workable but not risk-free "
-            f"(highest finding severity: {severity})."
+            f"Overall assessment signals include medium-severity findings and "
+            f"are not risk-free (highest finding severity: {severity})."
         )
 
     if len(medium_plus) > 1:
@@ -245,8 +250,8 @@ def build_executive_summary_narrative(
 
     if not medium_plus and not near_term:
         care = (
-            f"You can treat {tech_phrase} as low urgency for leadership attention right now—"
-            f"highest finding severity is {highest_severity}."
+            f"No medium-or-higher leadership signals were identified under activated checks "
+            f"for {tech_phrase}—highest finding severity is {highest_severity}."
         )
         why = (
             "There are no medium-or-higher engineering risks in the leadership view, "
@@ -300,72 +305,189 @@ def _next_steps_sentence(actions: tuple[RecommendationView, ...]) -> str:
     )
 
 
+def build_leadership_priority_actions(
+    *,
+    findings: tuple[FindingView, ...],
+    recommendations: tuple[RecommendationView, ...],
+    max_actions: int = 8,
+) -> tuple["PriorityAction", ...]:
+    """Return canonical Priority Actions for leadership surfaces (Slice 2.4/2.5/2.7).
+
+    Near-duplicate titles are merged (unioning recommendation/finding refs) instead
+    of first-wins drops, so presentation dedupe never loses traceability.
+    ``max_actions`` truncates the leadership display subset only after merge.
+    """
+
+    from codestrata.application.priority_actions import (
+        build_priority_actions,
+        merge_priority_actions,
+        priority_action_to_recommendation_view,
+    )
+    from codestrata.domain.priority_actions import PriorityAction
+
+    grounded_views = tuple(item for item in recommendations if item.related_finding_ids)
+    polished = tuple(_polish_recommendation(item, findings) for item in grounded_views)
+    adapters = tuple(_RecommendationViewAdapter(item) for item in polished)
+    actions = build_priority_actions(
+        adapters,
+        max_actions=max(len(adapters), 1) if adapters else 1,
+    )
+    finding_by_id = {item.finding_id: item for item in findings}
+    by_intent: dict[str, PriorityAction] = {}
+    order: list[str] = []
+    for action in actions:
+        titles = tuple(
+            customer_title(finding_by_id[fid].title)
+            if fid in finding_by_id
+            else fid
+            for fid in action.supporting_finding_ids
+        )
+        source = next(
+            (
+                item
+                for item in polished
+                if item.recommendation_id == action.primary_recommendation_id
+            ),
+            None,
+        )
+        if source is not None and source.related_finding_titles:
+            titles = source.related_finding_titles
+        view = priority_action_to_recommendation_view(
+            action,
+            related_finding_titles=titles,
+        )
+        intent = _action_intent(view.title)
+        existing = by_intent.get(intent)
+        if existing is None:
+            by_intent[intent] = action
+            order.append(intent)
+            continue
+        by_intent[intent] = merge_priority_actions(
+            existing,
+            action,
+            recommendations=adapters,
+        )
+    ordered = [by_intent[key] for key in order]
+    if max_actions > 0:
+        ordered = ordered[:max_actions]
+    return tuple(ordered)
+
+
 def build_priority_actions_for_leadership(
     *,
     findings: tuple[FindingView, ...],
     recommendations: tuple[RecommendationView, ...],
     max_actions: int = 8,
 ) -> tuple[RecommendationView, ...]:
-    """Return finding-backed Priority Actions for customer display.
+    """Return recommendation-backed Priority Actions for customer display.
 
-    - Keep existing recommendations only when linked to findings.
-    - When medium+ leadership risks lack a linked action, synthesize a
-      presentation action from the finding (does not alter engine scoring).
-    - Collapse duplicate titles and near-duplicate dependency/test intents.
+    Slice 2.4 authority rule:
+    - Priority Actions originate from Recommendations with finding links.
+    - Findings without Recommendations are NOT synthesized into Priority Actions
+      (they remain under Engineering Risks).
+    - Presentation IDs remain recommendation IDs.
     """
 
-    grounded = tuple(item for item in recommendations if item.related_finding_ids)
-    covered_ids = {fid for item in grounded for fid in item.related_finding_ids}
-    covered_titles = {
-        customer_title(title).lower()
-        for item in grounded
-        for title in item.related_finding_titles
-    }
-    covered_titles.update(customer_title(item.title).lower() for item in grounded)
-    covered_intents = {_action_intent(item.title) for item in grounded}
+    from codestrata.application.priority_actions import priority_action_to_recommendation_view
 
-    polished_grounded = tuple(_polish_recommendation(item, findings) for item in grounded)
-
-    synthetic: list[RecommendationView] = []
-    seen_titles: set[str] = set(covered_titles)
-    for finding in findings:
-        if not is_leadership_signal_finding(finding):
-            continue
-        if finding.severity.lower() not in {"critical", "high", "medium"}:
-            continue
-        if finding.finding_id in covered_ids:
-            continue
-        title = customer_title(finding.title)
-        key = title.lower()
-        if key in seen_titles:
-            continue
-        action_title = _action_title_from_finding(title, finding.category)
-        intent = _action_intent(action_title)
-        if intent in covered_intents:
-            continue
-        seen_titles.add(key)
-        covered_intents.add(intent)
-        synthetic.append(_action_from_finding(finding, title=title))
-
-    combined = list(polished_grounded) + synthetic
-    combined.sort(
-        key=lambda item: (
-            _bucket_rank(item.presentation_bucket),
-            -float(item.priority_score or 0.0),
-            priority_label_rank(item.priority),
-            item.title.lower(),
-        )
+    actions = build_leadership_priority_actions(
+        findings=findings,
+        recommendations=recommendations,
+        max_actions=max_actions,
     )
-    # Final pass: drop near-duplicate intents keeping highest-ranked.
-    deduped: list[RecommendationView] = []
-    seen_intents: set[str] = set()
-    for item in combined:
-        intent = _action_intent(item.title)
-        if intent in seen_intents:
-            continue
-        seen_intents.add(intent)
-        deduped.append(item)
-    return tuple(deduped[:max_actions])
+    finding_by_id = {item.finding_id: item for item in findings}
+    polished_by_id = {
+        item.recommendation_id: item
+        for item in recommendations
+        if item.related_finding_ids
+    }
+    projected: list[RecommendationView] = []
+    for action in actions:
+        source = polished_by_id.get(action.primary_recommendation_id or "")
+        if source is not None:
+            source = _polish_recommendation(source, findings)
+        titles = (
+            source.related_finding_titles
+            if source is not None and source.related_finding_titles
+            else tuple(
+                customer_title(finding_by_id[fid].title)
+                if fid in finding_by_id
+                else fid
+                for fid in action.supporting_finding_ids
+            )
+        )
+        projected.append(
+            priority_action_to_recommendation_view(
+                action,
+                related_finding_titles=titles,
+            )
+        )
+    return tuple(projected)
+
+
+class _RecommendationViewAdapter:
+    """Adapt RecommendationView for Priority Action mapping."""
+
+    __slots__ = ("_item",)
+
+    def __init__(self, item: RecommendationView) -> None:
+        self._item = item
+
+    @property
+    def id(self) -> str:
+        return self._item.recommendation_id
+
+    @property
+    def title(self) -> str:
+        return self._item.title
+
+    @property
+    def description(self) -> str:
+        return self._item.summary
+
+    @property
+    def rationale(self) -> str:
+        return self._item.rationale
+
+    @property
+    def priority(self) -> str:
+        return self._item.priority
+
+    @property
+    def category(self) -> str:
+        return self._item.category
+
+    @property
+    def effort(self) -> str:
+        return self._item.effort
+
+    @property
+    def risk(self) -> str:
+        return self._item.risk
+
+    @property
+    def related_finding_ids(self) -> tuple[str, ...]:
+        return self._item.related_finding_ids
+
+    @property
+    def supporting_finding_ids(self) -> tuple[str, ...]:
+        return self._item.related_finding_ids
+
+    @property
+    def priority_score(self) -> float:
+        return float(self._item.priority_score or 0.0)
+
+    @property
+    def presentation_bucket(self) -> str:
+        return self._item.presentation_bucket
+
+    @property
+    def limitations(self) -> tuple[str, ...]:
+        return ()
+
+    @property
+    def evidence_completeness(self) -> str:
+        return "complete" if self._item.related_finding_ids else "legacy"
 
 
 def _action_intent(title: str) -> str:
@@ -427,87 +549,6 @@ def _zip_related(item: RecommendationView) -> list[tuple[str, str]]:
     return out
 
 
-def _action_from_finding(finding: FindingView, *, title: str) -> RecommendationView:
-    severity = finding.severity.lower()
-    if severity == "critical":
-        bucket, priority, score = "immediate", "immediate", 150.0
-    elif severity == "high":
-        bucket, priority, score = "immediate", "high", 145.0
-    else:
-        bucket, priority, score = "near_term", "medium", 90.0
-    category = finding.category.strip().lower().replace(" ", "_")
-    summary = initiative_outcome_for_action(title, category)
-    return RecommendationView(
-        recommendation_id=f"presentation:finding:{finding.finding_id}",
-        title=_action_title_from_finding(title, category),
-        summary=summary,
-        rationale=(
-            f"Address this {severity} finding before expanding modernization scope."
-        ),
-        priority=priority,
-        category=category or "other",
-        related_finding_ids=(finding.finding_id,),
-        related_finding_titles=(title,),
-        effort="medium",
-        risk="medium" if severity == "medium" else "high",
-        priority_score=score,
-        presentation_bucket=bucket,
-    )
-
-
-def _action_title_from_finding(title: str, category: str) -> str:
-    """Turn a risk statement into an action-oriented leadership title."""
-
-    lowered = title.lower()
-    if "lockfile" in lowered:
-        return "Commit an npm lockfile"
-    if "not locked" in lowered or "locking is not configured" in lowered:
-        return "Lock dependencies for reproducible builds"
-    if "dynamic dependency" in lowered or "dynamic version" in lowered:
-        return "Pin dependency versions"
-    if "skipped or disabled tests" in lowered:
-        return "Re-enable or replace skipped tests"
-    if "no automated tests" in lowered or lowered == "missing tests":
-        return "Establish a test baseline"
-    if "no ci workflow" in lowered or "missing ci" in lowered:
-        return "Add a CI workflow"
-    if "framework concerns" in lowered or "framework symbol" in lowered:
-        return "Contain framework usage outside the domain model"
-    if "complex branching" in lowered or "excessive branching" in lowered:
-        return "Simplify high-risk branching paths"
-    if "oversized methods" in lowered or "large callable" in lowered:
-        return "Split oversized methods to reduce change risk"
-    if "license" in lowered and ("missing" in lowered or "no " in lowered):
-        return "Add an explicit LICENSE"
-    if lowered.startswith("missing "):
-        rest = title[len("missing ") :].strip()
-        return f"Add {rest}" if rest else title
-    if lowered.startswith("no "):
-        rest = title[3:].strip()
-        if rest.lower().startswith("conventional test"):
-            return "Introduce a conventional test layout"
-        if rest.lower().startswith("cloud deployment"):
-            return "Add cloud deployment assets"
-        return f"Address {rest}"
-    verbs = {
-        "security": "Remediate",
-        "testing": "Address",
-        "dependency": "Resolve",
-        "architecture": "Resolve",
-        "technical_debt": "Reduce",
-        "maintainability": "Reduce",
-        "cloud": "Clarify",
-        "cloud_readiness": "Clarify",
-        "governance": "Address",
-    }
-    verb = verbs.get(category, "Address")
-    if title.lower().startswith(verb.lower()):
-        return title
-    if title:
-        return f"{verb}: {title[0].lower() + title[1:]}"
-    return verb
-
-
 def initiative_outcome_for_action(title: str, category: str) -> str:
     """Initiative-specific business outcome (not a generic phase blurb)."""
 
@@ -543,114 +584,54 @@ def _is_generic_outcome(text: str) -> bool:
 
 
 def build_leadership_roadmap(
-    priority_actions: tuple[RecommendationView, ...],
+    priority_actions: tuple[RecommendationView, ...] | tuple[object, ...] = (),
+    *,
+    canonical_actions: tuple[object, ...] | None = None,
 ) -> RoadmapReportSection | None:
-    """Build a phased plan from the same ordered Priority Actions.
+    """Build a phased plan from canonical Priority Actions (Slice 2.5).
 
-    Phase assignment follows Priority Action horizon so ordering never
-    contradicts Immediate → Near Term → Future sequencing.
+    Authoritative path: PriorityAction → RoadmapAssessmentSection → HTML projection.
+    ``priority_actions`` RecommendationView input remains for backward-compatible
+    call sites; when ``canonical_actions`` is omitted, views are mapped back only
+    when they already carry recommendation IDs equal to Priority Action IDs
+    (Slice 2.4 presentation contract). Prefer passing ``canonical_actions``.
     """
 
-    if not priority_actions:
+    from codestrata.application.priority_actions import priority_action_from_recommendation
+    from codestrata.application.roadmap.from_priority_actions import (
+        build_roadmap_from_priority_actions,
+    )
+    from codestrata.application.roadmap.presentation import project_roadmap_for_leadership
+    from codestrata.domain.priority_actions import PriorityAction
+
+    actions: tuple[PriorityAction, ...]
+    if canonical_actions is not None:
+        actions = tuple(
+            item for item in canonical_actions if isinstance(item, PriorityAction)
+        )
+    else:
+        # Compatibility: reconstruct from presentation views that already encode
+        # action_id == recommendation_id (Slice 2.4). Not a Finding→Roadmap path.
+        rebuilt: list[PriorityAction] = []
+        for item in priority_actions:
+            if not isinstance(item, RecommendationView):
+                continue
+            if not item.related_finding_ids:
+                continue
+            rebuilt.append(
+                priority_action_from_recommendation(_RecommendationViewAdapter(item))
+            )
+        actions = tuple(rebuilt)
+
+    if not actions:
         return None
 
-    phase_order = ("stabilize", "secure", "modernize", "optimize")
-    buckets: dict[str, list[RecommendationView]] = {key: [] for key in phase_order}
-    for action in priority_actions:
-        phase = _phase_for_priority_action(action)
-        buckets[phase].append(action)
-
-    initiatives: list[RoadmapReportInitiativeView] = []
-    phases: list[RoadmapReportPhaseView] = []
-    sequence = 0
-    for phase_id in phase_order:
-        actions = buckets[phase_id]
-        if not actions:
-            continue
-        phase_initiatives: list[RoadmapReportInitiativeView] = []
-        for action in actions:
-            sequence += 1
-            initiative = RoadmapReportInitiativeView(
-                initiative_id=f"leadership:{action.recommendation_id}",
-                title=action.title,
-                summary=action.title,
-                phase=phase_id,
-                phase_label=phase_id.title(),
-                priority=action.priority,
-                effort=action.effort or "medium",
-                risk=action.risk or "medium",
-                expected_outcome=initiative_outcome_for_action(
-                    action.title, action.category
-                ),
-                supporting_finding_ids=tuple(action.related_finding_ids),
-                supporting_recommendation_ids=(action.recommendation_id,),
-                confidence="medium",
-                category=action.category,
-                sequence=sequence,
-            )
-            phase_initiatives.append(initiative)
-            initiatives.append(initiative)
-        phases.append(
-            RoadmapReportPhaseView(
-                phase_id=f"phase:{phase_id}",
-                phase=phase_id,
-                title=phase_id.title(),
-                objective=_PHASE_OBJECTIVES[phase_id],
-                sequence=len(phases),
-                initiative_ids=tuple(item.initiative_id for item in phase_initiatives),
-                initiatives=tuple(phase_initiatives),
-            )
-        )
-
-    near = sum(
-        1
-        for item in priority_actions
-        if (item.presentation_bucket or "").lower() in {"immediate", "near_term"}
+    section = build_roadmap_from_priority_actions(actions)
+    return project_roadmap_for_leadership(
+        section,
+        actions_by_id={item.action_id: item for item in actions},
+        outcome_for_action=initiative_outcome_for_action,
     )
-    summary = (
-        f"{len(initiatives)} initiative(s) across {len(phases)} phase(s), "
-        f"sequenced to match Priority Actions"
-        + (f" ({near} near-term)." if near else ".")
-    )
-    return RoadmapReportSection(
-        engine_version="leadership-presentation",
-        status="succeeded",
-        status_label="Ready",
-        summary=summary,
-        phases=tuple(phases),
-        initiatives=tuple(initiatives),
-        initiatives_total=len(initiatives),
-        initiatives_displayed=len(initiatives),
-        assumptions=(),
-        limitations=(),
-        confidence="medium",
-        metadata={"source": "priority_actions"},
-    )
-
-
-def _phase_for_priority_action(action: RecommendationView) -> str:
-    """Horizon-first phase so roadmap order matches Priority Actions."""
-
-    bucket = (action.presentation_bucket or "").strip().lower()
-    category = action.category.strip().lower().replace(" ", "_").replace("-", "_")
-    if category == "security":
-        return "secure"
-    if category == "performance":
-        return "optimize"
-    if bucket in {"immediate", "near_term"}:
-        return "stabilize"
-    if category in {
-        "testing",
-        "ci_cd",
-        "build",
-        "docs",
-        "documentation",
-        "governance",
-        "configuration",
-    }:
-        # Future hygiene still lands after Near Term stabilize work.
-        return "modernize"
-    return "modernize"
 
 
 def build_leadership_key_takeaways(

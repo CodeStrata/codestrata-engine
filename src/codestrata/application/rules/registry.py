@@ -9,6 +9,7 @@ from codestrata.application.rules.models import RuleInspectionView
 from codestrata.domain.rules.contracts import SharedRule
 from codestrata.domain.rules.enums import RuleCategory
 from codestrata.domain.rules.metadata import RuleMetadata
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 
 
 class RuleRegistry:
@@ -21,6 +22,12 @@ class RuleRegistry:
     def register(self, rule: SharedRule, *, production: bool = True) -> None:
         metadata = rule.metadata
         rule_id = str(metadata.rule_id)
+        if not isinstance(metadata.confidence, RuleConfidence):
+            raise RuleRegistryError(
+                f"Rule Confidence metadata is required for {rule_id}",
+                reason_code="missing_rule_confidence",
+                rule_id=rule_id,
+            )
         existing = self._rules.get(rule_id)
         if existing is not None:
             if str(existing.metadata.version) != str(metadata.version):

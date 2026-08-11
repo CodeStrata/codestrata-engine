@@ -43,6 +43,17 @@ rule → finding ID, severity, title, description, evidence, and metadata.
 New Analysis Intelligence rules use the Shared Rule Platform only. There is no
 third rule engine.
 
+Shared Rules carry structured inherent reliability metadata. See
+[Rule Confidence](rule-confidence.md) for its levels, calibration, validation
+support, and separation from match evidence certainty. See also
+[Evidence Confidence](evidence-confidence.md) for observation-level reliability
+on `EvidenceRef`, and [Finding Confidence](finding-confidence.md) for
+Finding-level support strength derived from those inputs.
+[Assessment-Head Confidence](assessment-head-confidence.md) describes support
+strength for one assessment head’s conclusions in assessed scope.
+[Recommendation Confidence](recommendation-confidence.md) describes how
+strongly supporting Findings back a specific Recommendation.
+
 ## Analysis Intelligence flow
 
 ```text
@@ -70,6 +81,11 @@ Security Intelligence consumes reusable evidence (including
 generic evidence truth, package registries, CVE databases, or SAST engines.
 Security rules interpret evidence into shared Findings; they do not introduce a
 parallel `SecurityFinding` type.
+
+After detection, a **security context classification** stage labels where
+evidence originated (production, test, CI expression, schema metadata, etc.)
+and adjusts severity/confidence without dropping matches. See
+[security-context-classification.md](security-context-classification.md).
 
 | Concern | Owner |
 | ------- | ----- |

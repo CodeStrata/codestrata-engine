@@ -31,6 +31,1346 @@
       "total_tokens": null
     },
     "ai_enrichment": null,
+    "assessment_coverage": {
+      "ai_readiness": {
+        "areas": [
+          {
+            "area_id": "ai_readiness_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "AI readiness capability"
+          },
+          {
+            "area_id": "ai_readiness_evidence_availability",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "AI readiness evidence"
+          },
+          {
+            "area_id": "ai_readiness_inventory_complete",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "AI readiness inventory"
+          },
+          {
+            "area_id": "ai_readiness_rules_enabled",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "AI readiness rules"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed.",
+          "Repository observation coverage does not imply live runtime, organizational, or external service coverage."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 4,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "ai_readiness",
+          "pack_id": "ai_readiness",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 4,
+          "candidate_count": null,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 4,
+          "unsupported_area_count": 0
+        }
+      },
+      "architecture_intelligence": {
+        "areas": [
+          {
+            "area_id": "architecture_rules",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Architecture rules"
+          },
+          {
+            "area_id": "build_metadata_coverage",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Build metadata"
+          },
+          {
+            "area_id": "classification_coverage",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Unit classification"
+          },
+          {
+            "area_id": "enterprise_context_coverage",
+            "candidate_count": null,
+            "claim_state": "not_claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "not_applicable",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is not claimed by the current assessment methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unsupported",
+            "title": "Enterprise context"
+          },
+          {
+            "area_id": "extraction_coverage",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Source extraction"
+          },
+          {
+            "area_id": "framework_coverage",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Framework evidence"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 5,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "architecture_intelligence",
+          "pack_id": "architecture",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 5,
+          "candidate_count": null,
+          "declared_area_count": 6,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 2,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 5,
+          "unsupported_area_count": 1
+        }
+      },
+      "cloud_readiness": {
+        "areas": [
+          {
+            "area_id": "cloud_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Cloud capability"
+          },
+          {
+            "area_id": "cloud_evidence_availability",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Cloud artifact evidence"
+          },
+          {
+            "area_id": "cloud_inventory_complete",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Cloud inventory"
+          },
+          {
+            "area_id": "cloud_rules_enabled",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Cloud rules"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed.",
+          "Repository observation coverage does not imply live runtime, organizational, or external service coverage."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 4,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "cloud_readiness",
+          "pack_id": "cloud",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 4,
+          "candidate_count": null,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 4,
+          "unsupported_area_count": 0
+        }
+      },
+      "dependency_intelligence": {
+        "areas": [
+          {
+            "area_id": "dependency_evidence_coverage",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Manifest evidence"
+          },
+          {
+            "area_id": "dependency_rule_coverage",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Dependency rules"
+          },
+          {
+            "area_id": "enterprise_context_coverage",
+            "candidate_count": null,
+            "claim_state": "not_claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "not_applicable",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is not claimed by the current assessment methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unsupported",
+            "title": "Enterprise context"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 2,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "dependency_intelligence",
+          "pack_id": "dependency",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 2,
+          "candidate_count": null,
+          "declared_area_count": 3,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 0,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 2,
+          "unsupported_area_count": 1
+        }
+      },
+      "modernization_assessment": {
+        "areas": [
+          {
+            "area_id": "contributing_heads",
+            "candidate_count": 1,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "evaluated",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": 0,
+            "limitations": [
+              "Modernization coverage cannot exceed contributing head coverage."
+            ],
+            "partial_count": null,
+            "processed_count": 1,
+            "skipped_count": null,
+            "support_state": "supported",
+            "title": "Contributing assessment heads"
+          },
+          {
+            "area_id": "finding_backed_recommendations",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "evaluated",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "supported",
+            "title": "Finding-backed recommendations"
+          },
+          {
+            "area_id": "priority_actions",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "evaluated",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "supported",
+            "title": "Priority Actions"
+          },
+          {
+            "area_id": "roadmap_chain",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "partially_evaluated",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology.",
+              "Modernization does not invent a numeric ratio from actions."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "partially_supported",
+            "title": "Roadmap chain completeness"
+          }
+        ],
+        "derivation_status": "derived",
+        "limitations": [
+          "Modernization coverage cannot exceed contributing head coverage.",
+          "Modernization coverage is synthesized from contributing heads."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 4,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 4,
+            "ratio": "1.0000"
+          }
+        ],
+        "scope": {
+          "activated": true,
+          "head_id": "modernization_assessment",
+          "pack_id": "roadmap",
+          "support_summary": "complete"
+        },
+        "status": "complete",
+        "totals": {
+          "applicable_area_count": 4,
+          "candidate_count": 1,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 3,
+          "executed_rule_count": null,
+          "failed_count": 0,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 1,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": 1,
+          "supported_area_count": 3,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 0,
+          "unsupported_area_count": 0
+        }
+      },
+      "performance": {
+        "areas": [
+          {
+            "area_id": "performance_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Performance capability"
+          },
+          {
+            "area_id": "performance_evidence_availability",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Performance evidence"
+          },
+          {
+            "area_id": "performance_inventory_complete",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Performance inventory"
+          },
+          {
+            "area_id": "performance_rules_enabled",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Performance rules"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed.",
+          "Repository observation coverage does not imply live runtime, organizational, or external service coverage."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 4,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "performance",
+          "pack_id": "performance",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 4,
+          "candidate_count": null,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 4,
+          "unsupported_area_count": 0
+        }
+      },
+      "security_intelligence": {
+        "areas": [
+          {
+            "area_id": "security_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Security capability"
+          },
+          {
+            "area_id": "security_evidence_availability",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Sensitive evidence availability"
+          },
+          {
+            "area_id": "security_inventory_complete",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Security inventory"
+          },
+          {
+            "area_id": "security_rules_enabled",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Security rules"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 4,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "security_intelligence",
+          "pack_id": "security",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 4,
+          "candidate_count": null,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 4,
+          "unsupported_area_count": 0
+        }
+      },
+      "technical_debt_intelligence": {
+        "areas": [
+          {
+            "area_id": "complexity_coverage",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Complexity measurements"
+          },
+          {
+            "area_id": "debt_rule_coverage",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Technical debt rules"
+          },
+          {
+            "area_id": "dependency_support_coverage",
+            "candidate_count": null,
+            "claim_state": "not_claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "not_applicable",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is not claimed by the current assessment methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unsupported",
+            "title": "Dependency support window"
+          },
+          {
+            "area_id": "duplication_coverage",
+            "candidate_count": null,
+            "claim_state": "not_claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "not_applicable",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is not claimed by the current assessment methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unsupported",
+            "title": "Duplication analysis"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 2,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "technical_debt_intelligence",
+          "pack_id": "technical_debt",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 2,
+          "candidate_count": null,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 0,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 2,
+          "unsupported_area_count": 2
+        }
+      },
+      "technology_inventory": {
+        "areas": [
+          {
+            "area_id": "build_system_detection",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "evaluated",
+            "evidence_available": true,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "supported",
+            "title": "Build system detection"
+          },
+          {
+            "area_id": "composition_facts",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "partially_evaluated",
+            "evidence_available": true,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Inventory area is only partially claimed."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "partially_supported",
+            "title": "Composition facts"
+          },
+          {
+            "area_id": "dependency_manifest_detection",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "evaluated",
+            "evidence_available": true,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "supported",
+            "title": "Dependency manifest detection"
+          },
+          {
+            "area_id": "language_detection",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "evaluated",
+            "evidence_available": true,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "supported",
+            "title": "Language detection"
+          },
+          {
+            "area_id": "version_availability",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "partially_evaluated",
+            "evidence_available": true,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Missing version facts do not imply missing technology detection."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "partially_supported",
+            "title": "Version availability"
+          }
+        ],
+        "derivation_status": "derived",
+        "limitations": [
+          "Technology Inventory coverage reflects inventory evidence, not repository health."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 5,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 5,
+            "ratio": "1.0000"
+          }
+        ],
+        "scope": {
+          "activated": true,
+          "head_id": "technology_inventory",
+          "pack_id": "technology",
+          "support_summary": "complete"
+        },
+        "status": "complete",
+        "totals": {
+          "applicable_area_count": 5,
+          "candidate_count": null,
+          "declared_area_count": 5,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 3,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 2,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 2,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 3,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 0,
+          "unsupported_area_count": 0
+        }
+      },
+      "testing": {
+        "areas": [
+          {
+            "area_id": "testing_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing capability"
+          },
+          {
+            "area_id": "testing_evidence_availability",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing evidence"
+          },
+          {
+            "area_id": "testing_inventory_complete",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing inventory"
+          },
+          {
+            "area_id": "testing_rules_enabled",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing rules"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed.",
+          "Repository observation coverage does not imply live runtime, organizational, or external service coverage."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 4,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "testing",
+          "pack_id": "testing",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 4,
+          "candidate_count": null,
+          "declared_area_count": 4,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 4,
+          "unsupported_area_count": 0
+        }
+      }
+    },
+    "assessment_head_confidence": {
+      "ai_readiness": {
+        "basis": [
+          "unavailable_head",
+          "unsupported_capability"
+        ],
+        "component_summary": {
+          "activated": false,
+          "assessment_status": "not_available",
+          "coverage_state": "unavailable",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "architecture_intelligence": {
+        "basis": [
+          "unavailable_head",
+          "unsupported_capability"
+        ],
+        "component_summary": {
+          "activated": false,
+          "assessment_status": "not_available",
+          "coverage_state": "unavailable",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "cloud_readiness": {
+        "basis": [
+          "unavailable_head",
+          "unsupported_capability"
+        ],
+        "component_summary": {
+          "activated": false,
+          "assessment_status": "not_available",
+          "coverage_state": "unavailable",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "dependency_intelligence": {
+        "basis": [
+          "unavailable_head",
+          "unsupported_capability"
+        ],
+        "component_summary": {
+          "activated": false,
+          "assessment_status": "not_available",
+          "coverage_state": "unavailable",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "modernization_assessment": {
+        "basis": [
+          "unavailable_head",
+          "unsupported_capability"
+        ],
+        "component_summary": {
+          "activated": false,
+          "assessment_status": "not_available",
+          "coverage_state": "complete",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "security_intelligence": {
+        "basis": [
+          "legacy_findings",
+          "unavailable_head"
+        ],
+        "component_summary": {
+          "activated": true,
+          "assessment_status": "assessed",
+          "coverage_state": "unavailable",
+          "evidence_completeness": "legacy",
+          "finding_count": 1,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 1,
+          "weakest_material_finding_confidence": "unavailable"
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "One or more material findings have Unavailable Finding Confidence."
+        ]
+      },
+      "technical_debt_intelligence": {
+        "basis": [
+          "unavailable_head",
+          "unsupported_capability"
+        ],
+        "component_summary": {
+          "activated": false,
+          "assessment_status": "not_available",
+          "coverage_state": "unavailable",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "technology_inventory": {
+        "basis": [
+          "complete_assessment_coverage",
+          "no_findings_with_complete_coverage"
+        ],
+        "component_summary": {
+          "activated": true,
+          "assessment_status": "assessed",
+          "coverage_state": "complete",
+          "evidence_completeness": null,
+          "finding_count": 0,
+          "high_finding_count": 0,
+          "limitations_count": 0,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 0,
+          "weakest_material_finding_confidence": null
+        },
+        "derivation_status": "derived",
+        "level": "moderate",
+        "limitations": [
+          "Technology Inventory confidence reflects inventory evidence quality, not repository health."
+        ]
+      }
+    },
     "comparison": null,
     "coverage": {
       "ai_interpretation": "not_requested",
@@ -48,14 +1388,71 @@
         "description": "d",
         "effort": "m",
         "evidence": [],
+        "evidence_completeness": "legacy",
         "id": "672b18af-845d-5ce6-9b18-d87bc75ab2f6",
-        "presentation_bucket": "future",
+        "limitations": [],
+        "presentation_bucket": "near_term",
+        "primary_finding_id": null,
         "priority": "high",
-        "priority_score": 68.0,
+        "priority_assessment": {
+          "basis": [
+            "legacy_recommendation"
+          ],
+          "calibration_status": "legacy",
+          "component_summary": {
+            "affected_subject_count": null,
+            "assessment_head_count": 0,
+            "base_score": 80,
+            "calibrated_score": 80,
+            "correlation_count": 0,
+            "effort": null,
+            "evidence_completeness": null,
+            "highest_finding_severity": null,
+            "limitations_count": 1,
+            "priority": "high",
+            "recommendation_confidence": null,
+            "supporting_finding_count": 0,
+            "weakest_finding_confidence": null
+          },
+          "limitations": [
+            "Legacy Recommendation; priority bounded conservatively."
+          ],
+          "policy_id": "priority.legacy.compatibility",
+          "priority": "high",
+          "score": 80
+        },
+        "priority_score": 80.0,
         "rationale": "r",
+        "recommendation_confidence": {
+          "basis": [
+            "legacy_recommendation",
+            "missing_supporting_findings"
+          ],
+          "component_summary": {
+            "assessment_head_count": 0,
+            "evidence_completeness": "legacy",
+            "high_finding_count": 0,
+            "limitations_count": 0,
+            "limited_finding_count": 0,
+            "moderate_finding_count": 0,
+            "primary_finding_confidence": null,
+            "recommendation_type": "legacy",
+            "supporting_finding_count": 0,
+            "traceability_complete": false,
+            "unavailable_finding_count": 0,
+            "weakest_supporting_finding_confidence": null
+          },
+          "derivation_status": "unavailable",
+          "level": "unavailable",
+          "limitations": [
+            "Legacy recommendation lacks canonical Finding Confidence support."
+          ]
+        },
+        "recommendation_type": "legacy",
         "related_finding_ids": [],
         "risk": "high",
         "rule_id": "REC001",
+        "supporting_finding_ids": [],
         "title": "Urgent rec"
       },
       {
@@ -67,17 +1464,75 @@
         "description": "d",
         "effort": "s",
         "evidence": [],
+        "evidence_completeness": "legacy",
         "id": "e2a6d3f7-6d64-51ee-b5f0-35d69a78eeb7",
+        "limitations": [],
         "presentation_bucket": "future",
+        "primary_finding_id": null,
         "priority": "low",
-        "priority_score": 31.0,
+        "priority_assessment": {
+          "basis": [
+            "legacy_recommendation"
+          ],
+          "calibration_status": "legacy",
+          "component_summary": {
+            "affected_subject_count": null,
+            "assessment_head_count": 0,
+            "base_score": 25,
+            "calibrated_score": 25,
+            "correlation_count": 0,
+            "effort": null,
+            "evidence_completeness": null,
+            "highest_finding_severity": null,
+            "limitations_count": 1,
+            "priority": "low",
+            "recommendation_confidence": null,
+            "supporting_finding_count": 0,
+            "weakest_finding_confidence": null
+          },
+          "limitations": [
+            "Legacy Recommendation; priority bounded conservatively."
+          ],
+          "policy_id": "priority.legacy.compatibility",
+          "priority": "low",
+          "score": 25
+        },
+        "priority_score": 25.0,
         "rationale": "r",
+        "recommendation_confidence": {
+          "basis": [
+            "legacy_recommendation",
+            "missing_supporting_findings"
+          ],
+          "component_summary": {
+            "assessment_head_count": 0,
+            "evidence_completeness": "legacy",
+            "high_finding_count": 0,
+            "limitations_count": 0,
+            "limited_finding_count": 0,
+            "moderate_finding_count": 0,
+            "primary_finding_confidence": null,
+            "recommendation_type": "legacy",
+            "supporting_finding_count": 0,
+            "traceability_complete": false,
+            "unavailable_finding_count": 0,
+            "weakest_supporting_finding_confidence": null
+          },
+          "derivation_status": "unavailable",
+          "level": "unavailable",
+          "limitations": [
+            "Legacy recommendation lacks canonical Finding Confidence support."
+          ]
+        },
+        "recommendation_type": "legacy",
         "related_finding_ids": [],
         "risk": "low",
         "rule_id": "REC002",
+        "supporting_finding_ids": [],
         "title": "Later rec"
       }
     ],
+    "evidence": [],
     "executive_summary": {
       "ci_detected": null,
       "cloud_capabilities": [],
@@ -102,11 +1557,14 @@
       "technology_count": 2,
       "tests_detected": null
     },
+    "finding_correlations": [],
     "findings": [
       {
         "affected_file_count": null,
         "affected_technologies": [],
         "category": "security",
+        "correlated_finding_ids": [],
+        "correlation_ids": [],
         "customer_visibility": null,
         "description": "First",
         "evidence": [
@@ -117,23 +1575,49 @@
             "line_number": 2
           }
         ],
+        "evidence_completeness": "legacy",
+        "evidence_refs": [],
+        "finding_confidence": {
+          "basis": [
+            "legacy_finding"
+          ],
+          "component_summary": {
+            "evidence_completeness": null,
+            "evidence_count": 0,
+            "match_evidence_confidence": null,
+            "primary_evidence_confidence": null,
+            "rule_confidence_level": null,
+            "traceability_complete": false,
+            "weakest_evidence_confidence": null
+          },
+          "derivation_status": "unavailable",
+          "level": "unavailable",
+          "limitations": [
+            "Phase-1 finding lacks Shared Rule Confidence and Evidence Confidence."
+          ]
+        },
         "group_id": null,
         "id": "d32e2442-b9d5-585e-993d-1981cc68ae27",
+        "limitations": [],
         "metadata": {},
         "modernization_relevance": null,
         "occurrence_count": null,
+        "primary_evidence_id": null,
         "provider_category": null,
         "provider_name": null,
         "provider_priority": null,
         "rule_id": "TEST001",
         "severity": "high",
         "source": "deterministic",
+        "synthesized_from_evidence_ids": [],
         "title": "A finding"
       },
       {
         "affected_file_count": null,
         "affected_technologies": [],
         "category": "testing",
+        "correlated_finding_ids": [],
+        "correlation_ids": [],
         "customer_visibility": null,
         "description": "Second",
         "evidence": [
@@ -144,22 +1628,47 @@
             "line_number": null
           }
         ],
+        "evidence_completeness": "legacy",
+        "evidence_refs": [],
+        "finding_confidence": {
+          "basis": [
+            "legacy_finding"
+          ],
+          "component_summary": {
+            "evidence_completeness": null,
+            "evidence_count": 0,
+            "match_evidence_confidence": null,
+            "primary_evidence_confidence": null,
+            "rule_confidence_level": null,
+            "traceability_complete": false,
+            "weakest_evidence_confidence": null
+          },
+          "derivation_status": "unavailable",
+          "level": "unavailable",
+          "limitations": [
+            "Phase-1 finding lacks Shared Rule Confidence and Evidence Confidence."
+          ]
+        },
         "group_id": null,
         "id": "3de48705-da3e-502d-97a2-7850fe88b871",
+        "limitations": [],
         "metadata": {},
         "modernization_relevance": null,
         "occurrence_count": null,
+        "primary_evidence_id": null,
         "provider_category": null,
         "provider_name": null,
         "provider_priority": null,
         "rule_id": "TEST002",
         "severity": "medium",
         "source": "deterministic",
+        "synthesized_from_evidence_ids": [],
         "title": "B finding"
       }
     ],
     "mode": "deterministic",
     "organization_name": null,
+    "priority_actions": [],
     "report_title": "Engineering Assessment",
     "repository": {
       "default_branch": "main",
@@ -192,6 +1701,7 @@
       "cloud_capabilities": [],
       "critical_high_finding_count": 1,
       "deterministic_recommendation_count": 2,
+      "evidence_count": 0,
       "finding_count": 2,
       "findings_by_severity": {
         "critical": 0,
@@ -201,6 +1711,7 @@
         "medium": 1
       },
       "phase_count": 0,
+      "priority_action_count": 0,
       "recommendation_count": 2,
       "recommendations_by_priority": {
         "critical": 0,
@@ -208,6 +1719,7 @@
         "low": 1,
         "medium": 0
       },
+      "roadmap_initiative_count": 0,
       "static_analysis_status": "disabled",
       "summary_text": "Analyzed repository 'sample-app' with 2 scanned file(s). Detected 2 finding(s) (0 critical) and 2 recommendation(s) (1 critical/high priority).",
       "technology_count": 2,
@@ -243,7 +1755,7 @@
       "recommendations"
     ],
     "generation_mode": "deterministic",
-    "html_report_version": "3.0",
+    "html_report_version": "3.1",
     "product_name": "CodeStrata",
     "report_type": "engineering_assessment",
     "report_version": "1.2",

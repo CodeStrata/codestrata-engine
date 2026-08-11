@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 
+from codestrata.application.rules.confidence_catalog import confidence_for_rule
 from codestrata.domain.cloud.ids import (
     PACK_ID,
     PACK_VERSION,
@@ -45,7 +46,7 @@ from codestrata.domain.evidence.repository_cloud.models import (
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
     RuleCategory,
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -53,6 +54,7 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 
 _PROVENANCE = "aggregated_repository_cloud_evidence"
@@ -154,6 +156,21 @@ def known_serverless_kinds(
     return tuple(sorted(values, key=lambda item: item.value))
 
 
+def deployment_fact_is_confirmed(item: CloudDeploymentFactEvidence) -> bool:
+    """True when a CI/CD artifact has confirmed cloud-deploy steps.
+
+    Path discovery may classify every workflow as a deployment candidate.
+    Build-only / echo-only workflows remain ``structurally_inspected`` and must
+    not count as deployment-pipeline findings or the deployment signal family.
+    """
+
+    return item.confirmation_level in {
+        EvidenceConfirmationLevel.STRUCTURALLY_CONFIRMED,
+        EvidenceConfirmationLevel.DECLARED,
+        EvidenceConfirmationLevel.CONFIGURED,
+    }
+
+
 def known_deployment_systems(
     evidence: AggregatedRepositoryCloudEvidence,
 ) -> tuple[CloudDeploymentSystem, ...]:
@@ -161,6 +178,7 @@ def known_deployment_systems(
         item.system
         for item in evidence.deployment_facts
         if item.system is not CloudDeploymentSystem.UNKNOWN
+        and deployment_fact_is_confirmed(item)
     }
     return tuple(sorted(values, key=lambda item: item.value))
 
@@ -209,9 +227,9 @@ def has_deployment_assets(evidence: AggregatedRepositoryCloudEvidence) -> bool:
 
 def confidence_from_levels(
     levels: Sequence[EvidenceConfirmationLevel],
-) -> RuleConfidence:
+) -> MatchEvidenceConfidence:
     if any(level is EvidenceConfirmationLevel.STRUCTURALLY_CONFIRMED for level in levels):
-        return RuleConfidence.HIGH
+        return MatchEvidenceConfidence.HIGH
     if any(
         level
         in {
@@ -221,8 +239,8 @@ def confidence_from_levels(
         }
         for level in levels
     ):
-        return RuleConfidence.MEDIUM
-    return RuleConfidence.LOW
+        return MatchEvidenceConfidence.MEDIUM
+    return MatchEvidenceConfidence.LOW
 
 
 def observation_note(rule_id: str) -> str:
@@ -246,6 +264,7 @@ def make_metadata(
         description=description,
         category=RuleCategory.CLOUD,
         default_severity=severity,
+        confidence=confidence_for_rule(rule_id),
         supported_languages=(),
         tags=("cloud", PACK_ID, "hygiene", "dimension:cloud"),
         remediation_summary=observation_note(rule_id),
@@ -266,15 +285,17 @@ def match(
     title: str,
     summary: str,
     severity: RuleSeverity,
-    confidence: RuleConfidence,
+    confidence: MatchEvidenceConfidence,
     evidence: tuple[RuleEvidence, ...],
     subject_keys: tuple[str, ...],
+    rule_confidence: RuleConfidence | None = None,
 ) -> RuleMatch:
     return RuleMatch(
         rule_id=RuleId(rule_id),
         rule_version=RuleVersion.parse(RULE_VERSION),
         severity=severity,
         confidence=confidence,
+        rule_confidence=rule_confidence or confidence_for_rule(rule_id),
         title=title,
         summary=summary,
         evidence=evidence,

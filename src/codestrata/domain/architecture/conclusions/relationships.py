@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from codestrata.domain.architecture.conclusions.enums import FindingRelationshipType
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
-from codestrata.domain.rules.enums import RuleConfidence
+from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
 
 class FindingRelationship(BaseModel):
@@ -17,7 +17,7 @@ class FindingRelationship(BaseModel):
     target_finding_id: str
     reason_code: str
     supporting_subject: str | None = None
-    confidence: RuleConfidence = RuleConfidence.MEDIUM
+    confidence: MatchEvidenceConfidence = MatchEvidenceConfidence.MEDIUM
     provenance: str = "architecture_conclusion_relationship_catalog"
 
     @field_validator(

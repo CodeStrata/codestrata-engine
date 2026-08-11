@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Mapping, Sequence
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from codestrata.domain.graph.ids import NodeId
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
@@ -13,8 +13,15 @@ from codestrata.domain.recommendations.enums import (
     RecommendationCategory,
     RecommendationPriority,
     RecommendationSource,
+    RecommendationType,
 )
 from codestrata.domain.recommendations.ids import build_recommendation_id
+from codestrata.domain.recommendations.priority import RecommendationPriorityAssessment
+from codestrata.domain.recommendations.recommendation_confidence import (
+    RecommendationConfidence,
+)
+from codestrata.domain.traceability import EvidenceCompleteness, TraceabilityValidationError
+from codestrata.domain.traceability.validators import normalize_limitations, sorted_unique_ids
 
 RECOMMENDATION_RESULT_VERSION = "1.0.0"
 
@@ -80,6 +87,24 @@ class Recommendation(BaseModel):
     category: RecommendationCategory
     source: RecommendationSource = RecommendationSource.FINDING_RULE
     related_finding_ids: tuple[str, ...] = ()
+    # Additive Epic 2 Slice 2.3 — Finding → Recommendation traceability.
+    # Dual-written with related_finding_ids during the compatibility window.
+    # Not part of recommendation ID material beyond related_finding_ids.
+    supporting_finding_ids: tuple[str, ...] = ()
+    primary_finding_id: str | None = None
+    recommendation_type: RecommendationType = RecommendationType.LEGACY
+    evidence_completeness: EvidenceCompleteness = EvidenceCompleteness.LEGACY
+    limitations: tuple[str, ...] = ()
+    # Epic 5 Slice 5.5 — Recommendation Confidence (not priority; not severity).
+    recommendation_confidence: RecommendationConfidence = Field(
+        default_factory=lambda: RecommendationConfidence.unavailable(
+            limitations=(
+                "Legacy Recommendation payload omitted recommendation_confidence.",
+            ),
+        )
+    )
+    # Epic 5 Slice 5.14 — calibrated Recommendation priority (not severity).
+    priority_assessment: RecommendationPriorityAssessment | None = None
     affected_node_ids: tuple[NodeId, ...] = ()
     evidence: tuple[RecommendationEvidence, ...] = ()
     actions: tuple[RecommendationAction, ...] = ()
@@ -100,6 +125,7 @@ class Recommendation(BaseModel):
 
     @field_validator(
         "related_finding_ids",
+        "supporting_finding_ids",
         "affected_node_ids",
         "evidence",
         "actions",
@@ -109,10 +135,33 @@ class Recommendation(BaseModel):
     def normalize_sequences(cls, value: object) -> tuple[Any, ...]:
         return as_tuple(value)
 
-    @field_validator("related_finding_ids", mode="after")
+    @field_validator("related_finding_ids", "supporting_finding_ids", mode="after")
     @classmethod
     def sort_finding_ids(cls, value: tuple[str, ...]) -> tuple[str, ...]:
-        return tuple(sorted({require_nonblank(item, label="finding_id") for item in value}))
+        return sorted_unique_ids(value, label="finding_id")
+
+    @field_validator("limitations", mode="before")
+    @classmethod
+    def normalize_limits(cls, value: object) -> tuple[str, ...]:
+        return normalize_limitations(value)
+
+    @field_validator("primary_finding_id", mode="before")
+    @classmethod
+    def normalize_primary(cls, value: object) -> str | None:
+        if value is None:
+            return None
+        return optional_nonblank(str(value), label="primary_finding_id")
+
+    @field_validator("recommendation_confidence", mode="before")
+    @classmethod
+    def normalize_recommendation_confidence(cls, value: object) -> object:
+        if value is None:
+            return RecommendationConfidence.unavailable(
+                limitations=(
+                    "Legacy Recommendation payload omitted recommendation_confidence.",
+                ),
+            )
+        return value
 
     @field_validator("actions", mode="after")
     @classmethod
@@ -130,6 +179,40 @@ class Recommendation(BaseModel):
             raise ValueError("metadata must be a mapping")
         return dict(value)
 
+    @model_validator(mode="after")
+    def validate_traceability(self) -> Recommendation:
+        # Compatibility dual-write: keep related_finding_ids == supporting_finding_ids.
+        related = self.related_finding_ids
+        supporting = self.supporting_finding_ids
+        if supporting and related and supporting != related:
+            raise TraceabilityValidationError(
+                "related_finding_ids must match supporting_finding_ids "
+                "during the compatibility window"
+            )
+        if supporting and not related:
+            related = supporting
+        elif related and not supporting:
+            supporting = related
+
+        primary = self.primary_finding_id
+        if primary is not None and primary not in supporting:
+            raise TraceabilityValidationError(
+                "primary_finding_id must reference a supporting_finding_ids entry"
+            )
+        if primary is None and len(supporting) == 1:
+            primary = supporting[0]
+
+        updates: dict[str, Any] = {}
+        if related != self.related_finding_ids:
+            updates["related_finding_ids"] = related
+        if supporting != self.supporting_finding_ids:
+            updates["supporting_finding_ids"] = supporting
+        if primary != self.primary_finding_id:
+            updates["primary_finding_id"] = primary
+        if updates:
+            return self.model_copy(update=updates)
+        return self
+
     @classmethod
     def create(
         cls,
@@ -146,10 +229,45 @@ class Recommendation(BaseModel):
         affected_node_ids: Sequence[NodeId] = (),
         metadata: Mapping[str, Any] | None = None,
         subject_keys: Sequence[str] = (),
+        supporting_finding_ids: Sequence[str] | None = None,
+        primary_finding_id: str | None = None,
+        recommendation_type: RecommendationType | None = None,
+        evidence_completeness: EvidenceCompleteness | None = None,
+        limitations: Sequence[str] = (),
+        recommendation_confidence: RecommendationConfidence | None = None,
     ) -> Recommendation:
-        """Construct a recommendation with a deterministic identity."""
+        """Construct a recommendation with a deterministic identity.
 
-        finding_ids = tuple(related_finding_ids)
+        Traceability fields are additive. Recommendation ID continues to use
+        ``provider_id`` + ``related_finding_ids`` + ``subject_keys`` only
+        (EvidenceRef / completeness / limitations / confidence are never
+        identity inputs). Recommendation Confidence is derived after supporting
+        Findings resolve; defaults to Unavailable until then.
+        """
+
+        # Dual-write compatibility: supporting and related stay identical.
+        if supporting_finding_ids is not None:
+            finding_ids = tuple(supporting_finding_ids)
+        else:
+            finding_ids = tuple(related_finding_ids)
+
+        if recommendation_type is None:
+            recommendation_type = (
+                RecommendationType.FINDING_BACKED
+                if finding_ids
+                else RecommendationType.LEGACY
+            )
+        if evidence_completeness is None:
+            evidence_completeness = (
+                EvidenceCompleteness.COMPLETE
+                if finding_ids
+                else EvidenceCompleteness.LEGACY
+            )
+        if primary_finding_id is None and finding_ids:
+            primary_finding_id = sorted(
+                {require_nonblank(item, label="finding_id") for item in finding_ids}
+            )[0]
+
         return cls(
             id=build_recommendation_id(
                 provider_id=provider_id,
@@ -163,6 +281,17 @@ class Recommendation(BaseModel):
             category=category,
             source=RecommendationSource.FINDING_RULE,
             related_finding_ids=finding_ids,
+            supporting_finding_ids=finding_ids,
+            primary_finding_id=primary_finding_id,
+            recommendation_type=recommendation_type,
+            evidence_completeness=evidence_completeness,
+            limitations=tuple(limitations),
+            recommendation_confidence=recommendation_confidence
+            or RecommendationConfidence.unavailable(
+                limitations=(
+                    "Recommendation Confidence pending supporting Finding resolution.",
+                ),
+            ),
             affected_node_ids=tuple(affected_node_ids),
             evidence=tuple(evidence),
             actions=tuple(actions),

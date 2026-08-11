@@ -486,7 +486,7 @@ class InsufficientEvidencePolicy:
 
         from codestrata.domain.architecture.conclusions.enums import ConclusionMateriality
         from codestrata.domain.architecture.conclusions.relationships import SeveritySummary
-        from codestrata.domain.rules.enums import RuleConfidence
+        from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
         conclusion_id = build_conclusion_id(
             policy_id=POLICY_INSUFFICIENT_EVIDENCE,
@@ -521,7 +521,7 @@ class InsufficientEvidencePolicy:
                 source_finding_count=0,
             ),
             business_impact="unknown",
-            confidence=RuleConfidence.LOW,
+            confidence=MatchEvidenceConfidence.LOW,
             coverage=coverage_map(
                 extraction_coverage=extraction,
                 classification_coverage=classification,

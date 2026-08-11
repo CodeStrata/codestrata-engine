@@ -16,7 +16,8 @@ DEFAULT_EXCLUDED_DIRECTORY_NAMES: frozenset[str] = frozenset(
     {
         ".git",
         ".codestrata",
-        ".codestrata-examples",
+        ".codestrata-artifacts",
+    ".codestrata-examples",
         ".codestrata-test-knowledge",
         ".export-staging",
         "export-staging",

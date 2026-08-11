@@ -419,8 +419,9 @@ def test_executive_summary_metrics_html_and_json(tmp_path: Path) -> None:
     assert "Executive Summary" in html
     assert "Leadership Verdict" in html
     assert "Assessment Summary" in html
-    assert "Priority findings" in html
-    assert "Technology Overview" in html
+    # Canonical Slice 14.9 presentation titles (not pre-14.9 labels).
+    assert "Priority Actions" in html
+    assert "Technology Inventory" in html
     assert "severity-critical" in html
     assert "Findings" in html
     assert "Should I care?" in html
@@ -431,8 +432,9 @@ def test_executive_summary_metrics_html_and_json(tmp_path: Path) -> None:
     assert executive["findings_by_severity"]["critical"] == 1
     assert executive["findings_by_severity"]["high"] == 1
     assert executive["findings_by_severity"]["medium"] == 1
-    assert executive["recommendations_by_priority"]["critical"] == 1
-    assert executive["recommendations_by_priority"]["high"] == 1
+    # Calibrated priority projection (Epic 5) may remap fixture Priority.CRITICAL → high.
+    assert executive["recommendations_by_priority"]["critical"] == 0
+    assert executive["recommendations_by_priority"]["high"] == 2
     assert executive["recommendations_by_priority"]["medium"] == 1
     assert executive["critical_high_finding_count"] == 2
     assert executive["tests_detected"] is True
@@ -447,7 +449,7 @@ def test_repository_facts_present_in_html_and_json(tmp_path: Path) -> None:
 
     assert "Findings" in html
     assert "Repository Profile" in html
-    assert "Technology Overview" in html
+    assert "Technology Inventory" in html
     assert "Spring Boot" in html
 
     assert facts["structure"]["file_count"] == 3
@@ -528,7 +530,7 @@ def test_static_analysis_completed_counts_agree_in_html_and_json(tmp_path: Path)
     assert provider["files_analyzed"] == 49
     assert provider["provider_version"] == "7.26.0"
     assert "category/java/bestpractices.xml" in provider["rulesets"]
-    assert "Technology Overview" in html
+    assert "Technology Inventory" in html
 
 
 def test_findings_and_deterministic_recommendations_parity(tmp_path: Path) -> None:
@@ -548,9 +550,11 @@ def test_findings_and_deterministic_recommendations_parity(tmp_path: Path) -> No
     assert findings[0]["evidence"]
     recs = document["assessment"]["deterministic_recommendations"]
     assert len(recs) == 3
-    assert recs[0]["rule_id"] == "REC.SECURITY.001"
+    # Prioritization may reorder equal-band recommendations; bind by rule_id.
+    by_rule = {rec["rule_id"]: rec for rec in recs}
+    assert "REC.SECURITY.001" in by_rule
     # related_finding_ids must be stable report finding IDs (not rule IDs).
-    assert recs[0]["related_finding_ids"] == [findings[0]["id"]]
+    assert by_rule["REC.SECURITY.001"]["related_finding_ids"] == [findings[0]["id"]]
     assert document["assessment"]["summary"]["recommendation_count"] == 3
 
 

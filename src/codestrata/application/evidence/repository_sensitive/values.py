@@ -37,6 +37,18 @@ _ENV_INTERPOLATION = re.compile(
     r"^\$\{[A-Za-z_][A-Za-z0-9_]*(?::[^}]*)?\}$|^\$[A-Za-z_][A-Za-z0-9_]*$"
 )
 _URL_LIKE = re.compile(r"(?i)^(https?|jdbc|amqp|mongodb|redis)://")
+# GitHub Actions / Azure DevOps secret *references* — not secret bodies.
+_CI_SECRET_EXPRESSION = re.compile(
+    r"^\$\{\{\s*(secrets\.|steps\.[^}]+\.outputs\.)[^}]*\}\}$|"
+    r"^\$\([\w.-]*(password|token|secret|key)[\w.-]*\)$",
+    re.IGNORECASE,
+)
+
+
+def is_ci_secret_expression(value: str) -> bool:
+    """Return True when value is a CI vault/OIDC expression, not a secret body."""
+
+    return bool(_CI_SECRET_EXPRESSION.match(value.strip()))
 
 
 def classify_placeholder(value: str) -> tuple[PlaceholderStatus, str | None, ValueKind]:
@@ -48,6 +60,13 @@ def classify_placeholder(value: str) -> tuple[PlaceholderStatus, str | None, Val
         return (
             PlaceholderStatus.ENVIRONMENT_INTERPOLATION,
             "environment_variable",
+            ValueKind.ENVIRONMENT_REFERENCE,
+        )
+    # CI vault/OIDC expressions reference secrets by name — not secret bodies.
+    if is_ci_secret_expression(text):
+        return (
+            PlaceholderStatus.ENVIRONMENT_INTERPOLATION,
+            "ci_secret_expression",
             ValueKind.ENVIRONMENT_REFERENCE,
         )
     if lower in _PLACEHOLDER_LITERALS or lower.startswith("your_"):
@@ -66,10 +85,19 @@ def redact_preview(value: str, *, sensitive: bool = True) -> str:
 
     Always returns a nonempty token so evidence models that require
     ``redacted_preview`` can accept empty configuration literals.
+
+    CI secret *expressions* (``${{ secrets.* }}``, pipeline macros) are not
+    secret bodies — preserve them so downstream context classification can
+    demote severity without weakening detectors.
     """
 
     if not value.strip():
         return "[EMPTY]"
+    if is_ci_secret_expression(value):
+        compact = value.strip()
+        if len(compact) <= 96:
+            return compact
+        return f"{compact[:40]}…{compact[-12:]}"
     if not sensitive:
         # Still bound length for non-sensitive flags/URLs.
         compact = value.strip()

@@ -10,6 +10,7 @@ from codestrata.application.rules.cloud.helpers import (
     _sorted_matches,
     active_families,
     confidence_from_levels,
+    deployment_fact_is_confirmed,
     evidence_is_usable,
     evidence_summary,
     has_deployment_assets,
@@ -448,7 +449,11 @@ class CloudDeploymentPipelineDetectedRule:
         if not systems:
             return SharedRuleEvaluationResult.not_matched()
         joined = ",".join(item.value for item in systems)
-        facts = [item for item in evidence.deployment_facts if item.system in systems]
+        facts = [
+            item
+            for item in evidence.deployment_facts
+            if item.system in systems and deployment_fact_is_confirmed(item)
+        ]
         category = CloudCategory.DEPLOYMENT_AUTOMATION
         evidence_items: list[RuleEvidence] = [
             evidence_summary(

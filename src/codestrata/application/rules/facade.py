@@ -81,10 +81,12 @@ class RuleExecutionFacade:
         else:
             loaded = self._legacy_engine.rules
 
-        findings: list[Finding] = []
+        from codestrata.application.traceability.merge import merge_finding_traceability
+
+        findings_by_id: dict[str, Finding] = {}
+        finding_order: list[str] = []
         evaluated: list[str] = []
         skipped: list[str] = []
-        seen_ids: set[str] = set()
 
         for rule in loaded:
             adapter = LegacyRuleAdapter(rule)
@@ -96,10 +98,13 @@ class RuleExecutionFacade:
             if result.skipped:
                 skipped.append(rule.id())
             for finding in result.findings:
-                if finding.id in seen_ids:
+                existing = findings_by_id.get(finding.id)
+                if existing is None:
+                    findings_by_id[finding.id] = finding
+                    finding_order.append(finding.id)
                     continue
-                seen_ids.add(finding.id)
-                findings.append(finding)
+                findings_by_id[finding.id] = merge_finding_traceability(existing, finding)
+        findings = [findings_by_id[item_id] for item_id in finding_order]
 
         return RuleEvaluationResult.from_findings(
             findings=tuple(findings),

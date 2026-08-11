@@ -12,14 +12,31 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from codestrata.domain.graph.validation import as_tuple, require_nonblank
+from codestrata.reporting.ai_readiness.intelligence_models import (
+    AiReadinessIntelligenceSection,
+)
 from codestrata.reporting.ai_readiness.models import AiReadinessReportSection
+from codestrata.reporting.architecture.intelligence_models import ArchitectureIntelligenceSection
 from codestrata.reporting.architecture.models import ArchitectureReportSection
+from codestrata.reporting.cloud.intelligence_models import CloudIntelligenceSection
 from codestrata.reporting.cloud.models import CloudReportSection
+from codestrata.reporting.dependency.intelligence_models import DependencyIntelligenceSection
 from codestrata.reporting.dependency.models import DependencyReportSection
+from codestrata.reporting.engineering_intelligence.intelligence_models import (
+    EngineeringIntelligenceSection,
+)
+from codestrata.reporting.modernization.intelligence_models import (
+    ModernizationIntelligenceSection,
+)
 from codestrata.reporting.performance.models import PerformanceReportSection
 from codestrata.reporting.roadmap.models import RoadmapReportSection
+from codestrata.reporting.security.intelligence_models import SecurityIntelligenceSection
 from codestrata.reporting.security.models import SecurityReportSection
+from codestrata.reporting.technical_debt.intelligence_models import (
+    TechnicalDebtIntelligenceSection,
+)
 from codestrata.reporting.technical_debt.models import TechnicalDebtReportSection
+from codestrata.reporting.technology.models import TechnologyInventorySection
 from codestrata.reporting.testing.models import TestingReportSection
 
 
@@ -94,6 +111,9 @@ class TechnologyItemView(BaseModel):
     name: str
     category: str | None = None
     version: str | None = None
+    # Epic 3 Slice 3.2 — preserve detection metadata when available.
+    confidence: float | None = Field(default=None, ge=0.0, le=1.0)
+    source: str | None = None
 
     @field_validator("name", mode="before")
     @classmethod
@@ -132,6 +152,54 @@ class EvidenceView(BaseModel):
         return require_nonblank(str(value), label="evidence field")
 
 
+class EvidenceRefView(BaseModel):
+    """Customer-safe EvidenceRef projection for HTML (Slice 2.7)."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    evidence_id: str
+    kind: str = "other"
+    production_mode: str = "direct"
+    path: str | None = None
+    line_start: int | None = None
+    line_end: int | None = None
+    symbolic_reference: str | None = None
+    snippet_text: str | None = None
+    measurement_name: str | None = None
+    measurement_value: str | int | float | bool | None = None
+    threshold_operator: str | None = None
+    threshold_value: str | int | float | bool | None = None
+    comparison_result: str | None = None
+    graph_kind: str | None = None
+    graph_ref_id: str | None = None
+    # Epic 3 Slice 3.3 — compact graph projection (optional; omit when absent).
+    graph_reference_kind: str | None = None
+    graph_node_ids: tuple[str, ...] = ()
+    graph_edge_ids: tuple[str, ...] = ()
+    graph_relationship_type: str | None = None
+    graph_cycle_id: str | None = None
+    measurement_scope: str | None = None
+    limitations: tuple[str, ...] = ()
+    evidence_confidence_level: str | None = None
+    evidence_confidence_limitations: tuple[str, ...] = ()
+
+    @field_validator("evidence_id", mode="before")
+    @classmethod
+    def normalize_required(cls, value: object) -> str:
+        return require_nonblank(str(value), label="evidence_id")
+
+    @field_validator(
+        "limitations",
+        "graph_node_ids",
+        "graph_edge_ids",
+        "evidence_confidence_limitations",
+        mode="before",
+    )
+    @classmethod
+    def normalize_sequences(cls, value: object) -> tuple[Any, ...]:
+        return as_tuple(value)
+
+
 class FindingView(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
@@ -143,6 +211,25 @@ class FindingView(BaseModel):
     category: str
     affected_nodes: tuple[str, ...] = ()
     evidence: tuple[EvidenceView, ...] = ()
+    # Epic 2 Slice 2.7 — EvidenceRef traceability (dual-carry with thin evidence).
+    evidence_refs: tuple[EvidenceRefView, ...] = ()
+    primary_evidence_id: str | None = None
+    synthesized_from_evidence_ids: tuple[str, ...] = ()
+    evidence_completeness: str = "legacy"
+    limitations: tuple[str, ...] = ()
+    finding_confidence_level: str | None = None
+    rule_confidence_level: str | None = None
+    # Reverse links resolved at build time (titles for customer labels).
+    driven_recommendation_ids: tuple[str, ...] = ()
+    driven_recommendation_titles: tuple[str, ...] = ()
+    influenced_priority_action_ids: tuple[str, ...] = ()
+    influenced_priority_action_titles: tuple[str, ...] = ()
+    # Epic 5 Slice 5.12 — correlated Findings (not duplicates).
+    correlated_finding_ids: tuple[str, ...] = ()
+    correlated_finding_titles: tuple[str, ...] = ()
+    correlation_relationship_labels: tuple[str, ...] = ()
+    # Epic 5 Slice 5.13 — customer-safe severity basis labels.
+    severity_basis_labels: tuple[str, ...] = ()
 
     @field_validator(
         "finding_id",
@@ -157,7 +244,22 @@ class FindingView(BaseModel):
     def normalize_required(cls, value: object) -> str:
         return require_nonblank(str(value), label="finding view field")
 
-    @field_validator("affected_nodes", "evidence", mode="before")
+    @field_validator(
+        "affected_nodes",
+        "evidence",
+        "evidence_refs",
+        "synthesized_from_evidence_ids",
+        "limitations",
+        "driven_recommendation_ids",
+        "driven_recommendation_titles",
+        "influenced_priority_action_ids",
+        "influenced_priority_action_titles",
+        "correlated_finding_ids",
+        "correlated_finding_titles",
+        "correlation_relationship_labels",
+        "severity_basis_labels",
+        mode="before",
+    )
     @classmethod
     def normalize_sequences(cls, value: object) -> tuple[Any, ...]:
         return as_tuple(value)
@@ -196,6 +298,17 @@ class RecommendationView(BaseModel):
     dependencies: tuple[str, ...] = ()
     priority_score: float = 0.0
     presentation_bucket: str = "future"
+    # Epic 2 Slice 2.7 — recommendation / Priority Action traceability.
+    primary_finding_id: str | None = None
+    recommendation_type: str = "legacy"
+    evidence_completeness: str = "legacy"
+    limitations: tuple[str, ...] = ()
+    recommendation_confidence_level: str | None = None
+    priority_basis_labels: tuple[str, ...] = ()
+    supporting_recommendation_ids: tuple[str, ...] = ()
+    supporting_recommendation_titles: tuple[str, ...] = ()
+    primary_recommendation_id: str | None = None
+    action_type: str | None = None
 
     @field_validator(
         "recommendation_id",
@@ -217,6 +330,10 @@ class RecommendationView(BaseModel):
         "actions",
         "evidence",
         "dependencies",
+        "limitations",
+        "priority_basis_labels",
+        "supporting_recommendation_ids",
+        "supporting_recommendation_titles",
         mode="before",
     )
     @classmethod
@@ -320,7 +437,7 @@ class AssessmentMetadataView(BaseModel):
     timing_report_ms: float | None = None
     ai_status: str
     model_id: str | None = None
-    report_version: str = "3.0"
+    report_version: str = "3.1"
     engine_version: str = "0.1.0"
     advisor_version: str | None = None
     repository_name: str | None = None
@@ -399,6 +516,42 @@ class AssessmentScopeView(BaseModel):
         return as_tuple(value)
 
 
+class AssessmentHeadSectionView(BaseModel):
+    """One customer assessment-head section (Epic 3 Slice 3.1 placeholders)."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    head: str
+    title: str
+    anchor: str
+    status: str
+    status_label: str
+    findings_count: int = Field(ge=0)
+    recommendations_count: int = Field(ge=0)
+    evidence_state: str = "unavailable"
+    confidence: str = "unavailable"
+    confidence_label: str = "Confidence unavailable"
+    assessment_head_confidence: dict[str, Any] | None = None
+    assessment_coverage: dict[str, Any] | None = None
+    limitations: tuple[str, ...] = ()
+    findings: tuple[FindingView, ...] = ()
+    recommendations: tuple[RecommendationView, ...] = ()
+    related_priority_action_ids: tuple[str, ...] = ()
+    placeholder_message: str | None = None
+    pack_content_available: bool = False
+
+    @field_validator(
+        "limitations",
+        "findings",
+        "recommendations",
+        "related_priority_action_ids",
+        mode="before",
+    )
+    @classmethod
+    def normalize_sequences(cls, value: object) -> tuple[Any, ...]:
+        return as_tuple(value)
+
+
 class CustomerReportDocument(BaseModel):
     """Renderer-neutral customer presentation document (Phase 6.3).
 
@@ -416,15 +569,28 @@ class CustomerReportDocument(BaseModel):
     findings: tuple[FindingView, ...] = ()
     recommendations: tuple[RecommendationView, ...] = ()
     priority_actions: tuple[RecommendationView, ...] = ()
+    # Full Priority Action set before leadership top-N display filtering.
+    priority_actions_total: int = Field(default=0, ge=0)
+    # Canonical EvidenceRef index (from findings) for appendix / deep links.
+    evidence: tuple[EvidenceRefView, ...] = ()
     ai_enrichment: AiEnrichmentView | None = None
     architecture_report: ArchitectureReportSection | None = None
+    architecture_intelligence: ArchitectureIntelligenceSection | None = None
     technical_debt_report: TechnicalDebtReportSection | None = None
+    technical_debt_intelligence: TechnicalDebtIntelligenceSection | None = None
     dependency_report: DependencyReportSection | None = None
+    dependency_intelligence: DependencyIntelligenceSection | None = None
     security_report: SecurityReportSection | None = None
+    security_intelligence: SecurityIntelligenceSection | None = None
     testing_report: TestingReportSection | None = None
     cloud_report: CloudReportSection | None = None
+    cloud_intelligence: CloudIntelligenceSection | None = None
     ai_readiness_report: AiReadinessReportSection | None = None
+    ai_readiness_intelligence: AiReadinessIntelligenceSection | None = None
+    modernization_intelligence: ModernizationIntelligenceSection | None = None
+    engineering_intelligence: EngineeringIntelligenceSection | None = None
     performance_report: PerformanceReportSection | None = None
+    technology_inventory: TechnologyInventorySection | None = None
     roadmap_report: RoadmapReportSection | None = None
     artifacts: tuple[ArtifactRefView, ...] = ()
     metadata: AssessmentMetadataView
@@ -435,6 +601,14 @@ class CustomerReportDocument(BaseModel):
     engineering_risks: tuple[EngineeringRiskThemeView, ...] = ()
     modernization_opportunities: tuple[str, ...] = ()
     assessment_scope: AssessmentScopeView | None = None
+    # Epic 3 Slice 3.1 — assessment-head organization (presentation projections).
+    assessment_heads: tuple[AssessmentHeadSectionView, ...] = ()
+    unclassified_findings: tuple[FindingView, ...] = ()
+    unclassified_recommendations: tuple[RecommendationView, ...] = ()
+    unclassified_limitation: str = (
+        "Some assessment results could not yet be assigned to a customer-facing "
+        "assessment section."
+    )
     provenance_note: str = (
         "Findings and Priority Actions reflect repository evidence from this assessment. "
         "Modernization Advisor, when present, is interpretive commentary only."
@@ -446,11 +620,15 @@ class CustomerReportDocument(BaseModel):
         "findings",
         "recommendations",
         "priority_actions",
+        "evidence",
         "artifacts",
         "outline",
         "key_takeaways",
         "engineering_risks",
         "modernization_opportunities",
+        "assessment_heads",
+        "unclassified_findings",
+        "unclassified_recommendations",
         mode="before",
     )
     @classmethod

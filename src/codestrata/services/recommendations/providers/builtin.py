@@ -74,6 +74,13 @@ def _base(
     subject_keys: tuple[str, ...] = (),
     metadata: dict[str, object] | None = None,
 ) -> Recommendation:
+    from codestrata.application.traceability.recommendation import (
+        select_primary_finding_id,
+    )
+    from codestrata.domain.recommendations.enums import RecommendationType
+    from codestrata.domain.traceability import EvidenceCompleteness
+
+    finding_ids = (finding.id,)
     return Recommendation.create(
         provider_id=provider_id,
         title=title,
@@ -81,7 +88,11 @@ def _base(
         rationale=rationale,
         priority=priority or priority_from_finding_severity(finding.severity),
         category=category,
-        related_finding_ids=(finding.id,),
+        related_finding_ids=finding_ids,
+        supporting_finding_ids=finding_ids,
+        primary_finding_id=select_primary_finding_id((finding,)) or finding.id,
+        recommendation_type=RecommendationType.FINDING_BACKED,
+        evidence_completeness=EvidenceCompleteness.COMPLETE,
         actions=actions,
         evidence=_evidence_from_finding(finding),
         affected_node_ids=finding.affected_assessment_node_ids,
@@ -563,6 +574,175 @@ class LargeRepositoryRecommendation:
         )
 
 
+class CorrelationAwareTransportVerificationRecommendation:
+    """One Recommendation for correlated TLS + hostname verification Findings."""
+
+    def id(self) -> str:
+        return "codestrata-rec-correlation-transport-verification"
+
+    def supported_finding_rule_ids(self) -> frozenset[str]:
+        return frozenset(
+            {
+                "security.tls-verification-disabled",
+                "security.hostname-verification-disabled",
+            }
+        )
+
+    def recommend(
+        self,
+        finding: Finding,
+        context: RecommendationContext,
+    ) -> tuple[Recommendation, ...]:
+        # Emit once from the lexicographically first correlated finding.
+        related = tuple(getattr(finding, "correlated_finding_ids", ()) or ())
+        if not related:
+            return ()
+        peers = [
+            item
+            for item in context.findings
+            if item.id in related
+            and item.rule_id
+            in {
+                "security.tls-verification-disabled",
+                "security.hostname-verification-disabled",
+            }
+            and item.rule_id != finding.rule_id
+        ]
+        if not peers:
+            return ()
+        members = tuple(sorted((finding, *peers), key=lambda item: item.id))
+        if finding.id != members[0].id:
+            return ()
+        finding_ids = tuple(item.id for item in members)
+        from codestrata.application.traceability.recommendation import (
+            select_primary_finding_id,
+        )
+        from codestrata.domain.findings.enums import FindingSeverity
+
+        _sev_rank = {
+            FindingSeverity.INFORMATIONAL: 0,
+            FindingSeverity.LOW: 1,
+            FindingSeverity.MEDIUM: 2,
+            FindingSeverity.HIGH: 3,
+            FindingSeverity.CRITICAL: 4,
+        }
+        highest = max(members, key=lambda item: _sev_rank.get(item.severity, 0))
+
+        return (
+            Recommendation.create(
+                provider_id=self.id(),
+                title="Restore transport verification controls",
+                summary=(
+                    "TLS verification and hostname verification are both disabled "
+                    "on the same configuration boundary."
+                ),
+                rationale=(
+                    "Correlated Security Findings share a configuration subject; "
+                    "restore verification together."
+                ),
+                priority=priority_from_finding_severity(highest.severity),
+                category=RecommendationCategory.MODERNIZATION,
+                related_finding_ids=finding_ids,
+                supporting_finding_ids=finding_ids,
+                primary_finding_id=select_primary_finding_id(members) or members[0].id,
+                actions=_actions(
+                    (
+                        "Re-enable verification",
+                        "Restore TLS and hostname verification on the shared boundary.",
+                        None,
+                        None,
+                    ),
+                ),
+                subject_keys=("correlation", "transport-verification", *finding_ids),
+                metadata={"correlation_aware": "true"},
+            ),
+        )
+
+
+class CorrelationAwareDependencyNormalizationRecommendation:
+    """One Recommendation for correlated duplicate + conflicting dependency Findings."""
+
+    def id(self) -> str:
+        return "codestrata-rec-correlation-dependency-normalization"
+
+    def supported_finding_rule_ids(self) -> frozenset[str]:
+        return frozenset(
+            {
+                "dependency.duplicate-declaration",
+                "dependency.conflicting-exact-versions",
+            }
+        )
+
+    def recommend(
+        self,
+        finding: Finding,
+        context: RecommendationContext,
+    ) -> tuple[Recommendation, ...]:
+        related = tuple(getattr(finding, "correlated_finding_ids", ()) or ())
+        if not related:
+            return ()
+        peers = [
+            item
+            for item in context.findings
+            if item.id in related
+            and item.rule_id
+            in {
+                "dependency.duplicate-declaration",
+                "dependency.conflicting-exact-versions",
+            }
+            and item.rule_id != finding.rule_id
+        ]
+        if not peers:
+            return ()
+        members = tuple(sorted((finding, *peers), key=lambda item: item.id))
+        if finding.id != members[0].id:
+            return ()
+        finding_ids = tuple(item.id for item in members)
+        from codestrata.application.traceability.recommendation import (
+            select_primary_finding_id,
+        )
+        from codestrata.domain.findings.enums import FindingSeverity
+
+        _sev_rank = {
+            FindingSeverity.INFORMATIONAL: 0,
+            FindingSeverity.LOW: 1,
+            FindingSeverity.MEDIUM: 2,
+            FindingSeverity.HIGH: 3,
+            FindingSeverity.CRITICAL: 4,
+        }
+        highest = max(members, key=lambda item: _sev_rank.get(item.severity, 0))
+
+        return (
+            Recommendation.create(
+                provider_id=self.id(),
+                title="Normalize duplicate dependency declarations",
+                summary=(
+                    "Duplicate declarations and conflicting exact versions affect "
+                    "the same dependency identity."
+                ),
+                rationale=(
+                    "Correlated Dependency Findings share dependency identity; "
+                    "normalize declarations in one change."
+                ),
+                priority=priority_from_finding_severity(highest.severity),
+                category=RecommendationCategory.DEPENDENCY,
+                related_finding_ids=finding_ids,
+                supporting_finding_ids=finding_ids,
+                primary_finding_id=select_primary_finding_id(members) or members[0].id,
+                actions=_actions(
+                    (
+                        "Consolidate declarations",
+                        "Keep one declaration with a single exact version in scope.",
+                        None,
+                        None,
+                    ),
+                ),
+                subject_keys=("correlation", "dependency-normalization", *finding_ids),
+                metadata={"correlation_aware": "true"},
+            ),
+        )
+
+
 def builtin_recommendation_providers() -> tuple[object, ...]:
     """Return the ordered builtin recommendation provider set."""
 
@@ -577,4 +757,6 @@ def builtin_recommendation_providers() -> tuple[object, ...]:
         JavaLanguageLevelRecommendation(),
         MissingNodeEngineRecommendation(),
         LargeRepositoryRecommendation(),
+        CorrelationAwareTransportVerificationRecommendation(),
+        CorrelationAwareDependencyNormalizationRecommendation(),
     )

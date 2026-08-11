@@ -45,3 +45,11 @@ class RoadmapStatus(StrEnum):
     EMPTY = "empty"
     DISABLED = "disabled"
     FAILED = "failed"
+
+
+class RoadmapInitiativeType(StrEnum):
+    """Lightweight Roadmap Initiative classification (Epic 2 Slice 2.5)."""
+
+    PRIORITY_ACTION_BACKED = "priority_action_backed"
+    MERGED = "merged"
+    LEGACY = "legacy"

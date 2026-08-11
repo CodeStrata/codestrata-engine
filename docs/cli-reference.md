@@ -32,19 +32,20 @@ hint.
 | `codestrata config validate` | Validate configuration / profile compatibility |
 | `codestrata config effective` | Show effective non-secret settings |
 | `codestrata config show` | Alias for `effective` |
-| `codestrata telemetry status` | Anonymous telemetry status (disabled by default) |
+| `codestrata telemetry status` | Privacy-first telemetry posture (disabled by default; no side effects) |
+| `codestrata telemetry preview` | Illustrative privacy-safe runtime event (local only; no transmission) |
 | `codestrata telemetry enable` | Explicit opt-in for anonymous telemetry |
 | `codestrata telemetry disable` | Disable anonymous telemetry |
 | `codestrata telemetry reset` | Reset installation id + preferences |
-| `codestrata telemetry show` | Print sample telemetry payload (no transmit) |
+| `codestrata telemetry show` | Print sample legacy telemetry payload (no transmit) |
 
 ### Assess (canonical)
 
 ```bash
-codestrata assess --config codestrata.toml --output reports
-codestrata assess --repo test-fixtures/sample-js-app --output reports --no-ai
-codestrata assess --config codestrata.toml --profile local --output reports
-codestrata assess --config codestrata.toml --output reports --with-ai
+codestrata assess --config codestrata.toml --no-ai
+codestrata assess --repo test-fixtures/sample-js-app --no-ai --no-ai
+codestrata assess --config codestrata.toml --profile local --no-ai
+codestrata assess --config codestrata.toml --no-ai --with-ai
 ```
 
 Important options:
@@ -84,7 +85,7 @@ Guide: [mcp/setup.md](mcp/setup.md).
 | Command | Purpose |
 | ------- | ------- |
 | `codestrata ai` | Community: supported assess providers, Configured / Not Configured, required env vars |
-| `codestrata ai doctor` | Community: validate Bedrock / OpenAI setup without assessing (no secrets) |
+| `codestrata ai doctor` | Community: validate Bedrock / OpenAI / OpenRouter setup without assessing (local readiness only; no secrets; no provider calls) |
 
 Portal guide: [AI Providers](https://docs.codestrata.ai/ai-providers/).
 

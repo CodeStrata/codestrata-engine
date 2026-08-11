@@ -49,10 +49,12 @@ Related environment overlays (also env > TOML):
 | `AWS_REGION` / `AWS_DEFAULT_REGION` | AWS region (resolved at use time; env > TOML) |
 | `CODESTRATA_BEDROCK_MODEL_ID` | `[ai.bedrock].model_id` |
 | `CODESTRATA_OPENAI_API_KEY_ENV` | `[ai.openai].api_key_env` (name only) |
+| `CODESTRATA_OPENROUTER_MODEL_ID` | `[ai.openrouter].model` (OpenRouter has no product default) |
 
-OpenAI secrets are **never** stored in TOML. Configure only the environment
-variable *name* (`api_key_env = "OPENAI_API_KEY"`) and set the value in the
-process environment or `.env`.
+OpenAI and OpenRouter secrets are **never** stored in TOML. Configure only the
+environment variable *name* (`api_key_env`) and set the value in the process
+environment or `.env`. OpenRouter additionally requires an explicit model
+(CLI, `CODESTRATA_OPENROUTER_MODEL_ID`, or `[ai.openrouter].model`).
 
 ## TOML examples
 
@@ -107,7 +109,7 @@ codestrata config validate --config codestrata.toml
 codestrata config validate --config codestrata.toml --profile bedrock --strict
 
 # Assess with an explicit profile
-codestrata assess --config codestrata.toml --profile local --output reports
+codestrata assess --config codestrata.toml --profile local --no-ai
 ```
 
 ## Validation behavior

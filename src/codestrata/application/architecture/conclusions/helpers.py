@@ -14,7 +14,7 @@ from codestrata.domain.architecture.conclusions.enums import (
 from codestrata.domain.architecture.conclusions.relationships import SeveritySummary
 from codestrata.domain.findings import Finding
 from codestrata.domain.findings.enums import FindingSeverity
-from codestrata.domain.rules.enums import RuleConfidence
+from codestrata.domain.rules.enums import MatchEvidenceConfidence
 
 _SEVERITY_RANK = {
     FindingSeverity.INFORMATIONAL: 0,
@@ -25,26 +25,26 @@ _SEVERITY_RANK = {
 }
 
 _CONFIDENCE_RANK = {
-    RuleConfidence.LOW: 0,
-    RuleConfidence.MEDIUM: 1,
-    RuleConfidence.HIGH: 2,
-    RuleConfidence.CERTAIN: 3,
+    MatchEvidenceConfidence.LOW: 0,
+    MatchEvidenceConfidence.MEDIUM: 1,
+    MatchEvidenceConfidence.HIGH: 2,
+    MatchEvidenceConfidence.CERTAIN: 3,
 }
 
 _RANK_TO_CONFIDENCE = {
-    0: RuleConfidence.LOW,
-    1: RuleConfidence.MEDIUM,
-    2: RuleConfidence.HIGH,
-    3: RuleConfidence.CERTAIN,
+    0: MatchEvidenceConfidence.LOW,
+    1: MatchEvidenceConfidence.MEDIUM,
+    2: MatchEvidenceConfidence.HIGH,
+    3: MatchEvidenceConfidence.CERTAIN,
 }
 
 
-def finding_confidence(finding: Finding) -> RuleConfidence:
+def finding_confidence(finding: Finding) -> MatchEvidenceConfidence:
     raw = str(finding.metadata.get("confidence", "medium")).lower()
     try:
-        return RuleConfidence(raw)
+        return MatchEvidenceConfidence(raw)
     except ValueError:
-        return RuleConfidence.MEDIUM
+        return MatchEvidenceConfidence.MEDIUM
 
 
 def build_severity_summary(findings: Sequence[Finding]) -> SeveritySummary:
@@ -70,19 +70,19 @@ def derive_confidence(
     *,
     classification_coverage: float | None = None,
     essential_finding_ids: Sequence[str] | None = None,
-) -> RuleConfidence:
+) -> MatchEvidenceConfidence:
     """Conservative: do not exceed weakest essential finding confidence."""
 
     if not findings:
-        return RuleConfidence.LOW
+        return MatchEvidenceConfidence.LOW
     essential = set(essential_finding_ids or [item.id for item in findings])
     essential_findings = [item for item in findings if item.id in essential] or list(findings)
     ranks = [_CONFIDENCE_RANK[finding_confidence(item)] for item in essential_findings]
     rank = min(ranks)
     if classification_coverage is not None and classification_coverage < 0.25:
-        rank = min(rank, _CONFIDENCE_RANK[RuleConfidence.LOW])
+        rank = min(rank, _CONFIDENCE_RANK[MatchEvidenceConfidence.LOW])
     elif classification_coverage is not None and classification_coverage < 0.5:
-        rank = min(rank, _CONFIDENCE_RANK[RuleConfidence.MEDIUM])
+        rank = min(rank, _CONFIDENCE_RANK[MatchEvidenceConfidence.MEDIUM])
     return _RANK_TO_CONFIDENCE[rank]
 
 
@@ -108,12 +108,12 @@ def derive_materiality(
 
 def derive_status(
     *,
-    confidence: RuleConfidence,
+    confidence: MatchEvidenceConfidence,
     classification_coverage: float | None,
 ) -> ConclusionStatus:
     if classification_coverage is not None and classification_coverage < 0.25:
         return ConclusionStatus.PROVISIONAL
-    if confidence is RuleConfidence.LOW:
+    if confidence is MatchEvidenceConfidence.LOW:
         return ConclusionStatus.PROVISIONAL
     return ConclusionStatus.ESTABLISHED
 

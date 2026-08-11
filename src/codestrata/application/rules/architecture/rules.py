@@ -31,7 +31,7 @@ from codestrata.domain.rules.architecture.ids import (
 )
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleConfidence,
+    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleSeverity,
     RuleSkipReason,
@@ -128,9 +128,9 @@ class DependencyCycleRule:
                     )
                 )
             confidence = (
-                RuleConfidence.HIGH
+                MatchEvidenceConfidence.HIGH
                 if view.extraction_coverage >= 0.4
-                else RuleConfidence.MEDIUM
+                else MatchEvidenceConfidence.MEDIUM
             )
             matches.append(
                 match(
@@ -229,7 +229,7 @@ class InvalidDependencyDirectionRule:
                         f"under model {view.layer_model}."
                     ),
                     severity=RuleSeverity.MEDIUM,
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=(
                         evidence_graph_edge(
                             source=source.unit_id,
@@ -323,7 +323,7 @@ class LayerBoundaryViolationRule:
                         "application/domain intermediaries."
                     ),
                     severity=RuleSeverity.HIGH,
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=(
                         evidence_graph_edge(
                             source=source.unit_id,
@@ -456,9 +456,9 @@ class ExcessiveCrossModuleCouplingRule:
                         "architectural boundaries."
                     ),
                     severity=severity,
-                    confidence=RuleConfidence.HIGH
+                    confidence=MatchEvidenceConfidence.HIGH
                     if view.extraction_coverage >= 0.4
-                    else RuleConfidence.MEDIUM,
+                    else MatchEvidenceConfidence.MEDIUM,
                     evidence=(
                         evidence_unit(
                             unit_id=unit.unit_id,
@@ -556,7 +556,7 @@ class ComponentConcentrationRule:
                         "architectural bottleneck."
                     ),
                     severity=RuleSeverity.MEDIUM if share < 0.5 else RuleSeverity.HIGH,
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=(
                         evidence_unit(
                             unit_id=unit_id,
@@ -639,7 +639,7 @@ class FrameworkLeakageRule:
                         "concerns into a framework-independent boundary."
                     ),
                     severity=RuleSeverity.MEDIUM,
-                    confidence=RuleConfidence.HIGH,
+                    confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         RuleEvidence(
                             kind=RuleEvidenceKind.SYMBOL,
@@ -734,7 +734,7 @@ class EnterpriseStandardMismatchRule:
                         f"'{standard_id}' (declared)."
                     ),
                     severity=RuleSeverity.HIGH,
-                    confidence=RuleConfidence.MEDIUM,
+                    confidence=MatchEvidenceConfidence.MEDIUM,
                     evidence=(
                         RuleEvidence(
                             kind=RuleEvidenceKind.ENTERPRISE_RELATIONSHIP,

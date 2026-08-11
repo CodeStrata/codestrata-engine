@@ -27,8 +27,8 @@ from codestrata.config.settings import (
 
 DOCS_AI_PROVIDERS = f"{DOCS_HOME}/ai-providers/"
 
-ProviderChoice = Literal["bedrock", "openai"]
-SUPPORTED_SETUP_PROVIDERS = ("bedrock", "openai")
+ProviderChoice = Literal["bedrock", "openai", "openrouter"]
+SUPPORTED_SETUP_PROVIDERS = ("bedrock", "openai", "openrouter")
 
 FRIENDLY_FALLBACK = (
     "If configuration isn't available yet, don't worry.\n"
@@ -42,9 +42,9 @@ ai_app = typer.Typer(
         "Optional AI setup for CodeStrata Engine.\n\n"
         "AI is optional — deterministic assess works without it.\n"
         "  codestrata ai\n"
-        "  codestrata ai --provider bedrock|openai\n"
+        "  codestrata ai --provider bedrock|openai|openrouter\n"
         "  codestrata ai doctor\n"
-        "  codestrata assess --repo . --output reports --with-ai"
+        "  codestrata assess --repo . --with-ai"
     ),
     no_args_is_help=False,
     invoke_without_command=True,
@@ -111,6 +111,7 @@ def _print_onboarding(settings: CodestrataSettings) -> None:
     typer.echo("Supported AI providers:")
     typer.echo("  • Amazon Bedrock (Recommended)")
     typer.echo("  • OpenAI")
+    typer.echo("  • OpenRouter (explicit; optional)")
     typer.echo("")
     typer.echo("CodeStrata Platform is separate (graph upload / commercial) —")
     typer.echo(
@@ -123,9 +124,10 @@ def _print_onboarding(settings: CodestrataSettings) -> None:
     typer.echo("Setup guides:")
     typer.echo("  codestrata ai --provider bedrock")
     typer.echo("  codestrata ai --provider openai")
+    typer.echo("  codestrata ai --provider openrouter")
     typer.echo("")
     tip("Validate configuration: codestrata ai doctor")
-    tip("Then run: codestrata assess --repo . --output reports --with-ai")
+    tip("Then run: codestrata assess --repo . --with-ai")
     typer.echo("")
     typer.echo(f"Docs: {DOCS_AI_PROVIDERS}")
     _print_friendly_fallback()
@@ -152,7 +154,7 @@ def _print_bedrock_guide() -> None:
     typer.echo("     pip install 'codestrata[bedrock]'")
     typer.echo("")
     tip("Validate: codestrata ai doctor")
-    tip("Assess with AI: codestrata assess --repo . --output reports --with-ai")
+    tip("Assess with AI: codestrata assess --repo . --with-ai")
     _print_friendly_fallback()
 
 
@@ -176,7 +178,35 @@ def _print_openai_guide() -> None:
     typer.echo("  pip install 'codestrata[openai]'")
     typer.echo("")
     tip("Validate: codestrata ai doctor")
-    tip("Assess with AI: codestrata assess --repo . --output reports --with-ai")
+    tip("Assess with AI: codestrata assess --repo . --with-ai")
+    _print_friendly_fallback()
+
+
+def _print_openrouter_guide() -> None:
+    typer.echo("OpenRouter setup (explicit; never the default)")
+    typer.echo("")
+    typer.echo("Doctor checks local readiness only — it does not call OpenRouter,")
+    typer.echo("validate your API key remotely, or probe model availability.")
+    typer.echo("")
+    typer.echo("1. Set your API key in the environment (never commit the value):")
+    typer.echo("     export OPENROUTER_API_KEY=<your-api-key>")
+    typer.echo("")
+    typer.echo("2. Select OpenRouter and set a model in codestrata.toml:")
+    typer.echo("     [ai]")
+    typer.echo('     provider = "openrouter"')
+    typer.echo("")
+    typer.echo("     [ai.openrouter]")
+    typer.echo('     model = "<provider/model>"')
+    typer.echo('     api_key_env = "OPENROUTER_API_KEY"')
+    typer.echo("")
+    typer.echo("   Or set CODESTRATA_OPENROUTER_MODEL_ID / --model-id.")
+    typer.echo("   OpenRouter has no product default model.")
+    typer.echo("")
+    typer.echo("3. Install the OpenAI-compatible extra (shared client dependency):")
+    typer.echo("     pip install 'codestrata[openai]'")
+    typer.echo("")
+    tip("Validate: codestrata ai doctor")
+    tip("Assess with AI: codestrata assess --repo . --with-ai")
     _print_friendly_fallback()
 
 
@@ -188,10 +218,13 @@ def _print_provider_guide(provider: str) -> None:
     if key == "openai":
         _print_openai_guide()
         return
+    if key == "openrouter":
+        _print_openrouter_guide()
+        return
     if key == "platform":
         typer.secho(
             "CodeStrata Platform is not an AI provider.\n"
-            "AI providers are: bedrock, openai.\n"
+            "AI providers are: bedrock, openai, openrouter.\n"
             "Platform connectivity is separate from assess --with-ai.\n"
             "See: https://docs.codestrata.ai/community/vs-platform",
             fg=typer.colors.YELLOW,
@@ -224,7 +257,10 @@ def _print_doctor(settings: CodestrataSettings) -> int:
     _print_friendly_fallback()
 
     if not report.active_supported:
-        tip("Set [ai].provider to bedrock or openai, then re-run: codestrata ai doctor")
+        tip(
+            "Set [ai].provider to bedrock, openai, or openrouter, "
+            "then re-run: codestrata ai doctor"
+        )
         return 1
 
     active_overview = next(
@@ -235,7 +271,7 @@ def _print_doctor(settings: CodestrataSettings) -> int:
         tip("Fix the active provider configuration, then re-run: codestrata ai doctor")
         return 1
 
-    tip("Ready for: codestrata assess --repo . --output reports --with-ai")
+    tip("Ready for: codestrata assess --repo . --with-ai")
     return 0
 
 
@@ -254,7 +290,7 @@ def ai_root(
         str | None,
         typer.Option(
             "--provider",
-            help="Show a setup guide: bedrock | openai.",
+            help="Show a setup guide: bedrock | openai | openrouter.",
         ),
     ] = None,
 ) -> None:
