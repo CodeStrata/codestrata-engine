@@ -2,6 +2,9 @@
 
 > **Canonical public install journey:**
 > [Install Engine](https://docs.codestrata.ai/getting-started/install)
+>
+> Editor client: [Install CodeStrata for VS Code](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment)
+> (`CodeStrataAI.codestrata-assessment`). Extension source is private.
 
 Install CodeStrata Engine (Community Edition) for local development or
 day-to-day assessment use. Portal steps are canonical; Engine notes for editable

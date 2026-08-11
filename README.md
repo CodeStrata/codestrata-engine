@@ -3,6 +3,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12%2B-blue.svg)](https://www.python.org/downloads/)
 [![Edition: Community](https://img.shields.io/badge/edition-Community-brightgreen.svg)](https://docs.codestrata.ai/community/vs-platform)
+[![Install CodeStrata for VS Code](https://img.shields.io/badge/Install-CodeStrata%20for%20VS%20Code-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment)
 
 > The Engine produces structured Engineering Assessments (single repository)
 > and can contribute to portfolio Engineering Intelligence Reports (EIR).
@@ -51,7 +52,7 @@ Roadmap). Details:
 | **codestrata-engine** (this repo) | Assessment CLI, reports, Engine docs | Yes — Community source |
 | **codestrata-examples** | Pinned real-world showcase manifests + fetch scripts | Yes — Community source |
 | **CodeStrata Platform** | Knowledge Graph, Retrieval, Answering, Portfolio / Executive Intelligence | Private implementation |
-| **VS Code extension** | Editor integration | Public Marketplace distribution; source private |
+| **VS Code extension** | Editor integration | [Public Marketplace](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment) (`CodeStrataAI.codestrata-assessment`); source private |
 
 Product statement: *The Engine produces structured engineering intelligence.
 The Platform stores, connects, retrieves, and reasons over that intelligence.*
@@ -59,6 +60,10 @@ The Platform stores, connects, retrieves, and reasons over that intelligence.*
 ---
 
 ## Quick start
+
+Community users can use CodeStrata through the **CLI** or **VS Code**.
+
+### CLI
 
 Requires **Python 3.12+**. Guides:
 [docs/quick-start.md](docs/quick-start.md) ·
@@ -95,6 +100,16 @@ Open the current assessment HTML under:
 ```text
 .codestrata-artifacts/assessments/<repository-id>/current/assessment.html
 ```
+
+### VS Code
+
+[![Install CodeStrata for VS Code](https://img.shields.io/badge/Install-CodeStrata%20for%20VS%20Code-007ACC?logo=visualstudiocode&logoColor=white)](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment)
+
+Install **[CodeStrata for VS Code](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment)**
+from Visual Studio Marketplace (`CodeStrataAI.codestrata-assessment`).
+The extension is publicly distributed there; extension source remains private.
+It is a thin client of the Engine CLI — keep the CLI installed and discoverable
+(commands above).
 
 ### Real-world showcases
 
@@ -266,7 +281,7 @@ This package ships `test-fixtures/sample-js-app` for offline smoke tests.
 | [docs/telemetry-assessment-analytics.md](docs/telemetry-assessment-analytics.md) | Slice 10.4 assessment analytics (construction API only) |
 | [docs/telemetry-repository-aggregate-analytics.md](docs/telemetry-repository-aggregate-analytics.md) | Slice 10.5 repository aggregate analytics (construction API only) |
 | [docs/telemetry-ai-analytics.md](docs/telemetry-ai-analytics.md) | Slice 10.6 AI analytics (construction API only) |
-| [VS Code extension docs](https://docs.codestrata.ai/extensions/vscode) | VS Code extension (Marketplace distribution; source private) |
+| [VS Code extension docs](https://docs.codestrata.ai/extensions/vscode) | VS Code extension ([Marketplace](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment); source private) |
 | [../verification/anonymous_analytics_privacy/README.md](../verification/anonymous_analytics_privacy/README.md) | Slice 10.8 anonymous analytics privacy verification |
 | [../verification/anonymous_analytics_completion/README.md](../verification/anonymous_analytics_completion/README.md) | Slice 10.9 Epic 10 completion verification (contracts-only; not operational) |
 | [docs/ai-enrichment.md](docs/ai-enrichment.md) | AI providers / Modernization Advisor enrichment |
