@@ -48,10 +48,10 @@ Roadmap). Details:
 
 | Product | Role | Public? |
 | ------- | ---- | ------- |
-| **codestrata-engine** (this repo) | Assessment CLI, reports, Engine docs | Yes |
-| **codestrata-examples** | Pinned real-world showcase manifests + fetch scripts | Yes |
-| **CodeStrata Platform** | Knowledge Graph, Retrieval, Answering, Portfolio / Executive Intelligence | Commercial product |
-| **VS Code extension** | Editor integration | Community package (`vscode-plugin/`) |
+| **codestrata-engine** (this repo) | Assessment CLI, reports, Engine docs | Yes — Community source |
+| **codestrata-examples** | Pinned real-world showcase manifests + fetch scripts | Yes — Community source |
+| **CodeStrata Platform** | Knowledge Graph, Retrieval, Answering, Portfolio / Executive Intelligence | Private implementation |
+| **VS Code extension** | Editor integration | Public Marketplace distribution; source private |
 
 Product statement: *The Engine produces structured engineering intelligence.
 The Platform stores, connects, retrieves, and reasons over that intelligence.*
@@ -266,7 +266,7 @@ This package ships `test-fixtures/sample-js-app` for offline smoke tests.
 | [docs/telemetry-assessment-analytics.md](docs/telemetry-assessment-analytics.md) | Slice 10.4 assessment analytics (construction API only) |
 | [docs/telemetry-repository-aggregate-analytics.md](docs/telemetry-repository-aggregate-analytics.md) | Slice 10.5 repository aggregate analytics (construction API only) |
 | [docs/telemetry-ai-analytics.md](docs/telemetry-ai-analytics.md) | Slice 10.6 AI analytics (construction API only) |
-| [../vscode-plugin/docs/analytics.md](../vscode-plugin/docs/analytics.md) | Slice 10.7 VS Code analytics (local / unavailable sink) |
+| [VS Code extension docs](https://docs.codestrata.ai/extensions/vscode) | VS Code extension (Marketplace distribution; source private) |
 | [../verification/anonymous_analytics_privacy/README.md](../verification/anonymous_analytics_privacy/README.md) | Slice 10.8 anonymous analytics privacy verification |
 | [../verification/anonymous_analytics_completion/README.md](../verification/anonymous_analytics_completion/README.md) | Slice 10.9 Epic 10 completion verification (contracts-only; not operational) |
 | [docs/ai-enrichment.md](docs/ai-enrichment.md) | AI providers / Modernization Advisor enrichment |

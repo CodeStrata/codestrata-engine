@@ -8,18 +8,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.2.0] - 2026-08-04
+## [0.2.0] - 2026-08-11
 
 ### Added
 
-* Release-validation System Verification (SV.1–SV.16) evidence for the curated
-  22-repository public OSS dataset
-* Assessment schema 1.2 customer-safe report projection and Platform Engineering
-  Intelligence / website-export release artifacts
+* Deterministic multi-head Engineering Assessment with Assessment Overview
+* Community report publishing with opaque public report URLs
+* Privacy-first telemetry consent (default deny; opt-in is not publish authorization)
+* Community Cloud client flows for published reports
+* Provider platform: AWS Bedrock live E2E validated; OpenAI/OpenRouter supported
+  with qualification (owner live E2E not completed)
 
 ### Changed
 
-* Engine package version aligned to the v0.2.0 release cut
+* Engine package version aligned to the v0.2.0 Community cut
+* Community public source is this Engine repository plus `codestrata-examples`.
+  The VS Code extension is Marketplace distribution (source private). Platform
+  and infrastructure remain private.
+
+### Notes
+
+* This changelog describes the v0.2.0 cut. Publication (PyPI, GitHub Release,
+  Marketplace) is a separate step and is not implied by this file.
 
 ## [0.1.0] - 2026-07-22
 
