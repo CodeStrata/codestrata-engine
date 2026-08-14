@@ -29,12 +29,14 @@ def report(tmp_path_factory: pytest.TempPathFactory):
 
 def test_verdict_is_pass_with_limitations(report) -> None:
     result, _ = report
-    assert result.verdict == "pass_with_limitations"
+    failed = [(item.name, item.detail) for item in result.checks if not item.ok]
+    assert result.verdict == "pass_with_limitations", failed
 
 
 def test_no_failed_checks_or_scenarios(report) -> None:
     result, _ = report
-    assert all(check.ok for check in result.checks)
+    failed = [(item.name, item.detail) for item in result.checks if not item.ok]
+    assert failed == []
     assert all(scenario.ok for scenario in result.negative_scenarios)
     assert len(result.negative_scenarios) >= 26
 

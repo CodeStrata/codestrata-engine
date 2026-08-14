@@ -65,7 +65,7 @@ def test_A_B_C_D_E_status_reports_persisted_preference(
 
     assert result.exit_code == 0
     out = result.stdout
-    assert "Preference: Enabled" in out
+    assert "Preference: Enabled (legacy v1" in out or "Preference: Enabled (v2" in out
     assert "Default: Disabled" in out
     assert "55555555" not in out
     assert "super-secret" not in out
@@ -128,11 +128,15 @@ def test_R_S_status_does_not_consume_prompt_guard(
     CliRunner().invoke(app, ["telemetry", "status"])
     assert get_last_interactive_prompt_result() is None
 
+    from codestrata.telemetry.persisted_consent import persist_v2_yes
+
+    persist_v2_yes(path=home / "telemetry.json")
+    reset_telemetry_singletons()
     telemetry = ensure_interactive_product_telemetry(
         command="assess",
         telemetry_allow=True,
     )
-    assert telemetry.runtime.session.decision_source.value == "cli_flag"
+    assert telemetry.runtime.session.decision_source.value == "persisted_preference"
     prompt = get_last_interactive_prompt_result()
     assert prompt is not None
     assert getattr(prompt, "prompted") is False

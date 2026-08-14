@@ -359,8 +359,10 @@ def test_write_modernization_assessment_reports_atomic(tmp_path: Path) -> None:
     text = report_paths.json_report_path.read_text(encoding="utf-8")
     assert text.endswith("\n")
     payload = json.loads(text)
-    assert payload["schema_version"] == ASSESSMENT_JSON_SCHEMA_VERSION
-    assert payload["assessment"]["timing"]["report_ms"] is not None
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    assert "completed_heads" in payload
+    assert payload["reports"]["assessment_html"] == "assessment.html"
+    assert report_paths.html_report_path.name == "assessment.html"
 
 
 def test_atomic_write_failure_leaves_no_final_artifacts(
@@ -395,7 +397,16 @@ def test_atomic_write_failure_leaves_no_final_artifacts(
     assert not report_paths.json_report_path.exists()
     assert not report_paths.text_report_path.exists()
     assert list(report_paths.run_directory.glob("*.tmp")) == []
-    assert not report_paths.run_directory.exists() or not any(report_paths.run_directory.iterdir())
+    leftover_reports = [
+        path
+        for path in (
+            report_paths.html_report_path,
+            report_paths.json_report_path,
+            report_paths.text_report_path,
+        )
+        if path.exists()
+    ]
+    assert leftover_reports == []
 
 
 def test_schema_version_present(tmp_path: Path) -> None:

@@ -91,7 +91,7 @@ def check_doctor_report_never_probes_without_mock_boundary(_source_root: Path) -
 
 def check_doctor_report_structure(_source_root: Path) -> CheckResult:
     scenarios = build_doctor_report_scenarios()
-    ok = all(item["provider_count"] == 2 for item in scenarios) and all(
+    ok = all(item["provider_count"] == 3 for item in scenarios) and all(
         item["check_count"] >= 2 for item in scenarios
     )
     return CheckResult(

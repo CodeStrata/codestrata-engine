@@ -49,6 +49,7 @@ CODESTRATA_CMD_RE = re.compile(
 AIMF_ALLOWLIST = {
     (REPO_ROOT / "ROADMAP.md").resolve(),
     (REPO_ROOT / "CHANGELOG.md").resolve(),
+    (REPO_ROOT / "ARCHITECTURE.md").resolve(),
 }
 
 
@@ -234,7 +235,10 @@ def test_no_stale_aimf_in_user_docs() -> None:
             continue
         text = path.read_text(encoding="utf-8")
         if re.search(r"\baimf\b", text, flags=re.IGNORECASE):
-            offenders.append(str(path.relative_to(ROOT)))
+            try:
+                offenders.append(str(path.relative_to(ROOT)))
+            except ValueError:
+                offenders.append(str(path.relative_to(REPO_ROOT)))
     assert not offenders, "Stale AIMF mentions:\n" + "\n".join(offenders[:20])
 
 

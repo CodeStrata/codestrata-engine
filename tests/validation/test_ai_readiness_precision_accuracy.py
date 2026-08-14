@@ -14,7 +14,7 @@ from codestrata.application.evidence.repository_ai_readiness.discovery import (
 from codestrata.domain.evidence.repository_ai_readiness.enums import (
     AiReadinessEvidenceFamily,
 )
-from validation.actual import run_real_assessment
+from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.ai_readiness import (
     AiReadinessExpectation,
     AiReadinessFamilyExpectation,
@@ -368,13 +368,12 @@ def test_negative_control_repositories_ai_readiness(tmp_path_factory) -> None:
         )
         expected = resolve_expected_results(definition)
         assert expected.ai_readiness is not None
-        report = next(Path(run.artifact_dir).rglob("report.json"))
-        document = json.loads(report.read_text(encoding="utf-8"))
-        artifact_paths = {"report.json": str(report)}
+        report, document = load_emitted_assessment(run.artifact_dir)
+        artifact_paths = {report.name: str(report)}
         evidence = report.parent / "repository-ai-readiness-evidence.json"
         if evidence.is_file():
             artifact_paths["repository-ai-readiness-evidence.json"] = str(evidence)
-        findings_list = document.get("assessment", {}).get("findings") or []
+        findings_list = (document.get("assessment") or {}).get("findings") or []
         findings = extract_ai_readiness_findings(findings_list)
         signals = extract_ai_readiness_signals(document, artifact_paths=artifact_paths)
         for forbidden in expected.ai_readiness.forbidden_rule_ids:
@@ -384,7 +383,7 @@ def test_negative_control_repositories_ai_readiness(tmp_path_factory) -> None:
             expectation=expected.ai_readiness,
             actual_findings=findings,
             actual_signals=signals,
-            artifact_texts={"report.json": report.read_text(encoding="utf-8")},
+            artifact_texts={report.name: json.dumps(document)},
             limitation_texts=(),
         )
         assert result.false_positives == 0, result.diagnostics

@@ -8,6 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-08-14
+
+### Added
+
+* Consent v2: durable Engine-owned Yes/No for lifecycle telemetry and privacy-safe
+  assessment intelligence (`assessment_metadata`), with decline-upgrade and disable
+* Privacy-safe assessment intelligence emission (schema 1.0 / 1.1) gated on v2 consent
+* Favicon embedded in generated public HTML reports (presentation-only)
+
+### Fixed
+
+* Public report Yes/No feedback acknowledgement under published CSP (nonce +
+  `connect-src 'self'`); local offline CSP remains `script-src`/`connect-src` none
+
+### Changed
+
+* Engine / CLI package version **0.2.1** (Community patch on the accepted
+  `e818ae6f` release candidate)
+
+### Notes
+
+* Does **not** collect graph telemetry, numeric assessment scores, source uploads,
+  or repository identity in report feedback
+* Patch validation: five representative frozen repos matched baselines exactly;
+  full 22-repo corpus rerun not required
+* Publication (PyPI / GitHub Release) is a separate step and is not implied here
+
 ## [0.2.0] - 2026-08-11
 
 ### Added

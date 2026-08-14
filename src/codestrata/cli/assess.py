@@ -235,8 +235,9 @@ def register_assess_command(app: typer.Typer) -> None:
             typer.Option(
                 "--telemetry-allow",
                 help=(
-                    "Allow privacy-safe telemetry attempts for this command only. "
-                    "The decision is not saved."
+                    "Session bridge for privacy-safe telemetry when durable consent "
+                    "already permits it. The decision is not saved and cannot override "
+                    "an explicit disable or invent consent."
                 ),
             ),
         ] = False,
@@ -323,6 +324,15 @@ def register_assess_command(app: typer.Typer) -> None:
         from codestrata.telemetry.assessment_isolation import (
             run_assessment_with_telemetry_isolation,
         )
+        from codestrata.telemetry.persisted_consent import (
+            assessment_metadata_policy_for_session,
+        )
+
+        amd_policy = assessment_metadata_policy_for_session(
+            transmission_authorized=bool(
+                telemetry.runtime.session.consent.transmission_authorized
+            ),
+        )
 
         def _run_primary():
             return run_assessment(
@@ -353,6 +363,7 @@ def register_assess_command(app: typer.Typer) -> None:
                 telemetry=telemetry,
                 ai_enabled=with_ai,
                 repo_root=repo_root,
+                assessment_metadata_policy=amd_policy,
             )
         except AssessmentCommandError as error:
             message = str(error)

@@ -136,7 +136,7 @@ def test_blank_model_id_raises_before_any_call() -> None:
 
 
 def test_non_positive_timeout_is_rejected_at_construction() -> None:
-    with pytest.raises(AIProviderConfigurationError):
+    with pytest.raises(ValueError, match=r"timeout_seconds must be within"):
         OpenAIAIModelProvider(timeout_seconds=0)
 
 

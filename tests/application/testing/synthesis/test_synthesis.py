@@ -14,6 +14,7 @@ from codestrata.application.testing.assessment.artifacts import (
 from codestrata.application.testing.assessment.assembler import TestAssessmentAssembler
 from codestrata.application.testing.assessment.inventory import execution_facts_from_status_map
 from codestrata.application.testing.synthesis import synthesize_testing
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.evidence.language.provenance import EvidenceProvenance
 from codestrata.domain.evidence.repository_testing.enums import (
@@ -290,7 +291,12 @@ def test_mixed_findings_and_traceability(tmp_path: Path) -> None:
     assert '"recommendations"' in body
     assert '"overall_posture_summary"' in body
     write_testing_assessment_artifact(section, tmp_path)
-    assert (tmp_path / "testing-assessment.json").read_text(encoding="utf-8") == body
+    assert (
+        resolve_head_path(tmp_path, legacy_filename="testing-assessment.json").read_text(
+            encoding="utf-8"
+        )
+        == body
+    )
 
 
 def test_deterministic_ordering_and_ids() -> None:

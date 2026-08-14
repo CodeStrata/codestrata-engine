@@ -80,8 +80,8 @@ def test_successful_ai_invocation_creates_execution_artifact(tmp_path: Path) -> 
     assert document["parsed_model_response"] is not None
     assert document["accepted_ai_result"] is not None
     assert document["authoritative_evidence_coverage"] is not None
-    report_json = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert report_json["assessment"]["ai"]["internal_execution_artifact"] == AI_EXECUTION_FILENAME
+    manifest = json.loads(result.json_report_path.read_text(encoding="utf-8"))
+    assert str(manifest["schema"]).startswith("codestrata-assessment-manifest")
     html = result.html_report_path.read_text(encoding="utf-8")
     assert "advisor-execution.json" not in html
     assert "internal_execution_artifact" not in html
@@ -90,8 +90,8 @@ def test_successful_ai_invocation_creates_execution_artifact(tmp_path: Path) -> 
 def test_deterministic_only_run_does_not_create_execution_artifact(tmp_path: Path) -> None:
     result, _, _ = _run(tmp_path, mode=AssessmentMode.DETERMINISTIC, model_id=None)
     assert not (result.run_directory / AI_EXECUTION_FILENAME).exists()
-    report_json = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert report_json["assessment"]["ai"].get("internal_execution_artifact") in {None, ""}
+    manifest = json.loads(result.json_report_path.read_text(encoding="utf-8"))
+    assert str(manifest["schema"]).startswith("codestrata-assessment-manifest")
 
 
 def test_provider_failure_creates_execution_artifact(tmp_path: Path) -> None:

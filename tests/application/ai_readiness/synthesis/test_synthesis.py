@@ -14,6 +14,7 @@ from codestrata.application.ai_readiness.assessment.artifacts import (
 from codestrata.application.ai_readiness.assessment.assembler import AiReadinessAssessmentAssembler
 from codestrata.application.ai_readiness.assessment.inventory import execution_facts_from_status_map
 from codestrata.application.ai_readiness.synthesis import synthesize_ai_readiness
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.ai_readiness.assessment.enums import (
     AiReadinessAssessmentStatus,
@@ -448,7 +449,12 @@ def test_partial_foundations_assembler(tmp_path: Path) -> None:
     assert '"recommendations"' in body
     assert '"overall_posture_summary"' in body
     write_ai_readiness_assessment_artifact(section, tmp_path)
-    assert (tmp_path / "ai-readiness-assessment.json").read_text(encoding="utf-8") == body
+    assert (
+        resolve_head_path(tmp_path, legacy_filename="ai-readiness-assessment.json").read_text(
+            encoding="utf-8"
+        )
+        == body
+    )
     _assert_no_forbidden(section.synthesis)
 
 

@@ -158,6 +158,7 @@ def test_create_bedrock_runtime_client_uses_profile_and_region(
 ) -> None:
     monkeypatch.delenv(AWS_PROFILE_ENV, raising=False)
     monkeypatch.delenv(AWS_REGION_ENV, raising=False)
+    monkeypatch.delenv(AWS_DEFAULT_REGION_ENV, raising=False)
     settings = _settings(
         tmp_path,
         """

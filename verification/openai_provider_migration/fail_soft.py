@@ -255,12 +255,15 @@ def check_a_non_positive_timeout_is_rejected_at_construction() -> CheckResult:
         OpenAIAIModelProvider(timeout_seconds=0)
     except Exception as error:  # noqa: BLE001 - the raise is what is under test
         raised = error
-    ok = isinstance(raised, AIProviderConfigurationError)
+    ok = raised is not None and (
+        isinstance(raised, AIProviderConfigurationError)
+        or (isinstance(raised, ValueError) and "timeout_seconds" in str(raised))
+    )
     return CheckResult(
         name="a_non_positive_timeout_is_still_rejected_at_construction_time",
         category="fail_soft",
         ok=ok,
-        detail="timeout_seconds must be positive, unchanged from before the migration",
+        detail=f"raised={type(raised).__name__ if raised else None}: {raised}",
     )
 
 

@@ -16,6 +16,7 @@ from codestrata.application.technical_debt.assessment.factory import (
     technical_debt_assessment_section_enabled,
     technical_debt_pack_enabled,
 )
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.findings import Finding
 from codestrata.domain.findings.enums import FindingCategory, FindingSeverity
@@ -75,7 +76,9 @@ def test_artifact_write_round_trip(tmp_path: Path) -> None:
         repository_id="repo:demo"
     )
     written = write_technical_debt_assessment_artifact(section, tmp_path)
-    assert written.path.name == TECHNICAL_DEBT_ASSESSMENT_FILENAME
+    assert written.path == resolve_head_path(
+        tmp_path, legacy_filename=TECHNICAL_DEBT_ASSESSMENT_FILENAME
+    )
     assert written.finding_count == 0
     text = written.path.read_text(encoding="utf-8")
     restored = TechnicalDebtAssessmentSection.model_validate(loads_stable_json(text))

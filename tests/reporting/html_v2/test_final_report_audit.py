@@ -382,7 +382,9 @@ def test_html_csp_print_schema(tmp_path: Path) -> None:
     assert f'content="{CONTENT_SECURITY_POLICY}"' in html
     assert "script-src 'none'" in html
     assert "<script" not in html
-    assert "<link " not in html
+    assert html.lower().count("<link ") == 1
+    assert 'rel="icon"' in html
+    assert "data:image/png;base64," in html
     assert "@media print" in html
     assert ASSESSMENT_JSON_SCHEMA_VERSION == "1.2"
 

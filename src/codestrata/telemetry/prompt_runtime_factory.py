@@ -1,4 +1,12 @@
-"""Construct process telemetry for a CLI command session (Slices 9.4–9.6 / 19.4)."""
+"""Construct process telemetry for a CLI command session (Slices 9.4–9.6 / 19.4 / 20.9).
+
+Consent-v2 precedence:
+  1. ``--telemetry-deny`` — session deny (does not change durable preference)
+  2. Durable preference (V1_YES / V2_YES / DISABLED / UNDECIDED)
+  3. ``--telemetry-allow`` — session bridge only; never creates consent;
+     never overrides DISABLED; never enables UNDECIDED
+  4. Interactive fresh-v2 or one-time V1→V2 upgrade prompts when eligible
+"""
 
 from __future__ import annotations
 
@@ -10,14 +18,64 @@ from codestrata.telemetry.cli_consent import (
     select_cli_telemetry_consent,
 )
 from codestrata.telemetry.consent import TelemetrySessionConsent
+from codestrata.telemetry.consent_scope import (
+    CommunityConsentState,
+    resolve_consent_capabilities,
+)
 from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
-from codestrata.telemetry.interactive_consent import run_interactive_consent_prompt
+from codestrata.telemetry.interactive_consent import (
+    run_interactive_consent_prompt,
+    run_v2_upgrade_prompt,
+)
 from codestrata.telemetry.persisted_consent import consent_from_persisted_preference
-from codestrata.telemetry.prompt_result import InteractiveConsentPromptResult
+from codestrata.telemetry.prompt_eligibility import (
+    PromptEligibilityReason,
+    evaluate_prompt_eligibility,
+)
+from codestrata.telemetry.prompt_result import (
+    InteractiveConsentPromptResult,
+    default_skipped_prompt_result,
+)
 from codestrata.telemetry.product_transport import resolve_product_telemetry_transport
 from codestrata.telemetry.runtime import TelemetryRuntime
 from codestrata.telemetry.runtime_factory import create_session_telemetry_runtime
 from codestrata.telemetry.transport import TelemetryTransport
+
+
+def _facade_for_consent(
+    consent: TelemetrySessionConsent,
+    *,
+    transport: TelemetryTransport | None,
+) -> DisabledTelemetryFacade:
+    active_transport = resolve_product_telemetry_transport(consent, transport=transport)
+    runtime: TelemetryRuntime = create_session_telemetry_runtime(
+        consent=consent,
+        transport=active_transport,
+    )
+    return DisabledTelemetryFacade(runtime=runtime)
+
+
+def _interactive_eligible(
+    *,
+    command: str,
+    quiet: bool,
+    json_output: bool,
+    decision_already_explicit: bool,
+    prompt_already_attempted: bool,
+    stdin_interactive: bool | None,
+    automation_detected: bool | None,
+    output_interactive: bool | None,
+) -> bool:
+    return evaluate_prompt_eligibility(
+        command=command,
+        quiet=quiet,
+        json_output=json_output,
+        decision_already_explicit=decision_already_explicit,
+        prompt_already_attempted=prompt_already_attempted,
+        stdin_interactive=stdin_interactive,
+        automation_detected=automation_detected,
+        output_interactive=output_interactive,
+    ).eligible
 
 
 def create_interactive_session_telemetry(
@@ -39,13 +97,7 @@ def create_interactive_session_telemetry(
     cli_selection: CliTelemetryConsentSelection | None = None,
     preference_path: Path | None = None,
 ) -> tuple[DisabledTelemetryFacade, InteractiveConsentPromptResult]:
-    """Prompt when undecided and eligible; reuse local preference when decided.
-
-    Unauthorized consent keeps UnavailableTelemetryTransport. Authorized consent
-    uses production Community HTTP when a client credential is available.
-    Explicit Yes/No is persisted locally. ``--telemetry-allow`` / ``--telemetry-deny``
-    win for the current process without changing stored preference.
-    """
+    """Prompt when undecided and eligible; reuse local preference when decided."""
 
     return create_command_session_telemetry_runtime(
         command=command,
@@ -90,7 +142,10 @@ def create_command_session_telemetry_runtime(
     """Authoritative command-session telemetry construction (one runtime).
 
     Raises ``CliTelemetryConsentConflict`` when both CLI flags are set.
-    Precedence: CLI flags → explicit_consent → persisted preference → prompt.
+
+    Precedence (Slice 20.9):
+      deny flag → durable preference → allow bridge → interactive prompt.
+    ``--telemetry-allow`` never creates consent and never overrides DISABLED.
     """
 
     selection = cli_selection
@@ -99,60 +154,94 @@ def create_command_session_telemetry_runtime(
             allow=telemetry_allow,
             deny=telemetry_deny,
         )
-    if selection is not None and selection.explicit_decision_present:
-        consent = selection.consent
-        assert consent is not None  # explicit_decision_present guarantees consent
-        active_transport = resolve_product_telemetry_transport(
-            consent, transport=transport
-        )
-        runtime = create_session_telemetry_runtime(
-            consent=consent,
-            transport=active_transport,
-        )
-        from codestrata.telemetry.prompt_eligibility import PromptEligibilityReason
-        from codestrata.telemetry.prompt_result import default_skipped_prompt_result
 
+    # 1) Session deny wins for this process (does not mutate durable preference).
+    if selection is not None and selection.deny_requested and not selection.conflict:
+        consent = selection.consent
+        assert consent is not None
         result = default_skipped_prompt_result(
             reason=PromptEligibilityReason.DECISION_ALREADY_EXPLICIT,
             consent=consent,
         )
-        return DisabledTelemetryFacade(runtime=runtime), result
+        return _facade_for_consent(consent, transport=transport), result
 
     if explicit_consent is not None and explicit_consent.explicit:
-        active_transport = resolve_product_telemetry_transport(
-            explicit_consent, transport=transport
-        )
-        runtime = create_session_telemetry_runtime(
-            consent=explicit_consent,
-            transport=active_transport,
-        )
-        from codestrata.telemetry.prompt_eligibility import PromptEligibilityReason
-        from codestrata.telemetry.prompt_result import default_skipped_prompt_result
-
         result = default_skipped_prompt_result(
             reason=PromptEligibilityReason.DECISION_ALREADY_EXPLICIT,
             consent=explicit_consent,
         )
-        return DisabledTelemetryFacade(runtime=runtime), result
+        return _facade_for_consent(explicit_consent, transport=transport), result
 
-    persisted = consent_from_persisted_preference(path=preference_path)
-    if persisted is not None:
-        active_transport = resolve_product_telemetry_transport(
-            persisted, transport=transport
-        )
-        runtime = create_session_telemetry_runtime(
-            consent=persisted,
-            transport=active_transport,
-        )
-        from codestrata.telemetry.prompt_eligibility import PromptEligibilityReason
-        from codestrata.telemetry.prompt_result import default_skipped_prompt_result
+    caps = resolve_consent_capabilities(path=preference_path)
+    allow_bridge = bool(selection is not None and selection.allow_requested)
 
+    # 2) Durable DISABLED — allow bridge cannot override.
+    if caps.state is CommunityConsentState.DISABLED:
+        persisted = consent_from_persisted_preference(path=preference_path)
+        assert persisted is not None
         result = default_skipped_prompt_result(
             reason=PromptEligibilityReason.DECISION_ALREADY_EXPLICIT,
             consent=persisted,
         )
-        return DisabledTelemetryFacade(runtime=runtime), result
+        return _facade_for_consent(persisted, transport=transport), result
 
+    # 3) Durable V2_YES — lifecycle (+ amd authorized separately).
+    if caps.state is CommunityConsentState.V2_YES:
+        persisted = consent_from_persisted_preference(path=preference_path)
+        assert persisted is not None
+        result = default_skipped_prompt_result(
+            reason=PromptEligibilityReason.DECISION_ALREADY_EXPLICIT,
+            consent=persisted,
+        )
+        return _facade_for_consent(persisted, transport=transport), result
+
+    # 4) Durable V1_YES — lifecycle only; optional one-time upgrade prompt.
+    if caps.state is CommunityConsentState.V1_YES:
+        if (
+            caps.should_prompt_v2_upgrade
+            and not allow_bridge
+            and _interactive_eligible(
+                command=command,
+                quiet=quiet,
+                json_output=json_output,
+                decision_already_explicit=False,
+                prompt_already_attempted=prompt_already_attempted,
+                stdin_interactive=stdin_interactive,
+                automation_detected=automation_detected,
+                output_interactive=output_interactive,
+            )
+        ):
+            upgrade = run_v2_upgrade_prompt(
+                input_func=input_func,
+                echo_func=echo_func,
+                preference_path=preference_path,
+                persist=True,
+            )
+            # Re-resolve after upgrade accept/decline.
+            post = consent_from_persisted_preference(path=preference_path)
+            consent = post if post is not None else upgrade.consent
+            return _facade_for_consent(consent, transport=transport), upgrade
+
+        persisted = consent_from_persisted_preference(path=preference_path)
+        assert persisted is not None
+        result = default_skipped_prompt_result(
+            reason=PromptEligibilityReason.DECISION_ALREADY_EXPLICIT,
+            consent=persisted,
+        )
+        return _facade_for_consent(persisted, transport=transport), result
+
+    # 5) UNDECIDED — allow bridge must NOT invent consent.
+    if allow_bridge:
+        from codestrata.telemetry.consent import default_session_consent
+
+        consent = default_session_consent()
+        result = default_skipped_prompt_result(
+            reason=PromptEligibilityReason.DECISION_ALREADY_EXPLICIT,
+            consent=consent,
+        )
+        return _facade_for_consent(consent, transport=transport), result
+
+    # 6) Fresh interactive v2 prompt (or non-interactive skip).
     result = run_interactive_consent_prompt(
         command=command,
         quiet=quiet,
@@ -167,14 +256,7 @@ def create_command_session_telemetry_runtime(
         preference_path=preference_path,
         persist=True,
     )
-    active_transport = resolve_product_telemetry_transport(
-        result.consent, transport=transport
-    )
-    runtime: TelemetryRuntime = create_session_telemetry_runtime(
-        consent=result.consent,
-        transport=active_transport,
-    )
-    return DisabledTelemetryFacade(runtime=runtime), result
+    return _facade_for_consent(result.consent, transport=transport), result
 
 
 __all__ = [

@@ -23,7 +23,7 @@ from codestrata.domain.evidence.repository_cloud.models import (
     RepositoryCloudEvidenceCoverage,
 )
 from codestrata.domain.evidence.repository_cloud.enums import RepositoryCloudParseStatus
-from validation.actual import run_real_assessment
+from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.cloud import (
     CloudExpectation,
     CloudFamilyExpectation,
@@ -311,13 +311,14 @@ def test_negative_control_repositories_cloud(tmp_path_factory) -> None:
         )
         expected = resolve_expected_results(definition)
         assert expected.cloud is not None
-        report = next(Path(run.artifact_dir).rglob("report.json"))
-        document = json.loads(report.read_text(encoding="utf-8"))
-        artifact_paths = {"report.json": str(report)}
+        report, document = load_emitted_assessment(run.artifact_dir)
+        artifact_paths = {report.name: str(report)}
         evidence = report.parent / "repository-cloud-evidence.json"
         if evidence.is_file():
             artifact_paths["repository-cloud-evidence.json"] = str(evidence)
-        findings = extract_cloud_findings(document["assessment"]["findings"])
+        findings = extract_cloud_findings(
+            (document.get("assessment") or {}).get("findings") or []
+        )
         signals = extract_cloud_signals(document, artifact_paths=artifact_paths)
         for forbidden in expected.cloud.forbidden_rule_ids:
             assert forbidden not in {item.rule_id for item in findings}
@@ -326,7 +327,7 @@ def test_negative_control_repositories_cloud(tmp_path_factory) -> None:
             expectation=expected.cloud,
             actual_findings=findings,
             actual_signals=signals,
-            artifact_texts={"report.json": report.read_text(encoding="utf-8")},
+            artifact_texts={report.name: json.dumps(document)},
             limitation_texts=(),
         )
         assert result.false_positives == 0, result.diagnostics

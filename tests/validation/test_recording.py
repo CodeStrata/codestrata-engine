@@ -146,9 +146,9 @@ def test_runner_writes_permanent_record_without_keep_results(
     latest = records_root / "local-sample-js" / "latest"
     record = load_repository_validation_record(latest)
     assert record.verdict == ValidationVerdict.PASS
-    assert record.schema_version == "1.2"
+    # ACTIVE_0_2_0: assessment.json is the manifest; schema_version 1.2 is not persisted.
+    assert record.schema_version is None
     assert record.ai_executed is False
-    assert "technology_inventory" in {item.pack for item in record.pack_precision}
     assert record.expectations_evaluated >= 1
     assert "JavaScript" in record.actual.get("technologies", [])
     # Assessment cleaned; record retained.

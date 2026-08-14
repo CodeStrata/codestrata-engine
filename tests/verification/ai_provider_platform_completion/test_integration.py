@@ -1,4 +1,9 @@
-"""SV.11.13 integration tests."""
+"""SV.11.13 integration tests.
+
+HISTORICAL_FROZEN_CHARACTERIZATION: Epic 11 slice-completion matrix against
+frozen ``reports/verification/sv11-*`` snapshots. Not an ACTIVE 0.2.0 release
+gate. Collect with ``CODESTRATA_RUN_HISTORICAL_FROZEN=1``.
+"""
 
 from __future__ import annotations
 

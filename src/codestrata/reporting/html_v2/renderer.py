@@ -23,6 +23,7 @@ from codestrata.reporting.branding import (
     BRAND_NAME,
     BRAND_REPORT_NAME,
     BRAND_VERSION,
+    brand_favicon_link_tag,
     brand_mark_svg,
 )
 from codestrata.reporting.cloud.intelligence import (
@@ -130,6 +131,7 @@ class HtmlReportRenderer:
                 ),
                 f"<title>{escape_html(BRAND_NAME)} {escape_html(BRAND_REPORT_NAME)} — "
                 f"{escape_html(view.summary.repository_name)}</title>",
+                brand_favicon_link_tag(),
                 f"<style>{_CSS}</style>",
                 "</head>",
                 "<body>",

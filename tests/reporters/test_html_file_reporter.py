@@ -366,7 +366,7 @@ def test_create_report_paths_includes_html(tmp_path: Path) -> None:
     )
     report_paths = create_report_paths(result=result, base_directory=tmp_path / "reports")
 
-    assert report_paths.html_report == report_paths.directory / "report.html"
+    assert report_paths.html_report == report_paths.directory / "assessment.html"
 
 
 def test_retention_keeps_three_complete_runs_with_html(tmp_path: Path) -> None:
@@ -440,4 +440,4 @@ def test_html_failure_does_not_remove_previous_valid_run(
 
     remaining = sorted(path.name for path in repository_directory.iterdir())
     assert "20260101-010101" in remaining
-    assert len([name for name in remaining if name.startswith("2026")]) == 5
+    assert len([name for name in remaining if name.startswith("2026")]) == 4

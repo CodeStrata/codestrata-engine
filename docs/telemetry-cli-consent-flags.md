@@ -1,13 +1,13 @@
-# CLI telemetry consent flags (Slice 9.6)
+# CLI telemetry consent flags (Slice 9.6 / updated Epic 20)
 
 **Policy:** `community-telemetry-cli-consent-policy:1.0`  
-**Scope:** `assess` command only — current CLI process — **not saved**
+**Scope:** `assess` command only — current CLI process — **not saved** as durable consent
 
 ## Flags
 
 | Flag | Meaning |
 | ---- | ------- |
-| `--telemetry-allow` | Explicitly allow privacy-safe telemetry **attempts** for this command/process |
+| `--telemetry-allow` | Session/frontend **bridge** only when durable consent already permits collection. Does **not** create consent, invent Yes for undecided users, or override Disabled. |
 | `--telemetry-deny` | Explicitly deny telemetry for this command/process |
 
 ```bash
@@ -18,16 +18,14 @@ codestrata assess --repo . --no-ai --telemetry-allow
 Both flags:
 
 - apply only to the **current** process
-- are **never** persisted
-- never reuse prior consent or legacy preferences
-- never create an installation identity
-- never create or flush a telemetry queue
-- never enable HTTP transmission in this release
-- take precedence over the interactive prompt and non-interactive suppression
+- are **never** persisted as durable Engine consent
+- never rewrite the preference file
+- never create an installation identity by themselves
+- take precedence over the interactive prompt for this invocation
 - remain subject to privacy filtering
 
-They provide automation-safe **consent semantics**. They do **not** make
-telemetry operational.
+Prefer durable `codestrata telemetry enable` / `disable` for intentional collection
+control. Do **not** use `--telemetry-allow` as a CI consent bypass.
 
 ## Mutual exclusivity
 
@@ -48,55 +46,7 @@ network side effects.
 
 | Flag | Decision | Source | Transmission authorized |
 | ---- | -------- | ------ | ----------------------- |
-| `--telemetry-allow` | `allowed_for_session` | `cli_flag` | yes |
-| `--telemetry-deny` | `denied_for_session` | `cli_flag` | no |
+| `--telemetry-allow` | Bridge only | `cli_flag` | Only if durable consent already allows |
+| `--telemetry-deny` | Deny | `cli_flag` | No |
 
-`transmission_authorized=true` means the runtime **may** call the transport port
-after privacy projection. Default transport remains unavailable → result
-`unavailable`, never `sent`.
-
-## Precedence
-
-1. Both flags → CLI error (stop)
-2. Either flag → explicit `cli_flag` consent; **no prompt**; stdin unused
-3. No flags → existing Slice 9.4 / 9.5 interactive or non-interactive behavior
-
-Explicit allow in CI / pipes / quiet / JSON:
-
-- no prompt
-- allow takes precedence over `non_interactive_disabled`
-- unavailable transport may be invoked
-- no success/telemetry banner
-
-## Command scope
-
-Flags are on **`assess` only**.
-
-`scan` is a separate legacy/advanced command (not an assess alias) and does **not**
-receive these flags. It does not prompt for telemetry consent.
-
-Do not use environment variables, `codestrata.toml`, or user preferences as
-equivalents.
-
-## Legacy telemetry commands
-
-`codestrata telemetry enable|disable|status|…` remain separate compatibility
-commands. Enabling a legacy preference does **not** authorize the privacy-first
-runtime for `assess`. Assess flags do not persist as a default for later runs.
-
-## Deferred
-
-- Community Cloud HTTP transport
-
-## Related
-
-- [telemetry-preview.md](telemetry-preview.md)
-- [telemetry-event-catalog.md](telemetry-event-catalog.md)
-- [telemetry-status.md](telemetry-status.md)
-- [telemetry-non-interactive.md](telemetry-non-interactive.md)
-- [telemetry-interactive-consent.md](telemetry-interactive-consent.md)
-- [telemetry-session-consent.md](telemetry-session-consent.md)
-- [telemetry-disabled-default.md](telemetry-disabled-default.md)
-- [telemetry-runtime.md](telemetry-runtime.md)
-- [telemetry.md](telemetry.md)
-- [../PRIVACY.md](../PRIVACY.md)
+Canonical product docs: https://docs.codestrata.ai/reference/telemetry

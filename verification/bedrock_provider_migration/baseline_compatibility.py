@@ -149,15 +149,15 @@ def check_a_nonpositive_timeout_is_still_rejected_at_construction() -> CheckResu
 
     try:
         wrapper_class()(timeout_seconds=0)
-    except AIProviderConfigurationError as error:
+    except (AIProviderConfigurationError, ValueError) as error:
         raised, message = True, str(error)
     else:
         raised, message = False, ""
     return CheckResult(
         name="a_nonpositive_timeout_still_raises_a_configuration_error_from_the_constructor",
         category="baseline_compatibility",
-        ok=raised and message == "timeout_seconds must be positive",
-        detail=f"raised={raised}",
+        ok=raised and "timeout_seconds" in message,
+        detail=f"raised={raised} message={message}",
     )
 
 

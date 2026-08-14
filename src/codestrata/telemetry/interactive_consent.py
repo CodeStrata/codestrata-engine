@@ -1,7 +1,7 @@
-"""Interactive telemetry consent prompt (Slice 19.4).
+"""Interactive telemetry consent prompts (Slices 19.4 / 20.9).
 
-Asks once when preference is undecided. Explicit Yes/No is persisted locally.
-Default Enter = No. Never prompts in CI/non-interactive contexts.
+Fresh users receive a single v2 consent question.
+Legacy V1 users may receive a one-time upgrade prompt (unless declined).
 """
 
 from __future__ import annotations
@@ -17,7 +17,11 @@ from codestrata.telemetry.consent import (
     default_session_consent,
     deny_session_consent_from_interactive_prompt,
 )
-from codestrata.telemetry.persisted_consent import persist_preference
+from codestrata.telemetry.persisted_consent import (
+    decline_v2_upgrade,
+    persist_disabled,
+    persist_v2_yes,
+)
 from codestrata.telemetry.prompt_eligibility import (
     PromptEligibilityReason,
     evaluate_prompt_eligibility,
@@ -31,12 +35,23 @@ from codestrata.telemetry.prompt_result import (
     default_skipped_prompt_result,
 )
 
+# Fresh-user v2 prompt (Slice 20.9).
 PROMPT_INTRO = """\
-Help improve CodeStrata by sharing anonymous usage and assessment metadata.
-No source code, repository names, file paths, findings, or credentials are sent.
+Help improve CodeStrata?
+
+Share anonymous usage and privacy-safe assessment insights.
+Source code and repository identity stay local. This does not publish reports.
 """
 
-PROMPT_QUESTION = "Share anonymous telemetry? [y/N]: "
+PROMPT_QUESTION = "Help improve CodeStrata? [y/N]: "
+
+# Legacy V1 → V2 upgrade (one-time unless declined).
+UPGRADE_INTRO = """\
+CodeStrata can also share privacy-safe assessment insights
+(still no source code or repository identity; does not publish reports).
+"""
+
+UPGRADE_QUESTION = "Enable assessment insights? [y/N]: "
 
 ALLOW_ANSWERS: frozenset[str] = frozenset({"y", "yes"})
 DENY_ANSWERS: frozenset[str] = frozenset({"n", "no", ""})
@@ -65,12 +80,26 @@ def _read_line(input_func: Callable[[str], str], prompt: str) -> str:
     return input_func(prompt)
 
 
-def _persist_answer(enabled: bool, *, path: Path | None) -> None:
-    try:
-        persist_preference(enabled, path=path)
-    except Exception:
-        # Preference write failures must never block assessment.
-        return
+def _echo_factory(
+    echo_func: Callable[[str], None] | None,
+    stream: TextIO | None,
+) -> Callable[[str], None]:
+    if echo_func is not None:
+        return echo_func
+
+    def echo(message: str) -> None:
+        target = stream
+        if target is None:
+            import sys
+
+            target = sys.stderr
+        try:
+            target.write(message if message.endswith("\n") else message + "\n")
+            target.flush()
+        except Exception:
+            return
+
+    return echo
 
 
 def run_interactive_consent_prompt(
@@ -90,7 +119,7 @@ def run_interactive_consent_prompt(
     preference_path: Path | None = None,
     persist: bool = True,
 ) -> InteractiveConsentPromptResult:
-    """Evaluate eligibility and optionally prompt once. Never raises to callers."""
+    """Evaluate eligibility and optionally prompt once for fresh v2 consent."""
 
     active = policy or default_interactive_consent_policy()
     eligibility = evaluate_prompt_eligibility(
@@ -117,20 +146,7 @@ def run_interactive_consent_prompt(
         )
 
     reader = input_func or input
-    echo = echo_func
-    if echo is None:
-
-        def echo(message: str) -> None:
-            target = stream
-            if target is None:
-                import sys
-
-                target = sys.stderr
-            try:
-                target.write(message if message.endswith("\n") else message + "\n")
-                target.flush()
-            except Exception:
-                return
+    echo = _echo_factory(echo_func, stream)
 
     try:
         echo("")
@@ -138,9 +154,8 @@ def run_interactive_consent_prompt(
         echo("")
         raw = _read_line(reader, PROMPT_QUESTION)
     except EOFError:
-        consent = deny_session_consent_from_interactive_prompt(persisted=persist)
-        if persist:
-            _persist_answer(False, path=preference_path)
+        # Dismiss: no collection, leave preference UNDECIDED (do not persist No).
+        consent = deny_session_consent_from_interactive_prompt(persisted=False)
         return InteractiveConsentPromptResult(
             eligibility=True,
             eligibility_reason=PromptEligibilityReason.ELIGIBLE.value,
@@ -149,14 +164,11 @@ def run_interactive_consent_prompt(
             decision=consent.decision.value,
             decision_source=consent.source.value,
             consent=consent,
-            safe_outcome="eof_denied",
+            safe_outcome="eof_dismissed",
             limitation_codes=active.limitations,
         )
     except KeyboardInterrupt:
-        # Telemetry is optional: treat interrupt as denial and continue product work.
-        consent = deny_session_consent_from_interactive_prompt(persisted=persist)
-        if persist:
-            _persist_answer(False, path=preference_path)
+        consent = deny_session_consent_from_interactive_prompt(persisted=False)
         return InteractiveConsentPromptResult(
             eligibility=True,
             eligibility_reason=PromptEligibilityReason.ELIGIBLE.value,
@@ -165,7 +177,7 @@ def run_interactive_consent_prompt(
             decision=consent.decision.value,
             decision_source=consent.source.value,
             consent=consent,
-            safe_outcome="interrupted_denied",
+            safe_outcome="interrupted_dismissed",
             limitation_codes=active.limitations,
         )
     except Exception:
@@ -183,17 +195,107 @@ def run_interactive_consent_prompt(
         )
 
     answer = parse_prompt_answer(raw)
-    # One attempt only: invalid → deny (no indefinite retry).
     if answer is PromptAnswer.ALLOW:
         consent = allow_session_consent_from_interactive_prompt(persisted=persist)
         if persist:
-            _persist_answer(True, path=preference_path)
-        outcome = "allowed"
-    else:
+            try:
+                persist_v2_yes(path=preference_path)
+            except Exception:
+                pass
+        outcome = "allowed_v2"
+    elif answer is PromptAnswer.DENY:
         consent = deny_session_consent_from_interactive_prompt(persisted=persist)
         if persist:
-            _persist_answer(False, path=preference_path)
-        outcome = "denied" if answer is PromptAnswer.DENY else "invalid_denied"
+            try:
+                persist_disabled(path=preference_path)
+            except Exception:
+                pass
+        outcome = "denied"
+    else:
+        # Invalid input: no accidental Yes; leave UNDECIDED (unconsented).
+        consent = deny_session_consent_from_interactive_prompt(persisted=False)
+        outcome = "invalid_dismissed"
+
+    return InteractiveConsentPromptResult(
+        eligibility=True,
+        eligibility_reason=PromptEligibilityReason.ELIGIBLE.value,
+        prompted=True,
+        attempts=1,
+        decision=consent.decision.value,
+        decision_source=consent.source.value,
+        consent=consent,
+        safe_outcome=outcome,
+        limitation_codes=active.limitations,
+    )
+
+
+def run_v2_upgrade_prompt(
+    *,
+    input_func: Callable[[str], str] | None = None,
+    echo_func: Callable[[str], None] | None = None,
+    stream: TextIO | None = None,
+    preference_path: Path | None = None,
+    persist: bool = True,
+) -> InteractiveConsentPromptResult:
+    """One-time V1→V2 upgrade prompt. Decline keeps V1_YES and stops nagging."""
+
+    active = default_interactive_consent_policy()
+    reader = input_func or input
+    echo = _echo_factory(echo_func, stream)
+    try:
+        echo("")
+        echo(UPGRADE_INTRO.rstrip("\n"))
+        echo("")
+        raw = _read_line(reader, UPGRADE_QUESTION)
+    except (EOFError, KeyboardInterrupt):
+        if persist:
+            try:
+                decline_v2_upgrade(path=preference_path)
+            except Exception:
+                pass
+        consent = allow_session_consent_from_interactive_prompt(persisted=True)
+        return InteractiveConsentPromptResult(
+            eligibility=True,
+            eligibility_reason=PromptEligibilityReason.ELIGIBLE.value,
+            prompted=True,
+            attempts=1,
+            decision=consent.decision.value,
+            decision_source=consent.source.value,
+            consent=consent,
+            safe_outcome="upgrade_declined",
+            limitation_codes=active.limitations,
+        )
+    except Exception:
+        consent = allow_session_consent_from_interactive_prompt(persisted=True)
+        return InteractiveConsentPromptResult(
+            eligibility=True,
+            eligibility_reason=PromptEligibilityReason.ELIGIBLE.value,
+            prompted=True,
+            attempts=1,
+            decision=consent.decision.value,
+            decision_source=consent.source.value,
+            consent=consent,
+            safe_outcome="upgrade_prompt_failed_keep_v1",
+            limitation_codes=active.limitations,
+        )
+
+    answer = parse_prompt_answer(raw)
+    if answer is PromptAnswer.ALLOW:
+        if persist:
+            try:
+                persist_v2_yes(path=preference_path)
+            except Exception:
+                pass
+        consent = allow_session_consent_from_interactive_prompt(persisted=True)
+        outcome = "upgrade_accepted_v2"
+    else:
+        if persist:
+            try:
+                decline_v2_upgrade(path=preference_path)
+            except Exception:
+                pass
+        consent = allow_session_consent_from_interactive_prompt(persisted=True)
+        outcome = "upgrade_declined"
 
     return InteractiveConsentPromptResult(
         eligibility=True,
@@ -213,7 +315,10 @@ __all__ = [
     "DENY_ANSWERS",
     "PROMPT_INTRO",
     "PROMPT_QUESTION",
+    "UPGRADE_INTRO",
+    "UPGRADE_QUESTION",
     "PromptAnswer",
     "parse_prompt_answer",
     "run_interactive_consent_prompt",
+    "run_v2_upgrade_prompt",
 ]

@@ -1,4 +1,10 @@
-"""End-to-end SV.11.6 runs: verdict, determinism, privacy, and artifacts."""
+"""End-to-end SV.11.6 runs: verdict, determinism, privacy, and artifacts.
+
+HISTORICAL_FROZEN_CHARACTERIZATION: Epic 11.6 OpenAI migration slice that
+forbade OpenRouter references under ``ai/``. Current 0.2.0 ships OpenRouter
+as a supported provider. Not an ACTIVE 0.2.0 release gate. Collect with
+``CODESTRATA_RUN_HISTORICAL_FROZEN=1``.
+"""
 
 from __future__ import annotations
 

@@ -1,8 +1,9 @@
 """CLI for anonymous Community telemetry preference and status commands.
 
-``codestrata telemetry status`` reports whether anonymous telemetry is Enabled,
-Disabled, or Not configured. ``enable`` / ``disable`` persist an explicit local
-preference under CODESTRATA_HOME. Never collects source code or repository identity.
+``codestrata telemetry status`` reports consent-v2 preference state.
+``enable`` persists V2_YES (usage + privacy-safe assessment insights).
+``disable`` persists DISABLED. Preference lives under CODESTRATA_HOME.
+``decline-upgrade`` retains V1_YES and stops v2-upgrade nagging (Slice 20.10).
 """
 
 from __future__ import annotations
@@ -14,9 +15,11 @@ import typer
 
 from codestrata.telemetry.constants import EventName
 from codestrata.telemetry.persisted_consent import (
-    TelemetryPreferenceState,
-    persist_preference,
-    preference_state,
+    consent_status_payload,
+    decline_v2_upgrade,
+    format_consent_status,
+    persist_disabled,
+    persist_v2_yes,
 )
 from codestrata.telemetry.preview_builder import build_privacy_first_telemetry_preview
 from codestrata.telemetry.preview_formatting import format_privacy_first_telemetry_preview
@@ -29,11 +32,15 @@ telemetry_app = typer.Typer(
         "Anonymous Community telemetry (disabled by default).\n\n"
         "Examples:\n"
         "  codestrata telemetry status\n"
+        "  codestrata telemetry status --json\n"
         "  codestrata telemetry enable\n"
         "  codestrata telemetry disable\n"
+        "  codestrata telemetry decline-upgrade\n"
         "  codestrata telemetry preview\n\n"
         "Preference is stored locally under CODESTRATA_HOME. Never collects "
         "source code, repository names, findings, prompts, or credentials. "
+        "Enable opts into privacy-safe usage and assessment insights (v2). "
+        "This consent does not publish reports. "
         "See PRIVACY.md and https://docs.codestrata.ai/security/privacy"
     ),
     no_args_is_help=True,
@@ -44,36 +51,22 @@ def _echo_json(payload: object) -> None:
     typer.echo(json.dumps(payload, indent=2, sort_keys=True))
 
 
-def _format_preference_status(state: TelemetryPreferenceState) -> str:
-    if state is TelemetryPreferenceState.ENABLED:
-        label = "Enabled"
-    elif state is TelemetryPreferenceState.DISABLED:
-        label = "Disabled"
-    else:
-        label = "Not configured"
-    return "\n".join(
-        [
-            "Anonymous Community telemetry",
-            "-----------------------------",
-            f"Preference: {label}",
-            "Default: Disabled (no silent telemetry)",
-            "Scope: Local preference under CODESTRATA_HOME",
-            (
-                "Contents: Anonymous usage and assessment metadata only — "
-                "no source code, repository names, file paths, findings, "
-                "or credentials."
-            ),
-            "Change later: `codestrata telemetry enable|disable`",
-            "",
-        ]
-    )
-
-
 @telemetry_app.command("status")
-def telemetry_status() -> None:
-    """Show local telemetry preference (Enabled / Disabled / Not configured)."""
+def telemetry_status(
+    as_json: Annotated[
+        bool,
+        typer.Option(
+            "--json",
+            help="Emit machine-stable consent-v2 status JSON (no identifying fields).",
+        ),
+    ] = False,
+) -> None:
+    """Show local telemetry preference (undecided / v1 / v2 / disabled)."""
 
-    typer.echo(_format_preference_status(preference_state()), nl=False)
+    if as_json:
+        _echo_json(consent_status_payload())
+        return
+    typer.echo(format_consent_status(), nl=False)
 
 
 @telemetry_app.command("preview")
@@ -102,13 +95,14 @@ def telemetry_preview(
 
 @telemetry_app.command("enable")
 def telemetry_enable() -> None:
-    """Persist explicit opt-in for anonymous Community telemetry."""
+    """Persist explicit v2 opt-in (usage + privacy-safe assessment insights)."""
 
-    persist_preference(True)
-    typer.echo("Anonymous telemetry preference: Enabled.")
+    persist_v2_yes()
+    typer.echo("Anonymous telemetry preference: Enabled (v2).")
     typer.echo(
+        "Includes privacy-safe assessment insights. "
         "No source code, repository names, file paths, findings, or credentials "
-        "are sent."
+        "are sent. This does not publish reports."
     )
 
 
@@ -116,8 +110,22 @@ def telemetry_enable() -> None:
 def telemetry_disable() -> None:
     """Persist explicit opt-out for anonymous Community telemetry."""
 
-    persist_preference(False)
+    persist_disabled()
     typer.echo("Anonymous telemetry preference: Disabled.")
+
+
+@telemetry_app.command("decline-upgrade")
+def telemetry_decline_upgrade() -> None:
+    """Keep legacy v1 lifecycle consent; decline broader v2 assessment insights."""
+
+    state = decline_v2_upgrade()
+    typer.echo(
+        "Anonymous telemetry preference: Enabled (legacy v1 — lifecycle only)."
+    )
+    typer.echo(
+        "Assessment insights remain off. "
+        f"State: {state.value}."
+    )
 
 
 @telemetry_app.command("reset")

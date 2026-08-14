@@ -1,0 +1,84 @@
+{
+  "findings": [
+    {
+      "finding_id": "f-private-001",
+      "rule_id": "architecture.layer-dependency",
+      "severity": "high",
+      "category": "architecture",
+      "title": "Finding: AcmeInternalSettlementEngine leaks settlement keys",
+      "description": "Evidence excerpt from /Users/private/AcmeSecretProject/payments/ledger.py",
+      "evidence": [
+        {
+          "path": "/Users/private/AcmeSecretProject/payments/ledger.py",
+          "snippet": "SECRET = 'TEST_SECRET_DO_NOT_TRANSMIT'",
+          "symbol": "AcmeInternalSettlementEngine"
+        }
+      ],
+      "recommendation_text": "Recommendation: rotate TEST_SECRET_DO_NOT_TRANSMIT immediately"
+    },
+    {
+      "finding_id": "f-private-002",
+      "rule_id": "architecture.layer-dependency",
+      "severity": "high",
+      "category": "architecture",
+      "title": "Duplicate aggregate row for VERY_PRIVATE_REPO_123",
+      "description": "Package acme-internal-payments-sdk",
+      "evidence": []
+    },
+    {
+      "finding_id": "f-private-003",
+      "rule_id": "security.debug-enabled",
+      "severity": "medium",
+      "category": "security",
+      "title": "Remote git@github.com:private/acme-secret.git",
+      "description": "URL https://internal.acme.example/private",
+      "evidence": []
+    },
+    {
+      "finding_id": "f-unsafe-pmd",
+      "rule_id": "PMD.JAVA.VeryPrivate",
+      "severity": "critical",
+      "category": "security",
+      "title": "PMD path leak",
+      "description": "/Users/private/AcmeSecretProject/payments/",
+      "evidence": []
+    },
+    {
+      "finding_id": "f-unsafe-provider",
+      "rule_id": "provider:openai",
+      "severity": "low",
+      "category": "unknown",
+      "title": "provider identity",
+      "description": "must not enter amd",
+      "evidence": []
+    },
+    {
+      "finding_id": "f-unsafe-url",
+      "rule_id": "https://internal.acme.example/private",
+      "severity": "high",
+      "category": "security",
+      "title": "url-like rule",
+      "description": "must not enter amd",
+      "evidence": []
+    },
+    {
+      "finding_id": "f-unsafe-path",
+      "rule_id": "/Users/private/AcmeSecretProject/payments/ledger.py",
+      "severity": "high",
+      "category": "security",
+      "title": "path-like rule",
+      "description": "must not enter amd",
+      "evidence": []
+    }
+  ],
+  "graph": {
+    "nodes": ["graph-node:AcmeInternalSettlementEngine"],
+    "edges": ["edge→https://internal.acme.example/private"]
+  },
+  "repository": {
+    "repository_name": "VERY_PRIVATE_REPO_123",
+    "repository_url": "git@github.com:private/acme-secret.git",
+    "packages": ["acme-internal-payments-sdk"]
+  },
+  "failure_message": "Traceback: File \"/Users/private/AcmeSecretProject/payments/run.py\""
+}

@@ -31,6 +31,8 @@ _ALLOWED_OPENROUTER_PATHS: frozenset[str] = frozenset(
     {
         "ai/providers/openrouter_provider.py",
         "ai/providers/factory.py",
+        "ai/providers/doctor.py",
+        "ai/providers/settings_policies.py",
         "extensions/assess_ai.py",
         "config/settings.py",
     }

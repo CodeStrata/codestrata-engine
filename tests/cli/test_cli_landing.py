@@ -28,7 +28,14 @@ from codestrata.cli.landing import (
 )
 
 runner = CliRunner()
-_ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+_COLOR_SGR_RE = re.compile(
+    r"\x1b\[(?:\d*;)*(?:3[0-7]|4[0-7]|9[0-7]|10[0-7]|38|48)(?:;[0-9]+)*m"
+)
+
+
+def _visible_text(text: str) -> str:
+    return _ANSI_RE.sub("", text)
 
 
 def _render(
@@ -44,6 +51,8 @@ def _render(
         file=buf,
         force_terminal=True,
         no_color=no_color,
+        # Deterministic: do not inherit GitHub/local TERM color-system detection.
+        color_system=None if no_color else "auto",
         emoji=False,
         soft_wrap=False,
         legacy_windows=False,
@@ -60,7 +69,7 @@ def _render(
 
 
 def _visible_len(line: str) -> int:
-    return len(_ANSI_RE.sub("", line).rstrip("\n"))
+    return len(_visible_text(line).rstrip("\n"))
 
 
 def test_wordmark_sizes_and_widths() -> None:
@@ -302,13 +311,18 @@ def test_welcome_uses_landing_when_forced(monkeypatch, tmp_path: Path) -> None:
 
 def test_no_color_monochrome_readable(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("NO_COLOR", "1")
+    monkeypatch.setenv("TERM", "dumb")
+    monkeypatch.setenv("FORCE_COLOR", "0")
     out = _render(100, cwd=tmp_path)
-    assert BRAND_STATEMENT in out
-    assert "Start Here" in out
-    assert "Telemetry" in out
-    assert "Share Report" in out
-    assert "Engine " in out
-    assert "\x1b[" not in out
+    visible = _visible_text(out)
+    assert BRAND_STATEMENT in visible
+    assert "Start Here" in visible
+    assert "Telemetry" in visible
+    assert "Share Report" in visible
+    assert "Engine " in visible
+    # No-color contract: no foreground/background SGR. Bold/reset may remain
+    # when Rich force_terminal is on; do not depend on runner TERM detection.
+    assert _COLOR_SGR_RE.search(out) is None
 
 
 def test_landing_palette_is_ansi_high_contrast() -> None:

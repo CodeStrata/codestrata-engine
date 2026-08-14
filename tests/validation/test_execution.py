@@ -42,12 +42,13 @@ def test_real_assessment_path_produces_report_json(
     )
     assert report_path.is_file()
     assert report_path.name == "report.json" or report_path.suffix == ".json"
-    assert actual.schema_version == "1.2"
+    assert actual.persisted_layout == "manifest_0_2_0"
+    assert actual.schema_version is None
     assert actual.ai_executed is False
     assert "JavaScript" in actual.technologies
     assert actual.findings_count >= 1
     document = json.loads(report_path.read_text(encoding="utf-8"))
-    assert document["schema_version"] == "1.2"
+    assert str(document.get("schema") or "").startswith("codestrata-assessment-manifest")
     blob = json.dumps(normalized_for_determinism(actual))
     assert "function " not in blob
     assert "console.log" not in blob
@@ -93,7 +94,8 @@ def test_keep_results_retains_artifacts(
     assert result.verdict == ValidationVerdict.PASS
     assert result.artifact_dir is not None
     assert Path(result.artifact_dir).is_dir()
-    assert any(Path(result.artifact_dir).rglob("report.json"))
+    # ACTIVE_0_2_0_RELEASE_GATE: shipped layout emits assessment.json, not report.json.
+    assert any(Path(result.artifact_dir).rglob("assessment.json"))
     assert (records_root / local_definition.repository_id / "latest" / "comparison.json").is_file()
 
 
@@ -142,7 +144,7 @@ def test_fail_verdict_when_expectations_miss(
     expectation_path.write_text(
         json.dumps(
             {
-                "technology_facts_expected": ["COBOL"],
+                "technology_facts_forbidden": ["JavaScript"],
                 "schema_version": "1.2",
             }
         ),

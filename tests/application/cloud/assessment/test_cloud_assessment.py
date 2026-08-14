@@ -20,6 +20,7 @@ from codestrata.application.cloud.assessment.factory import (
 from codestrata.application.cloud.assessment.factory import (
     cloud_report_section_enabled as is_cloud_report_section_enabled,
 )
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.cloud.assessment.enums import CloudAssessmentStatus
 from codestrata.domain.cloud.assessment.identifiers import (
@@ -145,7 +146,9 @@ def test_succeeded_empty_states_no_rules_evaluated() -> None:
 def test_artifact_write_round_trip(tmp_path: Path) -> None:
     section = CloudAssessmentAssembler().assemble_empty(repository_id="repo:demo")
     written = write_cloud_assessment_artifact(section, tmp_path)
-    assert written.path.name == CLOUD_ASSESSMENT_FILENAME
+    assert written.path == resolve_head_path(
+        tmp_path, legacy_filename=CLOUD_ASSESSMENT_FILENAME
+    )
     assert written.finding_count == 0
     text = written.path.read_text(encoding="utf-8")
     payload = loads_stable_json(text)

@@ -157,18 +157,33 @@ def run_capability_checks() -> tuple[list[CheckResult], dict[str, Any]]:
 def run_client_boundary_checks() -> tuple[list[CheckResult], dict[str, Any]]:
     from codestrata.ai.provider_adapters.openrouter.client import resolve_client
     from codestrata.ai.provider_adapters.openrouter.configuration import build_runtime_configuration
+    from codestrata.ai.provider_contracts.errors import ErrorCategory
 
     inputs = build_runtime_configuration().client_inputs
-    without = resolve_client(inputs)
-    with_client = resolve_client(inputs, injected_client=Client())
+
+    def _no_environment(_name: str) -> None:
+        return None
+
+    def _env_must_not_be_read(name: str) -> None:
+        raise AssertionError(f"injected client must not read the environment ({name})")
+
+    # Deterministic: never read ambient OPENROUTER_API_KEY (CI has none; developer shells often do).
+    without = resolve_client(inputs, environment_reader=_no_environment)
+    with_client = resolve_client(
+        inputs,
+        injected_client=Client(),
+        environment_reader=_env_must_not_be_read,
+    )
     checks = [
         CheckResult(
             name="client_resolution_without_injection_is_missing_configuration",
             category="client_boundary",
-            ok=without.handle is None
-            and without.error is not None
-            and without.error.category.value == "missing_configuration",
-            detail="authentication deferred; no env read",
+            ok=(
+                without.handle is None
+                and without.error is not None
+                and without.error.category is ErrorCategory.MISSING_CONFIGURATION
+            ),
+            detail="missing API key → MISSING_CONFIGURATION at the client boundary",
         ),
         CheckResult(
             name="injected_client_is_accepted_without_env_or_sdk",
@@ -308,15 +323,15 @@ def run_registration_and_runtime_checks(engine_root: Path) -> tuple[list[CheckRe
         CheckResult(
             name="assess_factory_accepts_openrouter_when_selected",
             category="registration",
-            ok=isinstance(created, OpenRouterAIModelProvider)
+            ok=type(created).__name__ == "OpenRouterAIModelProvider"
             and "openrouter" in supported_assess_ai_providers(),
             detail=f"provider_class={type(created).__name__ if created is not None else None}",
         ),
         CheckResult(
             name="default_provider_remains_bedrock",
             category="registration",
-            ok=AiSettings().provider == DEFAULT_ASSESS_PROVIDER,
-            detail=f"provider={AiSettings().provider}",
+            ok=str(AiSettings.model_fields["provider"].default) == DEFAULT_ASSESS_PROVIDER,
+            detail=f"declared_default={AiSettings.model_fields['provider'].default}",
         ),
         CheckResult(
             name="doctor_has_openrouter_local_readiness",

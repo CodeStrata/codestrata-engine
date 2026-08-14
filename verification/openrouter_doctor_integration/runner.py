@@ -17,6 +17,9 @@ def engine_root() -> Path:
 
 def run_verification(root: Path | None = None):
     engine = root or engine_root()
+    from codestrata.extensions.assess_ai import reset_assess_ai_provider_registry_for_tests
+
+    reset_assess_ai_provider_registry_for_tests()
     # Doctor's Bedrock branch probes a real AWS session; stub it so verification
     # stays network-free while still exercising OpenRouter/OpenAI doctor paths.
     with patch(

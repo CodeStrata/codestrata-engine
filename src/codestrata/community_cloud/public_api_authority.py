@@ -68,6 +68,12 @@ def production_telemetry_ingest_url() -> str:
     return f"{resolve_public_community_api_base()}/api/v1/telemetry"
 
 
+def production_assessment_metadata_url() -> str:
+    """Public Community assessment_metadata ingest URL (override-aware)."""
+
+    return f"{resolve_public_community_api_base()}/api/v1/assessment-metadata"
+
+
 __all__ = [
     "COMMUNITY_API_BASE_ENV",
     "EXECUTE_API_HOST_CLASSIFICATION",
@@ -81,6 +87,7 @@ __all__ = [
     "PUBLIC_HEALTH_URL",
     "PUBLIC_TELEMETRY_INGEST_URL",
     "is_public_community_api_host",
+    "production_assessment_metadata_url",
     "production_telemetry_ingest_url",
     "rejects_execute_api_as_public_authority",
     "resolve_public_community_api_base",

@@ -109,37 +109,35 @@ def test_config_driven_javascript_assessment(tmp_path: Path) -> None:
     html = result.html_report_path.read_text(encoding="utf-8")
     assert "JavaScript" in html or "javascript" in html.lower() or "Node" in html
     assert "spring-petclinic" not in html.lower()
-    assert result.graphs_directory is not None
-    assert result.graphs_directory.is_dir()
-    assert (result.graphs_directory / "repository-graph.json").is_file()
-    assert (result.graphs_directory / "knowledge-bindings.json").is_file()
-    assert (result.graphs_directory / "assessment-graph.json").is_file()
-    assert (result.graphs_directory / "graph-summary.json").is_file()
+    graphs_directory = result.run_directory / "graphs"
+    assert graphs_directory.is_dir()
+    assert (graphs_directory / "repository-graph.json").is_file()
+    assert (graphs_directory / "knowledge-bindings.json").is_file()
+    assert (graphs_directory / "assessment-graph.json").is_file()
+    assert (graphs_directory / "graph-summary.json").is_file()
     bindings = json.loads(
-        (result.graphs_directory / "knowledge-bindings.json").read_text(encoding="utf-8")
+        (graphs_directory / "knowledge-bindings.json").read_text(encoding="utf-8")
     )
     matched = {item["matched_key"] for item in bindings["bindings"]}
     assert "javascript" in matched
     assert result.knowledge_binding_count is not None
     assert result.knowledge_binding_count >= 1
-    assert result.findings_artifact_path is not None
-    assert result.findings_artifact_path.is_file()
     assert result.rule_finding_count is not None
     assert result.rule_finding_count >= 1
     assert result.rules_evaluated_count is not None
     assert result.rules_evaluated_count >= 1
-    assert result.recommendations_artifact_path is not None
-    assert result.recommendations_artifact_path.is_file()
     assert result.phase3_recommendation_count is not None
     assert result.phase3_recommendation_count >= 1
-    recommendations = json.loads(result.recommendations_artifact_path.read_text(encoding="utf-8"))
-    findings = json.loads(result.findings_artifact_path.read_text(encoding="utf-8"))
+    recommendations = json.loads(
+        (result.run_directory / "recommendations.json").read_text(encoding="utf-8")
+    )
+    findings = json.loads((result.run_directory / "findings.json").read_text(encoding="utf-8"))
     report = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    # Customer universe: findings.json / recommendations.json / report.json / summary agree.
+    # Customer universe: findings.json / recommendations.json / assessment.json agree.
     assert recommendations["recommendation_count"] == result.recommendations_count
     assert findings["finding_count"] == result.findings_count
-    assert report["assessment"]["summary"]["recommendation_count"] == result.recommendations_count
-    assert report["assessment"]["summary"]["finding_count"] == result.findings_count
+    assert str(report["schema"]).startswith("codestrata-assessment-manifest")
+    assert result.html_report_path.name == "assessment.html"
     assert result.recommendations_count >= result.phase3_recommendation_count
     assert result.findings_count >= result.rule_finding_count
 
@@ -248,10 +246,9 @@ def test_config_driven_javascript_assessment_with_fake_ai(tmp_path: Path) -> Non
     )
     assert result.html_report_path.is_file()
     assert len(provider.calls) == 1
-    assert result.graphs_directory is not None
-    assert (result.graphs_directory / "assessment-graph.json").is_file()
-    assert result.recommendations_artifact_path is not None
-    assert result.recommendations_artifact_path.is_file()
+    graphs_directory = result.run_directory / "graphs"
+    assert (graphs_directory / "assessment-graph.json").is_file()
+    assert (result.run_directory / "recommendations.json").is_file()
     assert result.phase3_recommendation_count is not None
     assert result.phase3_recommendation_count >= 1
     assert (result.run_directory / "advisor.json").is_file()
@@ -275,9 +272,8 @@ def test_config_driven_javascript_zero_ai_calls_deterministic(tmp_path: Path) ->
         static_analysis_enabled=False,
     )
     assert result.ai_executed is False
-    assert result.graphs_directory is not None
-    assert result.recommendations_artifact_path is not None
-    assert result.recommendations_artifact_path.is_file()
+    assert (result.run_directory / "graphs").is_dir()
+    assert (result.run_directory / "recommendations.json").is_file()
     assert not (result.run_directory / "advisor.json").exists()
 
 
@@ -356,7 +352,9 @@ enabled = false
     assert "Report generated successfully." in result.output
     runs = list(output.glob("*/*"))
     assert runs
-    assert (runs[0] / "report.html").is_file()
+    html_runs = list(output.rglob("assessment.html"))
+    assert html_runs
+    assert html_runs[0].is_file()
 
 
 def test_cli_repo_overrides_config(tmp_path: Path) -> None:

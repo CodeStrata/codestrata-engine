@@ -2,6 +2,9 @@
 
 Primary assessment results, exceptions, and exit codes always win.
 Telemetry never replaces a primary exception or converts failure to success.
+
+Slice 20.8: gated assessment_metadata 1.1 emission is best-effort and OFF by
+default (``emission_enabled=False``). Lifecycle consent alone never enables amd.
 """
 
 from __future__ import annotations
@@ -26,6 +29,16 @@ from codestrata.telemetry.assessment_lifecycle import (
     record_assess_completed_safely,
     record_assess_invoked_safely,
 )
+from codestrata.telemetry.assessment_metadata.diagnostics import (
+    AssessmentMetadataEmissionDiagnostics,
+)
+from codestrata.telemetry.assessment_metadata.emitter import emit_assessment_metadata_safely
+from codestrata.telemetry.assessment_metadata.policy import (
+    CommunityAssessmentMetadataEmissionPolicy,
+    default_assessment_metadata_emission_policy,
+)
+from codestrata.telemetry.assessment_metadata.source import new_assessment_id
+from codestrata.telemetry.assessment_metadata.transport import AssessmentMetadataTransport
 from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
 
 T = TypeVar("T")
@@ -40,11 +53,16 @@ def run_assessment_with_telemetry_isolation(
     repo_root: Path | None = None,
     policy: CommunityTelemetryAssessmentIsolationPolicy | None = None,
     diagnostics: AssessmentIsolationDiagnostics | None = None,
+    assessment_metadata_policy: CommunityAssessmentMetadataEmissionPolicy | None = None,
+    assessment_metadata_transport: AssessmentMetadataTransport | None = None,
+    assessment_metadata_diagnostics: AssessmentMetadataEmissionDiagnostics | None = None,
+    network_available: bool = True,
 ) -> tuple[T, AssessmentTelemetryIsolationResult]:
     """Execute primary assessment and isolate telemetry lifecycle events.
 
     Sequence:
       feature_invoked → primary() → feature_completed | operation_failed
+      → (optional) gated assessment_metadata 1.1 emission
 
     ``KeyboardInterrupt`` / ``SystemExit`` from primary are re-raised without
     failure telemetry (primary interrupt behavior preserved).
@@ -59,6 +77,12 @@ def run_assessment_with_telemetry_isolation(
     event_failures = 0
     telemetry_status = AssessmentTelemetrySideStatus.NOT_ATTEMPTED.value
     failure_category: str | None = None
+    # One opaque UUID for this assessment invocation (success and failure share it).
+    assessment_id = new_assessment_id()
+    amd_policy = (
+        assessment_metadata_policy or default_assessment_metadata_emission_policy()
+    )
+    amd_diag = assessment_metadata_diagnostics or AssessmentMetadataEmissionDiagnostics()
 
     def _attempt_record(ok: bool, *, category: str = "internal_failure") -> None:
         nonlocal event_attempts, event_failures, telemetry_status, failure_category
@@ -82,7 +106,7 @@ def run_assessment_with_telemetry_isolation(
 
     try:
         result = primary()
-    except Exception:
+    except Exception as exc:
         completed_ok = record_assess_completed_safely(
             telemetry,
             ai_enabled=ai_enabled,
@@ -93,6 +117,17 @@ def run_assessment_with_telemetry_isolation(
             repo_root=repo_root,
         )
         _attempt_record(completed_ok)
+        emit_assessment_metadata_safely(
+            failure=exc,
+            assessment_id=assessment_id,
+            telemetry=telemetry,
+            policy=amd_policy,
+            transport=assessment_metadata_transport,
+            network_available=network_available,
+            offline_mode=True,
+            ai_used=bool(ai_enabled),
+            diagnostics=amd_diag,
+        )
         diag.record_primary_failure()
         diag.last_telemetry_status = telemetry_status
         raise
@@ -110,6 +145,17 @@ def run_assessment_with_telemetry_isolation(
         repo_root=repo_root,
     )
     _attempt_record(completed_ok)
+    emit_assessment_metadata_safely(
+        result=result,
+        assessment_id=assessment_id,
+        telemetry=telemetry,
+        policy=amd_policy,
+        transport=assessment_metadata_transport,
+        network_available=network_available,
+        offline_mode=True,
+        ai_used=bool(ai_enabled or ai_executed),
+        diagnostics=amd_diag,
+    )
     diag.record_primary_success()
     isolation = AssessmentTelemetryIsolationResult(
         primary_status=AssessmentPrimaryStatus.SUCCESS.value,

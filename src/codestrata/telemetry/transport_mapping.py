@@ -47,7 +47,7 @@ def map_privacy_safe_event_to_cloud_request(
     event: PrivacySafeTelemetryEvent,
     *,
     event_id: str,
-    client_version_fallback: str = "0.2.0",
+    client_version_fallback: str = "0.2.1",
     installation_id: str | None = None,
 ) -> CommunityCloudTelemetryWireRequest:
     """Map a gated privacy-safe event into the Engine-owned cloud wire DTO.

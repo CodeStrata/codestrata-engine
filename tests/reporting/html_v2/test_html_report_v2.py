@@ -360,7 +360,10 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     assert "Advisor version" not in html.split('id="cover"', 1)[1].split('id="contents"', 1)[0]
     assert "@media print" in html
     # Self-contained: no external stylesheets or scripts.
-    assert "<link " not in html
+    # Favicon is embedded as a data URI (presentation-only; Slice 20.13A).
+    assert 'rel="icon"' in html
+    assert "data:image/png;base64," in html
+    assert html.lower().count("<link ") == 1
     assert "<script" not in html
 
 
@@ -467,18 +470,22 @@ def test_artifact_write_keeps_phase3_artifacts(tmp_path: Path) -> None:
     recommendations_text = (paths.run_directory / "recommendations.json").read_text(
         encoding="utf-8"
     )
-    report_json = json.loads(paths.json_report_path.read_text(encoding="utf-8"))
+    from codestrata.reporting.assessment_json import build_assessment_json_document
+
+    manifest = json.loads(paths.json_report_path.read_text(encoding="utf-8"))
+    document = build_assessment_json_document(report_input)
     findings_payload = json.loads(findings_text)
     recommendations_payload = json.loads(recommendations_text)
-    assert findings_payload["finding_count"] == report_json["assessment"]["summary"][
+    assert str(manifest["schema"]).startswith("codestrata-assessment-manifest")
+    assert findings_payload["finding_count"] == document["assessment"]["summary"][
         "finding_count"
     ]
-    assert recommendations_payload["recommendation_count"] == report_json["assessment"][
+    assert recommendations_payload["recommendation_count"] == document["assessment"][
         "summary"
     ]["recommendation_count"]
-    assert findings_payload["finding_count"] == len(report_json["assessment"]["findings"])
+    assert findings_payload["finding_count"] == len(document["assessment"]["findings"])
     assert recommendations_payload["recommendation_count"] == len(
-        report_json["assessment"]["deterministic_recommendations"]
+        document["assessment"]["deterministic_recommendations"]
     )
 
 

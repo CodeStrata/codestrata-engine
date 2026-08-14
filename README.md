@@ -201,12 +201,18 @@ credentials — see public AI Providers docs):
 codestrata assess --config codestrata.toml --with-ai
 ```
 
-**Optional Community telemetry** (disabled by default; process-local only):
+**Optional Community telemetry / assessment insights** (disabled by default;
+Engine-owned durable consent — shared with VS Code):
 
 ```bash
-codestrata assess --repo . --no-ai --telemetry-allow
+codestrata telemetry enable     # durable v2 Yes
+codestrata telemetry disable    # future collection off
+codestrata telemetry status
+codestrata assess --repo . --no-ai --telemetry-allow   # session bridge only; not consent
 codestrata assess --repo . --no-ai --telemetry-deny
 ```
+
+`--telemetry-allow` does **not** create consent and cannot override Disabled.
 
 **Explicit public report publish** (never automatic; not the same as telemetry):
 

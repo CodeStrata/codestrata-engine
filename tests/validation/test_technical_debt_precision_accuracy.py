@@ -26,7 +26,7 @@ from codestrata.domain.rules.context import (
     RuleExecutionContext,
 )
 from codestrata.domain.rules.enums import RuleResultStatus
-from validation.actual import run_real_assessment
+from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.inventory import FactClassification, compute_precision_recall
 from validation.models import ExpectedResults, ValidationVerdict
 from validation.paths import VALIDATION_ROOT
@@ -375,16 +375,17 @@ def test_negative_control_repositories_technical_debt(tmp_path_factory) -> None:
         assert run.verdict == ValidationVerdict.PASS
         expected = resolve_expected_results(definition)
         assert expected.technical_debt is not None
-        report = next(Path(run.artifact_dir).rglob("report.json"))
-        document = json.loads(report.read_text(encoding="utf-8"))
-        findings = extract_technical_debt_findings(document["assessment"]["findings"])
+        report, document = load_emitted_assessment(run.artifact_dir)
+        findings = extract_technical_debt_findings(
+            (document.get("assessment") or {}).get("findings") or []
+        )
         for forbidden in expected.technical_debt.forbidden_rule_ids:
             assert forbidden not in {item.rule_id for item in findings}
         result = validate_technical_debt_precision(
             repository_id=definition.repository_id,
             expectation=expected.technical_debt,
             actual_findings=findings,
-            artifact_texts={"report.json": report.read_text(encoding="utf-8")},
+            artifact_texts={report.name: json.dumps(document)},
         )
         assert result.false_positives == 0, result.diagnostics
         assert result.passed

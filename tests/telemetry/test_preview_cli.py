@@ -112,11 +112,12 @@ def test_preview_then_allow_flag(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
     reset_telemetry_singletons()
     CliRunner().invoke(app, ["telemetry", "preview"])
+    # Allow alone does not invent consent (Slice 20.9).
     telemetry = ensure_interactive_product_telemetry(
         command="assess",
         telemetry_allow=True,
     )
-    assert telemetry.runtime.session.decision is TelemetryDecision.ALLOWED_FOR_SESSION
+    assert telemetry.runtime.session.consent.transmission_authorized is False
 
 
 def test_preview_then_non_interactive(tmp_path: Path, monkeypatch) -> None:

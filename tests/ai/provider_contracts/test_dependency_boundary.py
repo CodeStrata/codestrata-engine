@@ -11,8 +11,9 @@ Two directions are checked:
 
 Slice 11.6 migrated OpenAI and Slice 11.7 migrated Bedrock onto the
 contracts, so ``provider_adapters/`` and the ``openai_provider.py`` /
-``bedrock.py`` compatibility wrappers are expected to import them. The
-orchestration layers stay on the legacy path.
+``bedrock.py`` compatibility wrappers are expected to import them.
+Engine 0.2.0 also wires OpenRouter and assess-path ``settings_policies``
+onto the same contracts. The orchestration layers stay on the legacy path.
 """
 
 from __future__ import annotations
@@ -48,6 +49,8 @@ _MIGRATED_PATH_PREFIXES: tuple[str, ...] = (
     "ai/provider_adapters/",
     "ai/providers/openai_provider.py",
     "ai/providers/bedrock.py",
+    "ai/providers/openrouter_provider.py",
+    "ai/providers/settings_policies.py",
 )
 
 

@@ -1,4 +1,9 @@
-"""Thin module coverage for test_integration (logic covered in test_contract/test_summary)."""
+"""Thin module coverage for test_integration (logic covered in test_contract/test_summary).
+
+HISTORICAL_FROZEN_CHARACTERIZATION: superseded curated-repository validation
+slice. Not an ACTIVE 0.2.0 release gate. Collect with
+``CODESTRATA_RUN_HISTORICAL_FROZEN=1``.
+"""
 
 from __future__ import annotations
 

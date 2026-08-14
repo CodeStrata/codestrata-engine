@@ -14,6 +14,7 @@ from codestrata.application.performance.assessment.artifacts import (
 from codestrata.application.performance.assessment.assembler import PerformanceAssessmentAssembler
 from codestrata.application.performance.assessment.inventory import execution_facts_from_status_map
 from codestrata.application.performance.synthesis import synthesize_performance
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.findings.enums import FindingCategory, FindingSeverity
 from codestrata.domain.findings.models import Finding
@@ -476,7 +477,12 @@ def test_partial_foundations_assembler(tmp_path: Path) -> None:
     assert '"recommendations"' in body
     assert '"overall_posture_summary"' in body
     write_performance_assessment_artifact(section, tmp_path)
-    assert (tmp_path / "performance-assessment.json").read_text(encoding="utf-8") == body
+    assert (
+        resolve_head_path(tmp_path, legacy_filename="performance-assessment.json").read_text(
+            encoding="utf-8"
+        )
+        == body
+    )
     _assert_no_forbidden(section.synthesis)
 
 

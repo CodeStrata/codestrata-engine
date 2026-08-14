@@ -1,10 +1,10 @@
 {
-  "content_fingerprint": "f933e9e5774470964e30e79126e0ea28d07a8e9669d3a90db5238db387dcc09a",
+  "content_fingerprint": "401af105e001647bb2c231a51a3ccece1a9b5ab7fd2e3c78888e47f3f5d7cc57",
   "export_name": "codestrata-engine",
   "extraction_tooling_version": "1.0.0",
-  "file_count": 2598,
-  "generated_at": "2026-08-11T13:45:55Z",
+  "file_count": 2620,
+  "generated_at": "2026-08-14T11:50:01Z",
   "manifest_version": 2,
-  "mode": "update",
-  "source_commit": "fafb9edb36f4f6b948ce4e54e0a43e992e0b7f71"
+  "mode": "first_time",
+  "source_commit": "ef8061b8cc7abfc084f6e47d2225e9550496c53e"
 }

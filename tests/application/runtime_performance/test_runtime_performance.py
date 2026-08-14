@@ -169,4 +169,5 @@ def test_report_write_single_html_render(
     assert render_calls["html"] == 1
     assert paths.json_report_path.is_file()
     payload = json.loads(paths.json_report_path.read_text(encoding="utf-8"))
-    assert payload["assessment"]["timing"]["report_ms"] is not None
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    assert paths.html_report_path.is_file()

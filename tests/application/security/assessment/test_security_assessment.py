@@ -16,6 +16,7 @@ from codestrata.application.security.assessment.factory import (
     security_assessment_section_enabled,
     security_pack_enabled,
 )
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.security.assessment.enums import SecurityAssessmentStatus
 from codestrata.domain.security.assessment.identifiers import (
@@ -142,7 +143,9 @@ def test_succeeded_empty_states_no_rules_evaluated() -> None:
 def test_artifact_write_round_trip(tmp_path: Path) -> None:
     section = SecurityAssessmentAssembler().assemble_empty(repository_id="repo:demo")
     written = write_security_assessment_artifact(section, tmp_path)
-    assert written.path.name == SECURITY_ASSESSMENT_FILENAME
+    assert written.path == resolve_head_path(
+        tmp_path, legacy_filename=SECURITY_ASSESSMENT_FILENAME
+    )
     assert written.finding_count == 0
     text = written.path.read_text(encoding="utf-8")
     payload = loads_stable_json(text)

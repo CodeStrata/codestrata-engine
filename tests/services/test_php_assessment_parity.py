@@ -13,6 +13,20 @@ from codestrata.config.settings import ComplexityEvidenceSettings
 from codestrata.models import Repository
 from codestrata.services.detectors.php_technology_detector import PhpTechnologyDetector
 
+_ENGINE_ROOT = Path(__file__).resolve().parents[2]
+_REPO_ROOT = _ENGINE_ROOT.parent
+
+
+def _sample_php_app() -> Path:
+    for candidate in (
+        _REPO_ROOT / "test-fixtures" / "sample-php-app",
+        _ENGINE_ROOT / "test-fixtures" / "sample-php-app",
+        Path("test-fixtures/sample-php-app"),
+    ):
+        if candidate.is_dir():
+            return candidate
+    return Path("test-fixtures/sample-php-app")
+
 
 def test_php_packs_include_language_gate() -> None:
     assert "php" in TechnicalDebtRulePack().supported_languages
@@ -20,7 +34,7 @@ def test_php_packs_include_language_gate() -> None:
 
 
 def test_sample_php_app_complexity_collects(tmp_path: Path) -> None:
-    sample = Path("test-fixtures/sample-php-app")
+    sample = _sample_php_app()
     if not sample.is_dir():
         return
     paths = tuple(
@@ -51,7 +65,7 @@ def test_sample_php_app_complexity_collects(tmp_path: Path) -> None:
 
 
 def test_sample_php_detector_still_laravel(tmp_path: Path) -> None:
-    sample = Path("test-fixtures/sample-php-app")
+    sample = _sample_php_app()
     files = [
         path.relative_to(sample).as_posix()
         for path in sample.rglob("*")

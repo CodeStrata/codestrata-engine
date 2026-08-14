@@ -64,12 +64,15 @@ def test_generated_html_embeds_tokens_and_keeps_csp_offline(tmp_path: Path) -> N
     ]
     dupes = [item for item, count in Counter(structural_ids).items() if count > 1]
     assert not dupes, f"duplicate structural ids: {dupes}"
-    assert "<link " not in html.lower()
     assert "<script" not in html.lower()
     assert "Content-Security-Policy" in html
     assert "font-src 'none'" in html
     assert "script-src 'none'" in html
     assert "@media print" in html
+    # Standalone favicon only (data URI); no external stylesheets.
+    assert html.lower().count("<link ") == 1
+    assert 'rel="icon"' in html
+    assert "data:image/png;base64," in html
 
 
 def test_ai_variant_also_uses_design_system_css(tmp_path: Path) -> None:

@@ -1,4 +1,9 @@
-"""SV.5 integration tests."""
+"""SV.5 integration tests.
+
+HISTORICAL_FROZEN_CHARACTERIZATION: verifies the superseded ``report.json``
+full-document contract. Shipped 0.2.0 writes ``assessment.json`` manifests.
+Not an ACTIVE 0.2.0 release gate. Collect with ``CODESTRATA_RUN_HISTORICAL_FROZEN=1``.
+"""
 
 from __future__ import annotations
 

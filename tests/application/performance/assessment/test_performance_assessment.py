@@ -20,6 +20,7 @@ from codestrata.application.performance.assessment.factory import (
 from codestrata.application.performance.assessment.factory import (
     performance_pack_enabled as is_performance_pack_enabled,
 )
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.performance.assessment.enums import PerformanceAssessmentStatus
 from codestrata.domain.performance.assessment.identifiers import (
@@ -144,7 +145,9 @@ def test_empty_and_disabled_behavior() -> None:
 def test_artifact_write_deterministic(tmp_path: Path) -> None:
     section = PerformanceAssessmentAssembler().assemble_empty(repository_id="repo:demo")
     written = write_performance_assessment_artifact(section, tmp_path)
-    assert written.path.name == PERFORMANCE_ASSESSMENT_FILENAME
+    assert written.path == resolve_head_path(
+        tmp_path, legacy_filename=PERFORMANCE_ASSESSMENT_FILENAME
+    )
     text = written.path.read_text(encoding="utf-8")
     payload = loads_stable_json(text)
     assert payload["artifact_schema_id"] == ARTIFACT_SCHEMA_ID

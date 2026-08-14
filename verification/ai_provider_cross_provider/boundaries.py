@@ -283,6 +283,7 @@ def _allowed_openrouter_ai_path(rel: str) -> bool:
         "providers/openrouter_provider.py",
         "providers/factory.py",
         "providers/doctor.py",
+        "providers/settings_policies.py",
     }
 
 

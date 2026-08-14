@@ -24,8 +24,9 @@ def test_eof_denies(tmp_path: Path) -> None:
         echo_func=lambda _m: None,
         preference_path=pref,
     )
-    assert result.safe_outcome == "eof_denied"
+    assert result.safe_outcome == "eof_dismissed"
     assert result.decision == TelemetryDecision.DENIED_FOR_SESSION.value
+    assert not pref.exists()
 
 
 def test_P_keyboard_interrupt_denies_and_primary_continues(tmp_path: Path) -> None:
@@ -42,7 +43,7 @@ def test_P_keyboard_interrupt_denies_and_primary_continues(tmp_path: Path) -> No
         echo_func=lambda _m: None,
         preference_path=pref,
     )
-    assert result.safe_outcome == "interrupted_denied"
+    assert result.safe_outcome == "interrupted_dismissed"
     assert result.decision_source == TelemetryDecisionSource.INTERACTIVE_PROMPT.value
 
     def primary() -> str:

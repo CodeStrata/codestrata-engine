@@ -19,6 +19,7 @@ from codestrata.application.dependency.assessment.factory import (
     dependency_assessment_section_enabled,
     dependency_pack_enabled,
 )
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.dependency.assessment.enums import (
     DependencyAssessmentStatus,
@@ -106,7 +107,9 @@ def test_artifact_write_round_trip(tmp_path: Path) -> None:
         repository_id="repo:demo"
     )
     written = write_dependency_assessment_artifact(section, tmp_path)
-    assert written.path.name == DEPENDENCY_ASSESSMENT_FILENAME
+    assert written.path == resolve_head_path(
+        tmp_path, legacy_filename=DEPENDENCY_ASSESSMENT_FILENAME
+    )
     assert written.finding_count == 0
     text = written.path.read_text(encoding="utf-8")
     payload = loads_stable_json(text)

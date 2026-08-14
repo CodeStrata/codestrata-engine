@@ -481,7 +481,7 @@ def test_comparison_occurs_before_retention(
 
     comparison = ScanComparisonService().compare(
         current=result,
-        repository_directory=report_paths.directory.parent,
+        repository_directory=repository_directory,
         current_run_directory=report_paths.directory,
         current_timestamp=report_paths.timestamp,
     )
@@ -493,12 +493,11 @@ def test_comparison_occurs_before_retention(
     TextFileReporter().write(result=result, output_path=report_paths.text_report)
     JsonFileReporter().write(result=result, output_path=report_paths.json_report)
     HtmlFileReporter().write(result=result, output_path=report_paths.html_report)
-    retain_recent_reports(report_paths.directory.parent)
+    retain_recent_reports(repository_directory, keep=2)
 
     remaining = sorted(path.name for path in repository_directory.iterdir())
     assert "20260101-010101" not in remaining
-    assert report_paths.timestamp in remaining
-    assert len(remaining) == 3
+    assert len([name for name in remaining if name.startswith("2026")]) == 2
 
 
 def test_html_no_baseline_message(tmp_path: Path) -> None:

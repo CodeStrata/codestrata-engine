@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -14,6 +15,14 @@ from codestrata.package_metadata import format_version_details, get_package_vers
 from codestrata.reporting.contract.constants import REPORT_HTML_VERSION
 
 runner = CliRunner()
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def _visible_help(result) -> str:
+    """Normalize CLI help for flag assertions (strip ANSI; collapse whitespace)."""
+
+    raw = f"{result.stdout or ''}{result.stderr or ''}"
+    return re.sub(r"\s+", " ", _ANSI_RE.sub("", raw))
 
 
 def test_init_writes_minimal_config(tmp_path: Path) -> None:
@@ -108,5 +117,6 @@ def test_help_marks_assess_primary_and_scan_legacy() -> None:
 def test_assess_help_includes_quiet_and_json_summary() -> None:
     result = runner.invoke(app, ["assess", "--help"])
     assert result.exit_code == 0
-    assert "--quiet" in result.stdout
-    assert "--json-summary" in result.stdout
+    help_text = _visible_help(result)
+    assert "--quiet" in help_text
+    assert "--json-summary" in help_text

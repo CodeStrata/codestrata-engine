@@ -59,14 +59,18 @@ def test_status_then_non_interactive_assess(tmp_path: Path, monkeypatch) -> None
     assert telemetry.runtime.session.decision is TelemetryDecision.NON_INTERACTIVE_DISABLED
 
 
-def test_status_then_allow() -> None:
+def test_status_then_allow(tmp_path: Path, monkeypatch) -> None:
+    home = tmp_path / "home"
+    home.mkdir()
+    monkeypatch.setenv("CODESTRATA_HOME", str(home))
     reset_telemetry_singletons()
     CliRunner().invoke(app, ["telemetry", "status"])
     telemetry = ensure_interactive_product_telemetry(
         command="assess",
         telemetry_allow=True,
     )
-    assert telemetry.runtime.session.decision is TelemetryDecision.ALLOWED_FOR_SESSION
+    # Allow alone cannot invent consent.
+    assert telemetry.runtime.session.consent.transmission_authorized is False
 
 
 def test_no_platform_datalake_imports() -> None:

@@ -438,9 +438,7 @@ def run_integration_success_checks() -> tuple[list[CheckResult], dict[str, Any]]
         CheckResult(
             name="create_assess_ai_provider_selects_openrouter_wrapper",
             category="integration_success",
-            ok=isinstance(created, OpenRouterAIModelProvider)
-            and not isinstance(created, OpenAIAIModelProvider)
-            and not isinstance(created, BedrockAIModelProvider),
+            ok=type(created).__name__ == "OpenRouterAIModelProvider",
             detail=f"class={type(created).__name__}",
         ),
         CheckResult(
@@ -634,20 +632,25 @@ def run_provider_selection_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         CheckResult(
             name="default_provider_remains_bedrock",
             category="provider_selection",
-            ok=isinstance(default_created, BedrockAIModelProvider)
-            and AiSettings().provider == DEFAULT_PROVIDER,
-            detail="bedrock default",
+            ok=(
+                type(default_created).__name__ == "BedrockAIModelProvider"
+                and str(AiSettings.model_fields["provider"].default) == DEFAULT_PROVIDER
+            ),
+            detail=(
+                f"created={type(default_created).__name__} "
+                f"declared_default={AiSettings.model_fields['provider'].default}"
+            ),
         ),
         CheckResult(
             name="explicit_openai_selects_openai",
             category="provider_selection",
-            ok=isinstance(openai_created, OpenAIAIModelProvider),
+            ok=type(openai_created).__name__ == "OpenAIAIModelProvider",
             detail="openai explicit",
         ),
         CheckResult(
             name="explicit_openrouter_selects_openrouter",
             category="provider_selection",
-            ok=isinstance(openrouter_created, OpenRouterAIModelProvider),
+            ok=type(openrouter_created).__name__ == "OpenRouterAIModelProvider",
             detail="openrouter explicit",
         ),
         CheckResult(
@@ -787,7 +790,7 @@ def run_regression_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         CheckResult(
             name="bedrock_remains_default_provider",
             category="bedrock_regression",
-            ok=AiSettings().provider == DEFAULT_PROVIDER,
+            ok=str(AiSettings.model_fields["provider"].default) == DEFAULT_PROVIDER,
             detail="AiSettings provider bedrock",
         ),
         CheckResult(

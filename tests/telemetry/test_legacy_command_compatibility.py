@@ -33,6 +33,6 @@ def test_legacy_enable_cli_does_not_call_send_payload(
     with patch("codestrata.telemetry.service.send_payload") as send:
         result = runner.invoke(app, ["telemetry", "enable"])
         assert result.exit_code == 0
-        assert "Anonymous telemetry preference: Enabled." in result.stdout
+        assert "Anonymous telemetry preference: Enabled (v2)." in result.stdout
         assert "No source code" in result.stdout
         send.assert_not_called()

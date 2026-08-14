@@ -18,6 +18,7 @@ from codestrata.application.testing.assessment.inventory import (
     build_severity_inventory,
     execution_facts_from_status_map,
 )
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.domain.evidence.language.provenance import EvidenceProvenance
 from codestrata.domain.evidence.repository_testing.enums import (
     RepositoryTestingParseStatus,
@@ -276,6 +277,8 @@ def test_inventory_deterministic_byte_identical(tmp_path: Path) -> None:
     )
     write_testing_assessment_artifact(left, tmp_path / "a")
     write_testing_assessment_artifact(right, tmp_path / "b")
-    assert (tmp_path / "a" / "testing-assessment.json").read_bytes() == (
-        tmp_path / "b" / "testing-assessment.json"
+    assert resolve_head_path(
+        tmp_path / "a", legacy_filename="testing-assessment.json"
+    ).read_bytes() == resolve_head_path(
+        tmp_path / "b", legacy_filename="testing-assessment.json"
     ).read_bytes()

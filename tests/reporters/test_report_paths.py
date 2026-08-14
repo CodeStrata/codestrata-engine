@@ -10,6 +10,10 @@ import pytest
 from codestrata.models import AnalysisResult, Repository
 from codestrata.reporters.html_file_reporter import HtmlFileReporter
 from codestrata.reporters.json_file_reporter import JsonFileReporter
+from codestrata.artifacts.manifest import (
+    ASSESSMENT_HTML_BASENAME,
+    ASSESSMENT_JSON_BASENAME,
+)
 from codestrata.reporters.report_paths import (
     DEFAULT_RETAINED_RUN_COUNT,
     ReportRetentionError,
@@ -63,14 +67,17 @@ def test_create_report_paths_uses_timestamped_run_directories(
         create_directory=True,
     )
 
-    assert report_paths.directory == (tmp_path / "reports" / "sample" / "20260721-153045")
+    assert report_paths.directory == (
+        tmp_path / "reports" / ".staging" / "sample-20260721-153045"
+    )
     assert report_paths.repository_name == "sample"
     assert report_paths.run_directory == report_paths.directory
     assert report_paths.run_timestamp == "20260721-153045"
     assert report_paths.text_report == report_paths.directory / "report.txt"
-    assert report_paths.json_report == report_paths.directory / "report.json"
-    assert report_paths.html_report == report_paths.directory / "report.html"
+    assert report_paths.json_report == report_paths.directory / ASSESSMENT_JSON_BASENAME
+    assert report_paths.html_report == report_paths.directory / ASSESSMENT_HTML_BASENAME
     assert report_paths.html_report_path == report_paths.html_report
+    assert report_paths.staging is True
     assert report_paths.directory.is_dir()
 
 
@@ -81,8 +88,8 @@ def test_sanitize_repository_directory_name() -> None:
     assert sanitize_repository_directory_name("sample") == "sample"
 
 
-def test_default_retained_run_count_is_three() -> None:
-    assert DEFAULT_RETAINED_RUN_COUNT == 3
+def test_default_retained_run_count_matches_lifecycle_max_versions() -> None:
+    assert DEFAULT_RETAINED_RUN_COUNT == 2
 
 
 def test_retain_recent_reports_with_fewer_than_three_runs(
@@ -324,7 +331,7 @@ def test_cleanup_runs_only_after_successful_report_generation(
 
     remaining = sorted(path.name for path in repository_directory.iterdir())
     assert "20260101-010101" in remaining
-    assert len([name for name in remaining if name.startswith("2026")]) == 5
+    assert len([name for name in remaining if name.startswith("2026")]) == 4
 
     monkeypatch.setattr(
         JsonFileReporter,
@@ -344,11 +351,12 @@ def test_cleanup_runs_only_after_successful_report_generation(
         result=result,
         output_path=report_paths.html_report,
     )
-    retain_recent_reports(report_paths.directory.parent)
+    retain_recent_reports(repository_directory, keep=3)
 
     remaining_after_success = sorted(path.name for path in repository_directory.iterdir())
     assert "20260101-010101" not in remaining_after_success
-    assert report_paths.timestamp in remaining_after_success
     assert len([name for name in remaining_after_success if name.startswith("2026")]) == 3
-    assert (report_paths.directory / "report.html").is_file()
+    assert report_paths.html_report.is_file()
+    assert report_paths.html_report.name == ASSESSMENT_HTML_BASENAME
+    assert report_paths.json_report.name == ASSESSMENT_JSON_BASENAME
     assert not (repository_directory / "archive").exists()

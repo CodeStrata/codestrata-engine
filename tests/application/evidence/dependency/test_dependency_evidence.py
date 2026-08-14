@@ -48,8 +48,11 @@ def _load_tree(root: Path) -> tuple[tuple[str, ...], dict[str, str]]:
         if not path.is_file():
             continue
         rel = path.relative_to(root).as_posix()
+        try:
+            texts[rel] = path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            continue
         paths.append(rel)
-        texts[rel] = path.read_text(encoding="utf-8")
     return tuple(paths), texts
 
 

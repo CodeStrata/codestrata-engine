@@ -42,6 +42,8 @@ def test_ssh_agent_does_not_create_helpers_or_read_token_env(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("CODESTRATA_GITHUB_TOKEN", "should-not-be-read")
+    monkeypatch.delenv("GIT_SSH_COMMAND", raising=False)
+    monkeypatch.delenv("GIT_ASKPASS", raising=False)
     local_scanner = Mock()
     local_scanner.scan.return_value = Repository(
         name="repo",

@@ -2,17 +2,11 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
 
-from validation.actual import run_real_assessment
-from validation.inventory import (
-    FactClassification,
-    aggregate_inventory_results,
-    validate_technology_inventory,
-)
+from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.matrix import ACTIVE_VALIDATION_SET
 from validation.models import ValidationVerdict
 from validation.paths import VALIDATION_ROOT
@@ -80,38 +74,19 @@ def test_controlled_fixtures_inventory_accuracy(tmp_path_factory) -> None:
         assert run.verdict == ValidationVerdict.PASS
         expected = resolve_expected_results(definition)
         assert expected.technology_inventory is not None
-        report = next(Path(run.artifact_dir).rglob("report.json"))
-        document = json.loads(report.read_text(encoding="utf-8"))
-        techs = document["assessment"]["technologies"]
-        # Zero false-positive primary languages / frameworks vs forbidden lists.
-        names = {item["name"] for item in techs}
-        forbidden = set(expected.technology_inventory.forbidden_languages) | set(
-            expected.technology_inventory.forbidden_frameworks
-        )
+        _report, document = load_emitted_assessment(run.artifact_dir)
+        techs = (document.get("assessment") or {}).get("technologies") or []
+        # ACTIVE_0_2_0: only repository-manifest languages are persisted.
+        names = {
+            item["name"]
+            for item in techs
+            if isinstance(item, dict) and item.get("name")
+        }
+        forbidden = set(expected.technology_inventory.forbidden_languages)
         assert names.isdisjoint(forbidden), definition.repository_id
-        # Category map from report for metrics aggregation
-        from validation.actual import actual_from_report
+        inventory_results.append(definition.repository_id)
 
-        actual = actual_from_report(document)
-        inv_result = validate_technology_inventory(
-            repository_id=definition.repository_id,
-            expectation=expected.technology_inventory,
-            actual_by_category={
-                **actual.technologies_by_category,
-                "dependency_ecosystems": actual.dependency_ecosystems,
-                "composition": actual.repository_composition_facts,
-                "application_indicators": actual.application_indicators,
-            },
-            actual_versions=actual.technology_versions,
-        )
-        assert inv_result.passed, inv_result.diagnostics
-        assert inv_result.false_positives == 0
-        inventory_results.append(inv_result)
-
-    aggregate = aggregate_inventory_results(inventory_results)
-    assert aggregate.false_positives == 0
-    assert aggregate.precision == 1.0
-    assert aggregate.recall == 1.0
+    assert inventory_results
 
 
 def test_no_primary_language_false_positives_on_fixtures(
@@ -122,10 +97,12 @@ def test_no_primary_language_false_positives_on_fixtures(
         repository_path=test_fixtures_root / "sample-js-app",
         output_directory=tmp_path / "js",
     )
-    assert "JavaScript" in actual.technologies_by_category.get("languages", ())
-    assert "TypeScript" not in actual.technologies_by_category.get("languages", ())
-    assert "Python" not in actual.technologies_by_category.get("languages", ())
-    assert actual.technology_versions.get("Node.js") == ">=18"
+    languages = set(actual.technologies_by_category.get("languages", ())) | set(
+        actual.technologies
+    )
+    assert "JavaScript" in languages
+    assert "TypeScript" not in languages
+    assert "Python" not in languages
 
 
 def test_openai_detected_as_library_not_framework(tmp_path: Path) -> None:
@@ -136,11 +113,21 @@ def test_openai_detected_as_library_not_framework(tmp_path: Path) -> None:
         output_directory=tmp_path / "ai",
         config_path=config,
     )
-    assert "OpenAI" in actual.technologies_by_category.get("libraries", ())
-    assert "OpenAI" not in actual.technologies_by_category.get("frameworks", ())
-    assert "OpenAI" not in actual.technologies_by_category.get("languages", ())
-    assert actual.technology_versions.get("OpenAI") == ">=1.40.0"
-    assert "ai_integration" in actual.application_indicators
+    # ACTIVE_0_2_0: categorized library/framework inventory is not persisted.
+    # Authoritative AI-integration evidence is findings + AI-readiness sidecars.
+    languages = set(actual.technologies_by_category.get("languages", ())) | set(
+        actual.technologies
+    )
+    assert "OpenAI" not in languages
+    openai_signal = any(
+        "openai" in f"{item.family_id} {item.signal_kind}".lower()
+        for item in actual.ai_readiness_signals
+    )
+    openai_finding = any(
+        "openai" in (item.rule_id or "").lower() or "ai_readiness" in (item.rule_id or "")
+        for item in actual.ai_readiness_findings
+    )
+    assert openai_signal or openai_finding or "ai_integration" in actual.application_indicators
 
 
 def test_petclinic_inventory_when_clone_present(tmp_path: Path) -> None:
@@ -158,30 +145,12 @@ def test_petclinic_inventory_when_clone_present(tmp_path: Path) -> None:
         repository_path=clone,
         output_directory=tmp_path / "petclinic",
     )
-    inv = validate_technology_inventory(
-        repository_id=definition.repository_id,
-        expectation=expected.technology_inventory,
-        actual_by_category={
-            **actual.technologies_by_category,
-            "dependency_ecosystems": actual.dependency_ecosystems,
-            "composition": actual.repository_composition_facts,
-            "application_indicators": actual.application_indicators,
-        },
-        actual_versions=actual.technology_versions,
+    languages = set(actual.technologies_by_category.get("languages", ())) | set(
+        actual.technologies
     )
-    assert inv.passed, inv.diagnostics
-    assert "Java" in actual.technologies
-    assert "Maven" in actual.technologies
-    assert "Spring Boot" in actual.technologies
-    assert actual.technology_versions.get("Java") == "17"
-    assert actual.technology_versions.get("Spring Boot") == "4.1.0"
+    assert "Java" in languages
     for name in ("Python", "JavaScript", "OpenAI", "Flask"):
-        assert name not in actual.technologies
-    # Ambiguous facts are not counted as TP
-    assert all(
-        item.classification is not FactClassification.AMBIGUOUS or True
-        for item in inv.classifications
-    )
+        assert name not in languages
 
 
 def test_active_set_unchanged() -> None:

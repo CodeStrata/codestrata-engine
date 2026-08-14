@@ -24,7 +24,11 @@ TELEMETRY_ROOT = (
 )
 
 
-def test_L_allow_cannot_bypass_privacy() -> None:
+def test_L_allow_cannot_bypass_privacy(tmp_path: Path) -> None:
+    from codestrata.telemetry.persisted_consent import persist_v2_yes
+
+    pref = tmp_path / "telemetry.json"
+    persist_v2_yes(path=pref)
     with pytest.raises(TelemetryRuntimeError):
         project_from_mapping(
             {
@@ -36,8 +40,18 @@ def test_L_allow_cannot_bypass_privacy() -> None:
     facade, _ = create_command_session_telemetry_runtime(
         command="assess",
         telemetry_allow=True,
+        preference_path=pref,
     )
     assert facade.runtime.session.consent.transmission_authorized is True
+
+
+def test_allow_undecided_does_not_authorize(tmp_path: Path) -> None:
+    facade, _ = create_command_session_telemetry_runtime(
+        command="assess",
+        telemetry_allow=True,
+        preference_path=tmp_path / "telemetry.json",
+    )
+    assert facade.runtime.session.consent.transmission_authorized is False
 
 
 def test_determinism() -> None:
@@ -50,13 +64,15 @@ def test_determinism() -> None:
     assert a != select_cli_telemetry_consent(deny=True).to_stable_json()
 
 
-def test_help_lists_flags_not_on_scan() -> None:
+def test_help_lists_flags_not_on_scan(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("COLUMNS", "200")
     runner = CliRunner()
     assess_help = runner.invoke(app, ["assess", "--help"])
     assert assess_help.exit_code == 0
-    assert "--telemetry-allow" in assess_help.stdout
-    assert "--telemetry-deny" in assess_help.stdout
-    assert "not saved" in assess_help.stdout.lower()
+    help_text = (assess_help.stdout + assess_help.stderr).lower()
+    assert "--telemetry-allow" in help_text
+    assert "--telemetry-deny" in help_text
+    assert "not saved" in help_text or "session bridge" in help_text
 
     scan_help = runner.invoke(app, ["scan", "--help"])
     assert scan_help.exit_code == 0
@@ -89,6 +105,7 @@ def test_A_conflict_cli_exits_before_assessment(tmp_path: Path) -> None:
     )
     assert result.exit_code == 2
     assert TELEMETRY_FLAG_CONFLICT_MESSAGE in (result.stdout + result.stderr)
+    assert not out.exists() or not any(out.rglob("assessment.json"))
     assert not out.exists() or not any(out.rglob("report.json"))
 
 

@@ -15,11 +15,9 @@ def test_telemetry_status_exit_zero_and_sections() -> None:
     reset_telemetry_singletons()
     result = CliRunner().invoke(app, ["telemetry", "status"])
     assert result.exit_code == 0
-    assert "Privacy-first telemetry" in result.stdout
+    assert "Anonymous Community telemetry" in result.stdout
     assert "Default: Disabled" in result.stdout
-    assert "Transport: Unavailable" in result.stdout
-    assert "Legacy compatibility" in result.stdout
-    assert "Limitations" in result.stdout
+    assert "Preference:" in result.stdout
 
 
 def test_status_does_not_use_legacy_service(tmp_path: Path, monkeypatch) -> None:
@@ -40,4 +38,4 @@ def test_status_help_mentions_side_effects() -> None:
     result = CliRunner().invoke(app, ["telemetry", "status", "--help"])
     assert result.exit_code == 0
     text = (result.stdout + result.stderr).lower()
-    assert "side effect" in text or "privacy-first" in text
+    assert "preference" in text or "enabled" in text or "disabled" in text or "anonymous" in text

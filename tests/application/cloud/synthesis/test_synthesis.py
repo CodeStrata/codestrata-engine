@@ -14,6 +14,7 @@ from codestrata.application.cloud.assessment.artifacts import (
 from codestrata.application.cloud.assessment.assembler import CloudAssessmentAssembler
 from codestrata.application.cloud.assessment.inventory import execution_facts_from_status_map
 from codestrata.application.cloud.synthesis import synthesize_cloud
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.config import load_settings
 from codestrata.domain.cloud.assessment.enums import (
     CloudAssessmentStatus,
@@ -345,7 +346,12 @@ def test_partial_adoption_assembler(tmp_path: Path) -> None:
     assert '"recommendations"' in body
     assert '"overall_posture_summary"' in body
     write_cloud_assessment_artifact(section, tmp_path)
-    assert (tmp_path / "cloud-assessment.json").read_text(encoding="utf-8") == body
+    assert (
+        resolve_head_path(tmp_path, legacy_filename="cloud-assessment.json").read_text(
+            encoding="utf-8"
+        )
+        == body
+    )
 
 
 def test_cloud_native_broad_adoption() -> None:

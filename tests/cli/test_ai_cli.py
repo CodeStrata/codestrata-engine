@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from typer.testing import CliRunner
@@ -15,6 +16,14 @@ from codestrata.cli.ai_cmd import FRIENDLY_FALLBACK
 from codestrata.config.settings import CodestrataSettings
 
 runner = CliRunner()
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def _visible_help(result) -> str:
+    """Normalize CLI help for flag assertions (strip ANSI; collapse whitespace)."""
+
+    raw = f"{result.stdout or ''}{result.stderr or ''}"
+    return re.sub(r"\s+", " ", _ANSI_RE.sub("", raw))
 
 
 def _write_config(path: Path, *, provider: str = "bedrock") -> Path:
@@ -39,8 +48,9 @@ def _write_config(path: Path, *, provider: str = "bedrock") -> Path:
 def test_ai_onboarding_screen() -> None:
     result = runner.invoke(app, ["ai", "--help"])
     assert result.exit_code == 0
-    assert "doctor" in result.stdout
-    assert "--provider" in result.stdout
+    help_text = _visible_help(result)
+    assert "doctor" in help_text
+    assert "--provider" in help_text
 
     status = runner.invoke(app, ["ai"])
     assert status.exit_code == 0
@@ -148,8 +158,9 @@ def test_ai_doctor_reports_credential_source_for_bedrock(monkeypatch, tmp_path: 
 def test_assess_help_documents_with_ai() -> None:
     result = runner.invoke(app, ["assess", "--help"])
     assert result.exit_code == 0
-    assert "--with-ai" in result.stdout
-    assert "codestrata ai" in result.stdout or "docs.codestrata.ai/ai-providers" in result.stdout
+    help_text = _visible_help(result)
+    assert "--with-ai" in help_text
+    assert "codestrata ai" in help_text or "docs.codestrata.ai/ai-providers" in help_text
 
 
 def test_build_report_marks_openai_when_key_present(monkeypatch) -> None:

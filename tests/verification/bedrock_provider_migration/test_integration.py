@@ -1,4 +1,9 @@
-"""SV.11.7 integration: verdict, limitations, privacy, determinism."""
+"""SV.11.7 integration: verdict, limitations, privacy, determinism.
+
+HISTORICAL_FROZEN_CHARACTERIZATION: Epic 11.7 Bedrock migration slice against
+pre-OpenRouter package boundaries and legacy wrapper exception types. Not an
+ACTIVE 0.2.0 release gate. Collect with ``CODESTRATA_RUN_HISTORICAL_FROZEN=1``.
+"""
 
 from __future__ import annotations
 

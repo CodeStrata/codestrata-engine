@@ -22,6 +22,13 @@ TELEMETRY_ROOT = (
 )
 
 
+@pytest.fixture(autouse=True)
+def _isolate_codestrata_home(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Keep persisted consent out of the developer/runner ~/.codestrata."""
+
+    monkeypatch.setenv("CODESTRATA_HOME", str(tmp_path))
+
+
 def test_Q_consent_cannot_bypass_privacy() -> None:
     with pytest.raises(TelemetryRuntimeError):
         project_from_mapping(
@@ -40,9 +47,12 @@ def test_R_S_prompt_text_has_no_repo_or_raw_event() -> None:
     for needle in ("/users/", "argv", "endpoint", "stack trace", "repository/"):
         assert needle not in blob
     assert "help improve codestrata" in blob
-    assert "anonymous usage and assessment metadata" in blob
-    assert "no source code" in blob
-    assert "share anonymous telemetry?" in blob
+    assert "anonymous usage" in blob
+    assert "assessment insights" in blob
+    assert "source code" in blob and ("stay local" in blob or "local" in blob)
+    assert "repository identity" in blob
+    assert "does not publish reports" in blob
+    assert "score" not in blob
     assert "[y/n]" in blob
     assert "[Y/n]" not in (PROMPT_INTRO + PROMPT_QUESTION)
 

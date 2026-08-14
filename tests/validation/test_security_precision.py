@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from validation.actual import run_real_assessment
+from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.inventory import FactClassification, compute_precision_recall
 from validation.models import ExpectedResults, ValidationVerdict
 from validation.registry import load_all_repositories, resolve_expected_results
@@ -239,9 +239,10 @@ def test_negative_control_repositories_security_precision(tmp_path_factory) -> N
         assert run.verdict == ValidationVerdict.PASS
         expected = resolve_expected_results(definition)
         assert expected.security is not None
-        report = next(Path(run.artifact_dir).rglob("report.json"))
-        document = json.loads(report.read_text(encoding="utf-8"))
-        findings = extract_security_findings(document["assessment"]["findings"])
+        report, document = load_emitted_assessment(run.artifact_dir)
+        findings = extract_security_findings(
+            (document.get("assessment") or {}).get("findings") or []
+        )
         for forbidden in expected.security.forbidden_rule_ids:
             assert forbidden not in {item.rule_id for item in findings}
         # No unsupported CVE / vulnerability finding families.
@@ -252,7 +253,7 @@ def test_negative_control_repositories_security_precision(tmp_path_factory) -> N
             repository_id=definition.repository_id,
             expectation=expected.security,
             actual_findings=findings,
-            artifact_texts={"report.json": report.read_text(encoding="utf-8")},
+            artifact_texts={report.name: json.dumps(document)},
         )
         assert result.false_positives == 0, result.diagnostics
         assert result.passed

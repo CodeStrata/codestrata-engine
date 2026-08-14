@@ -1,4 +1,4 @@
-"""No-persistence / no-network / transport gating for CLI flags (Slice 9.6)."""
+"""No-persistence / no-network / transport gating for CLI flags (Slice 9.6 / 20.9)."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from unittest.mock import patch
 from codestrata.telemetry.decisions import TelemetryDecision
 from codestrata.telemetry.events import RuntimeEventType, RuntimeTelemetryEvent
 from codestrata.telemetry.infrastructure.capture_transport import CaptureTelemetryTransport
+from codestrata.telemetry.persisted_consent import persist_v2_yes
 from codestrata.telemetry.prompt_runtime_factory import (
     create_command_session_telemetry_runtime,
 )
@@ -19,15 +20,13 @@ from codestrata.telemetry.service import (
 )
 
 
-def test_D_E_F_G_H_no_persistence_identity_queue_http(
+def test_D_E_F_G_H_allow_bridge_does_not_mutate_preference(
     tmp_path: Path, monkeypatch
 ) -> None:
     home = tmp_path / "home"
     home.mkdir()
-    (home / "telemetry.json").write_text(
-        json.dumps({"enabled": True, "decision_made": True, "schema_version": "1.0.0"}),
-        encoding="utf-8",
-    )
+    pref = home / "telemetry.json"
+    persist_v2_yes(path=pref)
     (home / "installation_id").write_text(
         "55555555-5555-4555-8555-555555555555\n", encoding="utf-8"
     )
@@ -41,16 +40,13 @@ def test_D_E_F_G_H_no_persistence_identity_queue_http(
     reset_telemetry_singletons()
 
     with patch("codestrata.telemetry.transport.send_payload") as send:
-        with patch("codestrata.telemetry.preferences.load_preferences") as load:
-            telemetry = ensure_interactive_product_telemetry(
-                command="assess",
-                telemetry_allow=True,
-            )
-            telemetry.record_assessment_started(ai_enabled=False)
-            send.assert_not_called()
-            load.assert_not_called()
+        telemetry = ensure_interactive_product_telemetry(
+            command="assess",
+            telemetry_allow=True,
+        )
+        telemetry.record_assessment_started(ai_enabled=False)
+        send.assert_not_called()
 
-    # Pre-seeded installation_id + telemetry.json must remain; no queue/http side effects.
     assert (home / "installation_id").read_text(encoding="utf-8").startswith("55555555")
     assert (home / "telemetry.json").read_bytes() == before["telemetry.json"]
     assert not (home / "queue").exists()
@@ -72,7 +68,9 @@ def test_I_deny_does_not_invoke_transport() -> None:
     assert facade.runtime.session.counters.transmission_attempts == 0
 
 
-def test_allow_unavailable_not_sent(monkeypatch) -> None:
+def test_allow_with_v2_unavailable_not_sent(tmp_path: Path, monkeypatch) -> None:
+    pref = tmp_path / "telemetry.json"
+    persist_v2_yes(path=pref)
     monkeypatch.setattr(
         "codestrata.telemetry.product_transport.try_create_production_http_transport",
         lambda: None,
@@ -80,8 +78,9 @@ def test_allow_unavailable_not_sent(monkeypatch) -> None:
     facade, result = create_command_session_telemetry_runtime(
         command="assess",
         telemetry_allow=True,
+        preference_path=pref,
     )
-    assert result.decision == "allowed_for_session"
+    assert result.consent.transmission_authorized is True
     recorded = facade.runtime.record(
         RuntimeTelemetryEvent(event_type=RuntimeEventType.APPLICATION_STARTED)
     )
@@ -89,11 +88,27 @@ def test_allow_unavailable_not_sent(monkeypatch) -> None:
     assert recorded.status.value != "sent"
 
 
-def test_allow_capture_receives_privacy_safe_only() -> None:
+def test_allow_undecided_does_not_send(tmp_path: Path) -> None:
     capture = CaptureTelemetryTransport()
     facade, _ = create_command_session_telemetry_runtime(
         command="assess",
         telemetry_allow=True,
+        preference_path=tmp_path / "missing.json",
+        transport=capture,
+    )
+    facade.runtime.record(
+        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
+    )
+    assert capture.captured == []
+
+
+def test_v2_capture_receives_privacy_safe_only(tmp_path: Path) -> None:
+    pref = tmp_path / "telemetry.json"
+    persist_v2_yes(path=pref)
+    capture = CaptureTelemetryTransport()
+    facade, _ = create_command_session_telemetry_runtime(
+        command="assess",
+        preference_path=pref,
         transport=capture,
     )
     facade.runtime.record(
@@ -114,6 +129,9 @@ def test_W_legacy_enable_authorizes_via_persisted_preference(
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
     reset_telemetry_singletons()
     get_legacy_telemetry_service(home=home).enable(emit_events=False)
+    # Enable writes consent_scope=2 (v2).
+    data = json.loads((home / "telemetry.json").read_text(encoding="utf-8"))
+    assert data.get("consent_scope") == 2
     reset_telemetry_singletons()
     telemetry = ensure_interactive_product_telemetry(
         command="assess",

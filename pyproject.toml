@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codestrata"
-version = "0.2.0"
+version = "0.2.1"
 description = "CodeStrata Engine: deterministic Engineering Assessment for repositories; portfolio Engineering Intelligence Reports (EIR) where applicable."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -108,6 +108,7 @@ codestrata = [
     "resources/**/*.json",
     "resources/**/*.md",
     "reporting/assets/*.svg",
+    "reporting/assets/*.png",
     "application/rules/data/*.json",
 ]
 
@@ -123,6 +124,8 @@ addopts = [
 ]
 markers = [
     "docker: requires Docker Compose and a running daemon (skipped when unavailable)",
+    "historical_frozen_characterization: superseded slice/artifact characterization; not an ACTIVE 0.2.0 release gate (set CODESTRATA_RUN_HISTORICAL_FROZEN=1 to collect)",
+    "remote_validation: live network validation against pinned public remotes; not part of the deterministic Engine CI gate (set CODESTRATA_RUN_REMOTE_VALIDATION=1 to run)",
 ]
 
 

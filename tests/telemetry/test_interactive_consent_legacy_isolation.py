@@ -18,7 +18,15 @@ def test_E_F_persisted_preference_skips_prompt(tmp_path: Path, monkeypatch) -> N
     home = tmp_path / "home"
     home.mkdir()
     (home / "telemetry.json").write_text(
-        json.dumps({"enabled": True, "decision_made": True, "schema_version": "1.0.0"}),
+        json.dumps(
+            {
+                "enabled": True,
+                "decision_made": True,
+                "schema_version": "1.0.0",
+                # Decline upgrade so one-time v2 prompt does not fire (Slice 20.9).
+                "v2_upgrade_declined": True,
+            }
+        ),
         encoding="utf-8",
     )
     (home / "installation_id").write_text(

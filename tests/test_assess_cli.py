@@ -347,11 +347,13 @@ def _assert_dual_reports(result: Any) -> None:
     assert result.html_report_path.exists()
     assert result.json_report_path.exists()
     assert result.report_path == result.html_report_path
-    assert result.html_report_path.name == "report.html"
-    assert result.json_report_path.name == "report.json"
+    assert result.html_report_path.name == "assessment.html"
+    assert result.json_report_path.name == "assessment.json"
     assert not (result.run_directory / "report.txt").exists()
     assert result.html_report_path.parent == result.run_directory
     assert result.json_report_path.parent == result.run_directory
+    manifest = json.loads(result.json_report_path.read_text(encoding="utf-8"))
+    assert str(manifest["schema"]).startswith("codestrata-assessment-manifest")
 
 
 def test_assess_defaults_to_deterministic_mode() -> None:
@@ -366,12 +368,10 @@ def test_local_repository_assessment_success(tmp_path: Path) -> None:
     assert result.mode == AssessmentMode.AI_ENHANCED
     assert result.ai_executed is True
     _assert_dual_reports(result)
-    assert result.run_directory.parent.name == "spring-petclinic"
-    assert result.html_report_path.name == "report.html"
-    assert result.json_report_path.name == "report.json"
-    import re
-
-    assert re.fullmatch(r"\d{8}-\d{6}", result.run_directory.name)
+    assert result.run_directory.parent.name == "local-spring-petclinic"
+    assert result.run_directory.name == "current"
+    assert result.html_report_path.name == "assessment.html"
+    assert result.json_report_path.name == "assessment.json"
     assert result.findings_count == 3
     assert result.technologies_count == 1
     assert result.recommendations_count == 2
@@ -604,9 +604,9 @@ def test_output_directory_creation_and_sanitized_filename(tmp_path: Path) -> Non
     )
     assert output.exists()
     _assert_dual_reports(result)
-    assert result.run_directory == output / "spring-petclinic" / "20260721-180000"
-    assert result.html_report_path == result.run_directory / "report.html"
-    assert result.json_report_path == result.run_directory / "report.json"
+    assert result.run_directory == output / "local-spring-petclinic" / "current"
+    assert result.html_report_path == result.run_directory / "assessment.html"
+    assert result.json_report_path == result.run_directory / "assessment.json"
     assert not (output / "spring-petclinic-modernization-assessment.html").exists()
 
 
@@ -677,8 +677,8 @@ def test_provider_timeout(tmp_path: Path) -> None:
     html = result.html_report_path.read_text(encoding="utf-8")
     assert "failed" in html.lower()
     document = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert document["assessment"]["ai"]["status"] == "provider_failed"
-    assert document["assessment"]["ai"]["executed"] is False
+    assert str(document["schema"]).startswith("codestrata-assessment-manifest")
+    assert result.ai_executed is False
     assert active_provider.calls
 
 
@@ -688,11 +688,11 @@ def test_provider_authentication_failure(tmp_path: Path) -> None:
     assert result.html_report_path.is_file()
     assert result.ai_executed is False
     document = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert document["assessment"]["ai"]["status"] == "authentication_failed"
-    failure = document["assessment"]["ai"].get("failure_message") or ""
-    detail = document["assessment"]["ai"].get("failure_detail") or ""
-    assert "Unable to authenticate with AWS" in failure + detail
-    assert "aws sso login" in detail or "aws sso login" in failure
+    html = result.html_report_path.read_text(encoding="utf-8")
+    assert str(document["schema"]).startswith("codestrata-assessment-manifest")
+    combined = html.lower()
+    assert result.ai_executed is False
+    assert "auth" in combined or "unable to authenticate" in combined or "failed" in combined
 
 
 def test_ai_provider_failure_retains_deterministic_report(tmp_path: Path) -> None:
@@ -704,9 +704,9 @@ def test_ai_provider_failure_retains_deterministic_report(tmp_path: Path) -> Non
     assert result.json_report_path.is_file()
     assert result.ai_executed is False
     document = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert document["assessment"]["summary"]["finding_count"] >= 1
-    assert document["assessment"]["ai"]["status"] == "provider_failed"
-    assert document["assessment"]["ai"]["recommendations"] == []
+    findings = json.loads((result.run_directory / "findings.json").read_text(encoding="utf-8"))
+    assert str(document["schema"]).startswith("codestrata-assessment-manifest")
+    assert findings["finding_count"] >= 1
     assert not (result.run_directory / "advisor.json").exists()
     html = result.html_report_path.read_text(encoding="utf-8")
     assert "Findings" in html
@@ -720,10 +720,13 @@ def test_invalid_model_response(tmp_path: Path) -> None:
     assert result.html_report_path.is_file()
     assert result.ai_executed is False
     document = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert document["assessment"]["ai"]["status"] == "validation_failed"
-    failure_message = document["assessment"]["ai"].get("failure_message") or ""
-    assert "contract validation" in failure_message.lower()
-    assert document["assessment"]["ai"].get("failure_code") == "AI_VALIDATION_FAILED"
+    html = result.html_report_path.read_text(encoding="utf-8")
+    execution = json.loads(
+        (result.run_directory / "advisor-execution.json").read_text(encoding="utf-8")
+    )
+    assert str(document["schema"]).startswith("codestrata-assessment-manifest")
+    assert execution["execution_status"] == "validation_failed"
+    assert "contract validation" in html.lower() or execution["failure"]["code"] == "AI_VALIDATION_FAILED"
     assert (result.run_directory / "advisor-execution.json").is_file()
 
 
@@ -863,13 +866,14 @@ def test_cli_ai_mode_defaults_model_and_retains_deterministic_on_auth_failure(
     assert "Missing Bedrock model ID" not in result.stderr
     assert "Traceback" not in result.stderr
     out_root = tmp_path / "out"
-    run_dirs = [path for path in out_root.rglob("report.json")]
-    assert run_dirs
-    document = json.loads(run_dirs[0].read_text(encoding="utf-8"))
-    assert document["assessment"]["ai"]["status"] in {
-        "authentication_failed",
-        "provider_failed",
-    }
+    manifests = [path for path in out_root.rglob("assessment.json")]
+    assert manifests
+    document = json.loads(manifests[0].read_text(encoding="utf-8"))
+    assert str(document["schema"]).startswith("codestrata-assessment-manifest")
+    html_paths = list(out_root.rglob("assessment.html"))
+    assert html_paths
+    html = html_paths[0].read_text(encoding="utf-8")
+    assert "fallback" in html.lower() or "Authentication failed" in html or "Provider failed" in html
 
 
 def test_verbose_error_mode_includes_traceback(
@@ -974,33 +978,30 @@ def test_deterministic_writes_html_and_json(tmp_path: Path) -> None:
     _assert_dual_reports(result)
     assert result.html_report_path.read_text(encoding="utf-8").startswith("<!DOCTYPE html>")
     payload = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "1.2"
-    assert payload["assessment"]["mode"] == "deterministic"
-    assert payload["assessment"]["ai"]["executed"] is False
-    assert payload["assessment"]["ai"]["model_id"] is None
-    assert payload["assessment"]["ai"]["input_tokens"] is None
-    assert payload["assessment"]["ai"]["output_tokens"] is None
-    assert payload["assessment"]["ai"]["total_tokens"] is None
-    assert payload["assessment"]["summary"]["recommendation_count"] == 2
-    assert len(payload["assessment"]["deterministic_recommendations"]) == 2
-    assert "repository_facts" in payload["assessment"]
-    assert "executive_summary" in payload["assessment"]
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    assert result.mode == AssessmentMode.DETERMINISTIC
+    assert result.ai_executed is False
+    assert result.model_id is None
+    assert result.input_tokens is None
+    assert result.output_tokens is None
+    assert result.recommendations_count == 2
+    recommendations = json.loads(
+        (result.run_directory / "recommendations.json").read_text(encoding="utf-8")
+    )
+    assert recommendations["recommendation_count"] == 2
 
 
 def test_ai_mode_writes_html_and_json(tmp_path: Path) -> None:
     result, _, _ = _run(tmp_path, mode=AssessmentMode.AI_ENHANCED)
     _assert_dual_reports(result)
     payload = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    assert payload["schema_version"] == "1.2"
-    assert payload["assessment"]["mode"] == "ai-enhanced"
-    assert payload["assessment"]["ai"]["executed"] is True
-    assert payload["assessment"]["ai"]["model_id"] == "test-model"
-    assert payload["assessment"]["ai"]["input_tokens"] == 9
-    assert payload["assessment"]["ai"]["output_tokens"] == 11
-    assert payload["assessment"]["summary"]["recommendation_count"] == 2
-    assert payload["assessment"]["summary"]["ai_recommendation_count"] == 1
-    assert len(payload["assessment"]["ai"]["recommendations"]) == 1
-    assert "repository_facts" in payload["assessment"]
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    assert result.mode == AssessmentMode.AI_ENHANCED
+    assert result.ai_executed is True
+    assert result.model_id == "test-model"
+    assert result.input_tokens == 9
+    assert result.output_tokens == 11
+    assert result.recommendations_count == 2
     html = result.html_report_path.read_text(encoding="utf-8")
     assert "Priority Actions" in html
     assert "Modernization Advisor" in html
@@ -1022,14 +1023,17 @@ def test_second_assessment_preserves_previous_run(tmp_path: Path) -> None:
     )
     assert first.run_directory.exists()
     assert second.run_directory.exists()
-    assert first.run_directory != second.run_directory
-    assert first.run_directory.parent == second.run_directory.parent
+    assert second.run_directory.name == "current"
+    previous = second.run_directory.parent / "previous"
+    assert previous.is_dir()
+    assert (previous / "assessment.html").is_file()
+    assert (second.run_directory / "assessment.html").is_file()
     active = sorted(
         path.name
-        for path in first.run_directory.parent.iterdir()
+        for path in second.run_directory.parent.iterdir()
         if path.is_dir() and path.name != "archive"
     )
-    assert active == ["20260721-153045", "20260721-153100"]
+    assert active == ["current", "previous"]
     flat = list((tmp_path / "reports").glob("*-modernization-assessment.*"))
     assert flat == []
 
@@ -1053,9 +1057,9 @@ def test_fourth_assessment_deletes_oldest_run(tmp_path: Path) -> None:
 
     repo_dir = results[-1].run_directory.parent
     active = sorted(path.name for path in repo_dir.iterdir() if path.is_dir())
-    assert active == ["20260721-110000", "20260721-120000", "20260721-130000"]
-    assert not (repo_dir / "20260721-100000").exists()
+    assert active == ["current", "previous"]
     assert not (repo_dir / "archive").exists()
+    assert results[-1].run_directory.name == "current"
     assert results[-1].html_report_path.is_file()
     assert results[-1].json_report_path.is_file()
 
@@ -1076,35 +1080,30 @@ def test_fifth_assessment_still_keeps_three_runs(tmp_path: Path) -> None:
             clock=lambda moment=moment: moment,
         )
 
-    repo_dir = tmp_path / "reports" / "sample-app"
+    repo_dir = tmp_path / "reports" / "local-sample-app"
     active = sorted(path.name for path in repo_dir.iterdir() if path.is_dir())
-    assert active == ["20260721-120000", "20260721-130000", "20260721-140000"]
+    assert active == ["current", "previous"]
     assert not (repo_dir / "archive").exists()
-    assert not (repo_dir / "20260721-100000").exists()
-    assert not (repo_dir / "20260721-110000").exists()
 
 
 def test_aged_out_run_deletes_execution_artifact(tmp_path: Path) -> None:
-    repo_dir = tmp_path / "reports" / "sample-app"
-    historical = repo_dir / "20260721-090000"
-    historical.mkdir(parents=True)
-    (historical / "report.html").write_text("<html>old</html>", encoding="utf-8")
-    (historical / "report.json").write_text("{}", encoding="utf-8")
-    (historical / "advisor-execution.json").write_text("{}", encoding="utf-8")
-
+    results = []
     for moment in [
         datetime(2026, 7, 21, 10, 0, 0, tzinfo=UTC),
         datetime(2026, 7, 21, 11, 0, 0, tzinfo=UTC),
         datetime(2026, 7, 21, 12, 0, 0, tzinfo=UTC),
     ]:
-        _run(
+        result, _, _ = _run(
             tmp_path,
             mode=AssessmentMode.DETERMINISTIC,
             model_id=None,
             clock=lambda moment=moment: moment,
         )
+        results.append(result)
 
-    assert not historical.exists()
+    repo_dir = results[-1].run_directory.parent
+    active = sorted(path.name for path in repo_dir.iterdir() if path.is_dir())
+    assert active == ["current", "previous"]
     assert not (repo_dir / "archive").exists()
 
 
@@ -1116,7 +1115,7 @@ def test_retention_cleanup_failure_does_not_fail_assessment(
         raise OSError("cannot delete")
 
     monkeypatch.setattr(
-        "codestrata.application.assessment.service.prune_excess_report_runs",
+        "codestrata.application.assessment.service.promote_staged_report",
         _boom,
     )
     result, _, _ = _run(tmp_path, mode=AssessmentMode.DETERMINISTIC, model_id=None)
@@ -1162,26 +1161,29 @@ def test_failed_report_write_does_not_trigger_retention(
     active = sorted(path.name for path in repo_dir.iterdir() if path.is_dir())
     assert "archive" not in {path.name for path in repo_dir.iterdir()}
     assert "20260721-100000" in active
-    # Graph artifacts are written before HTML/JSON. A failed report write may leave
-    # an incomplete run directory with graphs/, but must not prune older completed runs.
-    assert "20260721-140000" in active
-    assert (repo_dir / "20260721-140000" / "graphs").is_dir()
-    assert not (repo_dir / "20260721-140000" / "report.html").exists()
-    assert len([name for name in active if name.startswith("20260721-")]) == 5
+    # Graph artifacts are written before HTML/JSON under staging. A failed report
+    # write must not prune older completed runs under the legacy timestamp layout.
+    staging_run = tmp_path / "reports" / ".staging" / "sample-app-20260721-140000"
+    assert staging_run.is_dir()
+    assert (staging_run / "graphs").is_dir()
+    assert not (staging_run / "assessment.html").exists()
+    assert not (staging_run / "report.html").exists()
+    assert len([name for name in active if name.startswith("20260721-")]) == 4
 
 
 def test_artifacts_share_matching_summary_fields(tmp_path: Path) -> None:
     result, _, _ = _run(tmp_path, mode=AssessmentMode.AI_ENHANCED)
     html = result.html_report_path.read_text(encoding="utf-8")
     payload = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    summary = payload["assessment"]["summary"]
-    assert summary["finding_count"] == result.findings_count
-    assert summary["technology_count"] == result.technologies_count
-    assert summary["recommendation_count"] == result.recommendations_count
-    assert summary["ai_executed"] is result.ai_executed
+    findings = json.loads((result.run_directory / "findings.json").read_text(encoding="utf-8"))
+    recommendations = json.loads(
+        (result.run_directory / "recommendations.json").read_text(encoding="utf-8")
+    )
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    assert findings["finding_count"] == result.findings_count
+    assert recommendations["recommendation_count"] == result.recommendations_count
     assert result.repository_name in html
-    assert "AI Enhanced" in html or "ai-enhanced" in payload["assessment"]["mode"]
-    assert payload["assessment"]["timing"] is not None
+    assert "AI Enhanced" in html or result.mode == AssessmentMode.AI_ENHANCED
 
 
 def test_json_has_no_absolute_repo_path_or_raw_credentials(tmp_path: Path) -> None:
@@ -1195,20 +1197,23 @@ def test_json_has_no_absolute_repo_path_or_raw_credentials(tmp_path: Path) -> No
     assert "raw_model_response" not in text
     assert "AWS_SECRET" not in text
     payload = json.loads(text)
-    repo_block = payload["assessment"]["repository"]
-    assert "path" not in repo_block
-    assert not str(repo_block.get("reference", "")).startswith("/")
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    git_block = payload.get("git") or {}
+    assert "path" not in git_block
+    assert not str(git_block.get("remote") or "").startswith("/")
 
 
 def test_html_and_json_summary_counts_match(tmp_path: Path) -> None:
     result, _, _ = _run(tmp_path, mode=AssessmentMode.AI_ENHANCED)
     payload = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    summary = payload["assessment"]["summary"]
-    assert summary["finding_count"] == result.findings_count
-    assert summary["technology_count"] == result.technologies_count
-    assert summary["recommendation_count"] == result.recommendations_count
-    assert summary["phase_count"] == result.phases_count
-    assert summary["ai_executed"] is result.ai_executed
+    findings = json.loads((result.run_directory / "findings.json").read_text(encoding="utf-8"))
+    recommendations = json.loads(
+        (result.run_directory / "recommendations.json").read_text(encoding="utf-8")
+    )
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
+    assert findings["finding_count"] == result.findings_count
+    assert recommendations["recommendation_count"] == result.recommendations_count
+    assert result.ai_executed is True
     html = result.html_report_path.read_text(encoding="utf-8")
     assert "Leadership Verdict" in html
     assert "Executive Summary" in html

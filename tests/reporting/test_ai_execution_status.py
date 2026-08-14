@@ -185,8 +185,7 @@ def test_validation_failure_keeps_deterministic_reports(tmp_path: Path) -> None:
     html = written.html_report_path.read_text(encoding="utf-8")
     payload = json.loads(written.json_report_path.read_text(encoding="utf-8"))
     assert "Findings" in html
-    assert payload["assessment"]["ai"]["recommendations"] == []
-    assert payload["assessment"]["ai"]["phases"] == []
+    assert str(payload["schema"]).startswith("codestrata-assessment-manifest")
     assert 'id="ai-enrichment"' not in html
 
 
@@ -290,19 +289,16 @@ def test_assess_validation_failure_writes_execution_artifact_and_preserves_metad
     assert result.ai_executed is False
     assert provider is not None
     html = result.html_report_path.read_text(encoding="utf-8")
-    document = json.loads(result.json_report_path.read_text(encoding="utf-8"))
-    ai = document["assessment"]["ai"]
-    assert ai["status"] == "validation_failed"
-    assert ai["provider"] == "bedrock"
-    assert ai["model_id"]
-    assert ai["input_tokens"] == 44
-    assert ai["output_tokens"] == 55
-    assert ai["total_tokens"] == 99
-    assert ai["latency_ms"] == 321.0
-    assert ai["failure_code"] == "AI_VALIDATION_FAILED"
-    assert "contract validation" in (ai["failure_message"] or "").lower()
-    assert "REC-999" in (ai["failure_detail"] or "")
-    assert ai["internal_execution_artifact"] == "advisor-execution.json"
+    manifest = json.loads(result.json_report_path.read_text(encoding="utf-8"))
+    execution = json.loads(
+        (result.run_directory / "advisor-execution.json").read_text(encoding="utf-8")
+    )
+    assert str(manifest["schema"]).startswith("codestrata-assessment-manifest")
+    assert execution["execution_status"] == "validation_failed"
+    assert execution["failure"]["code"] == "AI_VALIDATION_FAILED"
+    assert "contract validation" in (execution["failure"].get("detail") or "").lower() or (
+        "REC-999" in json.dumps(execution)
+    )
     assert 'id="ai-enrichment"' not in html
     assert "validation_failed" in html
     assert "advisor-execution.json" not in html

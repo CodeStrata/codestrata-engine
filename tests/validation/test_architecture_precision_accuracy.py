@@ -12,7 +12,7 @@ from codestrata.application.rules.architecture.view_builder import (
     build_architecture_analysis_view,
     find_directed_cycles,
 )
-from validation.actual import run_real_assessment
+from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.architecture import (
     ArchitectureCycleExpectation,
     ArchitectureEdgeExpectation,
@@ -291,16 +291,17 @@ def test_negative_control_repositories_architecture_precision(tmp_path_factory) 
         assert run.verdict == ValidationVerdict.PASS
         expected = resolve_expected_results(definition)
         assert expected.architecture is not None
-        report = next(Path(run.artifact_dir).rglob("report.json"))
-        document = json.loads(report.read_text(encoding="utf-8"))
-        findings = extract_architecture_findings(document["assessment"]["findings"])
+        report, document = load_emitted_assessment(run.artifact_dir)
+        findings = extract_architecture_findings(
+            (document.get("assessment") or {}).get("findings") or []
+        )
         for forbidden in expected.architecture.forbidden_rule_ids:
             assert forbidden not in {item.rule_id for item in findings}
         result = validate_architecture_precision(
             repository_id=definition.repository_id,
             expectation=expected.architecture,
             actual_findings=findings,
-            artifact_texts={"report.json": report.read_text(encoding="utf-8")},
+            artifact_texts={report.name: json.dumps(document)},
         )
         assert result.false_positives == 0, result.diagnostics
         assert result.passed

@@ -47,7 +47,8 @@ def test_B_C_empty_and_invalid_never_allow(tmp_path: Path) -> None:
         preference_path=pref2,
     )
     assert invalid.decision == TelemetryDecision.DENIED_FOR_SESSION.value
-    assert invalid.safe_outcome == "invalid_denied"
+    assert invalid.safe_outcome == "invalid_dismissed"
+    assert not pref2.exists()
 
 
 def test_yes_maps_to_allowed_interactive(tmp_path: Path) -> None:

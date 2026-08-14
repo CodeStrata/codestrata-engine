@@ -42,10 +42,10 @@ def test_all_local_repositories_pass_smoke(local_definitions, tmp_path_factory) 
         assert result.verdict == ValidationVerdict.PASS
         assert result.ai_executed is False
         assert result.artifact_dir is not None
-        report_files = list(Path(result.artifact_dir).rglob("report.json"))
+        report_files = list(Path(result.artifact_dir).rglob("assessment.json"))
         assert report_files, result.repository_id
         document = json.loads(report_files[0].read_text(encoding="utf-8"))
-        assert document["schema_version"] == "1.2"
+        assert str(document.get("schema") or "").startswith("codestrata-assessment-manifest")
         blob = json.dumps(summary_to_safe_dict(summary))
         assert "/Users/" not in blob
         assert "BEGIN PRIVATE KEY" not in blob
@@ -97,7 +97,8 @@ def test_controlled_fixture_determinism(repository_id: str, tmp_path: Path) -> N
         config_path=config_path,
     )
     assert normalized_for_determinism(first) == normalized_for_determinism(second)
-    assert first.schema_version == "1.2"
+    assert first.persisted_layout == "manifest_0_2_0"
+    assert first.schema_version is None
     assert first.ai_executed is False
 
 

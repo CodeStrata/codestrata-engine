@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from importlib.metadata import entry_points
 from pathlib import Path
 
 import pytest
@@ -68,8 +69,13 @@ def test_safe_output_directory_creates(tmp_path: Path, monkeypatch: pytest.Monke
 
 
 def test_enterprise_runtime_available_in_monorepo() -> None:
-    # Monorepo engine still contains Enterprise KG modules for Platform development.
-    assert enterprise_runtime_available() is True
+    # Platform registers `enterprise` on codestrata.cli_extensions. Engine-only CI
+    # installs engine[dev] without Platform; do not require the entry point here.
+    enterprise_installed = any(
+        ep.name == "enterprise"
+        for ep in entry_points().select(group="codestrata.cli_extensions")
+    )
+    assert enterprise_runtime_available() is enterprise_installed
 
 
 def test_mcp_factory_skips_enterprise_when_disabled() -> None:

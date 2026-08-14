@@ -2,11 +2,21 @@
 
 from __future__ import annotations
 
+import re
+
 from typer.testing import CliRunner
 
 from codestrata.cli import app
 
 runner = CliRunner()
+_ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
+
+
+def _visible_help(result) -> str:
+    """Normalize CLI help for flag assertions (strip ANSI; collapse whitespace)."""
+
+    raw = f"{result.stdout or ''}{result.stderr or ''}"
+    return re.sub(r"\s+", " ", _ANSI_RE.sub("", raw))
 
 
 def test_incremental_help() -> None:
@@ -20,15 +30,17 @@ def test_incremental_help() -> None:
 def test_incremental_plan_help() -> None:
     result = runner.invoke(app, ["incremental", "plan", "--help"])
     assert result.exit_code == 0
-    assert "--previous-run-id" in result.stdout
-    assert "--json" in result.stdout
+    help_text = _visible_help(result)
+    assert "--previous-run-id" in help_text
+    assert "--json" in help_text
 
 
 def test_incremental_assess_help() -> None:
     result = runner.invoke(app, ["incremental", "assess", "--help"])
     assert result.exit_code == 0
-    assert "--with-ai" in result.stdout
-    assert "--equivalence-check" in result.stdout
+    help_text = _visible_help(result)
+    assert "--with-ai" in help_text
+    assert "--equivalence-check" in help_text
 
 
 def test_incremental_explain_help() -> None:

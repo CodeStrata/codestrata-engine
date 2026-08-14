@@ -35,9 +35,11 @@ def check_default_timeout_is_60_seconds(_source_root: Path) -> CheckResult:
 
 
 def check_provider_constructor_signatures_use_default(_source_root: Path) -> CheckResult:
-    """Both provider __init__ signatures default timeout_seconds to the shared constant."""
+    """Constructors take optional timeout_seconds; unset values resolve to DEFAULT_TIMEOUT_SECONDS."""
 
     import inspect
+
+    from codestrata.ai.providers.settings_policies import provider_timeout_seconds
 
     bedrock_default = (
         inspect.signature(BedrockAIModelProvider.__init__).parameters["timeout_seconds"].default
@@ -45,12 +47,22 @@ def check_provider_constructor_signatures_use_default(_source_root: Path) -> Che
     openai_default = (
         inspect.signature(OpenAIAIModelProvider.__init__).parameters["timeout_seconds"].default
     )
-    ok = bedrock_default == DEFAULT_TIMEOUT_SECONDS and openai_default == DEFAULT_TIMEOUT_SECONDS
+    resolved_bedrock = provider_timeout_seconds(None, provider="bedrock")
+    resolved_openai = provider_timeout_seconds(None, provider="openai")
+    ok = (
+        bedrock_default is None
+        and openai_default is None
+        and resolved_bedrock == DEFAULT_TIMEOUT_SECONDS
+        and resolved_openai == DEFAULT_TIMEOUT_SECONDS
+    )
     return CheckResult(
         name="provider_constructors_default_timeout_matches_shared_constant",
         category="timeouts",
         ok=ok,
-        detail=f"bedrock_default={bedrock_default} openai_default={openai_default}",
+        detail=(
+            f"bedrock_default={bedrock_default} openai_default={openai_default} "
+            f"resolved_bedrock={resolved_bedrock} resolved_openai={resolved_openai}"
+        ),
     )
 
 

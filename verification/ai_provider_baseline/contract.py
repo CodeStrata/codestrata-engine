@@ -133,6 +133,7 @@ ALLOWED_AI_PROVIDERS_DIRECTORY_FILES: frozenset[str] = frozenset(
         "openrouter_provider.py",
         "parsing.py",
         "registry.py",
+        "settings_policies.py",
     }
 )
 
