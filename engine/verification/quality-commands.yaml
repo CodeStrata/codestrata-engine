@@ -1,0 +1,135 @@
+schema_version: 1
+package_revision: ENGINE-2026-09-15-R1
+working_directory: repository_root
+coverage_source: codestrata
+coverage_floor: 80
+branch_measurement: true
+notes: >
+  Product pyproject.toml, src/codestrata, and tests/ live at the repository
+  root on this checkout. Policy text that says "run from engine/" does not
+  match that layout. Product checks run from the repository root using the
+  root pyproject.toml. Harness checks run from engine/ using engine/pyproject.toml.
+  The root engine-tests GitHub job is not present in this clone (no
+  .github/workflows CI files). A green pytest run is not lint/type/coverage evidence.
+
+engine_tests_job:
+  present_in_clone: false
+  historical_behavior: >
+    Installs Engine development dependencies and invokes pytest. Does not invoke
+    ruff, mypy, or coverage collection.
+  local_equivalent_argv:
+    - python
+    - -m
+    - pytest
+    - tests
+    - --import-mode=importlib
+    - -q
+  collects_engine_tests_verification: false
+  root_ci_edits: forbidden
+
+security_scanner:
+  id: pip-audit
+  pin: pip-audit>=2.7,<3.0
+  pinned_in: engine/pyproject.toml optional extra "quality"
+  argv: ["python", "-m", "pip_audit", "--progress-spinner", "off"]
+  required_inputs: installed environment (offline-capable)
+  severity_policy: >
+    Any known vulnerability in the scanned environment is FAIL. Missing tool or
+    unavailable advisory feed is BLOCKED, never a clean PASS. This is build-tool
+    dependency auditing, not Engine customer vulnerability-feed selection (E01/E06).
+  existing_docs_reference: docs/security/architecture.md mentions pip-audit; it is
+    not installed by the root development extra.
+
+commands:
+  - id: pip_check
+    suite: product
+    cwd: repository_root
+    record_as_baseline: true
+    argv: ["python", "-m", "pip", "check"]
+    notes: G00 exit 0.
+
+  - id: ruff
+    suite: product
+    cwd: repository_root
+    record_as_baseline: true
+    argv: ["python", "-m", "ruff", "check", "."]
+    notes: G00 exit 1; 541 errors. Baseline FAIL, not a new passing test.
+
+  - id: mypy
+    suite: product
+    cwd: repository_root
+    record_as_baseline: true
+    argv: ["python", "-m", "mypy", "--config-file", "pyproject.toml"]
+    notes: G00 exit 1; 133 errors in 55 files. Baseline FAIL.
+
+  - id: pytest_product_coverage
+    suite: product
+    cwd: repository_root
+    record_as_baseline: true
+    argv:
+      - python
+      - -m
+      - pytest
+      - tests
+      - --import-mode=importlib
+      - --cov=codestrata
+      - --cov-branch
+      - --cov-report=term-missing
+      - --cov-fail-under=80
+      - -q
+    notes: >
+      G00 exit 2; collection errors (validation.*). Coverage floor not evaluated
+      because collection failed. Root engine-tests equivalent plus coverage;
+      coverage is extra relative to the historical job.
+
+  - id: pytest_engine_tests_job_equivalent
+    suite: product
+    cwd: repository_root
+    record_as_baseline: true
+    argv: ["python", "-m", "pytest", "tests", "--import-mode=importlib", "-q"]
+    notes: >
+      Same pytest invocation class as the inspected engine-tests job (no ruff,
+      mypy, or coverage). Does not collect engine/tests/verification because
+      root testpaths is ["tests"] and root CI/pyproject must not be edited here.
+
+  - id: ruff_harness
+    suite: harness
+    cwd: engine
+    record_as_baseline: false
+    argv: ["python", "-m", "ruff", "check", "verification", "tests"]
+
+  - id: mypy_harness
+    suite: harness
+    cwd: engine
+    record_as_baseline: false
+    argv: ["python", "-m", "mypy", "--config-file", "pyproject.toml"]
+
+  - id: pytest_harness_coverage
+    suite: harness
+    cwd: engine
+    record_as_baseline: false
+    argv:
+      - python
+      - -m
+      - pytest
+      - tests
+      - --import-mode=importlib
+      - --cov=verification
+      - --cov-branch
+      - --cov-report=term-missing
+      - --cov-fail-under=80
+      - -q
+    notes: Scope regression tests for this story. Coverage source is verification, not codestrata.
+
+  - id: pip_audit
+    suite: security
+    cwd: repository_root
+    optional: true
+    record_as_baseline: false
+    argv: ["python", "-m", "pip_audit", "--progress-spinner", "off"]
+    notes: Approved scanner pip-audit 2.10.1; pin remains engine extra quality. Missing module is BLOCKED.
+
+# How to run (from engine/, PYTHONPATH includes engine/):
+#   python -m verification quality --suite harness   # this story's code
+#   python -m verification quality --suite product   # G00 baseline; may BASELINE_FAIL
+#   python -m verification quality --suite security  # pip-audit

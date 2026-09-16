@@ -1,0 +1,52 @@
+# Engine-owned quality/harness configuration for ENGINE-2026-09-15-R1.
+# This is not the installable Engine product. The product package remains
+# the repository-root pyproject.toml (name = "codestrata").
+
+[project]
+name = "codestrata-engine-gates"
+version = "0.0.0"
+description = "Scope guard and quality-command harness for Engine-only story work."
+requires-python = ">=3.12"
+readme = "docs/release/quality-command-manifest.md"
+dependencies = []
+
+[project.optional-dependencies]
+quality = [
+    "pip-audit>=2.7,<3.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--strict-config",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = [".", "tests", "verification"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = []
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["verification", "tests"]
+mypy_path = ["."]
+explicit_package_bases = true
+pretty = true
+show_error_codes = true
+warn_unused_configs = true
+
+[tool.coverage.run]
+source = ["verification"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 80
