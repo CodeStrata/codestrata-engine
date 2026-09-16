@@ -152,7 +152,7 @@ touching root `.github/workflows/`, which is outside this backlog's
 ```bash
 python3.12 -m venv .venv-engine-next
 source .venv-engine-next/bin/activate
-pip install -e "./engine[dev,mcp]"
+pip install -e "./[dev,mcp]"
 ```
 
 Use a separate output/cache directory for candidate runs — do not point at
@@ -178,16 +178,16 @@ stays BLOCKED rather than being fixed here.
 
 ## 6. Confirm the team is ready
 
-- [ ] Package manifest verified — every document and prompt declares `ENGINE-2026-09-15-R1`, SHA-256 digests recorded, standalone/ZIP copies byte-identical, all 99 prerequisite links checked (Kickoff Steps Phase 2)
-- [ ] `core.hooksPath` set to `engine/docs/implementation/git-hooks`; confirmed a deliberately-bad test commit is actually rejected before doing real work
-- [ ] Actual checkout SHA recorded and compared to the planning baseline
-- [ ] `release/engine-next` created and pushed; publisher triggers checked before that push
-- [ ] Each engineer's `git config user.name`/`user.email` verified as their own identity, not Cursor's
-- [ ] Isolated venv and output directory in place, live installation untouched
-- [ ] Baseline lint/type/test/coverage results recorded (pass or fail — either is fine, silence is not)
-- [ ] Evidence ledger location confirmed: `engine/docs/implementation/gates/`
-- [ ] A, B, C assigned by name; reviewer-differs-from-author agreed for every story
-- [ ] Group counter at zero; G10 through G52 all `NOT_RUN`
+- [x] Package manifest verified — every document and prompt declares `ENGINE-2026-09-15-R1`, SHA-256 digests recorded, standalone/ZIP copies byte-identical, all 99 prerequisite links checked (Kickoff Steps Phase 2)
+- [x] `core.hooksPath` set to `engine/docs/implementation/git-hooks`; confirmed a deliberately-bad test commit is actually rejected before doing real work
+- [x] Actual checkout SHA recorded and compared to the planning baseline
+- [x] `release/engine-next` created and pushed; publisher triggers checked before that push
+- [x] Each engineer's `git config user.name`/`user.email` verified as their own identity, not Cursor's
+- [x] Isolated venv and output directory in place, live installation untouched
+- [x] Baseline lint/type/test/coverage results recorded (pass or fail — either is fine, silence is not)
+- [x] Evidence ledger location confirmed: `engine/docs/implementation/gates/`
+- [x] A, B, C assigned by name; reviewer-differs-from-author agreed for every story
+- [x] Group counter at zero; G10 through G52 all `NOT_RUN`
 
 Once all of this is true, **G00 PASS** — P01 can start. Nothing above claims
 any implementation or quality gate has passed; it only means it's now safe
