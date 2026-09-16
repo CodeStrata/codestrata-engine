@@ -1,0 +1,13 @@
+{
+  "recorded_at": "2026-09-16",
+  "checkout_sha": "76173eb0310831529e2021bd8191e502936f2e5c",
+  "branch": "engine/P01-E00.2-scope-guards",
+  "integration_branch": "release/engine-next",
+  "notes": "Snapshot of dirty/untracked paths at E00.2 start. Do not git-reset these. Paths under engine/ are in-scope; outside-engine entries would be ignored as pre-existing rather than treated as this story's edits.",
+  "entries": [
+    {
+      "status": "M",
+      "path": "engine/docs/implementation/gates/G00.md"
+    }
+  ]
+}

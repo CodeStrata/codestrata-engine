@@ -1,0 +1,34 @@
+# Independent expected results for the E00.2 scope guard.
+# status values: PASS, FAIL, ERROR, BUDGET
+cases:
+  - id: engine_only_modify
+    expect: PASS
+  - id: root_script_edit
+    expect: FAIL
+    path: scripts/publish.sh
+  - id: workflow_edit
+    expect: FAIL
+    path: .github/workflows/ci.yml
+  - id: lockfile_edit
+    expect: FAIL
+    path: uv.lock
+  - id: export_manifest_edit
+    expect: FAIL
+    path: public-export-manifest.yaml
+  - id: root_delete
+    expect: FAIL
+    path: README.md
+  - id: rename_out
+    expect: FAIL
+  - id: rename_into_engine_from_root
+    expect: FAIL
+  - id: untracked_root
+    expect: FAIL
+  - id: partial_engine_and_root
+    expect: FAIL
+  - id: preexisting_root_dirty_ignored
+    expect: PASS
+  - id: not_a_git_repo
+    expect: ERROR
+  - id: budget_exceeded
+    expect: BUDGET
