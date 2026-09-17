@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# commit-msg — blocks a commit whose message contains an AI co-author
+# trailer (e.g. "Co-authored-by: Cursor <...>"). Some AI coding tools add
+# this automatically; this hook refuses the commit rather than relying on
+# the engineer to notice and strip it by hand.
+#
+# Install alongside pre-commit — see that file's header for the two ways to
+# activate both hooks.
+
+set -euo pipefail
+
+msg_file="$1"
+
+bad_pattern='Co-authored-by:.*(cursor|copilot|chatgpt|gpt-|openai|anthropic\.com|codex)'
+
+if grep -Eqi "$bad_pattern" "$msg_file"; then
+  echo "BLOCKED: commit message contains an AI co-author trailer." >&2
+  echo "Remove it and commit your own message (git commit --amend if already written)." >&2
+  echo "See G00-preflight-and-branch-setup.md section 3." >&2
+  echo "" >&2
+  echo "If this is a false positive, bypass with: git commit --no-verify" >&2
+  exit 1
+fi
+
+exit 0
