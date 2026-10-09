@@ -56,9 +56,7 @@ _FORBIDDEN_KEYS = (
 def test_installation_id_is_only_identifier_in_envelope() -> None:
     payload = _sample().to_stable_dict()
     identifier_keys = {
-        key
-        for key in payload
-        if key.endswith("_id") or key in {"username", "email", "hostname"}
+        key for key in payload if key.endswith("_id") or key in {"username", "email", "hostname"}
     }
     assert identifier_keys == {"installation_id"}
 

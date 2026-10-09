@@ -18,6 +18,7 @@ from codestrata.application.release.checks import (
     check_required_resources,
     check_schema_availability,
     check_smoke_summary,
+    check_verification_profiles,
 )
 from codestrata.application.release.models import ReleaseCheckItem, ReleaseCheckResult
 
@@ -45,6 +46,7 @@ def run_release_check(
         check_prompt_availability(),
         check_default_configuration(),
         check_deterministic_provider_health(),
+        check_verification_profiles(),
         check_mcp_optional(),
     ]
     if require_build_artifacts:

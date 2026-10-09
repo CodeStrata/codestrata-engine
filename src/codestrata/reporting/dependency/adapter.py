@@ -62,9 +62,7 @@ _STATUS_LABELS = {
 }
 
 _STATUS_SUMMARIES = {
-    DependencyAssessmentStatus.DISABLED: (
-        "Dependency analysis was disabled for this assessment."
-    ),
+    DependencyAssessmentStatus.DISABLED: ("Dependency analysis was disabled for this assessment."),
     DependencyAssessmentStatus.NOT_APPLICABLE: (
         "No supported dependency evidence was available for this repository."
     ),
@@ -79,12 +77,8 @@ _STATUS_SUMMARIES = {
         "Dependency assessment produced useful results with one or more partial "
         "failures or limitations."
     ),
-    DependencyAssessmentStatus.FAILED: (
-        "Dependency assessment could not be assembled safely."
-    ),
-    DependencyAssessmentStatus.NOT_REQUESTED: (
-        "Dependency assessment was not requested."
-    ),
+    DependencyAssessmentStatus.FAILED: ("Dependency assessment could not be assembled safely."),
+    DependencyAssessmentStatus.NOT_REQUESTED: ("Dependency assessment was not requested."),
 }
 
 _TRACE_RELATIONS = {
@@ -98,8 +92,7 @@ _TRACE_RELATIONS = {
 }
 
 _NONE_DETECTED = (
-    "No production dependency hygiene findings were detected by the enabled "
-    "repository-local rules."
+    "No production dependency hygiene findings were detected by the enabled repository-local rules."
 )
 
 
@@ -145,9 +138,7 @@ class DependencyReportAdapter:
             else DependencyReportTestObservations()
         )
         landscape = _landscape(section) if include_landscape else ()
-        hotspots = (
-            _hotspots(section, limit=hotspot_limit) if include_hotspots else ()
-        )
+        hotspots = _hotspots(section, limit=hotspot_limit) if include_hotspots else ()
         conclusion_groups = (
             _audience_groups(
                 conclusions=section.conclusions,
@@ -195,14 +186,10 @@ class DependencyReportAdapter:
         traceability = (
             _traceability(section)
             if include_traceability
-            else DependencyReportTraceabilityView(
-                summary="Traceability not included."
-            )
+            else DependencyReportTraceabilityView(summary="Traceability not included.")
         )
         executive = (
-            _executive_summary(section)
-            if include_executive_summary
-            else section.status.value
+            _executive_summary(section) if include_executive_summary else section.status.value
         )
         return DependencyReportSection(
             section_id=DEPENDENCY_REPORT_SECTION_ID,
@@ -212,8 +199,7 @@ class DependencyReportAdapter:
             status_label=_STATUS_LABELS.get(section.status, section.status.value),
             status_summary=_STATUS_SUMMARIES.get(section.status, section.status.value),
             assessment_scope=(
-                "Repository-level declared-dependency assessment for "
-                f"{section.repository_id}"
+                f"Repository-level declared-dependency assessment for {section.repository_id}"
             ),
             repository_name=section.repository_id,
             dependency_pack_id=section.dependency_pack_id,
@@ -269,10 +255,7 @@ def _executive_summary(section: DependencyAssessmentSection) -> str:
             "non-dependency report content remains available."
         )
     if section.status is DependencyAssessmentStatus.NOT_APPLICABLE:
-        return (
-            "No supported dependency evidence was available for this repository "
-            "assessment."
-        )
+        return "No supported dependency evidence was available for this repository assessment."
 
     production = section.execution_summary.production_finding_count
     test = section.execution_summary.test_finding_count
@@ -444,15 +427,12 @@ def _production_health(
         _recommendation_view(item)
         for item in section.recommendations
         if item.audience is DependencyConclusionAudience.PRODUCTION_HEALTH
-        and item.kind
-        is not DependencyRecommendationKind.ACKNOWLEDGE_NO_PRODUCTION_FINDINGS
+        and item.kind is not DependencyRecommendationKind.ACKNOWLEDGE_NO_PRODUCTION_FINDINGS
     )
     # When zero findings, omit remediation cards (only keep none-detected statement).
     if not refs:
         prod_recs = ()
-    manifests = tuple(
-        sorted({item.path for item in refs if item.path})
-    )
+    manifests = tuple(sorted({item.path for item in refs if item.path}))
     return DependencyReportProductionHealth(
         finding_count=len(refs),
         findings_displayed=len(displayed),
@@ -535,9 +515,7 @@ def _hotspots(
     # Prefer hotspots with findings/diagnostics first within the already-ordered list
     # without inventing a priority score — assessment already ordered within role.
     sliced = ordered[: max(0, limit)]
-    return tuple(
-        _hotspot_view(item, order=index) for index, item in enumerate(sliced, start=1)
-    )
+    return tuple(_hotspot_view(item, order=index) for index, item in enumerate(sliced, start=1))
 
 
 def _conclusion_view(item: DependencyConclusion) -> DependencyReportConclusionView:
@@ -653,9 +631,7 @@ def _coverage(
         manifests_partially_parsed=evidence.manifests_partially_parsed,
         manifests_failed=evidence.manifests_failed,
         production_parse_failures=section.execution_summary.production_parse_failures,
-        test_fixture_parse_failures=(
-            section.execution_summary.test_fixture_parse_failures
-        ),
+        test_fixture_parse_failures=(section.execution_summary.test_fixture_parse_failures),
         unsupported_construct_count=evidence.unsupported_construct_count,
         proven_unresolved_count=evidence.proven_unresolved_count,
         unsupported_resolution_count=evidence.unsupported_resolution_count,
@@ -676,11 +652,7 @@ def _limitation_view(item: DependencyLimitation) -> DependencyReportLimitationVi
 def _traceability(
     section: DependencyAssessmentSection,
 ) -> DependencyReportTraceabilityView:
-    edges = [
-        edge
-        for edge in section.traceability.edges
-        if edge.relation.value in _TRACE_RELATIONS
-    ]
+    edges = [edge for edge in section.traceability.edges if edge.relation.value in _TRACE_RELATIONS]
     # Prefer recommendation→conclusion and conclusion→theme first.
     priority = {
         "recommendation_to_conclusion": 0,

@@ -93,9 +93,7 @@ def project_runtime_event(
         if key not in APPROVED_FIELD_NAMES:
             raise TelemetryRuntimeError(TelemetryRuntimeErrorCode.UNKNOWN_FIELD)
 
-    return PrivacySafeTelemetryEvent(
-        fields={key: projected[key] for key in sorted(projected)}
-    )
+    return PrivacySafeTelemetryEvent(fields={key: projected[key] for key in sorted(projected)})
 
 
 def project_from_mapping(
@@ -124,9 +122,7 @@ def project_from_mapping(
     encoded = json.dumps(projected, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
     if len(encoded.encode("utf-8")) > active.max_event_size_bytes:
         raise TelemetryRuntimeError(TelemetryRuntimeErrorCode.EVENT_TOO_LARGE)
-    return PrivacySafeTelemetryEvent(
-        fields={key: projected[key] for key in sorted(projected)}
-    )
+    return PrivacySafeTelemetryEvent(fields={key: projected[key] for key in sorted(projected)})
 
 
 def _normalize_value(

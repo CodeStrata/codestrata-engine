@@ -25,6 +25,7 @@ from codestrata.services.analyzers.dependency_health_analyzer import (
 from codestrata.services.analyzers.dependency_metadata_analyzer import (
     DependencyMetadataAnalyzer,
 )
+from codestrata.services.analyzers.inventory_analyzer import InventoryAnalyzer
 from codestrata.services.analyzers.repository_metrics_analyzer import (
     RepositoryMetricsAnalyzer,
 )
@@ -40,6 +41,7 @@ __all__ = [
     "DependencyDiscoveryAnalyzer",
     "DependencyHealthAnalyzer",
     "DependencyMetadataAnalyzer",
+    "InventoryAnalyzer",
     "RepositoryMetricsAnalyzer",
     "SecurityAnalyzer",
 ]

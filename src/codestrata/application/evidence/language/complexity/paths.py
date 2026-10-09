@@ -17,6 +17,9 @@ _SUPPORTED_SUFFIXES: dict[str, frozenset[str]] = {
     "java": frozenset({".java"}),
     "php": frozenset({".php"}),
     "csharp": frozenset({".cs"}),
+    "javascript": frozenset(
+        {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".vue", ".svelte"}
+    ),
 }
 
 
@@ -55,7 +58,8 @@ def is_complexity_source_path(
             return False
     suffix = PurePosixPath(lower).suffix
     if language is None:
-        return suffix in {".py", ".java", ".php", ".cs"}
+        known = {item for suffixes in _SUPPORTED_SUFFIXES.values() for item in suffixes}
+        return suffix in known
     allowed = _SUPPORTED_SUFFIXES.get(language.strip().lower(), frozenset())
     return suffix in allowed
 

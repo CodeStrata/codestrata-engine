@@ -23,9 +23,9 @@ from codestrata.domain.rules.context import (
 )
 from codestrata.domain.rules.contracts import SharedRule
 from codestrata.domain.rules.enums import (
+    MatchEvidenceConfidence,
     RuleApplicabilityStatus,
     RuleCategory,
-    MatchEvidenceConfidence,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleResultStatus,
@@ -37,6 +37,11 @@ from codestrata.domain.rules.evidence import RuleEvidence, dedupe_evidence, fing
 from codestrata.domain.rules.identifiers import RuleId, validate_rule_id
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
 from codestrata.domain.rules.models import Rule, RuleContext, RuleResult
+from codestrata.domain.rules.results import (
+    RuleDiagnostic,
+    RuleMatch,
+    SharedRuleEvaluationResult,
+)
 from codestrata.domain.rules.rule_confidence import (
     RuleConfidence,
     RuleConfidenceBasis,
@@ -45,11 +50,6 @@ from codestrata.domain.rules.rule_confidence import (
     RuleValidationSupport,
     compute_precision_recall,
     rule_confidence_to_json,
-)
-from codestrata.domain.rules.results import (
-    RuleDiagnostic,
-    RuleMatch,
-    SharedRuleEvaluationResult,
 )
 
 __all__ = [

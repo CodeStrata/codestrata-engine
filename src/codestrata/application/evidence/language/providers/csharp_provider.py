@@ -6,6 +6,7 @@ import time
 from typing import Any
 
 from codestrata.application.evidence.language.adapters import bundle_from_raw_facts
+from codestrata.application.evidence.language.providers.depth import CSHARP_LANGUAGE_PIN
 from codestrata.application.rules.architecture.view_builder import collect_raw_package_facts
 from codestrata.domain.evidence.language.capabilities import CapabilityMaturity
 from codestrata.domain.evidence.language.capability_catalog import (
@@ -35,6 +36,7 @@ from codestrata.domain.evidence.language.identifiers import LanguageEvidenceProv
 class CsharpLanguageEvidenceProvider:
     PROVIDER_ID = "language.csharp.core"
     PROVIDER_VERSION = "1.0.0"
+    SUPPORTED_DEPTH = CSHARP_LANGUAGE_PIN
 
     def __init__(self) -> None:
         self._metadata = LanguageEvidenceProviderMetadata(

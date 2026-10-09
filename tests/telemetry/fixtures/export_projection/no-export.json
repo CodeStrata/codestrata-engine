@@ -1,0 +1,7 @@
+{
+  "mode": "no-export",
+  "withheld_categories": [],
+  "expected_allowed": [],
+  "expected_withheld": ["evidence", "graph"],
+  "transfers": false
+}

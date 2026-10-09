@@ -98,18 +98,18 @@ Key surfaces:
 - [telemetry-assessment-analytics.md](telemetry-assessment-analytics.md)
 - [telemetry-repository-aggregate-analytics.md](telemetry-repository-aggregate-analytics.md)
 - [telemetry-ai-analytics.md](telemetry-ai-analytics.md)
-- Epic 9 completion: [`../../verification/privacy_first_telemetry_completion/README.md`](../../verification/privacy_first_telemetry_completion/README.md)
-- Epic 10 completion: [`../../verification/anonymous_analytics_completion/README.md`](../../verification/anonymous_analytics_completion/README.md)
+- Epic 9 completion: `verification/privacy_first_telemetry_completion/README.md` (not included in this export)
+- Epic 10 completion: `verification/anonymous_analytics_completion/README.md` (not included in this export)
 - [../PRIVACY.md](../PRIVACY.md)
 
 ## VS Code analytics (Slice 10.7)
 
-VS Code owns an independently versioned analytics schema (`community-vscode-anonymous-analytics-schema:1.0`). See [`../../vscode-plugin/docs/analytics.md`](../../vscode-plugin/docs/analytics.md). Schemas are not identical; VS Code events are identity-free in Slice 10.7.
+VS Code owns an independently versioned analytics schema (`community-vscode-anonymous-analytics-schema:1.0`). See `vscode-plugin/docs/analytics.md` (not included in this export). Schemas are not identical; VS Code events are identity-free in Slice 10.7.
 
 ## Privacy verification (Slice 10.8)
 
-Epic 10 privacy verification lives in [`../../verification/anonymous_analytics_privacy/`](../../verification/anonymous_analytics_privacy/). It does not enable production analytics collection or transmission.
+Epic 10 privacy verification lives in `verification/anonymous_analytics_privacy/` (not included in this export). It does not enable production analytics collection or transmission.
 
 ## Completion verification (Slice 10.9)
 
-Epic 10 completion verification lives in [`../../verification/anonymous_analytics_completion/`](../../verification/anonymous_analytics_completion/). Analytics remain contracts-only and not operational in production.
+Epic 10 completion verification lives in `verification/anonymous_analytics_completion/` (not included in this export). Analytics remain contracts-only and not operational in production.

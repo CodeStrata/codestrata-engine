@@ -34,7 +34,10 @@ def main(argv: list[str] | None = None) -> int:
         "--repository",
         type=str,
         default=None,
-        help="Optional catalog repository id (reserved; selection remains policy-driven when qualified)",
+        help=(
+            "Optional catalog repository id (reserved; selection remains "
+            "policy-driven when qualified)"
+        ),
     )
     parser.add_argument(
         "--keep-output",
@@ -58,18 +61,15 @@ def main(argv: list[str] | None = None) -> int:
         with_catalog_network=args.with_catalog_network,
         keep_output=args.keep_output,
     )
-    print(
-        f"SV.4 repository assessment verification: {'PASS' if report.ok else 'FAIL'}"
-    )
+    print(f"SV.4 repository assessment verification: {'PASS' if report.ok else 'FAIL'}")
     print(f"verdict: {report.verdict}")
     if report.failures:
         print(f"failures: {', '.join(report.failures)}")
     if report.limitations:
         print(f"limitations: {'; '.join(report.limitations[:5])}")
     out = (
-        (args.output_dir or Path("reports/verification"))
-        / "repository-assessment-verification.json"
-    )
+        args.output_dir or Path("reports/verification")
+    ) / "repository-assessment-verification.json"
     print(f"report: {out}")
     return 0 if report.ok else 1
 

@@ -103,8 +103,7 @@ def test_synthesis_production_themes_and_traceability() -> None:
     )
     assert section.synthesis.status is TechnicalDebtSynthesisStatus.SUCCEEDED
     assert any(
-        item.kind is TechnicalDebtConclusionKind.COMPLEXITY_PRESENT
-        for item in section.conclusions
+        item.kind is TechnicalDebtConclusionKind.COMPLEXITY_PRESENT for item in section.conclusions
     )
     assert any(
         item.kind is TechnicalDebtConclusionKind.THEME_COMPLEXITY
@@ -128,12 +127,10 @@ def test_synthesis_production_themes_and_traceability() -> None:
     assert section.recommendations
     assert all(rec.conclusion_ids for rec in section.recommendations)
     assert any(
-        edge.relation.value == "recommendation_to_conclusion"
-        for edge in section.traceability.edges
+        edge.relation.value == "recommendation_to_conclusion" for edge in section.traceability.edges
     )
     assert any(
-        edge.relation.value == "conclusion_to_finding"
-        for edge in section.traceability.edges
+        edge.relation.value == "conclusion_to_finding" for edge in section.traceability.edges
     )
 
 
@@ -183,9 +180,7 @@ def test_concentration_boundary() -> None:
         finding_summaries=refs,
         hotspot_inventory=hotspots,
     )
-    package_facts = [
-        fact for fact in result.concentration_facts if fact.kind == "package_share"
-    ]
+    package_facts = [fact for fact in result.concentration_facts if fact.kind == "package_share"]
     assert package_facts
     assert package_facts[0].share >= PACKAGE_CONCENTRATION_MIN_SHARE
     assert package_facts[0].exceeds_threshold is True

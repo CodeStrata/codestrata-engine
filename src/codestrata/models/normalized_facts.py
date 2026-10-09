@@ -280,7 +280,9 @@ class ArchitectureFacts(BaseModel):
     """Application architecture signals."""
 
     has_api_layer: bool | None = None
+    has_presentation_layer: bool | None = None
     has_service_layer: bool | None = None
+    has_state_layer: bool | None = None
     has_persistence_layer: bool | None = None
     has_domain_layer: bool | None = None
     is_multi_application: bool | None = None
@@ -294,9 +296,17 @@ class ArchitectureFacts(BaseModel):
                     self.has_api_layer,
                     other.has_api_layer,
                 ),
+                "has_presentation_layer": merge_optional_bool(
+                    self.has_presentation_layer,
+                    other.has_presentation_layer,
+                ),
                 "has_service_layer": merge_optional_bool(
                     self.has_service_layer,
                     other.has_service_layer,
+                ),
+                "has_state_layer": merge_optional_bool(
+                    self.has_state_layer,
+                    other.has_state_layer,
                 ),
                 "has_persistence_layer": merge_optional_bool(
                     self.has_persistence_layer,

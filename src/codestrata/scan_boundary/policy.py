@@ -17,11 +17,19 @@ DEFAULT_EXCLUDED_DIRECTORY_NAMES: frozenset[str] = frozenset(
         ".git",
         ".codestrata",
         ".codestrata-artifacts",
-    ".codestrata-examples",
+        ".codestrata-examples",
         ".codestrata-test-knowledge",
         ".export-staging",
         "export-staging",
         ".idea",
+        ".angular",
+        ".next",
+        ".nuxt",
+        ".svelte-kit",
+        ".turbo",
+        ".cache",
+        ".output",
+        ".parcel-cache",
         ".mypy_cache",
         ".pytest_cache",
         ".ruff_cache",
@@ -34,6 +42,9 @@ DEFAULT_EXCLUDED_DIRECTORY_NAMES: frozenset[str] = frozenset(
         "vendor",
         "dist",
         "build",
+        "out",
+        "bin",
+        "obj",
         "target",
         "coverage",
         "reports",
@@ -88,9 +99,7 @@ class ScanSourceRole(StrEnum):
 
 # Heuristic directory / path tokens → role (checked after overrides).
 _TEST_PARTS = frozenset({"test", "tests", "__tests__", "spec", "specs"})
-_FIXTURE_PARTS = frozenset(
-    {"fixture", "fixtures", "testdata", "test-data", "test_data", "golden"}
-)
+_FIXTURE_PARTS = frozenset({"fixture", "fixtures", "testdata", "test-data", "test_data", "golden"})
 _EXAMPLE_PARTS = frozenset({"example", "examples", "sample", "samples", "demo", "demos"})
 _DOC_PARTS = frozenset({"docs", "doc", "documentation"})
 _VENDOR_PARTS = frozenset({"vendor", "third_party", "third-party", "external"})

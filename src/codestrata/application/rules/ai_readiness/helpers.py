@@ -51,8 +51,8 @@ from codestrata.domain.evidence.repository_ai_readiness.models import (
 )
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -60,8 +60,8 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
-from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 
 _PROVENANCE = "aggregated_repository_ai_readiness_evidence"
 _MAX_PATH_EVIDENCE = 12

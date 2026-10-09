@@ -85,9 +85,7 @@ class ArtifactResolver:
 
         self.require_run(run_id)
         records = [
-            item
-            for item in self._store.runs.list_artifacts(run_id)
-            if item.artifact_kind is kind
+            item for item in self._store.runs.list_artifacts(run_id) if item.artifact_kind is kind
         ]
         if len(records) > 1:
             raise DuplicateArtifactError(

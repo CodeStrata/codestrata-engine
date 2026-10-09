@@ -1,0 +1,5 @@
+E03.3: Enforce execution budgets and common emission semantics
+
+YAML launch catalog execution uses the E03.1 compiler and E03.2 operators
+with E01.1 process-enforced budgets, FAIL/ERROR semantics, and generic
+JSON/HTML/SARIF projections.

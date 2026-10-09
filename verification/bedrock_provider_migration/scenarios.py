@@ -81,9 +81,7 @@ def scenario_c_a_bedrock_config_key_changed() -> ScenarioResult:
 def scenario_d_the_wrapper_lost_its_public_surface() -> ScenarioResult:
     from codestrata.ai.providers import bedrock as wrapper_module
 
-    missing = sorted(
-        name for name in WRAPPER_REQUIRED_EXPORTS if not hasattr(wrapper_module, name)
-    )
+    missing = sorted(name for name in WRAPPER_REQUIRED_EXPORTS if not hasattr(wrapper_module, name))
     return ScenarioResult(
         scenario_id="D",
         title="The compatibility wrapper dropped a public helper",
@@ -182,9 +180,7 @@ def scenario_h_the_credential_chain_was_reimplemented(package_dir: Path) -> Scen
 
 def scenario_i_the_adapter_reads_the_environment(package_dir: Path) -> ScenarioResult:
     offenders = sorted(
-        filename
-        for filename in EXPECTED_MODULES
-        if "os" in _module_imports(package_dir / filename)
+        filename for filename in EXPECTED_MODULES if "os" in _module_imports(package_dir / filename)
     )
     return ScenarioResult(
         scenario_id="I",
@@ -251,9 +247,7 @@ def scenario_m_an_openai_concept_leaked() -> ScenarioResult:
 
     client = fixtures.Client()
     build_bedrock_provider(client=client).execute(fixtures.provider_request())
-    offenders = sorted(
-        name for name in FORBIDDEN_REQUEST_KWARG_NAMES if name in client.calls[0]
-    )
+    offenders = sorted(name for name in FORBIDDEN_REQUEST_KWARG_NAMES if name in client.calls[0])
     return ScenarioResult(
         scenario_id="M",
         title="An OpenAI request concept leaked into the Converse call",
@@ -395,9 +389,9 @@ def scenario_u_a_request_id_reached_a_result() -> ScenarioResult:
     from verification.bedrock_provider_migration import fixtures
     from verification.bedrock_provider_migration.determinism import canonical_json
 
-    result = build_bedrock_provider(
-        client=fixtures.Client(fixtures.converse_response())
-    ).execute(fixtures.provider_request())
+    result = build_bedrock_provider(client=fixtures.Client(fixtures.converse_response())).execute(
+        fixtures.provider_request()
+    )
     rendered = canonical_json(diagnostics.diagnostic_view_of_provider_result(result))
     return ScenarioResult(
         scenario_id="U",
@@ -411,10 +405,9 @@ def scenario_u_a_request_id_reached_a_result() -> ScenarioResult:
 def scenario_v_a_profile_or_region_reached_a_diagnostic_view() -> ScenarioResult:
     from codestrata.ai.provider_adapters.bedrock import diagnostics
     from codestrata.ai.provider_adapters.bedrock.factory import build_bedrock_provider
+    from codestrata.config.settings import CodestrataSettings
     from verification.bedrock_provider_migration import fixtures, privacy
     from verification.bedrock_provider_migration.determinism import canonical_json
-
-    from codestrata.config.settings import CodestrataSettings
 
     settings = CodestrataSettings.model_validate(
         {
@@ -456,7 +449,8 @@ def scenario_w_the_adapter_can_sleep_or_open_a_socket(package_dir: Path) -> Scen
 
 
 def scenario_x_openrouter_work_started(engine_root: Path) -> ScenarioResult:
-    """Fail when OpenRouter appears outside allowed operational surfaces (incl. doctor readiness)."""
+    """Fail when OpenRouter appears outside allowed operational surfaces (incl. doctor
+    readiness)."""
 
     ai_root = engine_root / "src" / "codestrata" / "ai"
     allowed = {

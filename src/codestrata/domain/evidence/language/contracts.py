@@ -123,9 +123,9 @@ class LanguageEvidenceCollectionResult(BaseModel):
     duration_ms: int | None = Field(default=None, ge=0)
 
     @classmethod
-    def succeeded(cls, bundle: LanguageEvidenceBundle, *, duration_ms: int | None = None) -> (
-        LanguageEvidenceCollectionResult
-    ):
+    def succeeded(
+        cls, bundle: LanguageEvidenceBundle, *, duration_ms: int | None = None
+    ) -> LanguageEvidenceCollectionResult:
         return cls(
             status=ProviderExecutionStatus.SUCCEEDED,
             bundle=bundle,
@@ -148,9 +148,9 @@ class LanguageEvidenceCollectionResult(BaseModel):
         )
 
     @classmethod
-    def failed(cls, message: str, *, duration_ms: int | None = None) -> (
-        LanguageEvidenceCollectionResult
-    ):
+    def failed(
+        cls, message: str, *, duration_ms: int | None = None
+    ) -> LanguageEvidenceCollectionResult:
         return cls(
             status=ProviderExecutionStatus.FAILED,
             message=require_nonblank(message, label="failure message"),

@@ -1,0 +1,34 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: testing.test-003
+  version: 1.0.0
+  title: Declared test framework lacks structural observation
+  category: testing
+  owner: codestrata
+  measurement: M19
+  tags: [testing, framework, declared]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_testing.framework_facts]
+select:
+  source: repository_testing
+  framework_facts:
+    all:
+      - declared_without_observation: true
+condition:
+  operator: testing.test-003
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        A declared test framework has no matching structural observation in
+        inspected candidates. This does not claim the framework is unused.
+      bindings: {}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: testing_declared_without_observation_count
+    operation: count
+parameters: {}

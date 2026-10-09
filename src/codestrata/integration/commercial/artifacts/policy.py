@@ -79,9 +79,7 @@ class ArtifactPublishingPolicy:
             publish_report_json=bool(getattr(artifacts, "publish_report_json", False)),
             publish_report_html=bool(getattr(artifacts, "publish_report_html", False)),
             publish_findings=bool(getattr(artifacts, "publish_findings", False)),
-            publish_evidence_manifest=bool(
-                getattr(artifacts, "publish_evidence_manifest", False)
-            ),
+            publish_evidence_manifest=bool(getattr(artifacts, "publish_evidence_manifest", False)),
             publish_knowledge_export=bool(getattr(artifacts, "publish_knowledge_export", False)),
             process_intelligence=bool(getattr(artifacts, "process_intelligence", False)),
             max_artifact_bytes=int(getattr(artifacts, "max_artifact_bytes", 10_485_760)),

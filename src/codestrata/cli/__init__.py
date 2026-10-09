@@ -22,6 +22,7 @@ from codestrata.cli.assess import (
     register_assess_command,
     run_assessment,
 )
+from codestrata.cli.compare_cmd import register_compare_command
 from codestrata.cli.config_cmd import config_app
 from codestrata.cli.doctor import register_doctor_command
 from codestrata.cli.evidence import evidence_app
@@ -34,6 +35,7 @@ from codestrata.cli.report import register_open_command, report_app
 from codestrata.cli.roadmap import roadmap_app
 from codestrata.cli.rules import rules_app
 from codestrata.cli.telemetry_cmd import register_telemetry_command
+from codestrata.cli.trend import register_trend_command
 from codestrata.cli.ux import (
     DOCS_GETTING_STARTED,
     DOCS_HOME,
@@ -87,7 +89,8 @@ app = typer.Typer(
         "Common workflows:\n"
         "  codestrata init\n"
         "  codestrata doctor\n"
-        "  codestrata assess --repo .\n"
+        "  codestrata assess --repo . --no-ai\n"
+        "  codestrata compare --baseline previous.json --candidate current.json\n"
         "  codestrata open\n\n"
         "Optional AI advisor (your own supported provider):\n"
         "  codestrata ai\n"
@@ -309,6 +312,15 @@ def scan(
         result=result,
         output_path=report_paths.html_report,
     )
+    from codestrata.reporting.assessment_canonical import (
+        canonical_html_for_analysis,
+    )
+
+    canonical_html = canonical_html_for_analysis(result)
+    report_paths.html_report.with_name("canonical-report.html").write_text(
+        canonical_html,
+        encoding="utf-8",
+    )
 
     retain_recent_reports(report_paths.directory.parent)
 
@@ -410,6 +422,8 @@ def _register_maintainer_commands(root: typer.Typer) -> None:
 register_assess_command(app)
 register_init_command(app)
 register_doctor_command(app)
+register_compare_command(app)
+register_trend_command(app)
 register_open_command(app)
 register_welcome_command(app)
 register_telemetry_command(app)

@@ -81,9 +81,7 @@ def format_examples(*, json_output: bool = False) -> str:
         lines.append(f"  - {title}: {path}")
     lines.append("")
     lines.append("Try:")
-    lines.append(
-        "  codestrata assess --repo test-fixtures/sample-js-app --no-ai"
-    )
+    lines.append("  codestrata assess --repo test-fixtures/sample-js-app --no-ai")
     lines.append("")
     lines.append("Real-world showcases:")
     lines.append("  git clone https://github.com/CodeStrata/codestrata-examples.git")

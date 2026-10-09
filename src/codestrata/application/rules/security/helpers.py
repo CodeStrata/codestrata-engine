@@ -18,8 +18,8 @@ from codestrata.domain.evidence.repository_sensitive.models import (
 )
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -27,8 +27,8 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
-from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.security.ids import PACK_ID, PACK_VERSION, RULE_VERSION
 from codestrata.domain.security.taxonomy import SecurityCategory
 
@@ -65,8 +65,14 @@ _RECOMMENDATIONS: dict[str, str] = {
     "security.permissive-cors-origin": (
         "Replace wildcard CORS origins with an explicit allow-list."
     ),
-    "security.debug-enabled": (
-        "Disable debug mode for production-facing configuration."
+    "security.debug-enabled": ("Disable debug mode for production-facing configuration."),
+    "security.known_vulnerability": (
+        "Upgrade or replace the resolved package version that matches the "
+        "pinned OSV advisory. Zero matches in a snapshot is not a secure claim."
+    ),
+    "license.disallowed": (
+        "Replace the resolved package or change the configured license "
+        "allow/deny list. This finding is not a legal compliance verdict."
     ),
 }
 
@@ -101,6 +107,7 @@ def make_metadata(
     description: str,
     remediation: str,
     severity: RuleSeverity = RuleSeverity.HIGH,
+    languages: tuple[str, ...] | None = None,
 ) -> RuleMetadata:
     return RuleMetadata(
         rule_id=RuleId(rule_id),
@@ -110,12 +117,11 @@ def make_metadata(
         category=RuleCategory.SECURITY,
         default_severity=severity,
         confidence=confidence_for_rule(rule_id),
-        supported_languages=("java", "python", "javascript", "typescript", "php", "csharp"),
+        supported_languages=languages
+        or ("java", "python", "javascript", "typescript", "php", "csharp"),
         tags=("security", PACK_ID, "hygiene", "dimension:security"),
         remediation_summary=remediation,
-        documentation_reference=(
-            "docs/analysis-intelligence/shared-rule-platform.md"
-        ),
+        documentation_reference=("docs/analysis-intelligence/shared-rule-platform.md"),
         enabled_by_default=True,
         experimental=False,
         requires_enterprise_context=False,
@@ -129,8 +135,7 @@ def make_metadata(
 def recommendation_for(rule_id: str) -> str:
     return _RECOMMENDATIONS.get(
         rule_id,
-        "Review the repository-sensitive evidence fact and remediate the "
-        "hygiene condition.",
+        "Review the repository-sensitive evidence fact and remediate the hygiene condition.",
     )
 
 
@@ -145,6 +150,9 @@ def match(
     subject_keys: tuple[str, ...],
     remediation: str | None = None,
     rule_confidence: RuleConfidence | None = None,
+    base_severity: RuleSeverity | None = None,
+    calibrated_severity: RuleSeverity | None = None,
+    severity_basis: tuple[str, ...] = (),
 ) -> RuleMatch:
     return RuleMatch(
         rule_id=RuleId(rule_id),
@@ -159,6 +167,9 @@ def match(
         affected_entities=subject_keys,
         provenance=PACK_ID,
         subject_keys=subject_keys,
+        base_severity=base_severity or severity,
+        calibrated_severity=calibrated_severity or severity,
+        severity_basis=severity_basis or ("yaml_catalog_default",),
     )
 
 
@@ -169,6 +180,7 @@ def evidence_artifact(
     security_category: SecurityCategory,
     security_context: str | None = None,
     security_context_reasons: str | None = None,
+    extra_attributes: dict[str, str] | None = None,
 ) -> RuleEvidence:
     attributes: dict[str, str] = {
         "evidence_id": item.evidence_id,
@@ -185,11 +197,16 @@ def evidence_artifact(
         attributes["security_context"] = security_context
     if security_context_reasons:
         attributes["security_context_reasons"] = security_context_reasons
+    line_text = item.metadata.get("line_start")
+    line_start = int(line_text) if line_text and line_text.isdigit() else None
+    _merge_extra_attributes(attributes, extra_attributes)
     return RuleEvidence(
         kind=RuleEvidenceKind.FILE_LOCATION,
         subject_reference=item.evidence_id,
         message=message,
         safe_location=item.path,
+        line_start=line_start,
+        line_end=line_start,
         attributes=attributes,
         provenance="aggregated_repository_sensitive_evidence",
     )
@@ -202,6 +219,7 @@ def evidence_configuration(
     security_category: SecurityCategory,
     security_context: str | None = None,
     security_context_reasons: str | None = None,
+    extra_attributes: dict[str, str] | None = None,
 ) -> RuleEvidence:
     attributes: dict[str, str] = {
         "evidence_id": item.evidence_id,
@@ -225,6 +243,7 @@ def evidence_configuration(
         attributes["security_context"] = security_context
     if security_context_reasons:
         attributes["security_context_reasons"] = security_context_reasons
+    _merge_extra_attributes(attributes, extra_attributes)
     return RuleEvidence(
         kind=RuleEvidenceKind.CONFIGURATION_KEY,
         subject_reference=item.evidence_id,
@@ -238,12 +257,35 @@ def evidence_configuration(
     )
 
 
+def _merge_extra_attributes(attributes: dict[str, str], extra: dict[str, str] | None) -> None:
+    if not extra:
+        return
+    for key, value in extra.items():
+        if key in attributes or not value:
+            continue
+        if len(attributes) >= 32:
+            break
+        attributes[key] = value
+
+
+def production_context_status(decision: object, *, value_kind: ValueKind | None) -> str:
+    """Map supported context to evidence; never assume production."""
+
+    if value_kind in {ValueKind.ENVIRONMENT_REFERENCE, ValueKind.UNKNOWN}:
+        return "unknown"
+    context = getattr(decision, "context", None)
+    label = getattr(context, "value", None) or str(context or "unknown")
+    if label == "production":
+        return "production"
+    if label == "unknown":
+        return "unknown"
+    return "non_production"
+
+
 def has_private_key_material(item: SensitiveArtifactEvidence) -> bool:
     if item.inspection_status is not InspectionStatus.INSPECTED:
         return False
-    return (
-        ContentClassification.PRIVATE_KEY_MATERIAL in item.content_classifications
-    )
+    return ContentClassification.PRIVATE_KEY_MATERIAL in item.content_classifications
 
 
 def is_credential_sensitive_fact(item: ConfigurationFactEvidence) -> bool:

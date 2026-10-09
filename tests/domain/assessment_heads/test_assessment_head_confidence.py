@@ -188,9 +188,7 @@ def test_zero_finding_policy() -> None:
         activated=True,
     )
     assert complete.level is AssessmentHeadConfidenceLevel.MODERATE
-    assert (
-        AssessmentHeadConfidenceBasis.NO_FINDINGS_WITH_COMPLETE_COVERAGE in complete.basis
-    )
+    assert AssessmentHeadConfidenceBasis.NO_FINDINGS_WITH_COMPLETE_COVERAGE in complete.basis
     assert complete.level is not AssessmentHeadConfidenceLevel.HIGH
 
     partial = derive_assessment_head_confidence(

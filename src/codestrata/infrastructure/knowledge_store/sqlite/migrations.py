@@ -70,8 +70,7 @@ def migrate_to_v3(connection: sqlite3.Connection) -> None:
     """Rename product identity column aimf_version → codestrata_version."""
 
     columns = {
-        str(row[1])
-        for row in connection.execute("PRAGMA table_info(assessment_runs)").fetchall()
+        str(row[1]) for row in connection.execute("PRAGMA table_info(assessment_runs)").fetchall()
     }
     if "aimf_version" in columns and "codestrata_version" not in columns:
         connection.execute(
@@ -105,9 +104,7 @@ def apply_migrations(connection: sqlite3.Connection) -> int:
         next_version = version + 1
         migration = migrations.get(next_version)
         if migration is None:
-            raise KnowledgeStoreError(
-                f"No migration registered for schema version {next_version}"
-            )
+            raise KnowledgeStoreError(f"No migration registered for schema version {next_version}")
         migration(connection)
         version = next_version
         if read_schema_version(connection) != version:

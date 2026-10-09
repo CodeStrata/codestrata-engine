@@ -79,13 +79,7 @@ def test_cursor_plugin_src_unchanged_by_slice() -> None:
 
 
 def test_no_platform_import_in_ai_analytics() -> None:
-    root = (
-        Path(__file__).resolve().parents[2]
-        / "src"
-        / "codestrata"
-        / "telemetry"
-        / "analytics"
-    )
+    root = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry" / "analytics"
     for path in root.glob("ai_analytics*.py"):
         text = path.read_text(encoding="utf-8")
         assert "import " not in text or "codestrata_platform" not in text

@@ -60,10 +60,7 @@ def build_hotspot_id(*, path: str, source_role: str) -> str:
 def sorted_mapping(values: Mapping[str, str] | None) -> dict[str, str]:
     if not values:
         return {}
-    return {
-        str(key): str(item)
-        for key, item in sorted(values.items(), key=lambda pair: pair[0])
-    }
+    return {str(key): str(item) for key, item in sorted(values.items(), key=lambda pair: pair[0])}
 
 
 def sorted_ids(values: Sequence[str] | None) -> tuple[str, ...]:

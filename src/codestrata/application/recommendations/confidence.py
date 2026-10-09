@@ -8,7 +8,7 @@ never inputs.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 from codestrata.domain.findings.finding_confidence import FindingConfidenceLevel
 from codestrata.domain.recommendations.enums import RecommendationType
@@ -22,6 +22,11 @@ from codestrata.domain.recommendations.recommendation_confidence import (
     recommendation_confidence_level_rank,
 )
 from codestrata.domain.traceability import EvidenceCompleteness
+
+
+@runtime_checkable
+class _HasLevel(Protocol):
+    level: object
 
 
 _FINDING_LEVELS = {
@@ -64,9 +69,7 @@ def derive_recommendation_confidence(
     unresolved = tuple(
         sorted({str(item).strip() for item in unresolved_supporting_ids if str(item).strip()})
     )
-    heads = tuple(
-        sorted({str(item).strip() for item in assessment_head_ids if str(item).strip()})
-    )
+    heads = tuple(sorted({str(item).strip() for item in assessment_head_ids if str(item).strip()}))
     levels = _normalize_finding_levels(supporting_finding_levels)
     primary_level = _normalize_one_level(primary_finding_level)
     primary_id = str(primary_finding_id).strip() if primary_finding_id else None
@@ -91,12 +94,8 @@ def derive_recommendation_confidence(
         moderate_finding_count=counts[FindingConfidenceLevel.MODERATE],
         limited_finding_count=counts[FindingConfidenceLevel.LIMITED],
         unavailable_finding_count=counts[FindingConfidenceLevel.UNAVAILABLE],
-        weakest_supporting_finding_confidence=(
-            weakest.value if weakest is not None else None
-        ),
-        primary_finding_confidence=(
-            primary_level.value if primary_level is not None else None
-        ),
+        weakest_supporting_finding_confidence=(weakest.value if weakest is not None else None),
+        primary_finding_confidence=(primary_level.value if primary_level is not None else None),
         evidence_completeness=completeness.value if completeness is not None else None,
         traceability_complete=traceability_complete,
         recommendation_type=rec_type.value if rec_type is not None else None,
@@ -108,9 +107,7 @@ def derive_recommendation_confidence(
     if rec_type is RecommendationType.LEGACY:
         legacy_basis = [RecommendationConfidenceBasis.LEGACY_RECOMMENDATION]
         if not supporting_ids:
-            legacy_basis.append(
-                RecommendationConfidenceBasis.MISSING_SUPPORTING_FINDINGS
-            )
+            legacy_basis.append(RecommendationConfidenceBasis.MISSING_SUPPORTING_FINDINGS)
         return RecommendationConfidence.unavailable(
             basis=tuple(legacy_basis),
             limitations=tuple(
@@ -194,9 +191,7 @@ def derive_recommendation_confidence(
 
     bases: list[RecommendationConfidenceBasis] = []
     out_limits = list(sorted(limit_set))
-    caps: list[RecommendationConfidenceLevel] = [
-        _FINDING_TO_REC[item] for item in levels
-    ]
+    caps: list[RecommendationConfidenceLevel] = [_FINDING_TO_REC[item] for item in levels]
 
     if rec_type is RecommendationType.MERGED:
         bases.append(RecommendationConfidenceBasis.MERGED_RECOMMENDATION)
@@ -223,9 +218,7 @@ def derive_recommendation_confidence(
 
     if FindingConfidenceLevel.UNAVAILABLE in unique:
         bases.append(RecommendationConfidenceBasis.UNAVAILABLE_SUPPORTING_FINDING)
-        out_limits.append(
-            "One or more supporting findings have Unavailable Finding Confidence."
-        )
+        out_limits.append("One or more supporting findings have Unavailable Finding Confidence.")
 
     level = min_recommendation_confidence_level(tuple(caps))
     if (
@@ -241,10 +234,14 @@ def derive_recommendation_confidence(
         level = RecommendationConfidenceLevel.LIMITED
 
     status = RecommendationConfidenceDerivationStatus.DERIVED
-    if level in {
-        RecommendationConfidenceLevel.LIMITED,
-        RecommendationConfidenceLevel.UNAVAILABLE,
-    } or completeness is not EvidenceCompleteness.COMPLETE:
+    if (
+        level
+        in {
+            RecommendationConfidenceLevel.LIMITED,
+            RecommendationConfidenceLevel.UNAVAILABLE,
+        }
+        or completeness is not EvidenceCompleteness.COMPLETE
+    ):
         status = (
             RecommendationConfidenceDerivationStatus.UNAVAILABLE
             if level is RecommendationConfidenceLevel.UNAVAILABLE
@@ -266,10 +263,6 @@ def apply_recommendation_confidence(
     findings: Sequence[Any] = (),
 ) -> Any:
     """Attach derived Recommendation Confidence onto a Recommendation-like object."""
-
-    from codestrata.domain.recommendations.recommendation_confidence import (
-        RecommendationConfidence,
-    )
 
     findings_by_id = {
         str(getattr(item, "id", "") or getattr(item, "finding_id", "") or ""): item
@@ -361,8 +354,9 @@ def _finding_level_of(finding: Any) -> str:
     confidence = getattr(finding, "finding_confidence", None)
     if confidence is None and isinstance(finding, Mapping):
         confidence = finding.get("finding_confidence")
-    if hasattr(confidence, "level"):
-        return str(confidence.level.value if hasattr(confidence.level, "value") else confidence.level)
+    if isinstance(confidence, _HasLevel):
+        level = confidence.level
+        return str(level.value if hasattr(level, "value") else level)
     if isinstance(confidence, Mapping) and confidence.get("level"):
         return str(confidence["level"]).strip().lower()
     direct = getattr(finding, "finding_confidence_level", None)
@@ -372,11 +366,17 @@ def _finding_level_of(finding: Any) -> str:
 
 
 def _assessment_head_of(finding: Any) -> str | None:
-    category = str(
-        getattr(finding, "category", None)
-        or (finding.get("category") if isinstance(finding, Mapping) else "")
-        or ""
-    ).strip().lower().replace(" ", "_").replace("-", "_")
+    category = (
+        str(
+            getattr(finding, "category", None)
+            or (finding.get("category") if isinstance(finding, Mapping) else "")
+            or ""
+        )
+        .strip()
+        .lower()
+        .replace(" ", "_")
+        .replace("-", "_")
+    )
     mapping = {
         "security": "security_intelligence",
         "dependency": "dependency_intelligence",
@@ -393,11 +393,15 @@ def _assessment_head_of(finding: Any) -> str | None:
     }
     if category in mapping:
         return mapping[category]
-    rule_id = str(
-        getattr(finding, "rule_id", None)
-        or (finding.get("rule_id") if isinstance(finding, Mapping) else "")
-        or ""
-    ).strip().lower()
+    rule_id = (
+        str(
+            getattr(finding, "rule_id", None)
+            or (finding.get("rule_id") if isinstance(finding, Mapping) else "")
+            or ""
+        )
+        .strip()
+        .lower()
+    )
     for prefix, head in (
         ("technical_debt.", "technical_debt_intelligence"),
         ("architecture.", "architecture_intelligence"),

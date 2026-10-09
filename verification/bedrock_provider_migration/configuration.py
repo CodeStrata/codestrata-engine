@@ -16,9 +16,13 @@ from codestrata.ai.provider_adapters.bedrock.factory import build_bedrock_provid
 from codestrata.config.settings import CodestrataSettings
 from verification.bedrock_provider_migration.contract import (
     AWS_CONFIG_KEYS,
-    AWS_PROFILE_ENV_NAME as EXPECTED_PROFILE_ENV_NAME,
-    AWS_REGION_ENV_NAMES as EXPECTED_REGION_ENV_NAMES,
     EXPECTED_TIMEOUT_SECONDS,
+)
+from verification.bedrock_provider_migration.contract import (
+    AWS_PROFILE_ENV_NAME as EXPECTED_PROFILE_ENV_NAME,
+)
+from verification.bedrock_provider_migration.contract import (
+    AWS_REGION_ENV_NAMES as EXPECTED_REGION_ENV_NAMES,
 )
 from verification.bedrock_provider_migration.determinism import canonical_json
 from verification.bedrock_provider_migration.models import CheckResult
@@ -182,9 +186,7 @@ def check_the_redacted_view_carries_presence_only() -> CheckResult:
             repr(runtime.client_inputs),
         )
     )
-    leaked = sorted(
-        token for token in (_PROFILE_VALUE, _REGION_VALUE) if token in rendered
-    )
+    leaked = sorted(token for token in (_PROFILE_VALUE, _REGION_VALUE) if token in rendered)
     return CheckResult(
         name="the_configuration_view_and_reprs_carry_presence_booleans_not_profile_or_region",
         category="configuration",

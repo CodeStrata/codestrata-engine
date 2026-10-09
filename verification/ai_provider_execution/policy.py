@@ -25,10 +25,7 @@ def check_retryable_partition_covers_every_error_category_exactly_once() -> Chec
     retryable = set(DEFAULT_RETRYABLE_ERROR_CATEGORIES)
     non_retryable = set(DEFAULT_NON_RETRYABLE_ERROR_CATEGORIES)
     all_categories = {category.value for category in ErrorCategory}
-    ok = (
-        retryable | non_retryable == all_categories
-        and retryable.isdisjoint(non_retryable)
-    )
+    ok = retryable | non_retryable == all_categories and retryable.isdisjoint(non_retryable)
     return CheckResult(
         name="retryable_and_non_retryable_partition_covers_every_error_category_exactly_once",
         category="policy",

@@ -10,8 +10,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Iterable, Sequence
 from enum import StrEnum
-from typing import Any, Iterable, Mapping, Sequence
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -178,9 +179,7 @@ def build_false_positive_id(
     """Deterministic ``fp:{sha256[:24]}`` from structural identity inputs."""
 
     entity = (
-        entity_type.value
-        if isinstance(entity_type, FalsePositiveEntityType)
-        else str(entity_type)
+        entity_type.value if isinstance(entity_type, FalsePositiveEntityType) else str(entity_type)
     )
     material = "\n".join(
         [
@@ -426,13 +425,9 @@ def merge_false_positive_records(
                 "first_seen_run_id": first_seen,
                 "last_seen_run_id": last_seen,
                 "resolved_run_id": resolved or preferred.resolved_run_id,
-                "evidence_ids": tuple(
-                    sorted(set(existing.evidence_ids) | set(item.evidence_ids))
-                ),
+                "evidence_ids": tuple(sorted(set(existing.evidence_ids) | set(item.evidence_ids))),
                 "regression_test_refs": tuple(
-                    sorted(
-                        set(existing.regression_test_refs) | set(item.regression_test_refs)
-                    )
+                    sorted(set(existing.regression_test_refs) | set(item.regression_test_refs))
                 ),
                 "observation_run_ids": tuple(
                     sorted(

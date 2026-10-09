@@ -15,15 +15,27 @@ from codestrata.services.rule_engine import (
     write_findings_artifact,
 )
 from codestrata.services.rule_engine.rules.builtin import (
+    AngularDetectedRule,
     JavaDetectedRule,
     LargeRepositoryRule,
     MissingLicenseRule,
     MissingReadmeRule,
     MissingTestsRule,
+    NestJsDetectedRule,
+    NextJsDetectedRule,
     NodeEngineDetectedRule,
     NpmLockfileMissingRule,
+    OutdatedNestJsVersionRule,
+    OutdatedNextJsVersionRule,
+    OutdatedReactVersionRule,
+    OutdatedSvelteVersionRule,
+    ReactDetectedRule,
     SpringBootDetectedRule,
+    SvelteDetectedRule,
+    UnsupportedAngularVersionRule,
     UnsupportedSpringBootVersionRule,
+    UnsupportedVueVersionRule,
+    VueDetectedRule,
 )
 
 
@@ -208,3 +220,176 @@ def test_javascript_sample_fixture_produces_rule_findings() -> None:
     assert "codestrata-rule-missing-license" in rule_ids
     assert "codestrata-rule-npm-lockfile-missing" in rule_ids
     assert evaluation.finding_count >= 2
+
+
+def test_angular_detected_and_unsupported_rules(tmp_path: Path) -> None:
+    root = tmp_path / "angular-app"
+    root.mkdir(parents=True)
+    (root / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "sales-portal",
+                "dependencies": {
+                    "@angular/core": "^15.2.0",
+                    "@angular/common": "^15.2.0",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "angular.json").write_text("{}", encoding="utf-8")
+    (root / "README.md").write_text("# Sales Portal\n", encoding="utf-8")
+    files = ["package.json", "angular.json", "README.md"]
+    repo = Repository(
+        name="sales-portal", path=root.resolve(), files=files, total_files=len(files)
+    )
+    context = rule_context_from_pipeline(GraphAssessmentPipeline().run(repo))
+    detected = AngularDetectedRule().evaluate(context)
+    unsupported = UnsupportedAngularVersionRule().evaluate(context)
+    assert len(detected.findings) == 1
+    assert "15.2.0" in detected.findings[0].title
+    assert len(unsupported.findings) == 1
+    assert "Unsupported Angular" in unsupported.findings[0].title
+
+
+def test_react_detected_and_outdated_rules(tmp_path: Path) -> None:
+    root = tmp_path / "react-app"
+    root.mkdir(parents=True)
+    (root / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "react-dashboard",
+                "dependencies": {
+                    "react": "^17.0.2",
+                    "react-dom": "^17.0.2",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "README.md").write_text("# React Dashboard\n", encoding="utf-8")
+    files = ["package.json", "README.md"]
+    repo = Repository(
+        name="react-dashboard", path=root.resolve(), files=files, total_files=len(files)
+    )
+    context = rule_context_from_pipeline(GraphAssessmentPipeline().run(repo))
+    detected = ReactDetectedRule().evaluate(context)
+    outdated = OutdatedReactVersionRule().evaluate(context)
+    assert len(detected.findings) == 1
+    assert "17.0.2" in detected.findings[0].title
+    assert len(outdated.findings) == 1
+    assert "Outdated React" in outdated.findings[0].title
+
+
+def test_vue_detected_and_unsupported_rules(tmp_path: Path) -> None:
+    root = tmp_path / "vue-app"
+    root.mkdir(parents=True)
+    (root / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "vue-legacy",
+                "dependencies": {
+                    "vue": "^2.7.14",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "README.md").write_text("# Vue Legacy\n", encoding="utf-8")
+    files = ["package.json", "README.md"]
+    repo = Repository(
+        name="vue-legacy", path=root.resolve(), files=files, total_files=len(files)
+    )
+    context = rule_context_from_pipeline(GraphAssessmentPipeline().run(repo))
+    detected = VueDetectedRule().evaluate(context)
+    unsupported = UnsupportedVueVersionRule().evaluate(context)
+    assert len(detected.findings) == 1
+    assert "2.7.14" in detected.findings[0].title
+    assert len(unsupported.findings) == 1
+    assert "Unsupported Vue 2" in unsupported.findings[0].title
+
+
+def test_nextjs_detected_and_outdated_rules(tmp_path: Path) -> None:
+    root = tmp_path / "next-app"
+    root.mkdir(parents=True)
+    (root / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "next-pages-app",
+                "dependencies": {
+                    "next": "^12.3.4",
+                    "react": "^18.2.0",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "README.md").write_text("# Next Pages App\n", encoding="utf-8")
+    files = ["package.json", "README.md"]
+    repo = Repository(
+        name="next-pages-app", path=root.resolve(), files=files, total_files=len(files)
+    )
+    context = rule_context_from_pipeline(GraphAssessmentPipeline().run(repo))
+    detected = NextJsDetectedRule().evaluate(context)
+    outdated = OutdatedNextJsVersionRule().evaluate(context)
+    assert len(detected.findings) == 1
+    assert "12.3.4" in detected.findings[0].title
+    assert len(outdated.findings) == 1
+    assert "Outdated Next.js" in outdated.findings[0].title
+
+
+def test_nestjs_detected_and_outdated_rules(tmp_path: Path) -> None:
+    root = tmp_path / "nest-app"
+    root.mkdir(parents=True)
+    (root / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "nest-api",
+                "dependencies": {
+                    "@nestjs/core": "^8.4.7",
+                    "@nestjs/common": "^8.4.7",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "README.md").write_text("# Nest API\n", encoding="utf-8")
+    files = ["package.json", "README.md"]
+    repo = Repository(
+        name="nest-api", path=root.resolve(), files=files, total_files=len(files)
+    )
+    context = rule_context_from_pipeline(GraphAssessmentPipeline().run(repo))
+    detected = NestJsDetectedRule().evaluate(context)
+    outdated = OutdatedNestJsVersionRule().evaluate(context)
+    assert len(detected.findings) == 1
+    assert "8.4.7" in detected.findings[0].title
+    assert len(outdated.findings) == 1
+    assert "Outdated NestJS" in outdated.findings[0].title
+
+
+def test_svelte_detected_and_outdated_rules(tmp_path: Path) -> None:
+    root = tmp_path / "svelte-app"
+    root.mkdir(parents=True)
+    (root / "package.json").write_text(
+        json.dumps(
+            {
+                "name": "svelte-app",
+                "dependencies": {
+                    "svelte": "^3.59.2",
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    (root / "README.md").write_text("# Svelte App\n", encoding="utf-8")
+    files = ["package.json", "README.md"]
+    repo = Repository(
+        name="svelte-app", path=root.resolve(), files=files, total_files=len(files)
+    )
+    context = rule_context_from_pipeline(GraphAssessmentPipeline().run(repo))
+    detected = SvelteDetectedRule().evaluate(context)
+    outdated = OutdatedSvelteVersionRule().evaluate(context)
+    assert len(detected.findings) == 1
+    assert "3.59.2" in detected.findings[0].title
+    assert len(outdated.findings) == 1
+    assert "Outdated Svelte" in outdated.findings[0].title

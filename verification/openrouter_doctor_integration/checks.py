@@ -15,14 +15,6 @@ from codestrata.ai.provider_adapters.openrouter.factory import (
 )
 from codestrata.ai.provider_contracts.identifiers import ProviderId
 from codestrata.ai.provider_contracts.retry_policy import DEFAULT_RETRY_POLICY
-
-# Import factory before assess_ai to keep load order stable.
-from codestrata.ai.providers.factory import (  # noqa: I001
-    create_assess_ai_provider,
-    resolve_assess_model_id,
-    supported_assess_ai_providers,
-)
-from codestrata.ai.providers.bedrock import BedrockAIModelProvider
 from codestrata.ai.providers.doctor import (
     ConfigStatus,
     OpenRouterBaseUrlStatus,
@@ -31,13 +23,19 @@ from codestrata.ai.providers.doctor import (
     evaluate_openrouter_readiness,
 )
 from codestrata.ai.providers.exceptions import AIProviderConfigurationError
-from codestrata.ai.providers.openai_provider import OpenAIAIModelProvider
+
+# Import factory before assess_ai to keep load order stable.
+from codestrata.ai.providers.factory import (  # noqa: I001
+    create_assess_ai_provider,
+    resolve_assess_model_id,
+    supported_assess_ai_providers,
+)
 from codestrata.ai.providers.openrouter_provider import OpenRouterAIModelProvider
 from codestrata.config.settings import AiSettings, OpenRouterSettings
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 from verification.openrouter_doctor_integration.contract import (
-    ASSESSMENT_SCHEMA_VERSION,
     ASSESS_REGISTERED_PROVIDERS,
+    ASSESSMENT_SCHEMA_VERSION,
     BEDROCK_DEFAULT_MODEL,
     CODESTRATA_OPENROUTER_MODEL_ID_ENV,
     DEFAULT_API_KEY_ENV,
@@ -135,9 +133,7 @@ def run_inventory_checks(engine_root: Path) -> tuple[list[CheckResult], dict[str
         CheckResult(
             name="openrouter_wrapper_present",
             category="inventory",
-            ok=(
-                engine_root / "src/codestrata/ai/providers/openrouter_provider.py"
-            ).is_file(),
+            ok=(engine_root / "src/codestrata/ai/providers/openrouter_provider.py").is_file(),
             detail="OpenRouterAIModelProvider present",
         ),
         CheckResult(
@@ -368,9 +364,7 @@ def run_doctor_exit_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         (item for item in active_not_ready.providers if item.name == "openrouter"),
         None,
     )
-    would_exit_1 = (
-        active_overview is None or active_overview.status is not ConfigStatus.CONFIGURED
-    )
+    would_exit_1 = active_overview is None or active_overview.status is not ConfigStatus.CONFIGURED
 
     bedrock_active = build_ai_configuration_report(
         settings_for("bedrock", openrouter={"model": ""}),
@@ -540,20 +534,16 @@ def run_integration_failure_checks() -> tuple[list[CheckResult], dict[str, Any]]
             raised = error
         secret_safe = raised is not None and SYNTHETIC_API_KEY not in str(raised)
         attempts_ok = len(client.calls) <= EXPECTED_MAXIMUM_ATTEMPTS
-        mapped = build_openrouter_provider(
-            client=Client(sdk_exception(exc_name))
-        ).execute(provider_request())
-        category_ok = (
-            mapped.error is not None and mapped.error.category.value == expected_category
+        mapped = build_openrouter_provider(client=Client(sdk_exception(exc_name))).execute(
+            provider_request()
         )
+        category_ok = mapped.error is not None and mapped.error.category.value == expected_category
         checks.append(
             CheckResult(
                 name=f"failure_{expected_category}_no_fallback_single_attempt",
                 category="integration_failure",
                 ok=raised is not None and secret_safe and attempts_ok and category_ok,
-                detail=_safe_detail(
-                    f"category={expected_category} calls={len(client.calls)}"
-                ),
+                detail=_safe_detail(f"category={expected_category} calls={len(client.calls)}"),
             )
         )
 
@@ -765,12 +755,8 @@ def run_regression_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         },
         clear=True,
     ):
-        openai_model = resolve_assess_model_id(
-            cli_model_id=None, settings=settings_for("openai")
-        )
-        bedrock_model = resolve_assess_model_id(
-            cli_model_id=None, settings=settings_for("bedrock")
-        )
+        openai_model = resolve_assess_model_id(cli_model_id=None, settings=settings_for("openai"))
+        bedrock_model = resolve_assess_model_id(cli_model_id=None, settings=settings_for("bedrock"))
 
     checks = [
         CheckResult(

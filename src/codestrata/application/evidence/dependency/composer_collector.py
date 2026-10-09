@@ -61,9 +61,7 @@ def parse_composer_json_text(
         data = json.loads(text)
     except json.JSONDecodeError as error:
         manifest = DependencyManifestEvidence(
-            evidence_id=make_manifest_evidence_id(
-                provider_id=COMPOSER_PROVIDER_ID, path=path
-            ),
+            evidence_id=make_manifest_evidence_id(provider_id=COMPOSER_PROVIDER_ID, path=path),
             path=path,
             ecosystem=DependencyEcosystem.COMPOSER,
             manifest_type=DependencyManifestType.COMPOSER_JSON,
@@ -76,9 +74,7 @@ def parse_composer_json_text(
 
     if not isinstance(data, dict):
         manifest = DependencyManifestEvidence(
-            evidence_id=make_manifest_evidence_id(
-                provider_id=COMPOSER_PROVIDER_ID, path=path
-            ),
+            evidence_id=make_manifest_evidence_id(provider_id=COMPOSER_PROVIDER_ID, path=path),
             path=path,
             ecosystem=DependencyEcosystem.COMPOSER,
             manifest_type=DependencyManifestType.COMPOSER_JSON,
@@ -230,13 +226,9 @@ def collect_composer_dependency_bundle(
             ),
         )
     )
-    parsed = sum(
-        1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED
-    )
+    parsed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED)
     partial = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+        1 for item in manifests_t if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
     )
     failed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED)
     unsupported_count = sum(len(item.unsupported_constructs) for item in manifests_t)

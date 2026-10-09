@@ -1,0 +1,11 @@
+{
+  "configuration_id": "dogfood",
+  "status": "PASS",
+  "findings": [{"id": "D1", "title": "codestrata-engine-pin"}],
+  "pin": {"id": "codestrata-engine"},
+  "coverage": {"evaluated_units": 1, "eligible_units": 1, "coverage_status": "COMPLETE"},
+  "generated_at": "2026-09-23T14:00:02Z",
+  "duration_ms": 7,
+  "host": "ci-3",
+  "pid": 33
+}

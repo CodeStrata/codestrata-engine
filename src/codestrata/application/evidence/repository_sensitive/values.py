@@ -22,16 +22,29 @@ _PLACEHOLDER_LITERALS = frozenset(
         "dummy",
         "test",
         "your_api_key",
+        "your-api-key",
+        "your-token-here",
+        "insert_key_here",
         "replace_me",
         "<replace-me>",
+        "<redacted>",
+        "[redacted]",
         "xxx",
+        "xxxx",
+        "xxxxx",
         "todo",
         "fixme",
         "none",
         "null",
         "n/a",
+        "akiaiosfodnn7example",
+        "not_a_real_secret",
+        "not-a-real-secret",
     }
 )
+_MASKED_SECRET = re.compile(r"^[\*•xX]{6,}$")
+_UNSUPPORTED_EXPRESSION = re.compile(r"^#\{.*\}$|^!env\b|^!conditional\b|^<%.*%>$|^\{\{.*\}\}$")
+_AWS_EXAMPLE_KEY = re.compile(r"^AKIA[0-9A-Z]*EXAMPLE$", re.IGNORECASE)
 
 _ENV_INTERPOLATION = re.compile(
     r"^\$\{[A-Za-z_][A-Za-z0-9_]*(?::[^}]*)?\}$|^\$[A-Za-z_][A-Za-z0-9_]*$"
@@ -73,6 +86,14 @@ def classify_placeholder(value: str) -> tuple[PlaceholderStatus, str | None, Val
         return PlaceholderStatus.PLACEHOLDER_LITERAL, lower, ValueKind.PLACEHOLDER
     if text.startswith("<") and text.endswith(">"):
         return PlaceholderStatus.PLACEHOLDER_LITERAL, "angle_bracket", ValueKind.PLACEHOLDER
+    if _MASKED_SECRET.fullmatch(text) or _AWS_EXAMPLE_KEY.fullmatch(text):
+        return (
+            PlaceholderStatus.PLACEHOLDER_LITERAL,
+            "lookalike_or_masked",
+            ValueKind.PLACEHOLDER,
+        )
+    if _UNSUPPORTED_EXPRESSION.match(text):
+        return PlaceholderStatus.UNKNOWN, "unsupported_expression", ValueKind.UNKNOWN
     if lower in {"true", "false", "yes", "no", "on", "off"}:
         return PlaceholderStatus.NOT_APPLICABLE, None, ValueKind.BOOLEAN
     if _URL_LIKE.match(text):

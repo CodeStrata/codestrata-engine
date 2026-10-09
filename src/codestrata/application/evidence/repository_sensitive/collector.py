@@ -19,6 +19,9 @@ from codestrata.application.evidence.repository_sensitive.limitations import (
 )
 from codestrata.application.evidence.repository_sensitive.signatures import (
     classify_text_signatures,
+    inspect_text_signatures,
+    looks_like_undecoded_base64,
+    primary_private_key_hit,
 )
 from codestrata.domain.evidence.language.capabilities import (
     EvidenceOrigin,
@@ -54,9 +57,7 @@ from codestrata.domain.evidence.repository_sensitive.models import (
 )
 
 
-def _artifact_provenance(
-    path: str, *, configuration_fingerprint: str
-) -> EvidenceProvenance:
+def _artifact_provenance(path: str, *, configuration_fingerprint: str) -> EvidenceProvenance:
     return EvidenceProvenance(
         provider_id=ARTIFACT_PROVIDER_ID,
         provider_version=ARTIFACT_PROVIDER_VERSION,
@@ -68,9 +69,7 @@ def _artifact_provenance(
     )
 
 
-def _config_provenance(
-    path: str, *, configuration_fingerprint: str
-) -> EvidenceProvenance:
+def _config_provenance(path: str, *, configuration_fingerprint: str) -> EvidenceProvenance:
     return EvidenceProvenance(
         provider_id=CONFIGURATION_PROVIDER_ID,
         provider_version=CONFIGURATION_PROVIDER_VERSION,
@@ -106,9 +105,7 @@ def _diagnostic(
     classification: SourceClassification,
 ) -> RepositorySensitiveDiagnostic:
     return RepositorySensitiveDiagnostic(
-        diagnostic_id=make_diagnostic_id(
-            code=code, path=path or "", detail=message
-        ),
+        diagnostic_id=make_diagnostic_id(code=code, path=path or "", detail=message),
         diagnostic_code=code,
         message=message,
         path=path,
@@ -181,9 +178,7 @@ def collect_repository_sensitive_evidence(
             )
             artifacts.append(
                 SensitiveArtifactEvidence(
-                    evidence_id=make_artifact_evidence_id(
-                        path=path, kind=kind.value
-                    ),
+                    evidence_id=make_artifact_evidence_id(path=path, kind=kind.value),
                     path=path,
                     kind=kind,
                     discovery_bases=bases,
@@ -218,9 +213,7 @@ def collect_repository_sensitive_evidence(
             )
             artifacts.append(
                 SensitiveArtifactEvidence(
-                    evidence_id=make_artifact_evidence_id(
-                        path=path, kind=kind.value
-                    ),
+                    evidence_id=make_artifact_evidence_id(path=path, kind=kind.value),
                     path=path,
                     kind=kind,
                     discovery_bases=bases,
@@ -251,9 +244,7 @@ def collect_repository_sensitive_evidence(
             )
             artifacts.append(
                 SensitiveArtifactEvidence(
-                    evidence_id=make_artifact_evidence_id(
-                        path=path, kind=kind.value
-                    ),
+                    evidence_id=make_artifact_evidence_id(path=path, kind=kind.value),
                     path=path,
                     kind=kind,
                     discovery_bases=bases,
@@ -273,16 +264,32 @@ def collect_repository_sensitive_evidence(
         content_classes = classify_text_signatures(text)
         refined = _refine_kind(kind, content_classes)
         discovery = list(bases)
-        if content_classes != (
-            ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,
-        ):
+        if content_classes != (ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,):
             discovery.append(DiscoveryBasis.CONTENT_SIGNATURE)
+        metadata: dict[str, str] = {}
+        hit = primary_private_key_hit(text)
+        if hit is None:
+            hits = inspect_text_signatures(text)
+            hit = hits[0] if hits else None
+        if hit is not None:
+            metadata = {
+                "detector_id": hit.detector_id,
+                "safe_secret_type": hit.safe_secret_type,
+                "redacted_span": hit.redacted_span,
+            }
+            if hit.line_start is not None:
+                metadata["line_start"] = str(hit.line_start)
+        elif looks_like_undecoded_base64(text):
+            metadata = {
+                "detector_id": "encoded.unsupported",
+                "safe_secret_type": "undecoded_base64",
+                "redacted_span": "[REDACTED]",
+                "unsupported_encoding": "true",
+            }
         # Filename alone does not imply sensitive content.
         artifacts.append(
             SensitiveArtifactEvidence(
-                evidence_id=make_artifact_evidence_id(
-                    path=path, kind=refined.value
-                ),
+                evidence_id=make_artifact_evidence_id(path=path, kind=refined.value),
                 path=path,
                 kind=refined,
                 discovery_bases=tuple(dict.fromkeys(discovery)),
@@ -294,6 +301,7 @@ def collect_repository_sensitive_evidence(
                 provenance=_artifact_provenance(
                     path, configuration_fingerprint=configuration_fingerprint
                 ),
+                metadata=metadata,
             )
         )
 
@@ -351,6 +359,10 @@ def collect_repository_sensitive_evidence(
             line = fact.get("line_start")
             line_text = str(line) if line is not None else ""
             normalized_key = str(fact["normalized_key"])
+            raw_meta = fact.get("metadata")
+            metadata_map: dict[str, str] = {}
+            if isinstance(raw_meta, dict):
+                metadata_map = {str(key): str(value) for key, value in raw_meta.items()}
             configuration_facts.append(
                 ConfigurationFactEvidence(
                     evidence_id=make_configuration_evidence_id(
@@ -366,17 +378,13 @@ def collect_repository_sensitive_evidence(
                     key_family=fact["key_family"],  # type: ignore[arg-type]
                     redacted_preview=str(fact["redacted_preview"]),
                     value_fingerprint=(
-                        str(fact["value_fingerprint"])
-                        if fact.get("value_fingerprint")
-                        else None
+                        str(fact["value_fingerprint"]) if fact.get("value_fingerprint") else None
                     ),
                     value_length=int(str(fact["value_length"])),
                     value_kind=fact["value_kind"],  # type: ignore[arg-type]
                     placeholder_status=fact["placeholder_status"],  # type: ignore[arg-type]
                     placeholder_kind=(
-                        str(fact["placeholder_kind"])
-                        if fact.get("placeholder_kind")
-                        else None
+                        str(fact["placeholder_kind"]) if fact.get("placeholder_kind") else None
                     ),
                     is_empty=bool(fact["is_empty"]),
                     literal_boolean=(
@@ -392,6 +400,7 @@ def collect_repository_sensitive_evidence(
                     provenance=_config_provenance(
                         path, configuration_fingerprint=configuration_fingerprint
                     ),
+                    metadata=metadata_map,
                 )
             )
 
@@ -428,19 +437,9 @@ def collect_repository_sensitive_evidence(
         or item.is_empty
     )
 
-    production = sum(
-        1
-        for item in artifacts
-        if item.classification is SourceClassification.SOURCE
-    )
-    test_count = sum(
-        1 for item in artifacts if item.classification is SourceClassification.TEST
-    )
-    unknown = sum(
-        1
-        for item in artifacts
-        if item.classification is SourceClassification.UNKNOWN
-    )
+    production = sum(1 for item in artifacts if item.classification is SourceClassification.SOURCE)
+    test_count = sum(1 for item in artifacts if item.classification is SourceClassification.TEST)
+    unknown = sum(1 for item in artifacts if item.classification is SourceClassification.UNKNOWN)
 
     parse_status = RepositorySensitiveParseStatus.SUCCEEDED
     if malformed or skipped or unsupported_binaries:

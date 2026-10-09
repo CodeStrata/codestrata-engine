@@ -67,10 +67,7 @@ def test_quiet_json_ci_incompatible(monkeypatch) -> None:
     )
     monkeypatch.setenv("CI", "true")
     # Auto-detect path (stdin_interactive=None) respects CI.
-    assert (
-        evaluate_prompt_eligibility(command="assess", stdin_interactive=None).eligible
-        is False
-    )
+    assert evaluate_prompt_eligibility(command="assess", stdin_interactive=None).eligible is False
     # stdin_interactive alone must not bypass automation (Slice 9.5).
     assert (
         evaluate_prompt_eligibility(

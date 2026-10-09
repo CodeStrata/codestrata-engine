@@ -16,8 +16,8 @@ from codestrata.telemetry.event_identity import (
 )
 from codestrata.telemetry.transport_policy import (
     DEFAULT_CONNECT_TIMEOUT_SECONDS,
-    DEFAULT_MAXIMUM_ATTEMPTS,
     DEFAULT_MAX_ENDPOINT_LENGTH,
+    DEFAULT_MAXIMUM_ATTEMPTS,
     DEFAULT_READ_TIMEOUT_SECONDS,
     CommunityTelemetryTransportPolicy,
     TransportPolicyError,

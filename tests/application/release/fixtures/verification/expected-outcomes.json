@@ -1,0 +1,78 @@
+{
+  "corrupt": {
+    "reason": "package_contract_rejected",
+    "status": "rejected"
+  },
+  "partial-missing-bundle": {
+    "reason": "bundle_material_missing",
+    "status": "unavailable"
+  },
+  "private-contents-in-public-log": {
+    "reason": "private_contents_must_not_use_public_tlog",
+    "status": "rejected"
+  },
+  "private-expired": {
+    "reason": "trust_entry_expired",
+    "status": "expired"
+  },
+  "private-revoked-fresh": {
+    "reason": "key_revoked_in_fresh_inventory",
+    "status": "revoked"
+  },
+  "private-stale-revocation": {
+    "reason": "revocation_inventory_exceeds_freshness_limit",
+    "status": "stale"
+  },
+  "private-tampered": {
+    "reason": "signature_mismatch",
+    "status": "tampered"
+  },
+  "private-valid": {
+    "reason": "ok",
+    "status": "verified"
+  },
+  "private-wrong-purpose": {
+    "reason": "preview_cannot_authorize_production",
+    "status": "wrong_purpose"
+  },
+  "public-expired": {
+    "reason": "certificate_expired",
+    "status": "expired"
+  },
+  "public-package-expired": {
+    "reason": "package_expired",
+    "status": "expired"
+  },
+  "public-private-contents-in-tlog": {
+    "reason": "private_contents_in_public_log",
+    "status": "rejected"
+  },
+  "public-tampered": {
+    "reason": "signature_mismatch",
+    "status": "tampered"
+  },
+  "public-unsupported": {
+    "reason": "unsupported_bundle_media_type",
+    "status": "unsupported"
+  },
+  "public-valid": {
+    "reason": "ok",
+    "status": "verified"
+  },
+  "public-wrong-eku": {
+    "reason": "certificate_eku_not_code_signing",
+    "status": "wrong_purpose"
+  },
+  "public-wrong-issuer": {
+    "reason": "oidc_issuer_mismatch",
+    "status": "wrong_issuer"
+  },
+  "public-wrong-purpose": {
+    "reason": "preview_cannot_authorize_production",
+    "status": "wrong_purpose"
+  },
+  "role-mismatch-public-as-private": {
+    "reason": "role_profile_mismatch",
+    "status": "rejected"
+  }
+}

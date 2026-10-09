@@ -1,0 +1,8 @@
+{
+  "lineage_status": "unknown_ambiguous",
+  "match_kind": "unknown_lineage",
+  "finding_churn": false,
+  "location_moved": false,
+  "reuse_reason": "ambiguous_lineage",
+  "fallback_to_full": true
+}

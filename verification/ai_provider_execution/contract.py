@@ -157,9 +157,7 @@ class ExecutionVerificationContract:
     migrate_openai_or_bedrock: bool = False
     add_openrouter: bool = False
     wire_executor_into_assess_enrichment_providers_doctor_cli_or_factory: bool = False
-    modify_defaults_selection_credentials_wire_formats_doctor_fail_soft_prompts_reports_schemas: (
-        bool
-    ) = False
+    modify_defaults_selection_credentials_wire_formats_doctor_fail_soft_prompts_reports_schemas: bool = False  # noqa: E501
     modify_telemetry_analytics_community_cloud_data_lake_vscode_cursor_infrastructure: bool = False
     commit_changes: bool = False
     notes: tuple[str, ...] = field(

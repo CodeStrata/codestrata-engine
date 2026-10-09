@@ -37,7 +37,9 @@ def check_disk_for_tier(tier: str, *, path: Path | None = None) -> DiskCheck:
         ok=ok,
         available_gb=round(available, 2),
         required_gb=required,
-        detail="ok" if ok else f"insufficient disk: need>={required}GiB free, have={available:.2f}GiB",
+        detail="ok"
+        if ok
+        else f"insufficient disk: need>={required}GiB free, have={available:.2f}GiB",
     )
 
 

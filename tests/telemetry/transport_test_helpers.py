@@ -90,9 +90,7 @@ def make_http_transport(
         if responses is None
         else responses
     )
-    transport = create_http_telemetry_transport(
-        make_config(**config_kwargs), client=client
-    )
+    transport = create_http_telemetry_transport(make_config(**config_kwargs), client=client)
     return transport, client
 
 

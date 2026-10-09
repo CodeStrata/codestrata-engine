@@ -9,7 +9,7 @@ from codestrata.application.agents.factory import create_agent_orchestrator
 from codestrata.application.agents.policies import AgentExecutionPolicy
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.config import load_settings
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 
 
 def test_fake_service_injection(tmp_path: Path) -> None:

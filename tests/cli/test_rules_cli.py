@@ -23,9 +23,7 @@ def test_rules_list_includes_architecture_pack() -> None:
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert payload["rules"]
-    assert any(
-        item["rule_id"] == "architecture.dependency-cycle" for item in payload["rules"]
-    )
+    assert any(item["rule_id"] == "architecture.dependency-cycle" for item in payload["rules"])
 
 
 def test_rules_list_category_architecture() -> None:

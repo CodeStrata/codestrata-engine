@@ -1,0 +1,73 @@
+labels:
+- id: resource-exhaustion
+  kind: resource-exhaustion
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: ERROR
+  expected_finding_classes: []
+  notes: Hard deadline/RSS breach is ERROR, never PASS.
+- id: corruption
+  kind: corruption
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: ERROR
+  expected_finding_classes: []
+  notes: Corrupt artifact/input cannot be reported as a healthy empty table.
+- id: repeat-variation
+  kind: repeat-variation
+  source: M33 three-repeat semantic digest
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: equal_or_fail
+  expected_finding_classes: []
+  notes: Three repeats on pinned inputs; operational fields excluded only when declared.
+- id: sigint-sigterm-hard-kill
+  kind: sigint-sigterm-hard-kill
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: cancelled_or_error
+  expected_finding_classes: []
+  notes: Cancellation grace then hard stop. Not PASS.
+- id: disk-full
+  kind: disk-full
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: ERROR
+  expected_finding_classes: []
+  notes: Disk exhaustion is explicit ERROR.
+- id: output-collision
+  kind: output-collision
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: ERROR
+  expected_finding_classes: []
+  notes: Colliding output paths do not overwrite an active baseline silently.
+- id: concurrent-reader
+  kind: concurrent-reader
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: stable_read
+  expected_finding_classes: []
+  notes: Concurrent readers of artifacts must not mutate them.
+- id: retention-active-baseline
+  kind: retention-active-baseline
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: retained
+  expected_finding_classes: []
+  notes: Retention must preserve the active baseline.
+- id: audit-redaction
+  kind: audit-redaction
+  source: M33 required fixture label; harness is E15.2
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: redacted
+  expected_finding_classes: []
+  notes: Quality logs and public evidence must not carry raw secrets.

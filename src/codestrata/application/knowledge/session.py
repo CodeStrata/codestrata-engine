@@ -7,6 +7,7 @@ from types import TracebackType
 from typing import Any
 
 from codestrata.application.knowledge.errors import KnowledgeStoreError
+from codestrata.application.knowledge.lock_policy import knowledge_lock_timeout_seconds
 from codestrata.application.knowledge.persistence import (
     build_staged_assessment_artifacts,
     content_fingerprint_for_manifest,
@@ -57,7 +58,7 @@ class AssessmentKnowledgeSession:
         self.repository_id = record.repository_id
         self._lock = self._store.repository_lock(
             record.repository_id,
-            timeout_seconds=self._lock_timeout_seconds,
+            timeout_seconds=knowledge_lock_timeout_seconds(self._lock_timeout_seconds),
         )
         self._lock.__enter__()
         self._lock_entered = True

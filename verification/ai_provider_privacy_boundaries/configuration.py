@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
-from verification.ai_provider_privacy_boundaries.checks import run_configuration_checks, run_configuration_path_write_checks
+from verification.ai_provider_privacy_boundaries.checks import (
+    run_configuration_checks,
+    run_configuration_path_write_checks,
+)
 
 __all__ = ["run_configuration_checks", "run_configuration_path_write_checks"]

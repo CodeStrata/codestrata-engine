@@ -6,15 +6,10 @@ import json
 from pathlib import Path
 
 import pytest
-
-from codestrata.domain.quality_metrics.false_negatives import (
-    FalseNegativeClassification,
-    FalseNegativeStatus,
-)
 from validation.false_negatives.adjudication import (
     FalseNegativeAdjudication,
-    apply_adjudication,
     adjudication_path,
+    apply_adjudication,
 )
 from validation.false_negatives.candidates import candidates_from_pack_result
 from validation.false_negatives.cli import main as fn_cli_main
@@ -27,13 +22,22 @@ from validation.recording import (
     build_repository_validation_record,
     write_repository_validation_record,
 )
-from validation.summary_artifact import DISCLAIMER, SUMMARY_SCHEMA_VERSION
+from validation.summary_artifact import (
+    DISCLAIMER,
+    SUMMARY_SCHEMA_VERSION,
+    SourceRecordRef,
+    SummaryScope,
+)
 from validation.summary_from_records import (
     aggregate_false_negative_tracking,
     build_summary_artifact,
     render_summary_markdown,
 )
-from validation.summary_artifact import SourceRecordRef, SummaryScope
+
+from codestrata.domain.quality_metrics.false_negatives import (
+    FalseNegativeClassification,
+    FalseNegativeStatus,
+)
 
 
 class _Fact:
@@ -128,9 +132,7 @@ def test_unsupported_and_insufficient_separated() -> None:
         ),
         run_id="20260801T120000Z",
     )
-    assert (
-        insufficient[0].classification is FalseNegativeClassification.INSUFFICIENT_EVIDENCE
-    )
+    assert insufficient[0].classification is FalseNegativeClassification.INSUFFICIENT_EVIDENCE
 
 
 def test_real_world_remains_suspected() -> None:
@@ -230,9 +232,7 @@ def test_skip_error_do_not_resolve() -> None:
             ),
         ),
     )
-    historical = candidates_from_pack_result(
-        "security", result, run_id="20260801T120000Z"
-    )
+    historical = candidates_from_pack_result("security", result, run_id="20260801T120000Z")
     merged = apply_run_history(
         (),
         historical,
@@ -258,12 +258,8 @@ def test_history_updates_last_seen() -> None:
             ),
         ),
     )
-    historical = candidates_from_pack_result(
-        "security", result, run_id="20260801T120000Z"
-    )
-    current = candidates_from_pack_result(
-        "security", result, run_id="20260801T130000Z"
-    )
+    historical = candidates_from_pack_result("security", result, run_id="20260801T120000Z")
+    current = candidates_from_pack_result("security", result, run_id="20260801T130000Z")
     merged = apply_run_history(
         current,
         historical,

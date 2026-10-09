@@ -1,0 +1,381 @@
+drivers:
+- applicability: resolved module graph
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.dependency-cycle
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: declared direction constraints
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.invalid-dependency-direction
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: declared M07 patterns
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.layer-boundary-violation
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: module fan_out vs threshold 10
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.excessive-cross-module-coupling
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported framework usage vs declared boundary
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.framework-leakage
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: '>=2 components'
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: partial share allowed with coverage
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: architecture
+  id: architecture.component-concentration
+  kind: metric
+  outcome_or_context_role: advisory
+- applicability: complete universe V
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: partial universe cannot prove exact centrality
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: architecture
+  id: M09.centrality
+  kind: metric
+  outcome_or_context_role: context
+- applicability: supported source/config literals
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.private-key-material
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported source/config literals
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.credential-literal
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported placeholders
+  comparison_unit: count
+  contributor_role: context_only
+  coverage_requirement: placeholders are hygiene signals
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.placeholder-credential
+  kind: rule
+  outcome_or_context_role: context
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.tls-verification-disabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.hostname-verification-disabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.authentication-disabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.permissive-cors-origin
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.debug-enabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.unresolved-version
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.mutable-version
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.unbounded-requirement
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.conflicting-exact-versions
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.duplicate-declaration
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: resolved versions plus fresh pinned OSV snapshot
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: fresh supported feed required; else UNKNOWN not clean
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: M13.known_vulnerability
+  kind: metric
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST complexity map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.excessive-branching
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST size map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.large-callable
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST nesting map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.deep-nesting
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST parameter map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.excessive-parameters
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST type-size map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.oversized-type
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported test syntax
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-001
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: unconfirmed test candidates
+  comparison_unit: count
+  contributor_role: context_only
+  coverage_requirement: candidates are not measured runtime coverage
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-002
+  kind: rule
+  outcome_or_context_role: advisory
+- applicability: declared tests without observation
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-003
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: complete supported CI config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-005
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported tokenization
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: partial ratio cannot prove full-scope cleanliness
+  direction: lower_ratio_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: quality
+  id: M18.clone_indicator
+  kind: metric
+  outcome_or_context_role: advisory
+- applicability: complete complexity and M24 history
+  comparison_unit: count
+  contributor_role: ranking
+  coverage_requirement: partial records excluded from comparable ranking
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: maintainability
+  id: M22.hotspot
+  kind: metric
+  outcome_or_context_role: context
+- applicability: attributable churn at that scope
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: scope-specific denominator; do not average file ratios
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: maintainability
+  id: M25.ownership_concentration
+  kind: metric
+  outcome_or_context_role: context
+- applicability: changed subjects plus comparable churn/centrality
+  comparison_unit: class
+  contributor_role: context_only
+  coverage_requirement: partial contributors visible; no verdict unless YAML maps
+    it
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: n/a
+  family: architecture
+  id: M29.change_concern
+  kind: metric
+  outcome_or_context_role: context
+manifest_id: e01.2-outcome-driver-manifest
+manifest_version: 1.0.0
+no_opaque_score: true
+package_revision: ENGINE-2026-09-15-R1
+source_ratification: e01.1-launch-ratification

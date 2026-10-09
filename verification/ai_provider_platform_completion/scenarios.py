@@ -19,6 +19,9 @@ from codestrata.config.settings import (
 )
 from codestrata.extensions.assess_ai import get_assess_ai_provider_registry
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
+from verification.ai_provider_cross_provider.contract import (
+    REGISTRY_DECISION as CROSS_DECISION,
+)
 from verification.ai_provider_platform_completion.contract import (
     BEDROCK_DEFAULT_MODEL,
     CURRENT_POSTURE_DOC_RELATIVE,
@@ -32,9 +35,6 @@ from verification.ai_provider_platform_completion.models import ScenarioResult
 from verification.ai_provider_platform_completion.slice_matrix import (
     build_slice_matrix,
     sorted_slice_matrix,
-)
-from verification.ai_provider_cross_provider.contract import (
-    REGISTRY_DECISION as CROSS_DECISION,
 )
 
 
@@ -244,9 +244,7 @@ def run_negative_scenarios(
     )
 
     # T. doctor performs provider invocation
-    doctor_src = (engine_root / "src/codestrata/ai/providers/doctor.py").read_text(
-        encoding="utf-8"
-    )
+    doctor_src = (engine_root / "src/codestrata/ai/providers/doctor.py").read_text(encoding="utf-8")
     add(
         "T",
         "doctor performs provider invocation",
@@ -334,9 +332,7 @@ def run_negative_scenarios(
     # OpenRouter explicit model requirement (extra signal for I)
     raised = False
     try:
-        resolve_assess_model_id(
-            cli_model_id=None, settings=_settings(provider="openrouter")
-        )
+        resolve_assess_model_id(cli_model_id=None, settings=_settings(provider="openrouter"))
     except Exception:  # noqa: BLE001
         raised = True
     if not raised:

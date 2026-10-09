@@ -24,8 +24,7 @@ RECOMMENDATIONS: dict[str, dict[str, str]] = {
         "expected_outcome": "Acyclic package dependencies within the affected scope.",
         "effort_band": "medium",
         "validation": (
-            "Regenerate the package dependency graph and confirm the cycle identity "
-            "is absent."
+            "Regenerate the package dependency graph and confirm the cycle identity is absent."
         ),
     },
     RULE_INVALID_DEPENDENCY_DIRECTION: {

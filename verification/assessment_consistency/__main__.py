@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 from verification.assessment_consistency.contract import REPORT_FILENAME, SV11_OUTPUT_RELATIVE
@@ -26,6 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     out = args.output_dir or Path(SV11_OUTPUT_RELATIVE)
     print(f"SV.11 assessment consistency: {report.verdict}")
+    print("platform_ingestion_safety: not_evaluated")
     print(
         f"repositories={report.repository_count} "
         f"defects={len(report.defect_candidates)} "

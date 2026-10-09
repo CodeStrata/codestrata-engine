@@ -12,9 +12,6 @@ from codestrata.cli import app
 from codestrata.telemetry.cli_consent_policy import TELEMETRY_FLAG_CONFLICT_MESSAGE
 from codestrata.telemetry.infrastructure.capture_transport import CaptureTelemetryTransport
 from codestrata.telemetry.infrastructure.http_client import FakeTelemetryHttpResponse
-from codestrata.telemetry.infrastructure.unavailable_transport import (
-    UnavailableTelemetryTransport,
-)
 from codestrata.telemetry.service import reset_telemetry_singletons
 from tests.telemetry.transport_test_helpers import (
     TEST_ENDPOINT,
@@ -109,9 +106,7 @@ def test_success_when_record_raises(tmp_path: Path, monkeypatch) -> None:
     assert runs, "successful assess must still write assessment.json"
 
 
-def test_injected_failing_http_does_not_change_exit(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_injected_failing_http_does_not_change_exit(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -142,9 +137,7 @@ def test_injected_failing_http_does_not_change_exit(
     assert client.calls
 
 
-def test_primary_failure_exit_preserved_with_capture_success(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_primary_failure_exit_preserved_with_capture_success(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -207,17 +200,13 @@ def test_flag_conflict_still_exit_2(tmp_path: Path) -> None:
     reset_telemetry_singletons()
     repo = _mini_repo(tmp_path)
     out = tmp_path / "out"
-    result = _invoke_assess(
-        repo, out, extra=["--telemetry-allow", "--telemetry-deny"]
-    )
+    result = _invoke_assess(repo, out, extra=["--telemetry-allow", "--telemetry-deny"])
     assert result.exit_code == 2
     assert TELEMETRY_FLAG_CONFLICT_MESSAGE in (result.stdout + result.stderr)
     assert not list(out.rglob("assessment.json"))
 
 
-def test_json_summary_unpolluted_by_telemetry_failure(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_json_summary_unpolluted_by_telemetry_failure(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -229,9 +218,7 @@ def test_json_summary_unpolluted_by_telemetry_failure(
         "codestrata.telemetry.disabled_service.DisabledTelemetryFacade.record_assessment_started",
         side_effect=RuntimeError("should be isolated"),
     ):
-        result = _invoke_assess(
-            repo, out, extra=["--json-summary", "--telemetry-deny"]
-        )
+        result = _invoke_assess(repo, out, extra=["--json-summary", "--telemetry-deny"])
     assert result.exit_code == 0
     # JSON summary should remain parseable machine output
     lines = [line for line in result.stdout.splitlines() if line.strip()]
@@ -242,9 +229,7 @@ def test_json_summary_unpolluted_by_telemetry_failure(
     assert "endpoint" not in json.dumps(payload)
 
 
-def test_factory_failure_falls_back_and_assess_continues(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_factory_failure_falls_back_and_assess_continues(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -261,9 +246,7 @@ def test_factory_failure_falls_back_and_assess_continues(
     assert {path.name for path in home.iterdir()} <= {"installation_id"}
 
 
-def test_normal_cli_without_credential_stays_unavailable(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_normal_cli_without_credential_stays_unavailable(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -284,9 +267,7 @@ def test_normal_cli_without_credential_stays_unavailable(
     }
 
 
-def test_normal_cli_opt_in_with_credential_uses_http_transport(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_normal_cli_opt_in_with_credential_uses_http_transport(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -313,9 +294,7 @@ def test_normal_cli_opt_in_with_credential_uses_http_transport(
     assert transport._configuration.endpoint.endswith("/api/v1/telemetry")
 
 
-def test_artifacts_equivalent_across_telemetry_outcomes(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_artifacts_equivalent_across_telemetry_outcomes(tmp_path: Path, monkeypatch) -> None:
     """Deny vs allow+unavailable should not change report schema/identity fields."""
 
     monkeypatch.setenv("CI", "1")

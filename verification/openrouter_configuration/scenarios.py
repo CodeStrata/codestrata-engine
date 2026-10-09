@@ -19,20 +19,20 @@ from codestrata.ai.provider_adapters.openrouter.factory import (
     build_openrouter_provider,
 )
 from codestrata.ai.provider_contracts.errors import ErrorCategory
+from codestrata.ai.providers.bedrock import BedrockAIModelProvider
 from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 
 # Import factory before assess_ai to keep load order stable.
 from codestrata.ai.providers.factory import create_assess_ai_provider, resolve_assess_model_id
-from codestrata.ai.providers.bedrock import BedrockAIModelProvider
 from codestrata.ai.providers.openai_provider import OpenAIAIModelProvider
 from codestrata.ai.providers.openrouter_provider import OpenRouterAIModelProvider
 from codestrata.config.settings import AiSettings, OpenRouterSettings
 from verification.openrouter_configuration.contract import (
+    BEDROCK_DEFAULT_MODEL,
     DEFAULT_API_KEY_ENV,
     DEFAULT_PROVIDER,
     NEGATIVE_SCENARIO_COUNT_MIN,
     OPENAI_DEFAULT_MODEL,
-    BEDROCK_DEFAULT_MODEL,
     TEST_ONLY_MODEL,
 )
 from verification.openrouter_configuration.fixtures import (
@@ -130,7 +130,12 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
             )
         )
     )
-    add("H", "API key enters diagnostics", "secret token in diagnostics", SYNTHETIC_API_KEY in diag or "sk-" in diag)
+    add(
+        "H",
+        "API key enters diagnostics",
+        "secret token in diagnostics",
+        SYNTHETIC_API_KEY in diag or "sk-" in diag,
+    )
     add(
         "I",
         "Auth header enters diagnostics",

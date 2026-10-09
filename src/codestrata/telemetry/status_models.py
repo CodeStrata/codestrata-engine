@@ -78,17 +78,13 @@ class PrivacyFirstTelemetryStatus:
             "interactive_prompt_commands",
             tuple(sorted(set(self.interactive_prompt_commands))),
         )
-        object.__setattr__(
-            self, "flag_commands", tuple(sorted(set(self.flag_commands)))
-        )
+        object.__setattr__(self, "flag_commands", tuple(sorted(set(self.flag_commands))))
         object.__setattr__(
             self,
             "policy_versions",
             tuple(sorted(self.policy_versions, key=lambda item: item[0])),
         )
-        object.__setattr__(
-            self, "limitation_codes", tuple(sorted(set(self.limitation_codes)))
-        )
+        object.__setattr__(self, "limitation_codes", tuple(sorted(set(self.limitation_codes))))
 
     def to_stable_dict(self) -> dict[str, Any]:
         return {
@@ -111,18 +107,13 @@ class PrivacyFirstTelemetryStatus:
             "interactive_prompt_available": self.interactive_prompt_available,
             "interactive_prompt_commands": list(self.interactive_prompt_commands),
             "interactive_prompt_default_deny": self.interactive_prompt_default_deny,
-            "interactive_prompt_once_per_process": (
-                self.interactive_prompt_once_per_process
-            ),
+            "interactive_prompt_once_per_process": (self.interactive_prompt_once_per_process),
             "legacy_compatibility_state": self.legacy_compatibility_state,
-            "legacy_preference_authorizes_runtime": (
-                self.legacy_preference_authorizes_runtime
-            ),
+            "legacy_preference_authorizes_runtime": (self.legacy_preference_authorizes_runtime),
             "limitation_codes": list(self.limitation_codes),
             "non_interactive_prompt_suppressed": self.non_interactive_prompt_suppressed,
             "policy_versions": [
-                {"name": name, "version": version}
-                for name, version in self.policy_versions
+                {"name": name, "version": version} for name, version in self.policy_versions
             ],
             "preview_available": self.preview_available,
             "preview_command": self.preview_command,

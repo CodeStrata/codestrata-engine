@@ -156,9 +156,7 @@ def _parse_dependency_element(
     else:
         # Supported Maven local property contract was inspected; property missing.
         version_availability = DependencyEvidenceAvailability.UNAVAILABLE
-        version_resolution_status = (
-            DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
-        )
+        version_resolution_status = DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
         resolved_local = None
     provenance = EvidenceProvenance(
         provider_id=MAVEN_PROVIDER_ID,
@@ -239,9 +237,7 @@ def _parse_plugin_element(
         resolved_local = resolved
     else:
         version_availability = DependencyEvidenceAvailability.UNAVAILABLE
-        version_resolution_status = (
-            DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
-        )
+        version_resolution_status = DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
         resolved_local = None
     provenance = EvidenceProvenance(
         provider_id=MAVEN_PROVIDER_ID,
@@ -378,9 +374,7 @@ def parse_pom_text(
             configuration_fingerprint=configuration_fingerprint,
         )
         manifest = DependencyManifestEvidence(
-            evidence_id=make_manifest_evidence_id(
-                provider_id=MAVEN_PROVIDER_ID, path=path
-            ),
+            evidence_id=make_manifest_evidence_id(provider_id=MAVEN_PROVIDER_ID, path=path),
             path=path,
             ecosystem=DependencyEcosystem.MAVEN,
             manifest_type=DependencyManifestType.POM_XML,
@@ -413,15 +407,13 @@ def parse_pom_text(
     if profiles is not None:
         for profile_el in profiles.findall(_path(namespace, "profile")):
             profile_id = _text(profile_el, namespace, "id") or "unnamed-profile"
-            profile_decls, profile_unresolved, profile_unsupported = (
-                _collect_from_container(
-                    profile_el,
-                    namespace=namespace,
-                    path=path,
-                    text=text,
-                    properties=properties,
-                    profile=profile_id,
-                )
+            profile_decls, profile_unresolved, profile_unsupported = _collect_from_container(
+                profile_el,
+                namespace=namespace,
+                path=path,
+                text=text,
+                properties=properties,
+                profile=profile_id,
             )
             declarations.extend(profile_decls)
             unresolved.extend(profile_unresolved)
@@ -529,19 +521,11 @@ def collect_maven_dependency_bundle(
             ),
         )
     )
-    parsed = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.SUCCEEDED
-    )
+    parsed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED)
     partial = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+        1 for item in manifests_t if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
     )
-    failed = sum(
-        1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED
-    )
+    failed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED)
     unsupported_count = sum(len(item.unsupported_constructs) for item in manifests_t)
     unresolved_count = sum(len(item.unresolved_expressions) for item in manifests_t)
     if failed and not parsed and not partial:

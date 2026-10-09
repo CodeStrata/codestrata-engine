@@ -24,7 +24,7 @@ from codestrata.application.agents.models import (
 from codestrata.application.agents.policies import AgentExecutionPolicy
 from codestrata.application.assessment.service import AssessmentCommandResult
 from codestrata.application.knowledge.queries import KnowledgeQueryService
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from codestrata.reporting.modernization_models import AssessmentMode
 from tests.application.knowledge.queries.conftest_helpers import (
     fingerprint_for,

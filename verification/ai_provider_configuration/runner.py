@@ -78,9 +78,7 @@ def run_ai_provider_configuration_verification(
     _collect("provider_selection", provider_selection.run_provider_selection_checks())
     _collect("model_resolution", model_resolution.run_model_resolution_checks())
     _collect("credentials", credentials.run_credential_checks())
-    _collect(
-        "adapter_configuration", adapter_configuration.run_adapter_configuration_checks()
-    )
+    _collect("adapter_configuration", adapter_configuration.run_adapter_configuration_checks())
     _collect("privacy", privacy.run_privacy_checks())
     _collect("runtime_unwired", runtime_unwired.run_runtime_unwired_checks())
     _collect("determinism", determinism.run_determinism_checks())

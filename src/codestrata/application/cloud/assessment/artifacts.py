@@ -6,13 +6,13 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.domain.cloud.assessment.identifiers import (
     ARTIFACT_SCHEMA_ID,
     CLOUD_ASSESSMENT_FILENAME,
 )
 from codestrata.domain.cloud.assessment.models import CloudAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
-from codestrata.artifacts.heads import resolve_head_path
 
 
 class CloudAssessmentArtifactWriteResult(BaseModel):

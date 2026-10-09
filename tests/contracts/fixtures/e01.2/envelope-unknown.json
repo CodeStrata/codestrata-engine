@@ -1,0 +1,230 @@
+{
+  "body": {
+    "change_summary": {
+      "affected_component_count": null,
+      "affected_component_ids": [],
+      "affected_test_count": null,
+      "affected_test_ids": [],
+      "boundary_dimension": null,
+      "boundary_spread_count": null,
+      "boundary_spread_member_ids": [],
+      "boundary_spread_status": "unknown",
+      "changed_component_count": 1,
+      "changed_component_ids": [
+        "repo:example-repo:module:services/orders"
+      ],
+      "changed_file_count": 1,
+      "changed_file_ids": [
+        "repo:example-repo:file:services/orders/Handler.java"
+      ],
+      "crossed_boundary_count": null,
+      "crossed_boundary_pairs": [],
+      "crossed_boundary_status": "unknown",
+      "cutoff_reason": null,
+      "graph_side": "candidate",
+      "lower_bound": false,
+      "mapping_coverage": "1.000000",
+      "mapping_coverage_status": "pass",
+      "narrative_only_context": false,
+      "schema_name": "codestrata.change-summary.v1",
+      "schema_version": "1.0.0",
+      "unmapped_changed_file_count": 0,
+      "visited_edges": null,
+      "visited_nodes": null
+    },
+    "comparison": {
+      "explanation": "Unknown eligible count is UNKNOWN, never 0% or 100%.",
+      "has_baseline": true,
+      "movement": "insufficient",
+      "reason_code": "unknown_denominator"
+    },
+    "coverage": [
+      {
+        "applicability": "applicable",
+        "capability_id": "quality.m22.hotspots",
+        "capability_version": "1.0.0",
+        "coverage_ratio": null,
+        "coverage_reason": "unknown_denominator",
+        "eligible_count": null,
+        "error_count": 0,
+        "evaluated_count": null,
+        "evidence_ids": [],
+        "excluded_count": 0,
+        "execution_state": "unknown",
+        "limitations": [
+          "unknown_denominator"
+        ],
+        "schema_name": "codestrata.capability-coverage.v1",
+        "schema_version": "1.0.0",
+        "scope": "repository",
+        "unknown_count": 0
+      }
+    ],
+    "descriptor_ids": [
+      "codestrata.analyzer.inventory.v1",
+      "codestrata.analyzer.architecture.v1",
+      "codestrata.analyzer.security.v1",
+      "codestrata.analyzer.quality.v1",
+      "codestrata.analyzer.maintainability.v1"
+    ],
+    "evaluation_time": "2026-09-15T00:00:00Z",
+    "evidence": [
+      {
+        "commit_id": null,
+        "evidence_id": "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669",
+        "extractor_version": "e01.2.example.v1",
+        "feed_record_id": null,
+        "graph_record_id": null,
+        "limitation": "js complexity unsupported",
+        "relative_path": "services/orders/Handler.java",
+        "schema_name": "codestrata.evidence.v1",
+        "schema_version": "1.0.0",
+        "source_kind": "source",
+        "source_revision": "abcdef1234567890",
+        "span": null,
+        "working_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    ],
+    "facts": [],
+    "findings": [],
+    "freshness": [
+      {
+        "capability_id": "security.m13.vulnerabilities",
+        "evaluation_time": "2026-09-15T00:00:00Z",
+        "explanation": "Missing feed cannot prove clean.",
+        "feed_digest": null,
+        "feed_provider": null,
+        "git_head": null,
+        "git_window": null,
+        "max_age_days": null,
+        "reason_code": "feed_missing",
+        "source_digest": null,
+        "source_publication_time": null,
+        "state": "unknown"
+      }
+    ],
+    "graph": {
+      "edges": [
+        {
+          "edge_id": "edge:contains:orders:handler",
+          "kind": "contains",
+          "source_id": "repo:example-repo:module:services/orders",
+          "target_id": "repo:example-repo:file:services/orders/Handler.java"
+        }
+      ],
+      "graph_id": "graph:example-repo:v1",
+      "limitations": [],
+      "nodes": [
+        {
+          "kind": "repository",
+          "node_id": "repo:example-repo",
+          "subject_id": "repo:example-repo"
+        },
+        {
+          "kind": "component",
+          "node_id": "repo:example-repo:module:services/orders",
+          "subject_id": "repo:example-repo:module:services/orders"
+        },
+        {
+          "kind": "file",
+          "node_id": "repo:example-repo:file:services/orders/Handler.java",
+          "subject_id": "repo:example-repo:file:services/orders/Handler.java"
+        }
+      ],
+      "schema_name": "codestrata.graph.v1",
+      "schema_version": "1.0.0"
+    },
+    "health_score": null,
+    "hotspots": [
+      {
+        "active_finding_ids": [],
+        "contributors": [
+          {
+            "coverage_reason": "unsupported_syntax",
+            "evidence_ids": [
+              "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+            ],
+            "measurement_id": "M16",
+            "measurement_version": "v1",
+            "name": "complexity",
+            "role": "ranking",
+            "value": null
+          },
+          {
+            "coverage_reason": "git_history_missing",
+            "evidence_ids": [
+              "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+            ],
+            "measurement_id": "M24",
+            "measurement_version": "v1",
+            "name": "churn",
+            "role": "ranking",
+            "value": null
+          },
+          {
+            "coverage_reason": null,
+            "evidence_ids": [
+              "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+            ],
+            "measurement_id": "M09",
+            "measurement_version": "v1",
+            "name": "centrality",
+            "role": "context_only",
+            "value": "0.250000"
+          }
+        ],
+        "evidence_ids": [
+          "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+        ],
+        "history_profile_id": "m24.history.v1",
+        "history_window": "180d+latest-1000",
+        "input_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "list_kind": "partial_or_unknown",
+        "opaque_score": false,
+        "priority_explanation": "formula_version=M22.v1; ranking=complexity*churn; complexity=UNKNOWN; changed_lines=UNKNOWN; value=UNKNOWN; scope=repo:example-repo:module:services/orders; window=180d+latest-1000; tie_break=subject_id_ascending",
+        "ranking_value": null,
+        "record_id": "hotspot:repo:example-repo:module:services/orders",
+        "schema_name": "codestrata.engineering-hotspot.v1",
+        "schema_version": "1.0.0",
+        "subject_id": "repo:example-repo:module:services/orders"
+      }
+    ],
+    "limitations": [
+      "js_ts_complexity_unsupported",
+      "feed_missing"
+    ],
+    "outcome_driver_manifest_digest": "da80d38beace93d8ee1a831d99a26964aee2da9b6e50e62ce05a9618de0515f4",
+    "ownership": [
+      {
+        "denominator": null,
+        "evidence_ids": [
+          "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c"
+        ],
+        "history_profile_id": "m24.history.v1",
+        "notes": "scoped independently; unknown mapping is UNKNOWN not 0%",
+        "numerator": null,
+        "record_id": "own:repo",
+        "schema_name": "codestrata.ownership-concentration.v1",
+        "schema_version": "1.0.0",
+        "scope": "repository",
+        "serialized_ratio": null,
+        "status": "unknown",
+        "subject_id": "repo:example-repo"
+      }
+    ],
+    "repository_subject_id": "repo:example-repo",
+    "schema_name": "codestrata.canonical-envelope.v1",
+    "schema_version": "1.0.0",
+    "source_revision": "abcdef1234567890",
+    "working_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "body_digest": "e4f759b5eafa95c998cdb77367a5a597e01acaaf4c7174a8fdfde7c107f2794e",
+  "operational": {
+    "duration_ms": null,
+    "generated_at": null,
+    "run_id": "run-example-unknown",
+    "signature": null
+  },
+  "schema_name": "codestrata.canonical-envelope.v1",
+  "schema_version": "1.0.0"
+}

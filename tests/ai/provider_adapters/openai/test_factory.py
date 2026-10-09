@@ -122,9 +122,9 @@ def test_executor_limitation_labels_predate_the_migration() -> None:
     from codestrata.ai.provider_contracts.executor import EXECUTOR_LIMITATIONS
 
     client = fakes.FakeClient(fakes.json_response({"a": 1}))
-    execution = factory.build_openai_executor(
-        factory.build_openai_provider(client=client)
-    ).execute(fakes.provider_request())
+    execution = factory.build_openai_executor(factory.build_openai_provider(client=client)).execute(
+        fakes.provider_request()
+    )
 
     assert execution.limitations == EXECUTOR_LIMITATIONS
     assert "executor_not_wired" in execution.limitations

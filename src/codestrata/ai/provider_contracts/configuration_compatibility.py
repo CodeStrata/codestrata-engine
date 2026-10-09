@@ -66,9 +66,9 @@ class ConfigurationCompatibilityStatement:
     explanation: str
 
 
-def build_configuration_compatibility_statements() -> (
-    tuple[ConfigurationCompatibilityStatement, ...]
-):
+def build_configuration_compatibility_statements() -> tuple[
+    ConfigurationCompatibilityStatement, ...
+]:
     statements = (
         ConfigurationCompatibilityStatement(
             requirement_id="CR-1",

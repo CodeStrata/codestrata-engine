@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/CandidateValidation.json",
+  "title": "CodeStrata Engine Candidate Validation and Preview",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "purpose", "permitted_scope", "expiry", "candidate_digest", "selector_digest", "effective_setting_digest", "input_digest", "engine_digest", "dsl_digest", "fixtures", "production_promotion_allowed"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.candidate-validation.v1" },
+    "schema_version": { "type": "string" },
+    "purpose": { "type": "string", "const": "candidate_validation" },
+    "permitted_scope": { "type": "object", "additionalProperties": false },
+    "expiry": { "type": "string" },
+    "candidate_digest": { "type": "string" },
+    "selector_digest": { "type": "string" },
+    "effective_setting_digest": { "type": "string" },
+    "input_digest": { "type": "string" },
+    "engine_digest": { "type": "string" },
+    "dsl_digest": { "type": "string" },
+    "fixtures": { "type": "array", "minItems": 1 },
+    "production_promotion_allowed": { "type": "boolean", "const": false },
+    "stale_evidence": { "type": "boolean", "const": false }
+  }
+}

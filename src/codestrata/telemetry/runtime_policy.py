@@ -13,15 +13,13 @@ from typing import Any
 COMMUNITY_TELEMETRY_RUNTIME_POLICY_ID = "community-telemetry-runtime-policy"
 COMMUNITY_TELEMETRY_RUNTIME_POLICY_VERSION = "1.0"
 COMMUNITY_TELEMETRY_RUNTIME_POLICY_URN = (
-    f"{COMMUNITY_TELEMETRY_RUNTIME_POLICY_ID}:"
-    f"{COMMUNITY_TELEMETRY_RUNTIME_POLICY_VERSION}"
+    f"{COMMUNITY_TELEMETRY_RUNTIME_POLICY_ID}:{COMMUNITY_TELEMETRY_RUNTIME_POLICY_VERSION}"
 )
 
 PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_ID = "community-telemetry-runtime-event"
 PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_VERSION = "1.0"
 PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_URN = (
-    f"{PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_ID}:"
-    f"{PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_VERSION}"
+    f"{PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_ID}:{PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_VERSION}"
 )
 
 DEFAULT_MAX_EVENT_SIZE_BYTES = 4096
@@ -101,9 +99,7 @@ class CommunityTelemetryRuntimePolicy:
         if not self.fail_silent:
             raise RuntimePolicyError("fail_silent must be true")
         if not self.telemetry_failure_cannot_alter_command_result:
-            raise RuntimePolicyError(
-                "telemetry_failure_cannot_alter_command_result must be true"
-            )
+            raise RuntimePolicyError("telemetry_failure_cannot_alter_command_result must be true")
         if not self.transport_unavailable_by_default:
             raise RuntimePolicyError("transport_unavailable_by_default must be true")
         if self.installation_id_allowed:

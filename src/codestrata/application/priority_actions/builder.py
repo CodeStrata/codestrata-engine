@@ -67,9 +67,7 @@ def _recommendation_id(item: RecommendationLike) -> str:
 
 def _description(item: RecommendationLike) -> str:
     return str(
-        getattr(item, "description", None)
-        or getattr(item, "summary", None)
-        or item.title
+        getattr(item, "description", None) or getattr(item, "summary", None) or item.title
     ).strip()
 
 
@@ -209,7 +207,9 @@ def merge_priority_actions(
                 continue
             finding_ids = merge_unique_sorted(finding_ids, _supporting_finding_ids(by_id[rec_id]))
         source_recs = tuple(by_id[rec_id] for rec_id in supporting_recs if rec_id in by_id)
-        primary = select_primary_recommendation_id(source_recs) or preferred.primary_recommendation_id
+        primary = (
+            select_primary_recommendation_id(source_recs) or preferred.primary_recommendation_id
+        )
         completeness = derive_evidence_completeness(source_recs)
     else:
         finding_ids = merge_unique_sorted(

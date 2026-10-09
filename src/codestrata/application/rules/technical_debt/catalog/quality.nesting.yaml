@@ -1,0 +1,50 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: quality.nesting
+  version: 1.0.0
+  title: Function nesting depth exceeds heuristic threshold
+  category: quality
+  owner: codestrata
+  measurement: M17
+  tags: [quality, nesting, heuristic]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [quality.function]
+select:
+  source: quality
+  functions:
+    all:
+      - max_nesting_depth_gt: 4
+condition:
+  operator: quality.nesting
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Function '{{qualified_name}}' in '{{path}}' has max_nesting_depth={{value}}
+        which exceeds heuristic threshold {{threshold}} ({{formula_version}}).
+        Unknown parse sections cannot prove the function is within the threshold.
+      bindings:
+        qualified_name: {type: string, evidence: qualified_name}
+        path: {type: string, evidence: path}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+        formula_version: {type: string, evidence: formula_version}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: quality_nesting_finding_count
+    operation: count
+evidence:
+  include:
+    - function_id
+    - span
+    - nesting_witness
+    - formula_version
+parameters:
+  max_nesting_depth: {type: integer, default: 4, exclusive_min: true}
+  unknown:
+    unknown_parse_invalidates_negative: true
+    absent_functions: not_applicable

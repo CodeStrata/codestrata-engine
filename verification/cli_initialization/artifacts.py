@@ -23,16 +23,8 @@ def classify_artifacts(
 
     active = contract or default_contract()
     classifications: dict[str, str] = {}
-    files = {
-        path.relative_to(root).as_posix()
-        for path in root.rglob("*")
-        if path.is_file()
-    }
-    dirs = {
-        path.relative_to(root).as_posix()
-        for path in root.rglob("*")
-        if path.is_dir()
-    }
+    files = {path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_file()}
+    dirs = {path.relative_to(root).as_posix() for path in root.rglob("*") if path.is_dir()}
 
     for rel in sorted(files | dirs):
         if rel in pre_existing:
@@ -68,7 +60,9 @@ def forbidden_present(classifications: dict[str, str]) -> list[str]:
     return sorted(path for path, kind in classifications.items() if kind == "forbidden")
 
 
-def required_missing(classifications: dict[str, str], required: tuple[str, ...] | None = None) -> list[str]:
+def required_missing(
+    classifications: dict[str, str], required: tuple[str, ...] | None = None
+) -> list[str]:
     need = required or REQUIRED_ARTIFACTS
     present = set(classifications)
     return [item for item in need if item not in present]

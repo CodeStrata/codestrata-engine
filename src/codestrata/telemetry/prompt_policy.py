@@ -5,9 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_ID = (
-    "community-telemetry-interactive-consent-policy"
-)
+COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_ID = "community-telemetry-interactive-consent-policy"
 COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_VERSION = "2.0"
 COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_URN = (
     f"{COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_ID}:"
@@ -97,21 +95,15 @@ class CommunityTelemetryInteractiveConsentPolicy:
         if self.policy_id != COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_ID:
             raise InteractiveConsentPolicyError("unsupported interactive prompt policy id")
         if self.policy_version != COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_VERSION:
-            raise InteractiveConsentPolicyError(
-                "unsupported interactive prompt policy version"
-            )
+            raise InteractiveConsentPolicyError("unsupported interactive prompt policy version")
         if not self.default_answer_deny:
             raise InteractiveConsentPolicyError("default_answer_deny must be true")
         if not self.persistence_allowed:
             raise InteractiveConsentPolicyError("persistence_allowed must be true")
         if not self.prior_consent_reuse_allowed:
-            raise InteractiveConsentPolicyError(
-                "prior_consent_reuse_allowed must be true"
-            )
+            raise InteractiveConsentPolicyError("prior_consent_reuse_allowed must be true")
         if self.installation_identity_required:
-            raise InteractiveConsentPolicyError(
-                "installation_identity_required must be false"
-            )
+            raise InteractiveConsentPolicyError("installation_identity_required must be false")
         if self.transmission_guaranteed:
             raise InteractiveConsentPolicyError("transmission_guaranteed must be false")
         if self.max_prompt_attempts != 1:

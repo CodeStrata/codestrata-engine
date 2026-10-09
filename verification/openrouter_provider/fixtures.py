@@ -32,7 +32,9 @@ class Message:
 
 
 class Choice:
-    def __init__(self, content: str = '{"summary":"synthetic"}', finish_reason: str = "stop") -> None:
+    def __init__(
+        self, content: str = '{"summary":"synthetic"}', finish_reason: str = "stop"
+    ) -> None:
         self.message = Message(content)
         self.finish_reason = finish_reason
 

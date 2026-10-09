@@ -8,8 +8,9 @@ this module must not redefine public path literals.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, Mapping, Protocol
+from typing import Any, Protocol
 
 from codestrata.community_cloud.public_api_authority import (
     PUBLIC_ASSESSMENT_METADATA_URL,
@@ -49,9 +50,7 @@ class AssessmentMetadataTransportResult:
 
 
 class AssessmentMetadataTransport(Protocol):
-    def send(
-        self, request: AssessmentMetadataWireRequest
-    ) -> AssessmentMetadataTransportResult: ...
+    def send(self, request: AssessmentMetadataWireRequest) -> AssessmentMetadataTransportResult: ...
 
 
 class HttpAssessmentMetadataTransport:
@@ -74,9 +73,7 @@ class HttpAssessmentMetadataTransport:
         )
         self._client_version = client_version or get_package_version()
 
-    def send(
-        self, request: AssessmentMetadataWireRequest
-    ) -> AssessmentMetadataTransportResult:
+    def send(self, request: AssessmentMetadataWireRequest) -> AssessmentMetadataTransportResult:
         try:
             return self._send_impl(request)
         except Exception:  # noqa: BLE001 — fail-silent
@@ -101,9 +98,9 @@ class HttpAssessmentMetadataTransport:
                 )
 
         payload = request.to_stable_dict()
-        body = json.dumps(
-            payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True
-        ).encode("utf-8")
+        body = json.dumps(payload, sort_keys=True, separators=(",", ":"), ensure_ascii=True).encode(
+            "utf-8"
+        )
         if len(body) > self._policy.max_body_bytes:
             return AssessmentMetadataTransportResult(
                 kind="rejected",
@@ -165,9 +162,7 @@ class CaptureAssessmentMetadataTransport:
         )
         self._raise = raise_on_send
 
-    def send(
-        self, request: AssessmentMetadataWireRequest
-    ) -> AssessmentMetadataTransportResult:
+    def send(self, request: AssessmentMetadataWireRequest) -> AssessmentMetadataTransportResult:
         if self._raise:
             raise RuntimeError("capture_transport_boom")
         self.captured.append(request.to_stable_dict())

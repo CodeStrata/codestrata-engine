@@ -99,6 +99,6 @@ def test_render_json_outputs_complete_analysis_result(
     payload = json.loads(output)
 
     assert payload["repository"]["name"] == "sample"
-    assert payload["repository"]["path"] == "/tmp/sample"
+    assert payload["repository"]["path"] == str(Path("/tmp/sample"))
     assert payload["technologies"][0]["name"] == "Java"
     assert payload["findings"][0]["rule_id"] == "repository.metrics.summary"

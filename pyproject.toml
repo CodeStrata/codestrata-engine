@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codestrata"
-version = "0.2.1"
+version = "0.3.0"
 description = "CodeStrata Engine: deterministic Engineering Assessment for repositories; portfolio Engineering Intelligence Reports (EIR) where applicable."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -37,6 +37,7 @@ classifiers = [
 
 dependencies = [
     "certifi>=2024.0,<2027.0",
+    "cryptography>=50.0,<51.0",
     "pydantic>=2.10,<3.0",
     "PyYAML>=6.0,<7.0",
     "rich>=13.9,<15.0",
@@ -53,29 +54,38 @@ openai = [
 ]
 mcp = [
     "mcp>=1.27,<2",
+    # G52-D005: mcp resolves PyJWT; 2.14.0 is CVE-2026-101918.
+    "PyJWT>=2.15.1,<3",
 ]
 development = [
     "boto3>=1.35,<2.0",
     "openai>=1.40,<2.0",
     "mcp>=1.27,<2",
+    # G52-D005: mcp resolves PyJWT; 2.14.0 is CVE-2026-101918.
+    "PyJWT>=2.15.1,<3",
     "build>=1.2,<2.0",
     "mypy>=1.14,<2.0",
     "pytest>=9.0.3,<10.0",
     "pytest-cov>=6.0,<7.0",
     "ruff>=0.9,<1.0",
     "types-PyYAML>=6.0,<7.0",
+    # E00.2: pin pip-audit in Engine extras only. Missing module is BLOCKED, not PASS.
+    "pip-audit>=2.7,<3.0",
 ]
 # Alias kept for existing docs/CI.
 dev = [
     "boto3>=1.35,<2.0",
     "openai>=1.40,<2.0",
     "mcp>=1.27,<2",
+    # G52-D005: mcp resolves PyJWT; 2.14.0 is CVE-2026-101918.
+    "PyJWT>=2.15.1,<3",
     "build>=1.2,<2.0",
     "mypy>=1.14,<2.0",
     "pytest>=9.0.3,<10.0",
     "pytest-cov>=6.0,<7.0",
     "ruff>=0.9,<1.0",
     "types-PyYAML>=6.0,<7.0",
+    "pip-audit>=2.7,<3.0",
 ]
 
 
@@ -109,7 +119,13 @@ codestrata = [
     "resources/**/*.md",
     "reporting/assets/*.svg",
     "reporting/assets/*.png",
+    "reporting/html_v2/assets/*.css",
+    "reporting/html_v2/assets/*.txt",
+    "reporting/html_v2/assets/*.woff2",
+    "reporting/html_v2/assets/*.ttf",
     "application/rules/data/*.json",
+    "application/rules/**/*.yaml",
+    "application/rules/**/*.yml",
 ]
 
 
@@ -126,6 +142,7 @@ markers = [
     "docker: requires Docker Compose and a running daemon (skipped when unavailable)",
     "historical_frozen_characterization: superseded slice/artifact characterization; not an ACTIVE 0.2.0 release gate (set CODESTRATA_RUN_HISTORICAL_FROZEN=1 to collect)",
     "remote_validation: live network validation against pinned public remotes; not part of the deterministic Engine CI gate (set CODESTRATA_RUN_REMOTE_VALIDATION=1 to run)",
+    "published_smoke: live PyPI install and fixture journeys for E16.3/G52 (set CODESTRATA_RUN_PUBLISHED_SMOKE=1 to run)",
 ]
 
 
@@ -178,6 +195,16 @@ ignore_missing_imports = true
 [tool.coverage.run]
 source = ["codestrata"]
 branch = true
+
+
+[tool.coverage.paths]
+# The installed-wheel acceptance test runs the same package from a temporary
+# prefix. Treat that copy as the source tree, rather than counting the Engine
+# package twice and assigning the installed copy zero coverage at report time.
+source = [
+    "src/codestrata",
+    "*/installed/codestrata",
+]
 
 
 [tool.coverage.report]

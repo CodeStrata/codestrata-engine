@@ -52,9 +52,7 @@ def test_missing_api_key_returns_a_bounded_error_instead_of_raising() -> None:
 
 
 def test_blank_api_key_is_treated_as_missing() -> None:
-    resolution = client_module.resolve_client(
-        _inputs(), environment_reader=lambda _name: "   "
-    )
+    resolution = client_module.resolve_client(_inputs(), environment_reader=lambda _name: "   ")
 
     assert resolution.error is not None
     assert resolution.error.code == error_mapping.CODE_MISSING_API_KEY
@@ -72,9 +70,7 @@ def test_missing_openai_extra_returns_a_bounded_dependency_error(
 
     monkeypatch.setattr(builtins, "__import__", fake_import)
 
-    resolution = client_module.resolve_client(
-        _inputs(), environment_reader=lambda _name: "sk-test"
-    )
+    resolution = client_module.resolve_client(_inputs(), environment_reader=lambda _name: "sk-test")
 
     assert resolution.error is not None
     assert resolution.error.code == error_mapping.CODE_MISSING_DEPENDENCY

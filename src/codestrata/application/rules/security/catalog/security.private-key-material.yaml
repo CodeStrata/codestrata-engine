@@ -1,0 +1,46 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: security.private-key-material
+  version: 1.0.0
+  title: Private key material in repository
+  category: security
+  owner: codestrata
+  measurement: M10
+  tags: [security, hygiene, secret]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_sensitive.artifacts]
+select:
+  source: repository_sensitive
+  artifacts:
+    all:
+      - inspection_status: inspected
+      - content_classification: private_key_material
+condition:
+  operator: security.has_private_key_material
+emit:
+  finding:
+    default_severity: high
+    message:
+      template: >-
+        Inspected artifact '{{path}}' ({{classification}}) contains a supported
+        private-key content signature. No key body is retained.
+      bindings:
+        path: {type: string, evidence: path}
+        classification: {type: string, evidence: classification}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: secret_private_key_finding_count
+    operation: count
+evidence:
+  include:
+    - source_location
+    - detector_id
+    - safe_secret_type
+    - redacted_span
+  never_include:
+    - raw_secret
+    - private_key_body
+parameters: {}

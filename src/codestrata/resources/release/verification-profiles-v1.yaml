@@ -1,0 +1,37 @@
+schema_name: codestrata.release.verification-profiles.v1
+schema_version: 1.0.0
+policy_id: engine-release-verification-profiles
+policy_version: "1.0"
+max_bundle_bytes: 65536
+public_sigstore:
+  profile_id: codestrata.release.sigstore-public.v1
+  signer_role: public_distribution
+  algorithm: ecdsa-p256-sha256
+  expected_identity: https://github.com/CodeStrata/codestrata-engine/.github/workflows/release.yml@refs/tags/v*
+  expected_issuer: https://token.actions.githubusercontent.com
+  certificate_oidc_issuer_oid: "1.3.6.1.4.1.57264.1.1"
+  transparency_log_required: true
+  transparency_log_forbidden: false
+  network_mode: offline
+private_offline:
+  profile_id: codestrata.release.offline-self-managed-key.v1
+  signer_role: private_result
+  algorithm: ed25519
+  transparency_log_required: false
+  transparency_log_forbidden: true
+  network_mode: offline
+  revocation:
+    policy: freshness_limited
+    max_age_seconds: 604800
+    instant_revocation: false
+    stale_behavior: unknown_not_revoked
+limitations:
+  - offline_bundle_verification_only
+  - no_live_fulcio_rekor_fetch
+  - public_and_private_signer_roles_distinct
+  - private_rule_result_contents_never_enter_public_tlog
+  - offline_revocation_is_freshness_limited
+  - instant_revocation_not_claimed
+  - no_consent_local_utility_preserved
+  - signature_bytes_outside_canonical_body
+  - official_oidc_publication_is_e14_4

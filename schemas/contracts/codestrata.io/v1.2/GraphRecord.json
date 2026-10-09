@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/GraphRecord.json",
+  "title": "CodeStrata Engine Graph Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "graph_id", "nodes", "edges"],
+  "properties": {
+    "schema_name": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "graph_id": { "type": "string" },
+    "nodes": { "type": "array" },
+    "edges": { "type": "array" },
+    "limitations": { "type": "array" }
+  }
+}

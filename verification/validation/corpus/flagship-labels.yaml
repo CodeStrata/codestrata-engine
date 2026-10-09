@@ -1,0 +1,63 @@
+labels:
+- id: juice-shop-owasp-classes
+  kind: labeled-flagship
+  source: OWASP Juice Shop documented challenge classes, independent of Engine output
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: labeled
+  expected_finding_classes:
+  - injection
+  - xss
+  - broken-access-control
+  - sensitive-data-exposure
+  - security-misconfiguration
+  notes: Public intentionally-vulnerable app. Labels are class-level, not a run of
+    the Engine.
+- id: planted-secret-fixture
+  kind: labeled-flagship
+  source: engine/tests/verification/validation/fixtures/planted-secret
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: find
+  expected_finding_classes:
+  - secret-like-token
+  notes: Synthetic token marked planted-fixture; not a live credential.
+- id: planted-vulnerable-dependency
+  kind: labeled-flagship
+  source: engine/tests/verification/validation/fixtures/planted-cve-dep
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: find_or_unknown_if_feed_missing
+  expected_finding_classes:
+  - vulnerable-dependency
+  notes: Old lodash pin for later feed matching. Missing feed => UNKNOWN, never clean
+    PASS.
+- id: planted-architecture-cycle
+  kind: labeled-flagship
+  source: engine/tests/verification/validation/fixtures/planted-architecture
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: find
+  expected_finding_classes:
+  - dependency-cycle
+  notes: Two Java packages import each other. Independent expected cycle.
+- id: unsupported-rust-snippet
+  kind: labeled-flagship
+  source: engine/tests/verification/validation/fixtures/unsupported-rust
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: UNKNOWN
+  expected_finding_classes: []
+  notes: Rust-only snippet. Unsupported language is not successfully assessed.
+- id: nodegoat-known-issues-not-large
+  kind: labeled-flagship
+  source: validation/repository-catalog discovery lead (OWASP/NodeGoat); not counted
+    in the 50-large bar
+  independent_of_engine_output: true
+  precedes_tuning: true
+  expected_status: labeled
+  expected_finding_classes:
+  - injection
+  - xss
+  notes: Small known-issues app. Discovery lead only; excluded from external-large
+    by size.

@@ -13,8 +13,7 @@ from verification.ai_provider_cross_provider.runner import engine_root, run_veri
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "SV.11.8 Cross-Provider Contract Verification "
-            "(CodeStrata v0.2.0 Epic 11, Slice 11.8)"
+            "SV.11.8 Cross-Provider Contract Verification (CodeStrata v0.2.0 Epic 11, Slice 11.8)"
         ),
     )
     parser.add_argument("--engine-root", type=Path, default=None)

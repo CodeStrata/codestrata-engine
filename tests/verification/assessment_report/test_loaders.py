@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from verification.assessment_report.loaders import load_run_directory
 
 

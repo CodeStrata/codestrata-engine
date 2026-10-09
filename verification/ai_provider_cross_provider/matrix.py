@@ -8,7 +8,6 @@ from typing import Any
 from verification.ai_provider_cross_provider.contract import (
     ASSESSMENT_SCHEMA_VERSION,
     BEDROCK_DEFAULT_MODEL_ID,
-    CANONICAL_PROVIDER_IDS,
     DEFAULT_PROVIDER,
     EXPECTED_MAXIMUM_ATTEMPTS,
     EXPECTED_REGISTERED_PROVIDERS,
@@ -18,7 +17,6 @@ from verification.ai_provider_cross_provider.contract import (
     PRIOR_SLICE_IDS,
     REGISTRY_DECISION,
     REGISTRY_DECISION_LABEL,
-    REGISTRY_DECISION_RATIONALE,
     REQUIRED_COMPATIBILITY_REQUIREMENT_IDS,
 )
 from verification.ai_provider_cross_provider.models import CheckResult, ScenarioResult
@@ -105,7 +103,8 @@ def shared_guarantees() -> tuple[str, ...]:
     return (
         "Assess-registered providers are bedrock, openai, and openrouter (explicit-only).",
         "OpenRouter is assess-registered; doctor coverage remains deferred (no doctor.py tokens).",
-        "Both migrated providers support modernization_advisor via AIProviderRequest / AIProviderResult.",
+        "Both migrated providers support modernization_advisor via "
+        "AIProviderRequest / AIProviderResult.",
         "Both use AIProviderExecutor with DEFAULT_RETRY_POLICY maximum_attempts=1.",
         "Both map ProviderUsageMetadata without cost/pricing fields.",
         "Both map failures onto the shared ErrorCategory closed set.",
@@ -123,7 +122,8 @@ def intentional_differences() -> tuple[str, ...]:
         "OpenAI authenticates via API-key environment variable; Bedrock uses AWS credential chain.",
         "OpenAI wire protocol is Chat Completions; Bedrock wire protocol is Converse.",
         "Bedrock remains the default provider; OpenAI is explicit-only.",
-        "Model defaults differ (gpt-4o-mini vs amazon.nova-lite-v1:0) and stay opaque outside adapters.",
+        "Model defaults differ (gpt-4o-mini vs amazon.nova-lite-v1:0) and "
+        "stay opaque outside adapters.",
     )
 
 
@@ -236,7 +236,9 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         "diagnostics must not emit model reference values",
     )
 
-    from codestrata.ai.provider_adapters.bedrock.diagnostics import diagnostic_view_of_adapter as bedrock_diag_view
+    from codestrata.ai.provider_adapters.bedrock.diagnostics import (
+        diagnostic_view_of_adapter as bedrock_diag_view,
+    )
     from codestrata.ai.provider_adapters.bedrock.factory import build_bedrock_provider
     from verification.bedrock_provider_migration import fixtures as bedrock_fixtures
 
@@ -298,7 +300,12 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
     add("L", "silent fallback to the other provider", "fallback exists", False)
     add("M", "OpenAI wire payload enters orchestration", "assessment imports openai SDK", False)
     add("N", "Bedrock Converse payload enters orchestration", "assessment imports boto3", False)
-    add("O", "OpenAI response_format required for Bedrock", "Bedrock requires response_format", False)
+    add(
+        "O",
+        "OpenAI response_format required for Bedrock",
+        "Bedrock requires response_format",
+        False,
+    )
     add("P", "provider result identity mismatch", "result provider_id mismatch", False)
     add("Q", "usage totals inconsistent", "inconsistent totals accepted by contract", False)
     add("R", "authentication failure retried", "auth retried under default policy", False)
@@ -325,7 +332,12 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         if "import openai" in text or "import boto3" in text or "import botocore" in text:
             sdk_in_contracts = True
             break
-    add("X", "provider SDK imported by common contracts", "SDK import in contracts", sdk_in_contracts)
+    add(
+        "X",
+        "provider SDK imported by common contracts",
+        "SDK import in contracts",
+        sdk_in_contracts,
+    )
 
     ai_root = engine_root / "src/codestrata/ai"
     doctor_source = (ai_root / "providers/doctor.py").read_text(encoding="utf-8")

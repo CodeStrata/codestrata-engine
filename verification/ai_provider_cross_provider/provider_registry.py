@@ -99,7 +99,8 @@ def check_registry_decision_is_explicit() -> CheckResult:
     return CheckResult(
         name="registry_decision_is_explicitly_b_compatibility_retained",
         category="provider_registry",
-        ok=REGISTRY_DECISION == "B" and REGISTRY_DECISION_LABEL == "compatibility_registry_retained",
+        ok=REGISTRY_DECISION == "B"
+        and REGISTRY_DECISION_LABEL == "compatibility_registry_retained",
         detail=REGISTRY_DECISION_RATIONALE,
         evidence={
             "registry_decision": REGISTRY_DECISION,
@@ -211,11 +212,10 @@ def check_no_client_construction_when_factory_mocked(engine_root: Path) -> Check
     """AI-disabled / selection path: factory may resolve wrappers without SDK clients."""
 
     del engine_root  # inventory uses engine_root elsewhere; selection is in-memory
-    with patch(
-        "codestrata.ai.provider_adapters.bedrock.client.resolve_client"
-    ) as bedrock_resolve, patch(
-        "codestrata.ai.provider_adapters.openai.client.resolve_client"
-    ) as openai_resolve:
+    with (
+        patch("codestrata.ai.provider_adapters.bedrock.client.resolve_client") as bedrock_resolve,
+        patch("codestrata.ai.provider_adapters.openai.client.resolve_client") as openai_resolve,
+    ):
         create_assess_ai_provider(settings_for("bedrock"))
         create_assess_ai_provider(settings_for("openai"))
         ok = bedrock_resolve.call_count == 0 and openai_resolve.call_count == 0

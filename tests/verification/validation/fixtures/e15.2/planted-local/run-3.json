@@ -1,0 +1,10 @@
+{
+  "configuration_id": "planted-local",
+  "status": "PASS",
+  "findings": [{"id": "F1", "title": "planted"}],
+  "coverage": {"evaluated_units": 2, "eligible_units": 2, "coverage_status": "COMPLETE"},
+  "generated_at": "2026-09-23T12:00:02Z",
+  "duration_ms": 17,
+  "run_id": "run-3",
+  "peak_rss_bytes": 1050
+}

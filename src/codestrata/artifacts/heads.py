@@ -52,7 +52,9 @@ def head_basename_for_legacy_filename(legacy_filename: str) -> str:
     return name
 
 
-def resolve_head_path(run_directory: Path, *, head_id: str | None = None, legacy_filename: str | None = None) -> Path:
+def resolve_head_path(
+    run_directory: Path, *, head_id: str | None = None, legacy_filename: str | None = None
+) -> Path:
     """Return the authoritative path for a head artifact under ``heads/``."""
 
     heads = heads_directory(run_directory)

@@ -1,0 +1,53 @@
+api_version: codestrata.io/rules/v1
+applies_to:
+  facts:
+  - module.declaration
+  - graph.imports
+  languages:
+  - java
+condition:
+  dependency_view: null
+  edge_types:
+  - imports
+  fact: null
+  max_depth: 1
+  operands: []
+  operator: cycle
+  traversal: direct
+  value: null
+evidence_include:
+- source_location
+- dependency_path
+finding:
+  bindings:
+  - evidence: dependency_path
+    name: dependency_path
+    type: string
+  default_severity: high
+  documentation_url: https://docs.codestrata.ai/rules/architecture/dependency-cycle
+  message_template: '{{dependency_path}} participates in an import cycle'
+kind: Rule
+metadata:
+  category: architecture
+  id: architecture.dependency-cycle
+  owner: codestrata
+  title: Modules must not form import cycles
+  version: 1.0.0
+metric:
+  name: dependency_cycle_count
+  operation: count
+parameter_schema:
+- default: 8
+  maximum: 32.0
+  minimum: 2.0
+  name: max_cycle_length
+  value_type: integer
+schema_name: codestrata.rule.v1
+schema_version: 1.0.0
+select:
+  nodes:
+    all:
+    - type: module
+  selector_digest: null
+  selector_ref: null
+  source: repository_graph

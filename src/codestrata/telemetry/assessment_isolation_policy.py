@@ -72,9 +72,7 @@ class CommunityTelemetryAssessmentIsolationPolicy:
         if self.policy_id != COMMUNITY_TELEMETRY_ASSESSMENT_ISOLATION_POLICY_ID:
             raise AssessmentIsolationPolicyError("unsupported isolation policy id")
         if self.policy_version != COMMUNITY_TELEMETRY_ASSESSMENT_ISOLATION_POLICY_VERSION:
-            raise AssessmentIsolationPolicyError(
-                "unsupported isolation policy version"
-            )
+            raise AssessmentIsolationPolicyError("unsupported isolation policy version")
         required_true = (
             self.primary_operation_authoritative,
             self.telemetry_side_effects_optional,
@@ -103,14 +101,10 @@ class CommunityTelemetryAssessmentIsolationPolicy:
         return {
             "bounded_lifecycle_events_only": self.bounded_lifecycle_events_only,
             "limitations": list(self.limitations),
-            "no_telemetry_driven_assessment_retry": (
-                self.no_telemetry_driven_assessment_retry
-            ),
+            "no_telemetry_driven_assessment_retry": (self.no_telemetry_driven_assessment_retry),
             "no_telemetry_driven_cancellation": self.no_telemetry_driven_cancellation,
             "no_telemetry_persistence": self.no_telemetry_persistence,
-            "no_transport_activation_by_default": (
-                self.no_transport_activation_by_default
-            ),
+            "no_transport_activation_by_default": (self.no_transport_activation_by_default),
             "policy_id": self.policy_id,
             "policy_token": self.policy_token,
             "policy_version": self.policy_version,
@@ -124,9 +118,7 @@ class CommunityTelemetryAssessmentIsolationPolicy:
             ),
             "telemetry_failures_fail_silent": self.telemetry_failures_fail_silent,
             "telemetry_side_effects_optional": self.telemetry_side_effects_optional,
-            "telemetry_success_cannot_alter_primary": (
-                self.telemetry_success_cannot_alter_primary
-            ),
+            "telemetry_success_cannot_alter_primary": (self.telemetry_success_cannot_alter_primary),
         }
 
 

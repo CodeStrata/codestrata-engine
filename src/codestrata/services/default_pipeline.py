@@ -6,19 +6,26 @@ from codestrata import __version__
 from codestrata.config.settings import CodestrataSettings
 from codestrata.extensions.analyzers import resolve_enabled_analyzers
 from codestrata.services.analysis_service import AnalysisService
-from codestrata.services.analyzers import (
-    ArchitectureAnalyzer,
-    BuildDiscoveryAnalyzer,
-    BuildMetadataAnalyzer,
-    CicdDiscoveryAnalyzer,
-    CloudReadinessAnalyzer,
-    CompositeAnalyzer,
+from codestrata.services.analyzers.architecture_analyzer import ArchitectureAnalyzer
+from codestrata.services.analyzers.build_discovery_analyzer import BuildDiscoveryAnalyzer
+from codestrata.services.analyzers.build_metadata_analyzer import BuildMetadataAnalyzer
+from codestrata.services.analyzers.cicd_discovery_analyzer import CicdDiscoveryAnalyzer
+from codestrata.services.analyzers.cloud_readiness_analyzer import CloudReadinessAnalyzer
+from codestrata.services.analyzers.composite_analyzer import CompositeAnalyzer
+from codestrata.services.analyzers.dependency_discovery_analyzer import (
     DependencyDiscoveryAnalyzer,
-    DependencyHealthAnalyzer,
-    DependencyMetadataAnalyzer,
-    RepositoryMetricsAnalyzer,
-    SecurityAnalyzer,
 )
+from codestrata.services.analyzers.dependency_health_analyzer import (
+    DependencyHealthAnalyzer,
+)
+from codestrata.services.analyzers.dependency_metadata_analyzer import (
+    DependencyMetadataAnalyzer,
+)
+from codestrata.services.analyzers.inventory_analyzer import InventoryAnalyzer
+from codestrata.services.analyzers.repository_metrics_analyzer import (
+    RepositoryMetricsAnalyzer,
+)
+from codestrata.services.analyzers.security_analyzer import SecurityAnalyzer
 from codestrata.services.contracts import Analyzer
 from codestrata.services.detectors.composite_technology_detector import (
     CompositeTechnologyDetector,
@@ -30,6 +37,7 @@ from codestrata.services.detectors.javascript_technology_detector import (
 )
 from codestrata.services.detectors.php_technology_detector import PhpTechnologyDetector
 from codestrata.services.detectors.python_technology_detector import PythonTechnologyDetector
+from codestrata.services.detectors.rust_technology_detector import RustTechnologyDetector
 from codestrata.static_analysis.providers import PmdProvider
 from codestrata.static_analysis.service import StaticAnalysisService
 
@@ -38,6 +46,7 @@ def builtin_analyzers() -> list[Analyzer]:
     """Return the first-party Phase 1 analyzer list (Community default)."""
 
     return [
+        InventoryAnalyzer(),
         RepositoryMetricsAnalyzer(),
         BuildDiscoveryAnalyzer(),
         BuildMetadataAnalyzer(),
@@ -67,6 +76,7 @@ def create_default_analysis_service(
             PhpTechnologyDetector(),
             CsharpTechnologyDetector(),
             PythonTechnologyDetector(),
+            RustTechnologyDetector(),
         ]
     )
 

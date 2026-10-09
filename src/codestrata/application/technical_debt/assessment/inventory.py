@@ -85,20 +85,14 @@ def enrich_finding_reference(finding: Finding) -> TechnicalDebtFindingReference:
         if part.strip()
     ) or ("technical-debt",)
     scope = tuple(
-        part.strip()
-        for part in finding.metadata.get("subject_keys", "").split(",")
-        if part.strip()
+        part.strip() for part in finding.metadata.get("subject_keys", "").split(",") if part.strip()
     )
     path = finding.metadata.get("path")
     if not path and finding.evidence:
         path = finding.evidence[0].path
     if not path and scope:
         path = next(
-            (
-                item
-                for item in scope
-                if "/" in item or item.endswith((".py", ".java"))
-            ),
+            (item for item in scope if "/" in item or item.endswith((".py", ".java"))),
             None,
         )
     path = path.replace("\\", "/") if path else None
@@ -257,9 +251,7 @@ def build_hotspot_inventory(
         production=tuple(
             item for item in hotspots if item.source_role is TechnicalDebtSourceRole.PRODUCTION
         ),
-        test=tuple(
-            item for item in hotspots if item.source_role is TechnicalDebtSourceRole.TEST
-        ),
+        test=tuple(item for item in hotspots if item.source_role is TechnicalDebtSourceRole.TEST),
         unknown=tuple(
             item for item in hotspots if item.source_role is TechnicalDebtSourceRole.UNKNOWN
         ),

@@ -39,11 +39,7 @@ class RuleSuppressionService:
                 if suppression.subject_reference not in subjects:
                     continue
             if suppression.path_pattern:
-                paths = [
-                    item.safe_location
-                    for item in match.evidence
-                    if item.safe_location
-                ]
+                paths = [item.safe_location for item in match.evidence if item.safe_location]
                 if not any(fnmatch(path, suppression.path_pattern) for path in paths):
                     continue
             return RuleSuppressionDecision(

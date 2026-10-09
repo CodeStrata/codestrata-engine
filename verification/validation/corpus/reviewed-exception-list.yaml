@@ -1,0 +1,11 @@
+package_revision: ENGINE-2026-09-15-R1
+story: E15.3
+independent_reviewer: ''
+exceptions:
+- id: platform-r05
+  gate_or_story: Platform/R05
+  scope: out_of_engine_release_gate
+  rationale: Remaining Platform/R05 work is explicitly out of this gate, not a waiver for missing Engine behavior.
+  reviewed: false
+  reviewer: ''
+  review_date: ''

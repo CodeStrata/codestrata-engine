@@ -1,0 +1,4 @@
+diff --git a/src/legacy.py b/src/renamed.py
+similarity index 100%
+rename from src/legacy.py
+rename to src/renamed.py

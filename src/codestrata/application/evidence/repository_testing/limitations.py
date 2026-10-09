@@ -29,13 +29,11 @@ _STANDARD: tuple[tuple[RepositoryTestingLimitationCategory, str], ...] = (
     ),
     (
         RepositoryTestingLimitationCategory.FRAMEWORK_DETECTION_BOUNDED,
-        "Framework detection is limited to supported declarations and structural "
-        "indicators.",
+        "Framework detection is limited to supported declarations and structural indicators.",
     ),
     (
         RepositoryTestingLimitationCategory.TEST_TYPE_CONVENTION_BASED,
-        "Test-type classification is based on repository conventions and explicit "
-        "configuration.",
+        "Test-type classification is based on repository conventions and explicit configuration.",
     ),
     (
         RepositoryTestingLimitationCategory.NO_TEST_EFFECTIVENESS,
@@ -51,8 +49,7 @@ _STANDARD: tuple[tuple[RepositoryTestingLimitationCategory, str], ...] = (
     ),
     (
         RepositoryTestingLimitationCategory.MARKERS_NOT_JUDGED,
-        "Disabled or skipped markers are collected without judging whether they "
-        "are justified.",
+        "Disabled or skipped markers are collected without judging whether they are justified.",
     ),
     (
         RepositoryTestingLimitationCategory.FIXTURE_CONTENT_NOT_EVALUATED,
@@ -60,8 +57,7 @@ _STANDARD: tuple[tuple[RepositoryTestingLimitationCategory, str], ...] = (
     ),
     (
         RepositoryTestingLimitationCategory.GENERATED_VENDOR_EXCLUSIONS,
-        "Generated, vendored, binary, unsupported, or oversized files may be "
-        "excluded.",
+        "Generated, vendored, binary, unsupported, or oversized files may be excluded.",
     ),
     (
         RepositoryTestingLimitationCategory.NO_RELEASE_READINESS,
@@ -73,9 +69,7 @@ _STANDARD: tuple[tuple[RepositoryTestingLimitationCategory, str], ...] = (
 def standard_limitations() -> tuple[RepositoryTestingLimitation, ...]:
     return tuple(
         RepositoryTestingLimitation(
-            limitation_id=make_limitation_id(
-                category=category.value, summary=summary
-            ),
+            limitation_id=make_limitation_id(category=category.value, summary=summary),
             category=category,
             summary=summary,
         )

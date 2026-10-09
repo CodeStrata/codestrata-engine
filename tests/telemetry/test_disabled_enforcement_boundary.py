@@ -14,10 +14,7 @@ from codestrata.telemetry.runtime_factory import create_default_telemetry_runtim
 from codestrata.telemetry.service import get_telemetry_service, reset_telemetry_singletons
 from codestrata.telemetry.transport import TelemetryTransportResultKind
 
-
-TELEMETRY_ROOT = (
-    Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
-)
+TELEMETRY_ROOT = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
 
 
 def test_S_no_fallback_to_active_legacy() -> None:
@@ -40,7 +37,14 @@ def test_U_default_transport_never_sent() -> None:
 
 
 def test_W_X_no_platform_datalake_imports() -> None:
-    forbidden = ("codestrata_platform", "codestrata_platform.community_cloud","community_cloud_api", "boto3", "fastapi", "data_lake")
+    forbidden = (
+        "codestrata_platform",
+        "codestrata_platform.community_cloud",
+        "community_cloud_api",
+        "boto3",
+        "fastapi",
+        "data_lake",
+    )
     for path in TELEMETRY_ROOT.rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

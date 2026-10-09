@@ -80,7 +80,6 @@ class DependencyFacts(BaseModel):
             key=lambda dependency: (
                 dependency.name,
                 dependency.ecosystem,
-                dependency.scope,
                 dependency.manifest_path,
             ),
         )

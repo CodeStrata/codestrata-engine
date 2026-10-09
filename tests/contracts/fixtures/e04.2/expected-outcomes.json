@@ -1,0 +1,6 @@
+{
+  "off_severity": "off_is_not_severity",
+  "out_of_range_parameter": "out_of_range_parameter",
+  "executable_message": "executable_message",
+  "conflicting_settings": "conflicting_settings"
+}

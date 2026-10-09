@@ -46,7 +46,9 @@ class CatalogView:
 
 
 _FULL_SHA = re.compile(r"^[0-9a-f]{40}$")
-_FLOATING = frozenset({"main", "master", "head", "default", "latest", "origin/main", "origin/master"})
+_FLOATING = frozenset(
+    {"main", "master", "head", "default", "latest", "origin/main", "origin/master"}
+)
 
 
 def _parse_revision(raw: Any) -> QualifiedRevision | None:
@@ -63,7 +65,9 @@ def _parse_revision(raw: Any) -> QualifiedRevision | None:
         rtype = str(raw.get("type") or raw.get("revision_type") or "").strip().lower()
         value = str(raw.get("value") or raw.get("revision") or "").strip()
         source_tag = raw.get("source_tag")
-        source = str(source_tag).strip() if isinstance(source_tag, str) and source_tag.strip() else None
+        source = (
+            str(source_tag).strip() if isinstance(source_tag, str) and source_tag.strip() else None
+        )
         if rtype not in {"commit", "tag"} or not value:
             return None
         if value.lower() in _FLOATING:
@@ -87,9 +91,7 @@ def resolve_catalog_path(repo_root: Path) -> Path:
     for path in candidates:
         if path.is_file():
             return path.resolve()
-    raise FileNotFoundError(
-        f"permanent catalog not found; expected {CATALOG_RELATIVE_PATH}"
-    )
+    raise FileNotFoundError(f"permanent catalog not found; expected {CATALOG_RELATIVE_PATH}")
 
 
 def load_catalog(repo_root: Path) -> CatalogView:
@@ -132,9 +134,7 @@ def select_smoke_repository(catalog: CatalogView) -> tuple[CatalogEntry | None, 
     """Deterministic selection per SV.4 policy."""
 
     candidates = [
-        e
-        for e in catalog.entries
-        if e.enabled_for_smoke and e.qualified_revision is not None
+        e for e in catalog.entries if e.enabled_for_smoke and e.qualified_revision is not None
     ]
     if not candidates:
         return None, "no smoke-enabled catalog entry has a qualified commit/tag revision"

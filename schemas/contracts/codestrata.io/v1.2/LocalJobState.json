@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/LocalJobState.json",
+  "title": "CodeStrata Engine Local Job Progress Cancellation and Terminal State",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "progress"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.local-job-state.v1" },
+    "schema_version": { "type": "string" },
+    "progress": { "type": "object", "additionalProperties": false },
+    "cancellation": { "type": ["object", "null"] },
+    "terminal": { "type": ["object", "null"] }
+  }
+}

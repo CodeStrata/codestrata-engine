@@ -362,6 +362,27 @@ def test_assess_defaults_to_deterministic_mode() -> None:
     assert "Default is --no-ai" in result.stdout or "--no-ai" in result.stdout
 
 
+def test_assess_seals_canonical_records_on_analysis_result(tmp_path: Path) -> None:
+    result, _, _ = _run(
+        tmp_path,
+        repo_name="sealed-baseline",
+        mode=AssessmentMode.DETERMINISTIC,
+    )
+    analysis_path = result.run_directory / "analysis-result.json"
+    payload = json.loads(analysis_path.read_text(encoding="utf-8"))
+    metadata = payload["metadata"]
+    assert "canonical_hotspots" in metadata
+    assert "canonical_ownership" in metadata
+    assert "canonical_cochange" in metadata
+    assert "canonical_coverage" in metadata
+    assert "canonical_freshness" in metadata
+    assert metadata["dirty"] is False
+    assert metadata["source_revision"] == "working-tree"
+    assert metadata["evaluation_time"] == "2026-07-21T18:00:00Z"
+    assert metadata["canonical_graph_ref"]["repository_node_count"] >= 0
+    assert payload["comparison"] is None
+
+
 def test_local_repository_assessment_success(tmp_path: Path) -> None:
     result, provider, _ = _run(tmp_path, repo_name="spring-petclinic")
     assert result.repository_name == "spring-petclinic"
@@ -429,8 +450,12 @@ def test_deterministic_assessment_success_without_model_or_aws(
     assert provider.calls == []
     assert context_builder.calls == []
     html = result.html_report_path.read_text(encoding="utf-8")
-    assert "Leadership Verdict" in html
-    assert "Executive Summary" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
+    assert html.count('id="executive-summary"') == 1
+    assert html.find('id="attention-first"') < html.find('id="executive-summary"')
+    assert 'href="#executive-summary"' not in html
+    assert "Should I care?" not in html
     assert "Deterministic" in html
     assert 'id="ai-enrichment"' not in html
     assert "Findings" in html
@@ -726,7 +751,10 @@ def test_invalid_model_response(tmp_path: Path) -> None:
     )
     assert str(document["schema"]).startswith("codestrata-assessment-manifest")
     assert execution["execution_status"] == "validation_failed"
-    assert "contract validation" in html.lower() or execution["failure"]["code"] == "AI_VALIDATION_FAILED"
+    assert (
+        "contract validation" in html.lower()
+        or execution["failure"]["code"] == "AI_VALIDATION_FAILED"
+    )
     assert (result.run_directory / "advisor-execution.json").is_file()
 
 
@@ -873,7 +901,9 @@ def test_cli_ai_mode_defaults_model_and_retains_deterministic_on_auth_failure(
     html_paths = list(out_root.rglob("assessment.html"))
     assert html_paths
     html = html_paths[0].read_text(encoding="utf-8")
-    assert "fallback" in html.lower() or "Authentication failed" in html or "Provider failed" in html
+    assert (
+        "fallback" in html.lower() or "Authentication failed" in html or "Provider failed" in html
+    )
 
 
 def test_verbose_error_mode_includes_traceback(
@@ -1215,8 +1245,12 @@ def test_html_and_json_summary_counts_match(tmp_path: Path) -> None:
     assert recommendations["recommendation_count"] == result.recommendations_count
     assert result.ai_executed is True
     html = result.html_report_path.read_text(encoding="utf-8")
-    assert "Leadership Verdict" in html
-    assert "Executive Summary" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
+    assert html.count('id="executive-summary"') == 1
+    assert html.find('id="attention-first"') < html.find('id="executive-summary"')
+    assert 'href="#executive-summary"' not in html
+    assert "Should I care?" not in html
     assert "Priority Actions" in html
     # Finding totals remain visible via severity cards / appendix summary.
     assert str(result.findings_count) in html

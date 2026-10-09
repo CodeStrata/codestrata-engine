@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from tests.telemetry.transport_test_helpers import TEST_ENDPOINT, TEST_TOKEN, make_config
 
 from codestrata.telemetry.event_identity import (
     TelemetryTransportCredential,
@@ -12,7 +13,6 @@ from codestrata.telemetry.transport_configuration import (
     TelemetryTransportConfiguration,
     TransportConfigurationError,
 )
-from tests.telemetry.transport_test_helpers import TEST_ENDPOINT, TEST_TOKEN, make_config
 
 
 def test_credential_valid_and_redacted() -> None:

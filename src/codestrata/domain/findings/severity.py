@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from decimal import Decimal, InvalidOperation
 from enum import StrEnum
-from typing import Any, Mapping
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -79,7 +79,16 @@ class FindingSeverityComponents(BaseModel):
     runtime_validation: str | None = None
     limitations_count: int = Field(default=0, ge=0)
 
-    @field_validator("rule_id", "assessment_head", "production_context", "affected_scope", "directness", "runtime_validation", "threshold_ratio", mode="before")
+    @field_validator(
+        "rule_id",
+        "assessment_head",
+        "production_context",
+        "affected_scope",
+        "directness",
+        "runtime_validation",
+        "threshold_ratio",
+        mode="before",
+    )
     @classmethod
     def optional_text(cls, value: object) -> str | None:
         if value is None:
@@ -97,9 +106,7 @@ class FindingSeverityAssessment(BaseModel):
     basis: tuple[FindingSeverityBasis, ...] = ()
     calibration_status: SeverityCalibrationStatus = SeverityCalibrationStatus.CALIBRATED
     limitations: tuple[str, ...] = ()
-    component_summary: FindingSeverityComponents = Field(
-        default_factory=FindingSeverityComponents
-    )
+    component_summary: FindingSeverityComponents = Field(default_factory=FindingSeverityComponents)
     policy_id: str | None = None
 
     @field_validator("basis", mode="before")
@@ -132,10 +139,7 @@ class FindingSeverityAssessment(BaseModel):
 
     @model_validator(mode="after")
     def validate_assessment(self) -> FindingSeverityAssessment:
-        if (
-            self.calibration_status is SeverityCalibrationStatus.CALIBRATED
-            and not self.basis
-        ):
+        if self.calibration_status is SeverityCalibrationStatus.CALIBRATED and not self.basis:
             raise ValueError("calibrated severity assessment requires at least one basis")
         return self
 
@@ -153,8 +157,7 @@ class FindingSeverityAssessment(BaseModel):
             severity=severity,
             basis=(FindingSeverityBasis.LEGACY_RULE,),
             calibration_status=SeverityCalibrationStatus.UNAVAILABLE,
-            limitations=limitations
-            or ("Severity calibration unavailable for this Finding.",),
+            limitations=limitations or ("Severity calibration unavailable for this Finding.",),
             component_summary=FindingSeverityComponents(
                 base_severity=severity,
                 calibrated_severity=severity,

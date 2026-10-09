@@ -39,9 +39,7 @@ def _assert_clean(text: str) -> None:
 @pytest.fixture
 def secret_adapter(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setenv("MY_KEY_VAR", _SECRET_KEY)
-    client = fakes.FakeClient(
-        fakes.text_response(_SECRET_RESPONSE, id=_SECRET_REQUEST_ID)
-    )
+    client = fakes.FakeClient(fakes.text_response(_SECRET_RESPONSE, id=_SECRET_REQUEST_ID))
     return build_openai_provider(
         openai_settings=OpenAISettings(api_key_env="MY_KEY_VAR", base_url=_SECRET_BASE_URL),
         client=client,

@@ -1,0 +1,53 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: architecture.cycles
+  version: 1.0.0
+  title: Modules must not form dependency cycles
+  category: architecture
+  owner: codestrata
+applies_to:
+  languages:
+    - java
+    - python
+    - javascript
+    - typescript
+    - php
+    - csharp
+  facts:
+    - module.declaration
+    - graph.imports
+    - graph.depends_on
+select:
+  source: repository_graph
+  nodes:
+    all:
+      - type: module
+condition:
+  operator: cycle
+  edge_types:
+    - imports
+    - depends_on
+  traversal: direct
+  max_depth: 1
+  dependency_view: resolved
+finding:
+  default_severity: medium
+  message_template: A resolved module graph cycle is present
+  bindings:
+    - name: cycle_members
+      type: string
+      evidence: cycle_members
+  documentation_url: https://docs.codestrata.ai/rules/architecture/cycles
+metric:
+  name: module_cycle_count
+  operation: count
+evidence_include:
+  - source_location
+  - dependency_path
+parameter_schema:
+  - name: max_cycle_length
+    value_type: integer
+    minimum: 2
+    maximum: 32
+    default: 8

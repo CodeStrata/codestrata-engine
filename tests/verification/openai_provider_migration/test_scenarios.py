@@ -114,9 +114,9 @@ def test_scenarios_use_only_synthetic_fixtures() -> None:
         and isinstance(node.value, ast.Name)
         and node.value.id == "os"
     }
-    referenced = {
-        node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)
-    } | {node.id for node in ast.walk(tree) if isinstance(node, ast.Name)}
+    referenced = {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)} | {
+        node.id for node in ast.walk(tree) if isinstance(node, ast.Name)
+    }
 
     assert not environment_reads
     assert "default_environment_reader" not in referenced

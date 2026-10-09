@@ -105,8 +105,7 @@ class PriorityAction(BaseModel):
         primary = self.primary_recommendation_id
         if primary is not None and primary not in supporting:
             raise TraceabilityValidationError(
-                "primary_recommendation_id must reference a "
-                "supporting_recommendation_ids entry"
+                "primary_recommendation_id must reference a supporting_recommendation_ids entry"
             )
         if primary is None and len(supporting) == 1:
             primary = supporting[0]
@@ -160,8 +159,7 @@ class PriorityAction(BaseModel):
         primary = primary_recommendation_id or supporting_recs[0]
         if primary not in supporting_recs:
             raise TraceabilityValidationError(
-                "primary_recommendation_id must reference a "
-                "supporting_recommendation_ids entry"
+                "primary_recommendation_id must reference a supporting_recommendation_ids entry"
             )
         if action_type is None:
             action_type = (

@@ -26,9 +26,9 @@ from codestrata.domain.recommendations.recommendation_confidence import (
     RecommendationConfidenceComponents,
     RecommendationConfidenceDerivationStatus,
     RecommendationConfidenceLevel,
+    min_recommendation_confidence_level,
     recommendation_confidence_level_rank,
     recommendation_confidence_to_json,
-    min_recommendation_confidence_level,
 )
 
 __all__ = [

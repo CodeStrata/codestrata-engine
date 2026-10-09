@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 import subprocess
 import time
 from dataclasses import dataclass
@@ -84,7 +83,8 @@ def run_codestrata(
     elapsed = time.perf_counter() - started
     combined = f"{stdout}\n{stderr}".lower()
     safe_argv = tuple(
-        sanitize_text(part, workspace=cwd) for part in argv[1:]  # omit absolute binary
+        sanitize_text(part, workspace=cwd)
+        for part in argv[1:]  # omit absolute binary
     )
     return CommandResult(
         name=name or (args[0] if args else "codestrata"),

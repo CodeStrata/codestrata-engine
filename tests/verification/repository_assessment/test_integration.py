@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from verification.repository_assessment.catalog import load_catalog, select_smoke_repository
 from verification.repository_assessment.reporting import report_contains_forbidden_leak
 from verification.repository_assessment.runner import run_repository_assessment_verification

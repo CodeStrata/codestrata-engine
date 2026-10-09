@@ -201,9 +201,7 @@ class CsharpTechnologyDetector:
                 )
             )
 
-        sdk_blob = " ".join(
-            self._read_text(repository, path) for path in csproj_files[:20]
-        )
+        sdk_blob = " ".join(self._read_text(repository, path) for path in csproj_files[:20])
         if "Microsoft.NET.Sdk.Web" in sdk_blob:
             technologies.append(
                 Technology(

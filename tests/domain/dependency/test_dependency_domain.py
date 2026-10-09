@@ -87,12 +87,8 @@ def test_empty_section_round_trip_deterministic() -> None:
         DependencyAssessmentAssembler,
     )
 
-    left = DependencyAssessmentAssembler().assemble_empty(
-        repository_id="repo:codestrata"
-    )
-    right = DependencyAssessmentAssembler().assemble_empty(
-        repository_id="repo:codestrata"
-    )
+    left = DependencyAssessmentAssembler().assemble_empty(repository_id="repo:codestrata")
+    right = DependencyAssessmentAssembler().assemble_empty(repository_id="repo:codestrata")
     assert left.model_dump(mode="json") == right.model_dump(mode="json")
     payload = dumps_stable_json(left.model_dump(mode="json"))
     restored = DependencyAssessmentSection.model_validate(loads_stable_json(payload))

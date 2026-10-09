@@ -45,13 +45,9 @@ def register_architecture_conclusion_tools(
             payload = _load_artifact(artifact_path)
             conclusions = list(payload.get("conclusions", []))
             if category:
-                conclusions = [
-                    item for item in conclusions if item.get("category") == category
-                ]
+                conclusions = [item for item in conclusions if item.get("category") == category]
             if status:
-                conclusions = [
-                    item for item in conclusions if item.get("status") == status
-                ]
+                conclusions = [item for item in conclusions if item.get("status") == status]
             return {
                 "conclusions": [
                     {
@@ -110,9 +106,7 @@ def register_architecture_conclusion_tools(
                 "materiality": match.get("materiality"),
                 "business_impact": match.get("business_impact"),
                 "modernization_relevance": match.get("modernization_relevance"),
-                "consolidated_recommendation_ids": match.get(
-                    "consolidated_recommendation_ids", []
-                ),
+                "consolidated_recommendation_ids": match.get("consolidated_recommendation_ids", []),
                 "limitations": match.get("limitations", []),
                 "status": match.get("status"),
             }
@@ -162,9 +156,7 @@ def register_architecture_conclusion_tools(
                         "recommendation_group_id": item.get("recommendation_group_id"),
                         "title": item.get("title"),
                         "primary_action": item.get("primary_action"),
-                        "source_recommendation_ids": item.get(
-                            "source_recommendation_ids", []
-                        ),
+                        "source_recommendation_ids": item.get("source_recommendation_ids", []),
                         "modernization_wave": item.get("modernization_wave"),
                         "limitations": item.get("limitations", []),
                     }

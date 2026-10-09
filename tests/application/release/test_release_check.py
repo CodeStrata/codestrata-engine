@@ -15,6 +15,7 @@ from codestrata.application.release.checks import (
     check_prompt_availability,
     check_required_resources,
     check_schema_availability,
+    check_verification_profiles,
 )
 from codestrata.cli import app
 from codestrata.cli.release import release_app
@@ -32,6 +33,7 @@ def test_packaged_default_config_and_schemas() -> None:
     assert check_prompt_availability().ok
     assert check_default_configuration().ok
     assert check_deterministic_provider_health().ok
+    assert check_verification_profiles().ok
 
 
 def test_cli_version_and_release_help() -> None:

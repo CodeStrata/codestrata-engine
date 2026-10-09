@@ -150,13 +150,9 @@ def run_verification(root: Path | None = None) -> BedrockMigrationVerificationRe
         "title": SLICE_TITLE,
     }
 
-    draft = reporting.build_report(
-        checks=checks, scenarios=scenario_results, matrices=matrices
-    )
+    draft = reporting.build_report(checks=checks, scenarios=scenario_results, matrices=matrices)
     checks.extend(privacy.run_report_privacy_checks(draft.to_dict()))
-    return reporting.build_report(
-        checks=checks, scenarios=scenario_results, matrices=matrices
-    )
+    return reporting.build_report(checks=checks, scenarios=scenario_results, matrices=matrices)
 
 
 __all__ = [

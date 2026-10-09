@@ -5,9 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-COMMUNITY_TELEMETRY_PUBLIC_CATALOG_POLICY_ID = (
-    "community-telemetry-public-catalog-policy"
-)
+COMMUNITY_TELEMETRY_PUBLIC_CATALOG_POLICY_ID = "community-telemetry-public-catalog-policy"
 COMMUNITY_TELEMETRY_PUBLIC_CATALOG_POLICY_VERSION = "1.0"
 COMMUNITY_TELEMETRY_PUBLIC_CATALOG_POLICY_URN = (
     f"{COMMUNITY_TELEMETRY_PUBLIC_CATALOG_POLICY_ID}:"

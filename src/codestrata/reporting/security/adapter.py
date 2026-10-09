@@ -56,9 +56,7 @@ _STATUS_LABELS = {
 }
 
 _STATUS_SUMMARIES = {
-    SecurityAssessmentStatus.DISABLED: (
-        "Security analysis was disabled for this assessment."
-    ),
+    SecurityAssessmentStatus.DISABLED: ("Security analysis was disabled for this assessment."),
     SecurityAssessmentStatus.NOT_APPLICABLE: (
         "No applicable Security assessment was produced for this repository."
     ),
@@ -74,12 +72,8 @@ _STATUS_SUMMARIES = {
         "Security assessment produced usable results with partial evidence or "
         "rule evaluation limitations."
     ),
-    SecurityAssessmentStatus.FAILED: (
-        "Security assessment could not be assembled successfully."
-    ),
-    SecurityAssessmentStatus.NOT_REQUESTED: (
-        "Security assessment was not requested."
-    ),
+    SecurityAssessmentStatus.FAILED: ("Security assessment could not be assembled successfully."),
+    SecurityAssessmentStatus.NOT_REQUESTED: ("Security assessment was not requested."),
 }
 
 _FORBIDDEN = (
@@ -129,18 +123,10 @@ _REC_GROUPS = {
     SecurityRecommendationKind.REVIEW_SECURITY_FINDING_HOTSPOTS.value: (
         "Repository credential hygiene"
     ),
-    SecurityRecommendationKind.CORRECT_MALFORMED_CONFIGURATION.value: (
-        "Coverage expansion"
-    ),
-    SecurityRecommendationKind.EXPAND_SUPPORTED_EVIDENCE_COVERAGE.value: (
-        "Coverage expansion"
-    ),
-    SecurityRecommendationKind.ADD_RUNTIME_SECURITY_VALIDATION.value: (
-        "Coverage expansion"
-    ),
-    SecurityRecommendationKind.ADD_GIT_HISTORY_SECRET_SCANNING.value: (
-        "Coverage expansion"
-    ),
+    SecurityRecommendationKind.CORRECT_MALFORMED_CONFIGURATION.value: ("Coverage expansion"),
+    SecurityRecommendationKind.EXPAND_SUPPORTED_EVIDENCE_COVERAGE.value: ("Coverage expansion"),
+    SecurityRecommendationKind.ADD_RUNTIME_SECURITY_VALIDATION.value: ("Coverage expansion"),
+    SecurityRecommendationKind.ADD_GIT_HISTORY_SECRET_SCANNING.value: ("Coverage expansion"),
     SecurityRecommendationKind.ADD_EXTERNAL_DEPENDENCY_VULNERABILITY_ANALYSIS.value: (
         "Coverage expansion"
     ),
@@ -159,9 +145,7 @@ _GROUP_ORDER = (
 
 def _safe(text: str) -> str:
     lowered = text.lower()
-    disclaimer = (
-        "does not establish that the repository or deployed application is secure"
-    )
+    disclaimer = "does not establish that the repository or deployed application is secure"
     sanitized = (
         lowered.replace(disclaimer, "")
         .replace("does not mean the repository is secure", "")
@@ -210,9 +194,7 @@ class SecurityReportAdapter:
             if include_findings
             else SecurityReportFindingSummary()
         )
-        coverage = (
-            _coverage(section) if include_coverage else SecurityReportCoverageSummary()
-        )
+        coverage = _coverage(section) if include_coverage else SecurityReportCoverageSummary()
         themes = (
             _themes(section, limit=theme_limit)
             if include_themes and include_synth_projection
@@ -228,28 +210,16 @@ class SecurityReportAdapter:
             if include_recommendations and include_synth_projection
             else ((), ())
         )
-        hotspots = (
-            _hotspots(section, limit=hotspot_limit) if include_hotspots else ()
-        )
-        diagnostics = (
-            _diagnostics(section, limit=diagnostic_limit)
-            if include_diagnostics
-            else ()
-        )
-        limitations = (
-            _limitations(section, limit=limitation_limit)
-            if include_limitations
-            else ()
-        )
+        hotspots = _hotspots(section, limit=hotspot_limit) if include_hotspots else ()
+        diagnostics = _diagnostics(section, limit=diagnostic_limit) if include_diagnostics else ()
+        limitations = _limitations(section, limit=limitation_limit) if include_limitations else ()
         traceability = (
             _traceability(section)
             if include_traceability
             else SecurityReportTraceabilityView(summary="Traceability not included.")
         )
         executive = (
-            _executive_summary(section)
-            if include_executive_summary
-            else section.status.value
+            _executive_summary(section) if include_executive_summary else section.status.value
         )
         return SecurityReportSection(
             section_id=SECURITY_REPORT_SECTION_ID,
@@ -257,14 +227,11 @@ class SecurityReportAdapter:
             title="Security Intelligence",
             status=section.status.value,
             status_label=_STATUS_LABELS.get(section.status, section.status.value),
-            status_summary=_STATUS_SUMMARIES.get(
-                section.status, section.status.value
-            ),
+            status_summary=_STATUS_SUMMARIES.get(section.status, section.status.value),
             assessment_status=section.status.value,
             synthesis_status=synthesis_status,
             assessment_scope=(
-                "Repository-level Security hygiene assessment for "
-                f"{section.repository_id}"
+                f"Repository-level Security hygiene assessment for {section.repository_id}"
             ),
             repository_name=section.repository_id,
             security_pack_id=section.security_pack_id,
@@ -301,9 +268,7 @@ class SecurityReportAdapter:
             metadata={
                 "assessment_section_id": section.section_id,
                 "evidence_pipeline": section.evidence_pipeline,
-                "production_finding_count": str(
-                    finding_summary.production_finding_count
-                ),
+                "production_finding_count": str(finding_summary.production_finding_count),
                 "all_finding_count": str(finding_summary.all_finding_count),
                 "theme_limit": str(theme_limit),
                 "finding_display_limit": str(finding_limit),
@@ -332,10 +297,7 @@ def _executive_summary(section: SecurityAssessmentSection) -> str:
             "complete successfully."
         )
     if section.status is SecurityAssessmentStatus.NOT_APPLICABLE:
-        return (
-            "No applicable Security assessment content was produced for this "
-            "repository."
-        )
+        return "No applicable Security assessment content was produced for this repository."
 
     production = section.finding_inventory.production.finding_count
     test = section.finding_inventory.test.finding_count
@@ -344,13 +306,7 @@ def _executive_summary(section: SecurityAssessmentSection) -> str:
     parts: list[str] = []
 
     if production > 0:
-        locations = len(
-            {
-                item.path
-                for item in section.finding_summaries
-                if item.path
-            }
-        )
+        locations = len({item.path for item in section.finding_summaries if item.path})
         text = (
             f"The supported repository Security hygiene assessment identified "
             f"{production} production-role finding"
@@ -457,9 +413,7 @@ def _finding_summary(
     )
     by_category = tuple(
         SecurityReportCountBucket(key=key, count=count)
-        for key, count in sorted(
-            Counter(item.security_category.value for item in all_refs).items()
-        )
+        for key, count in sorted(Counter(item.security_category.value for item in all_refs).items())
     )
     by_rule = tuple(
         SecurityReportCountBucket(key=key, count=count)
@@ -482,13 +436,9 @@ def _finding_summary(
         by_severity=by_severity,
         by_category=by_category,
         by_rule=by_rule,
-        production_findings=tuple(
-            _finding_view(item) for item in production[:finding_limit]
-        ),
+        production_findings=tuple(_finding_view(item) for item in production[:finding_limit]),
         production_findings_displayed=min(len(production), finding_limit),
-        additional_observations=tuple(
-            _finding_view(item) for item in additional[:finding_limit]
-        ),
+        additional_observations=tuple(_finding_view(item) for item in additional[:finding_limit]),
         additional_observations_displayed=min(len(additional), finding_limit),
         none_detected_statement=none_detected,
     )
@@ -504,8 +454,7 @@ def _coverage(section: SecurityAssessmentSection) -> SecurityReportCoverageSumma
         artifacts_inspected=evidence.artifacts_inspected,
         structured_files_parsed=evidence.structured_files_parsed,
         configuration_facts_collected=evidence.configuration_facts_collected,
-        rules_registered=section.execution_summary.security_rules_planned
-        or len(HYGIENE_RULE_IDS),
+        rules_registered=section.execution_summary.security_rules_planned or len(HYGIENE_RULE_IDS),
         rules_executed=section.execution_summary.rules_executed,
         malformed_files=evidence.malformed_files,
         unsupported_binaries=evidence.unsupported_binaries,

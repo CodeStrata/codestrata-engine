@@ -121,10 +121,7 @@ class RecommendationPriorityAssessment(BaseModel):
                 f"priority {self.priority.value} inconsistent with score {self.score} "
                 f"(expected {expected.value})"
             )
-        if (
-            self.calibration_status is PriorityCalibrationStatus.CALIBRATED
-            and not self.basis
-        ):
+        if self.calibration_status is PriorityCalibrationStatus.CALIBRATED and not self.basis:
             raise ValueError("calibrated priority assessment requires at least one basis")
         return self
 
@@ -149,8 +146,7 @@ class RecommendationPriorityAssessment(BaseModel):
             score=bounded,
             basis=(RecommendationPriorityBasis.LEGACY_RECOMMENDATION,),
             calibration_status=PriorityCalibrationStatus.LEGACY,
-            limitations=limitations
-            or ("Legacy Recommendation; priority bounded conservatively.",),
+            limitations=limitations or ("Legacy Recommendation; priority bounded conservatively.",),
             component_summary=RecommendationPriorityComponents(
                 base_score=bounded,
                 calibrated_score=bounded,

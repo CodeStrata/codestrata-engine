@@ -72,9 +72,7 @@ def build_openai_provider(
     """Build an :class:`OpenAIProvider`. Constructs no client and reads no environment."""
 
     runtime_configuration = configuration or build_runtime_configuration(
-        openai_settings=resolve_openai_settings(
-            settings=settings, openai_settings=openai_settings
-        ),
+        openai_settings=resolve_openai_settings(settings=settings, openai_settings=openai_settings),
         timeout_seconds=timeout_seconds,
     )
     return OpenAIProvider(

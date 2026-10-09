@@ -26,8 +26,7 @@ _BASE_LIMITATIONS = (
     "Only declaration hygiene was assessed for supported ecosystems.",
     "No registry lookups, CVE analysis, license validation, or dependency "
     "freshness checks were performed.",
-    "Supported ecosystems and package managers only; unsupported manifests "
-    "may be omitted.",
+    "Supported ecosystems and package managers only; unsupported manifests may be omitted.",
 )
 
 _SOFT_CLAIM_FRAGMENTS = (
@@ -100,9 +99,7 @@ def build_dependency_intelligence(
         if str(getattr(item, "finding_id", "") or "").strip()
     }
     dep_recs = tuple(
-        item
-        for item in recommendations
-        if _is_dependency_recommendation(item, dep_finding_ids)
+        item for item in recommendations if _is_dependency_recommendation(item, dep_finding_ids)
     )
 
     finding_links = _finding_links(dep_findings, report)
@@ -189,9 +186,7 @@ def _finding_links(
                 severity=item.severity,
                 confidence=_finding_confidence_label(item),
                 evidence_ids=_evidence_ids(item),
-                recommendation_ids=tuple(
-                    getattr(item, "driven_recommendation_ids", ()) or ()
-                ),
+                recommendation_ids=tuple(getattr(item, "driven_recommendation_ids", ()) or ()),
                 path=_finding_path(item),
                 ecosystem=_finding_ecosystem(item),
                 rule_id=str(getattr(item, "rule_id", "") or "dependency.unknown"),
@@ -226,9 +221,7 @@ def _finding_links(
         for item in report_findings
         if _is_dependency_finding(item)
     ]
-    rows.sort(
-        key=lambda row: (row.severity.lower(), row.title.lower(), row.finding_id)
-    )
+    rows.sort(key=lambda row: (row.severity.lower(), row.title.lower(), row.finding_id))
     return tuple(rows)
 
 
@@ -256,9 +249,7 @@ def _evidence_ids(item: Any) -> tuple[str, ...]:
     refs = getattr(item, "evidence_refs", None)
     if refs:
         return tuple(
-            getattr(ref, "evidence_id", "")
-            for ref in refs
-            if getattr(ref, "evidence_id", None)
+            getattr(ref, "evidence_id", "") for ref in refs if getattr(ref, "evidence_id", None)
         )
     ids = getattr(item, "evidence_ids", None)
     if ids:
@@ -345,9 +336,7 @@ def _ecosystems(
             if item.count > 0:
                 landscape_decls[name.lower()] = item.count
 
-    names = sorted(
-        {*_normalized_detected_names(landscape_decls), *hotspot_counts.keys()}
-    )
+    names = sorted({*_normalized_detected_names(landscape_decls), *hotspot_counts.keys()})
     if not names:
         return ()
 
@@ -485,9 +474,7 @@ def _overview(
     ):
         item = by_key.get(key)
         if item is not None:
-            facts.append(
-                DependencyOverviewFact(label=label, value=str(item.count))
-            )
+            facts.append(DependencyOverviewFact(label=label, value=str(item.count)))
     if cov.manifests_discovered or cov.manifests_parsed or cov.manifests_failed:
         facts.append(
             DependencyOverviewFact(
@@ -584,9 +571,7 @@ def _limitations(
             "coverage may be incomplete."
         )
     if not finding_links:
-        notes.append(
-            "No dependency hygiene findings were produced within the assessed scope."
-        )
+        notes.append("No dependency hygiene findings were produced within the assessed scope.")
     seen: set[str] = set()
     out: list[str] = []
     for note in notes:

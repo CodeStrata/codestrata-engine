@@ -10,8 +10,9 @@ import json
 import ssl
 import urllib.error
 import urllib.request
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping, Protocol
+from typing import Protocol
 
 
 @dataclass(frozen=True, slots=True)

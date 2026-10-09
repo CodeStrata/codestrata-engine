@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from verification.assessment_consistency.inputs import Sv10InputError, load_sv10_records
 from verification.assessment_consistency.scenarios import minimal_record
 

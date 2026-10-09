@@ -115,9 +115,7 @@ def extract_reported_latency_ms(metrics_payload: Any) -> float | None:
     return number
 
 
-def resolve_latency_ms(
-    *, reported_latency_ms: float | None, measured_latency_ms: float
-) -> float:
+def resolve_latency_ms(*, reported_latency_ms: float | None, measured_latency_ms: float) -> float:
     """Prefer the service-reported latency, falling back to the wall-clock measurement."""
 
     if reported_latency_ms is not None:

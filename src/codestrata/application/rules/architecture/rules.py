@@ -29,6 +29,7 @@ from codestrata.domain.rules.architecture.ids import (
     RULE_INVALID_DEPENDENCY_DIRECTION,
     RULE_LAYER_BOUNDARY_VIOLATION,
 )
+from codestrata.domain.rules.architecture.models import ArchitectureAnalysisView
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
     MatchEvidenceConfidence,
@@ -89,11 +90,7 @@ class DependencyCycleRule:
         for cycle in cycles:
             body = cycle[:-1]
             # Skip cycles composed only of composition-root / registration wiring.
-            roles = {
-                view.unit_map[node].role
-                for node in body
-                if node in view.unit_map
-            }
+            roles = {view.unit_map[node].role for node in body if node in view.unit_map}
             if roles.intersection({"composition_root", "registration"}):
                 # Bootstrap / registration wiring is not reported as an architectural cycle.
                 continue
@@ -331,9 +328,7 @@ class LayerBoundaryViolationRule:
                             path=path,
                             message="Boundary skip dependency",
                             attributes={
-                                "governing_rule": (
-                                    f"forbid_skip:{source.layer}->{target.layer}"
-                                ),
+                                "governing_rule": (f"forbid_skip:{source.layer}->{target.layer}"),
                                 "expected_path": (
                                     "presentation|api>application>domain>persistence"
                                 ),
@@ -435,9 +430,7 @@ class ExcessiveCrossModuleCouplingRule:
             if count < relative_floor and peer_median > 0:
                 # Absolute threshold alone is not enough when below peer relative floor.
                 continue
-            severity = (
-                RuleSeverity.HIGH if count >= self._threshold * 2 else RuleSeverity.MEDIUM
-            )
+            severity = RuleSeverity.HIGH if count >= self._threshold * 2 else RuleSeverity.MEDIUM
             targets = sorted(
                 edge.target_unit_id
                 for edge in view.included_edges()
@@ -519,13 +512,27 @@ class ComponentConcentrationRule:
                 reason_code=RuleSkipReason.OTHER,
                 message="Architecture view or extraction coverage insufficient",
             )
-        peers = comparable_coupling_units(view)
-        if len(peers) < self._minimum or not view.included_edges():
+        shares = self._edge_bearing_shares(view)
+        if len(shares) < self._minimum:
             return RuleApplicability.not_applicable(
                 reason_code=RuleSkipReason.OTHER,
                 message="Graph population below minimum for concentration analysis",
             )
         return RuleApplicability.applicable()
+
+    def _edge_bearing_shares(self, view: ArchitectureAnalysisView) -> dict[str, float]:
+        """Shares for modules that actually sit on a dependency edge.
+
+        Empty primary units do not count. A two-module link is always a 50/50
+        split and is not a concentration signal.
+        """
+
+        peers = {unit.unit_id for unit in comparable_coupling_units(view)}
+        return {
+            unit_id: share
+            for unit_id, share in incident_edge_shares(view).items()
+            if unit_id in peers and share > 0
+        }
 
     def evaluate(self, context: RuleExecutionContext) -> SharedRuleEvaluationResult:
         view = architecture_view(context)
@@ -534,12 +541,12 @@ class ComponentConcentrationRule:
                 reason=RuleSkipReason.OTHER,
                 message="Architecture view unavailable",
             )
-        peers = {unit.unit_id for unit in comparable_coupling_units(view)}
-        shares = {
-            unit_id: share
-            for unit_id, share in incident_edge_shares(view).items()
-            if unit_id in peers
-        }
+        shares = self._edge_bearing_shares(view)
+        if len(shares) < self._minimum:
+            return SharedRuleEvaluationResult.not_applicable(
+                reason=RuleSkipReason.OTHER,
+                message="Graph population below minimum for concentration analysis",
+            )
         matches = []
         for unit_id, share in sorted(shares.items(), key=lambda item: (-item[1], item[0])):
             if share < self._threshold:
@@ -548,7 +555,7 @@ class ComponentConcentrationRule:
             matches.append(
                 match(
                     rule_id=RULE_COMPONENT_CONCENTRATION,
-                    title="Concentrated architectural connectivity",
+                    title=f"Concentrated architectural connectivity in {unit_id}",
                     summary=(
                         f"Architectural module '{unit_id}' accounts for {share:.0%} of "
                         f"incident dependency edges among comparable modules "
@@ -564,7 +571,7 @@ class ComponentConcentrationRule:
                             attributes={
                                 "role": unit.role if unit else "architectural_module",
                                 "threshold": f"{self._threshold:.2f}",
-                                "peer_population": str(len(peers)),
+                                "peer_population": str(len(shares)),
                             },
                         ),
                     ),

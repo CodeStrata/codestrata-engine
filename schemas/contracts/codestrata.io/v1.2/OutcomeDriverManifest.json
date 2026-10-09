@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/OutcomeDriverManifest.json",
+  "title": "CodeStrata Engine Launch Outcome-Driver Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "manifest_id",
+    "manifest_version",
+    "package_revision",
+    "source_ratification",
+    "no_opaque_score",
+    "drivers"
+  ],
+  "properties": {
+    "manifest_id": { "type": "string", "const": "e01.2-outcome-driver-manifest" },
+    "manifest_version": { "type": "string" },
+    "package_revision": { "type": "string", "const": "ENGINE-2026-09-15-R1" },
+    "source_ratification": { "type": "string" },
+    "no_opaque_score": { "type": "boolean", "const": true },
+    "drivers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "family",
+          "outcome_or_context_role",
+          "applicability",
+          "direction",
+          "comparison_unit",
+          "epsilon",
+          "coverage_requirement",
+          "empty_scope"
+        ]
+      }
+    }
+  }
+}

@@ -150,9 +150,7 @@ class CrossProviderVerificationContract:
     slice_id: str = SLICE_ID
     allowed_verdicts: tuple[str, ...] = ALLOWED_VERDICTS
     expected_limitations: tuple[str, ...] = EXPECTED_LIMITATIONS
-    required_compatibility_requirement_ids: tuple[str, ...] = (
-        REQUIRED_COMPATIBILITY_REQUIREMENT_IDS
-    )
+    required_compatibility_requirement_ids: tuple[str, ...] = REQUIRED_COMPATIBILITY_REQUIREMENT_IDS
     registry_decision: str = REGISTRY_DECISION
     registry_decision_label: str = REGISTRY_DECISION_LABEL
     start_slice_11_9: bool = False

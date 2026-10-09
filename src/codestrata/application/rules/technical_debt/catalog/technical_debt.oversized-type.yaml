@@ -1,0 +1,38 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: technical_debt.oversized-type
+  version: 1.0.0
+  title: Oversized type
+  category: technical_debt
+  owner: codestrata
+  measurement: M16
+  tags: [technical_debt, size, type]
+applies_to:
+  languages: [java, python, php, csharp, javascript, typescript]
+  requires:
+    facts: [complexity.type]
+select:
+  source: complexity
+  types:
+    all:
+      - physical_line_count_gt: 300
+condition:
+  operator: technical_debt.oversized-type
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Type '{{qualified_name}}' has physical_line_count={{value}}
+        which exceeds threshold {{threshold}}.
+      bindings:
+        qualified_name: {type: string, evidence: qualified_name}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+    documentation_url: docs/analysis-intelligence/technical-debt/complexity-rules.md
+  metric:
+    name: technical_debt_oversized_type_count
+    operation: count
+parameters:
+  max_physical_lines: {type: integer, default: 300, exclusive_min: true}

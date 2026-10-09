@@ -73,9 +73,7 @@ def _decl(
     classification: SourceClassification = SourceClassification.SOURCE,
     is_management: bool = False,
     raw_version: str | None = "1.0.0",
-    resolution: DependencyVersionResolutionStatus = (
-        DependencyVersionResolutionStatus.RESOLVED
-    ),
+    resolution: DependencyVersionResolutionStatus = (DependencyVersionResolutionStatus.RESOLVED),
     ecosystem: DependencyEcosystem = DependencyEcosystem.MAVEN,
     manifest_type: DependencyManifestType = DependencyManifestType.POM_XML,
 ) -> DependencyDeclarationEvidence:
@@ -126,19 +124,11 @@ def _evidence(
     declarations: tuple[DependencyDeclarationEvidence, ...],
     status: DependencyParseStatus = DependencyParseStatus.SUCCEEDED,
 ) -> AggregatedDependencyEvidence:
-    failed = sum(
-        1 for item in manifests if item.parse_status is DependencyParseStatus.FAILED
-    )
+    failed = sum(1 for item in manifests if item.parse_status is DependencyParseStatus.FAILED)
     partial = sum(
-        1
-        for item in manifests
-        if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+        1 for item in manifests if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
     )
-    succeeded = sum(
-        1
-        for item in manifests
-        if item.parse_status is DependencyParseStatus.SUCCEEDED
-    )
+    succeeded = sum(1 for item in manifests if item.parse_status is DependencyParseStatus.SUCCEEDED)
     return AggregatedDependencyEvidence(
         repository_id="repo:test",
         status=status,
@@ -151,9 +141,7 @@ def _evidence(
             manifests_partially_parsed=partial,
             manifests_failed=failed,
             declarations_collected=len(declarations),
-            unsupported_construct_count=sum(
-                len(item.unsupported_constructs) for item in manifests
-            ),
+            unsupported_construct_count=sum(len(item.unsupported_constructs) for item in manifests),
         ),
         evidence_fingerprint="fp-inventory-test",
     )
@@ -318,9 +306,7 @@ def test_declaration_kind_and_management_plugin_separation() -> None:
     assert kinds["plugin"] == 1
     assert kinds["test"] == 1
 
-    man_inv = build_manifest_inventory(
-        evidence=evidence, finding_refs=()
-    )
+    man_inv = build_manifest_inventory(evidence=evidence, finding_refs=())
     entry = man_inv.entries[0]
     assert entry.active_declaration_count == 2
     assert entry.dependency_management_count == 1
@@ -436,10 +422,7 @@ def test_gradle_interpolation_is_diagnostic_not_finding() -> None:
     assert section.all_finding_ids == ()
     summary = build_diagnostics_summary(evidence)
     assert summary.production_count >= 1
-    assert any(
-        item.diagnostic_code == "unsupported_gradle_resolution"
-        for item in summary.records
-    )
+    assert any(item.diagnostic_code == "unsupported_gradle_resolution" for item in summary.records)
     assert "unsupported_gradle_resolution" in section.diagnostics
 
 
@@ -484,9 +467,7 @@ def test_test_fixture_parse_failure_remains_succeeded() -> None:
                 status=DependencyParseStatus.FAILED,
             ),
         ),
-        declarations=(
-            _decl(evidence_id="p1", identity="com.example:lib", path="pom.xml"),
-        ),
+        declarations=(_decl(evidence_id="p1", identity="com.example:lib", path="pom.xml"),),
         status=DependencyParseStatus.PARTIALLY_SUCCEEDED,
     )
     section = DependencyAssessmentAssembler().assemble(
@@ -591,13 +572,8 @@ def test_traceability_and_no_absolute_paths_repeat_identity(tmp_path: Path) -> N
     assert "C:\\" not in text
     assert left.manifest_inventory.entries[0].evidence_id
     assert left.finding_summaries[0].evidence_ids
-    assert any(
-        edge.relation.value == "section_to_manifest"
-        for edge in left.traceability.edges
-    )
-    assert any(
-        edge.relation.value == "section_to_hotspot" for edge in left.traceability.edges
-    )
+    assert any(edge.relation.value == "section_to_manifest" for edge in left.traceability.edges)
+    assert any(edge.relation.value == "section_to_hotspot" for edge in left.traceability.edges)
 
 
 def test_no_scores_or_external_metadata_fields_on_section() -> None:

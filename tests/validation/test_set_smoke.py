@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from validation.actual import normalized_for_determinism, run_real_assessment
 from validation.matrix import ACTIVE_VALIDATION_SET
 from validation.models import RepositorySourceType, ValidationVerdict

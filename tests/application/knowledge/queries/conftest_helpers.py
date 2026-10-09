@@ -67,7 +67,7 @@ from codestrata.domain.repository_graph import (
     RepositoryProperties,
     RepositoryRelationshipType,
 )
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from codestrata.services.artifact_serialization import (
     findings_payload,
     recommendations_payload,
@@ -121,12 +121,8 @@ def build_repository_graph_payload(
         module_key="b",
         properties=ModuleProperties(name="module-b", path="b"),
     )
-    dep_b = factory.dependency(
-        DependencyProperties(ecosystem="npm", name="lib-b", version="1.0.0")
-    )
-    dep_c = factory.dependency(
-        DependencyProperties(ecosystem="npm", name="lib-c", version="2.0.0")
-    )
+    dep_b = factory.dependency(DependencyProperties(ecosystem="npm", name="lib-b", version="1.0.0"))
+    dep_c = factory.dependency(DependencyProperties(ecosystem="npm", name="lib-c", version="2.0.0"))
     nodes = (repo, module_a, module_b, dep_b, dep_c)
     relationships = (
         GraphRelationship(

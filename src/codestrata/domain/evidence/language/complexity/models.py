@@ -36,9 +36,7 @@ class IntMetric(BaseModel):
             if self.value is None:
                 raise ValueError("available metrics require an integer value")
         elif self.value is not None:
-            raise ValueError(
-                "unsupported/unavailable metrics must leave value unset (None)"
-            )
+            raise ValueError("unsupported/unavailable metrics must leave value unset (None)")
         return self
 
     @classmethod

@@ -141,9 +141,7 @@ def validate_event_before_transport(
                 limitations=limitations,
                 event_type=event_type,
                 schema_version=str(reconstructed_stable.get("schema_version")),
-                runtime_policy_version=str(
-                    reconstructed_stable.get("runtime_policy_version")
-                ),
+                runtime_policy_version=str(reconstructed_stable.get("runtime_policy_version")),
                 catalog_schema_version=catalog_schema,
                 field_count=field_count,
                 serialized_size_bucket=size_bucket,
@@ -198,15 +196,9 @@ def _status_for_reason(reason: PreTransportReasonCode) -> PreTransportPrivacySta
         PreTransportReasonCode.UNSUPPORTED_RUNTIME_POLICY: (
             PreTransportPrivacyStatus.UNSUPPORTED_POLICY
         ),
-        PreTransportReasonCode.CATALOG_EVENT_MISSING: (
-            PreTransportPrivacyStatus.CATALOG_MISMATCH
-        ),
-        PreTransportReasonCode.CATALOG_FIELD_MISSING: (
-            PreTransportPrivacyStatus.CATALOG_MISMATCH
-        ),
-        PreTransportReasonCode.CATALOG_ENUM_MISMATCH: (
-            PreTransportPrivacyStatus.CATALOG_MISMATCH
-        ),
+        PreTransportReasonCode.CATALOG_EVENT_MISSING: (PreTransportPrivacyStatus.CATALOG_MISMATCH),
+        PreTransportReasonCode.CATALOG_FIELD_MISSING: (PreTransportPrivacyStatus.CATALOG_MISMATCH),
+        PreTransportReasonCode.CATALOG_ENUM_MISMATCH: (PreTransportPrivacyStatus.CATALOG_MISMATCH),
         PreTransportReasonCode.CATALOG_MISMATCH: PreTransportPrivacyStatus.CATALOG_MISMATCH,
         PreTransportReasonCode.FORBIDDEN_FIELD_NAME: PreTransportPrivacyStatus.UNSAFE_FIELD,
         PreTransportReasonCode.UNKNOWN_FIELD: PreTransportPrivacyStatus.UNSAFE_FIELD,
@@ -214,13 +206,9 @@ def _status_for_reason(reason: PreTransportReasonCode) -> PreTransportPrivacySta
         PreTransportReasonCode.INVALID_EVENT_COMBINATION: (
             PreTransportPrivacyStatus.INVALID_EVENT_COMBINATION
         ),
-        PreTransportReasonCode.TOO_MANY_FIELDS: (
-            PreTransportPrivacyStatus.FIELD_LIMIT_EXCEEDED
-        ),
+        PreTransportReasonCode.TOO_MANY_FIELDS: (PreTransportPrivacyStatus.FIELD_LIMIT_EXCEEDED),
         PreTransportReasonCode.EVENT_TOO_LARGE: PreTransportPrivacyStatus.EVENT_TOO_LARGE,
-        PreTransportReasonCode.NONCANONICAL_SERIALIZATION: (
-            PreTransportPrivacyStatus.REJECTED
-        ),
+        PreTransportReasonCode.NONCANONICAL_SERIALIZATION: (PreTransportPrivacyStatus.REJECTED),
         PreTransportReasonCode.INTERNAL_PRIVACY_FAILURE: (
             PreTransportPrivacyStatus.INTERNAL_FAILURE
         ),

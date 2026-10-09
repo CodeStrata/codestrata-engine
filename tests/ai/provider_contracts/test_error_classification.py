@@ -73,7 +73,9 @@ def test_provider_error_classification_rejects_invalid_category() -> None:
 def test_provider_error_classification_rejects_non_bool_retryable() -> None:
     with pytest.raises(ProviderContractValidationError):
         ProviderErrorClassification(
-            category=ErrorCategory.TIMEOUT, retryable="yes", safe_code="x"  # type: ignore[arg-type]
+            category=ErrorCategory.TIMEOUT,
+            retryable="yes",
+            safe_code="x",  # type: ignore[arg-type]
         )
 
 

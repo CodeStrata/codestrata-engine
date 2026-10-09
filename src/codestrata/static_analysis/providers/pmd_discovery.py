@@ -16,10 +16,10 @@ CODESTRATA_PMD_PATH_ENV = "CODESTRATA_PMD_PATH"
 DEFAULT_VERSION_TIMEOUT_SECONDS = 15
 
 _HOMEBREW_CANDIDATES = (
-    Path("/opt/homebrew/bin/pmd"),
-    Path("/usr/local/bin/pmd"),
-    Path("/opt/homebrew/bin/pmd-bin"),
-    Path("/usr/local/bin/pmd-bin"),
+    "/opt/homebrew/bin/pmd",
+    "/usr/local/bin/pmd",
+    "/opt/homebrew/bin/pmd-bin",
+    "/usr/local/bin/pmd-bin",
 )
 
 _PATH_NAMES = ("pmd", "pmd-bin")
@@ -111,7 +111,13 @@ def resolve_pmd_executable(
                     source=source,
                     message="Configured PMD path exists but is not executable.",
                 )
-            return PmdDiscoveryResult(executable=str(path), source=source)
+            if candidate_path.startswith("/") and not (
+                len(candidate_path) >= 2 and candidate_path[1] == ":"
+            ):
+                executable = Path(candidate_path).as_posix()
+            else:
+                executable = str(path)
+            return PmdDiscoveryResult(executable=executable, source=source)
 
         # Bare command names are accepted for version probing.
         resolved_name = which(candidate_path)
@@ -193,6 +199,8 @@ def _path_is_executable(path: Path) -> bool:
         mode = path.stat().st_mode
     except OSError:
         return False
+    if sys.platform == "win32":
+        return stat.S_ISREG(mode)
     return bool(mode & (stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH))
 
 

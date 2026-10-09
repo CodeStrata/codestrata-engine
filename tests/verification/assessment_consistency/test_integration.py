@@ -10,7 +10,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from verification.assessment_consistency.contract import RELEASE_VALIDATION_TARGET
 from verification.assessment_consistency.runner import run_assessment_consistency
 

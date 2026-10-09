@@ -195,9 +195,7 @@ def test_openai_profile_and_strict_key_check(tmp_path: Path) -> None:
     assert settings.ai.openai.api_key_env == "OPENAI_API_KEY"
     assert not any(item.severity == "error" for item in issues)
 
-    strict_issues = validate_profile_settings(
-        settings, profile="openai", strict=True, environ={}
-    )
+    strict_issues = validate_profile_settings(settings, profile="openai", strict=True, environ={})
     assert any(item.code == "openai_api_key_absent" for item in strict_issues)
 
 

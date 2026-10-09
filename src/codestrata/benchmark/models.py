@@ -46,9 +46,7 @@ class PerformanceBenchmarkDocument(BaseModel):
     benchmark_id: str = BENCHMARK_ID
     generated_at: str
     environment: dict[str, Any] = Field(default_factory=dict)
-    comparison_keys: list[str] = Field(
-        default_factory=lambda: list(COMPARISON_KEYS)
-    )
+    comparison_keys: list[str] = Field(default_factory=lambda: list(COMPARISON_KEYS))
     measurement_limitations: list[str] = Field(default_factory=list)
     runs: list[PerformanceBenchmarkRun] = Field(default_factory=list)
     summary: dict[str, Any] = Field(default_factory=dict)

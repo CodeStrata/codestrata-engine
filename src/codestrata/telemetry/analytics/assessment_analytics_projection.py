@@ -17,10 +17,10 @@ from codestrata.telemetry.analytics.assessment_analytics_policy import (
 )
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 from codestrata.telemetry.analytics.events import (
-    FORBIDDEN_ANALYTICS_FIELD_NAMES,
-    AnalyticsEvent,
     _APPROVED_DURATION_BUCKETS,
     _APPROVED_FAILURE_CATEGORIES,
+    FORBIDDEN_ANALYTICS_FIELD_NAMES,
+    AnalyticsEvent,
 )
 from codestrata.telemetry.analytics.installation_identity import is_uuid_v4
 from codestrata.telemetry.analytics.projection import project_analytics_event
@@ -190,9 +190,7 @@ def project_assessment_analytics_event(
     analytics_event = event.to_analytics_event()
     project_analytics_event(analytics_event)
 
-    return AssessmentAnalyticsProjection(
-        fields={key: payload[key] for key in sorted(payload)}
-    )
+    return AssessmentAnalyticsProjection(fields={key: payload[key] for key in sorted(payload)})
 
 
 def project_assessment_analytics_to_analytics_event(

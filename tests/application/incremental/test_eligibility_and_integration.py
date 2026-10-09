@@ -15,7 +15,7 @@ from codestrata.application.incremental.service import IncrementalPlanningServic
 from codestrata.application.knowledge.models import AssessmentRunStatus, KnowledgeArtifactKind
 from codestrata.application.knowledge.queries.service import KnowledgeQueryService
 from codestrata.domain.repository.enums import RepositoryFileKind
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from tests.application.incremental.helpers import candidate_state, entry, manifest
 from tests.application.knowledge.queries.conftest_helpers import (
     make_manifest,

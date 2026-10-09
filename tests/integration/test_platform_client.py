@@ -18,6 +18,7 @@ from codestrata.integration.commercial.mapper import (
     technology_summary,
 )
 from codestrata.integration.commercial.publisher import publish_assessment_to_platform
+from codestrata.integration.community_runtime import HOSTED_SUBMISSION_REMOVED
 from codestrata.models import Repository, Technology
 from codestrata.models.enums import TechnologyCategory
 
@@ -101,7 +102,7 @@ def test_mock_client_register_lookup_and_lifecycle() -> None:
     assert completed.status == "succeeded"
 
 
-def test_publisher_disabled_is_noop() -> None:
+def test_publisher_removed_when_disabled() -> None:
     result = publish_assessment_to_platform(
         client=MockPlatformClient(),
         config=PlatformClientConfig(enabled=False),
@@ -110,10 +111,11 @@ def test_publisher_disabled_is_noop() -> None:
         html_report_path=None,
         json_report_path=None,
     )
-    assert result.status == "disabled"
+    assert result.status == "removed"
+    assert result.message == HOSTED_SUBMISSION_REMOVED
 
 
-def test_publisher_succeeds_with_mock_client() -> None:
+def test_publisher_removed_even_when_enabled() -> None:
     client = MockPlatformClient()
     result = publish_assessment_to_platform(
         client=client,
@@ -127,26 +129,14 @@ def test_publisher_succeeds_with_mock_client() -> None:
         html_report_path=Path("/tmp/report.html"),
         json_report_path=Path("/tmp/report.json"),
     )
-    assert result.status == "succeeded"
-    assert result.repository_id is not None
-    assert result.assessment_id is not None
-    assert result.engine_assessment_id is not None
+    assert result.status == "removed"
+    assert result.message == HOSTED_SUBMISSION_REMOVED
+    assert result.assessment_id is None
 
 
-def test_publisher_swallows_platform_unavailable() -> None:
-    client = MockPlatformClient()
-    client.fail_next = "register_repository"
-    result = publish_assessment_to_platform(
-        client=client,
-        config=PlatformClientConfig(
-            enabled=True,
-            organization_id="org:1",
-            workspace_id="workspace:1",
-        ),
-        repository=_repo(),
-        configured_repository_url=None,
-        html_report_path=None,
-        json_report_path=None,
-    )
-    assert result.status == "failed"
-    assert result.message
+def test_enabled_settings_still_compose_offline_client() -> None:
+    class Settings:
+        platform = PlatformIntegrationSettings(enabled=True, auth_token="secret")
+
+    client = platform_client_from_settings(Settings())
+    assert isinstance(client, OfflinePlatformClient)

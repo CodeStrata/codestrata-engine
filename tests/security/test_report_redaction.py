@@ -58,7 +58,7 @@ def test_findings_payload_redacts_excerpts_keeps_paths() -> None:
     finding = Finding.create(
         rule_id="SEC-TEST",
         title="Hardcoded credential",
-        description='Found password=SuperSecretPass in config',
+        description="Found password=SuperSecretPass in config",
         severity=FindingSeverity.HIGH,
         category=FindingCategory.SECURITY,
         evidence=[

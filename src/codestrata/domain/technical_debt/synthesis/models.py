@@ -154,9 +154,7 @@ class TechnicalDebtRecommendation(BaseModel):
     finding_ids: tuple[str, ...] = ()
     hotspot_ids: tuple[str, ...] = ()
     conditional: bool = True
-    audience: TechnicalDebtConclusionAudience = (
-        TechnicalDebtConclusionAudience.PRODUCTION_HEALTH
-    )
+    audience: TechnicalDebtConclusionAudience = TechnicalDebtConclusionAudience.PRODUCTION_HEALTH
     effort_band: str = "unknown"
     business_impact: str = "unknown"
     provenance: str = "technical_debt_synthesis"

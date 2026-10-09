@@ -161,13 +161,7 @@ def evaluate_slice(
     failed = report_failed_count(payload) if payload else None
     verdict_ok = verdict in ALLOWED_PRIOR_VERDICTS
     failed_ok = failed == 0
-    complete = (
-        package_ok
-        and report_exists
-        and schema_match
-        and verdict_ok
-        and failed_ok
-    )
+    complete = package_ok and report_exists and schema_match and verdict_ok and failed_ok
     return {
         "complete": complete,
         "failed_checks": failed,

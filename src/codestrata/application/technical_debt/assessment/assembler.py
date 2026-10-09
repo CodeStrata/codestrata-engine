@@ -48,11 +48,7 @@ def technical_debt_findings(findings: Sequence[Finding]) -> tuple[Finding, ...]:
 
     return tuple(
         sorted(
-            (
-                finding
-                for finding in findings
-                if finding.rule_id.startswith(RULE_ID_PREFIX)
-            ),
+            (finding for finding in findings if finding.rule_id.startswith(RULE_ID_PREFIX)),
             key=lambda item: (item.rule_id, item.id),
         )
     )
@@ -234,9 +230,7 @@ def _coverage_from_evidence(
         )
         numerator = files_analyzed
         denominator = files_considered
-        ratio = (
-            round(files_analyzed / files_considered, 4) if files_considered > 0 else None
-        )
+        ratio = round(files_analyzed / files_considered, 4) if files_considered > 0 else None
 
     areas = (
         TechnicalDebtCoverageArea(
@@ -278,14 +272,9 @@ def _coverage_from_evidence(
             provenance="technical_debt_assessment",
         ),
     )
-    return TechnicalDebtCoverageSummary(
-        areas=tuple(sorted(areas, key=lambda item: item.area_id))
-    )
+    return TechnicalDebtCoverageSummary(areas=tuple(sorted(areas, key=lambda item: item.area_id)))
 
-
-    return TechnicalDebtCoverageSummary(
-        areas=tuple(sorted(areas, key=lambda item: item.area_id))
-    )
+    return TechnicalDebtCoverageSummary(areas=tuple(sorted(areas, key=lambda item: item.area_id)))
 
 
 class TechnicalDebtAssessmentAssembler:
@@ -444,9 +433,7 @@ class TechnicalDebtAssessmentAssembler:
             else TechnicalDebtHotspotInventory()
         )
         primary_refs = tuple(
-            item
-            for item in all_refs
-            if item.source_role is TechnicalDebtSourceRole.PRODUCTION
+            item for item in all_refs if item.source_role is TechnicalDebtSourceRole.PRODUCTION
         )
         primary_ids = tuple(item.finding_id for item in primary_refs)
         all_ids = tuple(item.finding_id for item in all_refs)
@@ -458,11 +445,7 @@ class TechnicalDebtAssessmentAssembler:
 
         if not pack_enabled:
             status = TechnicalDebtAssessmentStatus.DISABLED
-        elif (
-            complexity_evidence_enabled
-            and files_considered == 0
-            and not debt_findings
-        ):
+        elif complexity_evidence_enabled and files_considered == 0 and not debt_findings:
             status = TechnicalDebtAssessmentStatus.INSUFFICIENT_EVIDENCE
         elif provider_failures > 0:
             status = TechnicalDebtAssessmentStatus.PARTIALLY_SUCCEEDED
@@ -471,14 +454,10 @@ class TechnicalDebtAssessmentAssembler:
 
         diag = {str(item) for item in diagnostics if str(item).strip()}
         if files_failed > 0 and production_parse_failures == 0:
-            diag.add(
-                "non_material_parse_failures_do_not_degrade_status:"
-                f"{files_failed}"
-            )
+            diag.add(f"non_material_parse_failures_do_not_degrade_status:{files_failed}")
         if files_failed > production_parse_failures:
             diag.add(
-                "parse_failures_total_vs_production:"
-                f"{files_failed}:{production_parse_failures}"
+                f"parse_failures_total_vs_production:{files_failed}:{production_parse_failures}"
             )
 
         limitations = (
@@ -759,6 +738,4 @@ def _section_traceability(
                     target_id=conclusion_id,
                 )
             )
-    return TechnicalDebtTraceabilityIndex(
-        edges=tuple(sorted(edges, key=lambda item: item.edge_id))
-    )
+    return TechnicalDebtTraceabilityIndex(edges=tuple(sorted(edges, key=lambda item: item.edge_id)))

@@ -268,9 +268,7 @@ class SecurityEvidenceSummary(BaseModel):
     )
     @classmethod
     def normalize_sequences(cls, value: object) -> tuple[str, ...]:
-        return tuple(
-            sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()})
-        )
+        return tuple(sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()}))
 
 
 class SecurityRoleFindingInventory(BaseModel):
@@ -311,14 +309,10 @@ class SecurityFindingInventory(BaseModel):
         )
     )
     test: SecurityRoleFindingInventory = Field(
-        default_factory=lambda: SecurityRoleFindingInventory(
-            source_role=SecuritySourceRole.TEST
-        )
+        default_factory=lambda: SecurityRoleFindingInventory(source_role=SecuritySourceRole.TEST)
     )
     unknown: SecurityRoleFindingInventory = Field(
-        default_factory=lambda: SecurityRoleFindingInventory(
-            source_role=SecuritySourceRole.UNKNOWN
-        )
+        default_factory=lambda: SecurityRoleFindingInventory(source_role=SecuritySourceRole.UNKNOWN)
     )
     total_finding_count: int = Field(default=0, ge=0)
 
@@ -535,42 +529,28 @@ class SecurityAssessmentSection(BaseModel):
     graph_fingerprint: str = ""
     evidence_fingerprint: str = ""
     configuration_fingerprint: str = ""
-    execution_summary: SecurityExecutionSummary = Field(
-        default_factory=SecurityExecutionSummary
-    )
-    evidence_summary: SecurityEvidenceSummary = Field(
-        default_factory=SecurityEvidenceSummary
-    )
+    execution_summary: SecurityExecutionSummary = Field(default_factory=SecurityExecutionSummary)
+    evidence_summary: SecurityEvidenceSummary = Field(default_factory=SecurityEvidenceSummary)
     coverage: SecurityCoverageSummary = Field(default_factory=SecurityCoverageSummary)
     finding_ids: tuple[str, ...] = ()
     finding_summaries: tuple[SecurityFindingReference, ...] = ()
     all_finding_ids: tuple[str, ...] = ()
     all_finding_summaries: tuple[SecurityFindingReference, ...] = ()
-    finding_inventory: SecurityFindingInventory = Field(
-        default_factory=SecurityFindingInventory
-    )
+    finding_inventory: SecurityFindingInventory = Field(default_factory=SecurityFindingInventory)
     rule_inventory: SecurityRuleInventory = Field(default_factory=SecurityRuleInventory)
-    category_inventory: SecurityCategoryInventory = Field(
-        default_factory=SecurityCategoryInventory
-    )
-    severity_inventory: SecuritySeverityInventory = Field(
-        default_factory=SecuritySeverityInventory
-    )
+    category_inventory: SecurityCategoryInventory = Field(default_factory=SecurityCategoryInventory)
+    severity_inventory: SecuritySeverityInventory = Field(default_factory=SecuritySeverityInventory)
     confidence_inventory: SecurityConfidenceInventory = Field(
         default_factory=SecurityConfidenceInventory
     )
     evidence_type_inventory: SecurityEvidenceTypeInventory = Field(
         default_factory=SecurityEvidenceTypeInventory
     )
-    hotspot_inventory: SecurityHotspotInventory = Field(
-        default_factory=SecurityHotspotInventory
-    )
+    hotspot_inventory: SecurityHotspotInventory = Field(default_factory=SecurityHotspotInventory)
     diagnostics_summary: SecurityDiagnosticsSummary = Field(
         default_factory=SecurityDiagnosticsSummary
     )
-    synthesis: SecuritySynthesisResult = Field(
-        default_factory=SecuritySynthesisResult
-    )
+    synthesis: SecuritySynthesisResult = Field(default_factory=SecuritySynthesisResult)
     themes: tuple[SecurityTheme, ...] = ()
     theme_ids: tuple[str, ...] = ()
     concentration_facts: tuple[SecurityConcentrationFact, ...] = ()
@@ -580,9 +560,7 @@ class SecurityAssessmentSection(BaseModel):
     recommendation_ids: tuple[str, ...] = ()
     limitations: tuple[SecurityLimitation, ...] = ()
     diagnostics: tuple[str, ...] = ()
-    traceability: SecurityTraceabilityIndex = Field(
-        default_factory=SecurityTraceabilityIndex
-    )
+    traceability: SecurityTraceabilityIndex = Field(default_factory=SecurityTraceabilityIndex)
     enterprise_context_used: bool = False
     business_impact: str = "unknown"
     metadata: dict[str, str] = Field(default_factory=dict)

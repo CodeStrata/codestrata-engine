@@ -117,9 +117,7 @@ def _evidence(
                 path="tls/server.key",
                 kind=SensitiveArtifactKind.PRIVATE_KEY,
                 inspection_status=InspectionStatus.INSPECTED,
-                content_classifications=(
-                    ContentClassification.PRIVATE_KEY_MATERIAL,
-                ),
+                content_classifications=(ContentClassification.PRIVATE_KEY_MATERIAL,),
                 classification=SourceClassification.SOURCE,
                 provenance=_prov(),
             ),
@@ -128,9 +126,7 @@ def _evidence(
                 path="tls/server.crt",
                 kind=SensitiveArtifactKind.PUBLIC_CERTIFICATE,
                 inspection_status=InspectionStatus.INSPECTED,
-                content_classifications=(
-                    ContentClassification.PUBLIC_CERTIFICATE_MATERIAL,
-                ),
+                content_classifications=(ContentClassification.PUBLIC_CERTIFICATE_MATERIAL,),
                 classification=SourceClassification.SOURCE,
                 provenance=_prov(),
             ),
@@ -200,9 +196,7 @@ def _evidence(
 
 
 def _facts_all_ok() -> tuple:
-    return execution_facts_from_status_map(
-        {rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS}
-    )
+    return execution_facts_from_status_map({rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS})
 
 
 def test_schema_version_is_1_2_0() -> None:
@@ -297,13 +291,9 @@ def test_evidence_summary_reconciles_without_secret_claims() -> None:
     assert section.evidence_summary.private_key_signatures_observed == 1
     assert section.all_finding_ids == ()
     assert len(section.diagnostics_summary.evidence_diagnostics) == 1
-    assert section.diagnostics_summary.evidence_diagnostics[0].diagnostic_code == (
-        "malformed_yaml"
-    )
+    assert section.diagnostics_summary.evidence_diagnostics[0].diagnostic_code == ("malformed_yaml")
     # Diagnostics are not Findings.
-    assert all(
-        item.finding_id != "diag:malformed" for item in section.all_finding_summaries
-    )
+    assert all(item.finding_id != "diag:malformed" for item in section.all_finding_summaries)
 
 
 def test_rule_inventory_includes_zero_finding_rules() -> None:
@@ -432,16 +422,13 @@ def test_hotspot_ranking_bounds_and_neutral_wording() -> None:
     assert "vulnerable" not in hotspots.hotspots[0].label.lower()
     assert "critical" not in hotspots.hotspots[0].label.lower()
     assert hotspots.hotspots[0].label == "Security finding hotspot"
-    assert set(hotspots.hotspots[0].finding_ids).issubset(
-        {item.finding_id for item in refs}
-    )
+    assert set(hotspots.hotspots[0].finding_ids).issubset({item.finding_id for item in refs})
 
 
 def test_lifecycle_status_precision() -> None:
     assembler = SecurityAssessmentAssembler()
     assert (
-        assembler.assemble_disabled(repository_id="r").status
-        is SecurityAssessmentStatus.DISABLED
+        assembler.assemble_disabled(repository_id="r").status is SecurityAssessmentStatus.DISABLED
     )
     assert (
         assembler.assemble_not_requested(repository_id="r").status
@@ -451,10 +438,7 @@ def test_lifecycle_status_precision() -> None:
         assembler.assemble_insufficient_evidence(repository_id="r").status
         is SecurityAssessmentStatus.INSUFFICIENT_EVIDENCE
     )
-    assert (
-        assembler.assemble_failed(repository_id="r").status
-        is SecurityAssessmentStatus.FAILED
-    )
+    assert assembler.assemble_failed(repository_id="r").status is SecurityAssessmentStatus.FAILED
     assert (
         assembler.assemble_not_applicable(repository_id="r").status
         is SecurityAssessmentStatus.NOT_APPLICABLE
@@ -526,9 +510,7 @@ def test_lifecycle_status_precision() -> None:
 
     all_failed = execution_facts_from_status_map(
         {rule_id: "failed" for rule_id in HYGIENE_RULE_IDS},
-        diagnostics_by_rule={
-            rule_id: ("fail",) for rule_id in HYGIENE_RULE_IDS
-        },
+        diagnostics_by_rule={rule_id: ("fail",) for rule_id in HYGIENE_RULE_IDS},
     )
     failed = assembler.assemble(
         repository_id="r",

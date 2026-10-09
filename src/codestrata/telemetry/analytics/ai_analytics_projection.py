@@ -21,9 +21,9 @@ from codestrata.telemetry.analytics.ai_analytics_policy import (
 )
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 from codestrata.telemetry.analytics.events import (
+    _APPROVED_DURATION_BUCKETS,
     FORBIDDEN_ANALYTICS_FIELD_NAMES,
     AnalyticsEvent,
-    _APPROVED_DURATION_BUCKETS,
 )
 from codestrata.telemetry.analytics.installation_identity import is_uuid_v4
 from codestrata.telemetry.analytics.projection import project_analytics_event
@@ -179,9 +179,7 @@ def project_ai_analytics_event(
         if payload["failure_category"] not in APPROVED_AI_FAILURE_CATEGORIES:
             raise AnalyticsError(AnalyticsErrorCode.INVALID_FAILURE_CATEGORY)
 
-    return AIAnalyticsProjection(
-        fields={key: payload[key] for key in sorted(payload)}
-    )
+    return AIAnalyticsProjection(fields={key: payload[key] for key in sorted(payload)})
 
 
 def project_ai_analytics_to_analytics_event(
@@ -208,9 +206,7 @@ def project_ai_analytics_from_mapping(
         if key not in APPROVED_AI_ANALYTICS_FIELD_NAMES:
             raise AnalyticsError(AnalyticsErrorCode.UNKNOWN_FIELD)
         projected[key] = value
-    return AIAnalyticsProjection(
-        fields={key: projected[key] for key in sorted(projected)}
-    )
+    return AIAnalyticsProjection(fields={key: projected[key] for key in sorted(projected)})
 
 
 __all__ = [

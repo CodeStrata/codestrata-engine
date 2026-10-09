@@ -15,11 +15,11 @@ from codestrata.telemetry.analytics.ai_analytics_mapping import (
     map_provider_to_family,
 )
 from codestrata.telemetry.analytics.ai_analytics_models import build_ai_analytics_event
+from codestrata.telemetry.analytics.ai_analytics_policy import default_ai_analytics_policy
 from codestrata.telemetry.analytics.ai_analytics_serialization import (
     ai_analytics_event_to_stable_json,
     ai_analytics_policy_to_stable_json,
 )
-from codestrata.telemetry.analytics.ai_analytics_policy import default_ai_analytics_policy
 from codestrata.telemetry.analytics.installation_identity import (
     new_anonymous_installation_identity,
 )

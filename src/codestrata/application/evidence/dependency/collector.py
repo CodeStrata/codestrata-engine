@@ -41,9 +41,7 @@ def _merge_coverage(
         ),
         manifests_failed=sum(item.coverage.manifests_failed for item in bundles),
         manifests_excluded=sum(item.coverage.manifests_excluded for item in bundles),
-        declarations_collected=sum(
-            item.coverage.declarations_collected for item in bundles
-        ),
+        declarations_collected=sum(item.coverage.declarations_collected for item in bundles),
         unsupported_construct_count=sum(
             item.coverage.unsupported_construct_count for item in bundles
         ),
@@ -90,11 +88,7 @@ def aggregate_dependency_bundles(
     )
     declarations = tuple(
         sorted(
-            (
-                declaration
-                for bundle in ordered_bundles
-                for declaration in bundle.declarations
-            ),
+            (declaration for bundle in ordered_bundles for declaration in bundle.declarations),
             key=lambda item: (
                 item.source.path,
                 item.source.line_start or 0,
@@ -106,13 +100,7 @@ def aggregate_dependency_bundles(
     )
     coverage = _merge_coverage(ordered_bundles)
     diagnostics = tuple(
-        sorted(
-            {
-                diagnostic
-                for bundle in ordered_bundles
-                for diagnostic in bundle.diagnostics
-            }
-        )
+        sorted({diagnostic for bundle in ordered_bundles for diagnostic in bundle.diagnostics})
     )
     return AggregatedDependencyEvidence(
         repository_id=repository_id,
@@ -121,11 +109,7 @@ def aggregate_dependency_bundles(
         manifests=manifests,
         declarations=declarations,
         coverage=coverage,
-        contributing_provider_ids=tuple(
-            sorted({bundle.provider_id for bundle in ordered_bundles})
-        ),
+        contributing_provider_ids=tuple(sorted({bundle.provider_id for bundle in ordered_bundles})),
         diagnostics=diagnostics,
-        evidence_fingerprint=_fingerprint(
-            repository_id=repository_id, bundles=ordered_bundles
-        ),
+        evidence_fingerprint=_fingerprint(repository_id=repository_id, bundles=ordered_bundles),
     )

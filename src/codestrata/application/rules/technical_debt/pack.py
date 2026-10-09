@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from codestrata.application.rules.technical_debt.rules import (
-    DeepNestingRule,
-    ExcessiveBranchingRule,
-    ExcessiveParametersRule,
-    LargeCallableRule,
-    OversizedTypeRule,
+from codestrata.application.rules.technical_debt.yaml_debt import (
+    YamlDeepNestingRule,
+    YamlExcessiveBranchingRule,
+    YamlExcessiveParametersRule,
+    YamlLargeCallableRule,
+    YamlOversizedTypeRule,
 )
 from codestrata.domain.rules.contracts import SharedRule
 from codestrata.domain.rules.enums import RuleCategory
@@ -33,12 +33,17 @@ class TechnicalDebtRulePack:
     title: str = PACK_TITLE
     description: str = PACK_DESCRIPTION
     category: RuleCategory = RuleCategory.TECHNICAL_DEBT
-    supported_languages: tuple[str, ...] = ("java", "python", "php", "csharp")
+    supported_languages: tuple[str, ...] = (
+        "java",
+        "python",
+        "php",
+        "csharp",
+        "javascript",
+        "typescript",
+    )
     default_enabled: bool = False
     requires_enterprise_context: bool = False
-    documentation_reference: str = (
-        "docs/analysis-intelligence/shared-rule-platform.md"
-    )
+    documentation_reference: str = "docs/analysis-intelligence/shared-rule-platform.md"
     configuration_requirements: tuple[str, ...] = (
         "rules.enabled=true",
         "rules.technical_debt.enabled=true",
@@ -82,25 +87,25 @@ def technical_debt_rules(
     candidates: list[tuple[str, SharedRule]] = [
         (
             RULE_LARGE_CALLABLE,
-            LargeCallableRule(max_physical_lines=large_callable_max_lines),
+            YamlLargeCallableRule(max_physical_lines=large_callable_max_lines),
         ),
         (
             RULE_EXCESSIVE_BRANCHING,
-            ExcessiveBranchingRule(
+            YamlExcessiveBranchingRule(
                 max_branch_points=excessive_branching_max_branch_points
             ),
         ),
         (
             RULE_DEEP_NESTING,
-            DeepNestingRule(max_nesting_depth=deep_nesting_max_depth),
+            YamlDeepNestingRule(max_nesting_depth=deep_nesting_max_depth),
         ),
         (
             RULE_EXCESSIVE_PARAMETERS,
-            ExcessiveParametersRule(max_parameters=excessive_parameters_max_count),
+            YamlExcessiveParametersRule(max_parameters=excessive_parameters_max_count),
         ),
         (
             RULE_OVERSIZED_TYPE,
-            OversizedTypeRule(max_physical_lines=oversized_type_max_lines),
+            YamlOversizedTypeRule(max_physical_lines=oversized_type_max_lines),
         ),
     ]
     if enabled_rule_ids is None:

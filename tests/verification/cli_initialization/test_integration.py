@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from verification.cli_initialization.reporting import report_contains_forbidden_leak
 from verification.cli_initialization.runner import run_cli_initialization_verification
 

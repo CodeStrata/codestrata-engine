@@ -46,9 +46,7 @@ class EvidenceMeasurement(BaseModel):
     upper_threshold: int | float | str | None = None
     threshold_operator: ThresholdOperator = ThresholdOperator.NONE
     threshold_source: str | None = None
-    comparison_result: MeasurementComparisonResult = (
-        MeasurementComparisonResult.NOT_COMPARED
-    )
+    comparison_result: MeasurementComparisonResult = MeasurementComparisonResult.NOT_COMPARED
     availability: MeasurementAvailability = MeasurementAvailability.AVAILABLE
     scope: MeasurementScope = MeasurementScope.OTHER
     scope_reference: str | None = None
@@ -87,9 +85,7 @@ class EvidenceMeasurement(BaseModel):
             if isinstance(value, float) and (
                 value != value or value in (float("inf"), float("-inf"))
             ):
-                raise TraceabilityValidationError(
-                    "measurement numeric values must be finite"
-                )
+                raise TraceabilityValidationError("measurement numeric values must be finite")
             return value
         raise TraceabilityValidationError(
             "measurement values must be JSON scalars (str|int|float|bool|null)"
@@ -100,8 +96,7 @@ class EvidenceMeasurement(BaseModel):
         if self.availability is MeasurementAvailability.AVAILABLE:
             if self.measured_value is None:
                 raise TraceabilityValidationError(
-                    "available measurements require measured_value "
-                    "(use 0 for a measured zero)"
+                    "available measurements require measured_value (use 0 for a measured zero)"
                 )
         elif self.measured_value is not None or self.normalized_value is not None:
             raise TraceabilityValidationError(
@@ -119,9 +114,7 @@ class EvidenceMeasurement(BaseModel):
                 MeasurementComparisonResult.NOT_COMPARED,
                 MeasurementComparisonResult.UNKNOWN,
             }:
-                raise TraceabilityValidationError(
-                    "comparison_result requires a threshold operator"
-                )
+                raise TraceabilityValidationError("comparison_result requires a threshold operator")
             return self
 
         if operator in {
@@ -137,18 +130,12 @@ class EvidenceMeasurement(BaseModel):
                 and isinstance(self.upper_threshold, (int, float))
                 and self.upper_threshold < self.threshold
             ):
-                raise TraceabilityValidationError(
-                    "upper_threshold must be >= threshold"
-                )
+                raise TraceabilityValidationError("upper_threshold must be >= threshold")
         else:
             if self.threshold is None:
-                raise TraceabilityValidationError(
-                    f"{operator.value} requires threshold"
-                )
+                raise TraceabilityValidationError(f"{operator.value} requires threshold")
             if self.upper_threshold is not None:
-                raise TraceabilityValidationError(
-                    f"{operator.value} forbids upper_threshold"
-                )
+                raise TraceabilityValidationError(f"{operator.value} forbids upper_threshold")
 
         return self
 
@@ -181,9 +168,7 @@ class EvidenceMeasurement(BaseModel):
         **kwargs: Any,
     ) -> EvidenceMeasurement:
         if availability is MeasurementAvailability.AVAILABLE:
-            raise TraceabilityValidationError(
-                "unavailable() cannot use availability=available"
-            )
+            raise TraceabilityValidationError("unavailable() cannot use availability=available")
         return cls(
             metric_id=metric_id,
             metric_name=metric_name,

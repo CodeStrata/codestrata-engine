@@ -89,8 +89,7 @@ def test_keeps_actionable_production_security_finding() -> None:
         severity="high",
         category="security",
         description=(
-            "Configuration key holds a literal. "
-            "Context: Production source (path-production)."
+            "Configuration key holds a literal. Context: Production source (path-production)."
         ),
     )
     assert is_leadership_signal_finding(finding) is True
@@ -260,9 +259,7 @@ def test_priority_actions_are_recommendation_backed_not_finding_synthesized() ->
         presentation_bucket="near_term",
         category="testing",
     )
-    grounded = grounded.model_copy(
-        update={"related_finding_titles": ("Missing tests",)}
-    )
+    grounded = grounded.model_copy(update={"related_finding_titles": ("Missing tests",)})
     actions = build_priority_actions_for_leadership(
         findings=findings,
         recommendations=(ungrounded, grounded),
@@ -371,3 +368,55 @@ def test_leadership_verdict_and_executive_summary_avoid_methodology() -> None:
         assert banned.lower() not in blob.lower()
     assert "Should I care" not in narrative.should_i_care  # value itself, not heading
     assert narrative.what_next
+
+
+def test_verdict_and_what_next_lead_with_highest_risk() -> None:
+    findings = (
+        _finding(
+            title="Missing license",
+            severity="medium",
+            category="governance",
+            finding_id="l1",
+        ),
+        _finding(
+            title="Excessive branching",
+            severity="high",
+            category="maintainability",
+            finding_id="b1",
+        ),
+    )
+    actions = (
+        _rec(
+            title="Add an explicit LICENSE.",
+            related_finding_ids=("l1",),
+            presentation_bucket="near_term",
+            category="governance",
+            recommendation_id="lic",
+        ),
+    )
+    metrics = DashboardMetrics(
+        file_count=10,
+        technology_count=2,
+        findings_count=2,
+        recommendations_count=1,
+        test_files_label="12",
+        cicd_label="Detected",
+    )
+    verdict = build_leadership_verdict(
+        findings=findings,
+        priority_actions=actions,
+        metrics=metrics,
+        highest_severity="High",
+    )
+    narrative = build_executive_summary_narrative(
+        findings=findings,
+        priority_actions=actions,
+        metrics=metrics,
+        highest_severity="High",
+        technologies=("Angular", "TypeScript"),
+    )
+    risk = "Complex branching is increasing change risk"
+    assert risk in verdict
+    assert verdict.index(risk) < verdict.index("LICENSE")
+    assert risk in narrative.what_next
+    assert narrative.what_next.index(risk) < narrative.what_next.index("LICENSE")

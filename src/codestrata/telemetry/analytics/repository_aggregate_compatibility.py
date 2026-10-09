@@ -9,9 +9,7 @@ from codestrata.telemetry.analytics.repository_aggregate_policy import (
     COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_VERSION,
 )
 
-_COMPATIBLE: frozenset[str] = frozenset(
-    {COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_VERSION}
-)
+_COMPATIBLE: frozenset[str] = frozenset({COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_VERSION})
 
 
 class RepositoryAggregateAnalyticsCompatibilityError(AnalyticsError):

@@ -153,14 +153,7 @@ def test_env_force_disable(telemetry_home: Path, monkeypatch: pytest.MonkeyPatch
 
 def test_schema_file_exists() -> None:
     root = Path(__file__).resolve().parents[2]
-    schema = (
-        root
-        / "schemas"
-        / "telemetry"
-        / "codestrata.io"
-        / "v1.0"
-        / "TelemetryEvent.json"
-    )
+    schema = root / "schemas" / "telemetry" / "codestrata.io" / "v1.0" / "TelemetryEvent.json"
     assert schema.is_file()
     data = json.loads(schema.read_text(encoding="utf-8"))
     assert data["properties"]["schema_version"]["const"] == "1.0.0"

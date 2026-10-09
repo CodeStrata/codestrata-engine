@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from validation.models import (
     ActualAssessmentResult,
     ComparisonMismatch,
@@ -175,9 +174,7 @@ def test_repeat_runs_create_history_and_stable_latest(
     assert first.verdict == second.verdict == ValidationVerdict.PASS
     run_ids = list_run_ids("local-sample-js", records_root=records_root)
     assert len(run_ids) >= 2
-    latest = load_repository_validation_record(
-        records_root / "local-sample-js" / "latest"
-    )
+    latest = load_repository_validation_record(records_root / "local-sample-js" / "latest")
     assert latest.verdict == ValidationVerdict.PASS
     assert latest.run_id == run_ids[-1]
     # Deterministic actual snapshot fields for technology inventory.

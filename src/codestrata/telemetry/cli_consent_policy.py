@@ -8,8 +8,7 @@ from typing import Any
 COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_ID = "community-telemetry-cli-consent-policy"
 COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_VERSION = "1.0"
 COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_URN = (
-    f"{COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_ID}:"
-    f"{COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_VERSION}"
+    f"{COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_ID}:{COMMUNITY_TELEMETRY_CLI_CONSENT_POLICY_VERSION}"
 )
 
 _REVIEW_STATUS = "per_invocation_cli_flags_no_persistence"
@@ -33,9 +32,7 @@ _LIMITATIONS: tuple[str, ...] = (
 
 SUPPORTED_COMMANDS: frozenset[str] = frozenset({"assess"})
 
-TELEMETRY_FLAG_CONFLICT_MESSAGE = (
-    "--telemetry-allow and --telemetry-deny cannot be used together."
-)
+TELEMETRY_FLAG_CONFLICT_MESSAGE = "--telemetry-allow and --telemetry-deny cannot be used together."
 
 
 class CliConsentPolicyError(ValueError):
@@ -65,9 +62,7 @@ class CommunityTelemetryCliConsentPolicy:
     limitations: tuple[str, ...] = _LIMITATIONS
 
     def __post_init__(self) -> None:
-        object.__setattr__(
-            self, "supported_commands", tuple(sorted(set(self.supported_commands)))
-        )
+        object.__setattr__(self, "supported_commands", tuple(sorted(set(self.supported_commands))))
         object.__setattr__(self, "limitations", tuple(sorted(set(self.limitations))))
         self.validate()
 

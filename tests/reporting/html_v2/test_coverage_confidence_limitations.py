@@ -181,9 +181,7 @@ def test_html_assessment_heads_end_with_canonical_ccl(tmp_path: Path) -> None:
         supporting_finding_ids=(finding.id,),
         primary_finding_id=finding.id,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
-        actions=(
-            RecommendationAction(order=1, title="Rotate", description="Rotate secret"),
-        ),
+        actions=(RecommendationAction(order=1, title="Rotate", description="Rotate secret"),),
         subject_keys=("repo",),
     )
     analysis = AnalysisResult(
@@ -239,11 +237,11 @@ def test_html_assessment_heads_end_with_canonical_ccl(tmp_path: Path) -> None:
         assert cov < conf < lim, f"CCL order wrong in {anchor}"
 
     # EIS also uses canonical labels (not Overall *).
-    eis = html[
-        html.find('id="engineering-intelligence-summary"') : html.find(
-            'id="key-takeaways"'
-        )
-    ]
+    eis_start = html.find('id="engineering-intelligence-summary"')
+    eis_end = html.find('id="engineering-risks"', eis_start + 1)
+    if eis_end < 0:
+        eis_end = html.find("</section>", eis_start + 1)
+    eis = html[eis_start:eis_end]
     assert "<h4>Coverage</h4>" in eis
     assert "<h4>Confidence</h4>" in eis
     assert "<h4>Limitations</h4>" in eis

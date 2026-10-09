@@ -1,0 +1,10 @@
+{
+  "configuration_id": "representative-java",
+  "status": "PASS",
+  "findings": [{"id": "J1", "title": "doris-pin-identity"}],
+  "pin": {"id": "doris", "sha": "placeholder-not-cloned"},
+  "coverage": {"evaluated_units": 1, "eligible_units": 1, "coverage_status": "COMPLETE"},
+  "generated_at": "2026-09-23T13:00:00Z",
+  "duration_ms": 5,
+  "run_id": "java-1"
+}

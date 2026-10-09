@@ -24,6 +24,9 @@ _CATEGORY_TO_HEAD: dict[str, AssessmentHead] = {
     "technical_debt": AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
     "maintainability": AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
     "architecture": AssessmentHead.ARCHITECTURE_INTELLIGENCE,
+    "testing": AssessmentHead.QUALITY_INTELLIGENCE,
+    "quality": AssessmentHead.QUALITY_INTELLIGENCE,
+    "test": AssessmentHead.QUALITY_INTELLIGENCE,
     "cloud": AssessmentHead.CLOUD_READINESS,
     "cloud_readiness": AssessmentHead.CLOUD_READINESS,
     "ai_readiness": AssessmentHead.AI_READINESS,
@@ -39,11 +42,16 @@ _RULE_PREFIX_TO_HEAD: tuple[tuple[str, AssessmentHead], ...] = (
     ("architecture.", AssessmentHead.ARCHITECTURE_INTELLIGENCE),
     ("dependency.", AssessmentHead.DEPENDENCY_INTELLIGENCE),
     ("security.", AssessmentHead.SECURITY_INTELLIGENCE),
+    ("quality.", AssessmentHead.QUALITY_INTELLIGENCE),
+    ("testing.", AssessmentHead.QUALITY_INTELLIGENCE),
+    ("test.", AssessmentHead.QUALITY_INTELLIGENCE),
     ("cloud.", AssessmentHead.CLOUD_READINESS),
     ("modernization.", AssessmentHead.MODERNIZATION_ASSESSMENT),
 )
 
-AssessmentStatus = str  # assessed | partially_assessed | not_available | not_enabled | legacy_assessment
+AssessmentStatus = (
+    str  # assessed | partially_assessed | not_available | not_enabled | legacy_assessment
+)
 ConfidenceLabel = str  # high | moderate | limited | unavailable
 
 
@@ -101,11 +109,7 @@ def confidence_from_completeness(values: Sequence[str]) -> ConfidenceLabel:
     ``derive_assessment_head_confidence`` and must not rely on this helper.
     """
 
-    normalized = [
-        str(item or "").strip().lower()
-        for item in values
-        if str(item or "").strip()
-    ]
+    normalized = [str(item or "").strip().lower() for item in values if str(item or "").strip()]
     if not normalized:
         return "unavailable"
     if all(item == "complete" for item in normalized):
@@ -161,7 +165,12 @@ def derive_head_status(
 ) -> AssessmentStatus:
     """Conservative status — zero findings never implies healthy/assessed alone."""
 
-    if pack_enabled is False and not pack_present and finding_count == 0 and recommendation_count == 0:
+    if (
+        pack_enabled is False
+        and not pack_present
+        and finding_count == 0
+        and recommendation_count == 0
+    ):
         return "not_enabled"
     if pack_present:
         if finding_count or recommendation_count:
@@ -188,6 +197,7 @@ def build_assessment_head_sections(
     security_present: bool,
     cloud_present: bool,
     ai_readiness_present: bool,
+    testing_present: bool = False,
     assessed_packs: Sequence[str] = (),
     not_assessed_packs: Sequence[tuple[str, str]] = (),
 ) -> tuple[
@@ -200,7 +210,9 @@ def build_assessment_head_sections(
     finding_heads: dict[str, AssessmentHead | None] = {
         item.finding_id: classify_finding_head(item) for item in findings
     }
-    findings_by_head: dict[AssessmentHead, list[FindingView]] = {h: [] for h in ASSESSMENT_RESULT_HEADS}
+    findings_by_head: dict[AssessmentHead, list[FindingView]] = {
+        h: [] for h in ASSESSMENT_RESULT_HEADS
+    }
     unclassified_findings: list[FindingView] = []
     for item in findings:
         head = finding_heads.get(item.finding_id)
@@ -214,13 +226,13 @@ def build_assessment_head_sections(
         h: [] for h in ASSESSMENT_RESULT_HEADS
     }
     unclassified_recommendations: list[RecommendationView] = []
-    for item in recommendations:
-        head = classify_recommendation_head(item, finding_heads=finding_heads)
-        rec_heads[item.recommendation_id] = head
+    for recommendation in recommendations:
+        head = classify_recommendation_head(recommendation, finding_heads=finding_heads)
+        rec_heads[recommendation.recommendation_id] = head
         if head is None or head not in recommendations_by_head:
-            unclassified_recommendations.append(item)
+            unclassified_recommendations.append(recommendation)
         else:
-            recommendations_by_head[head].append(item)
+            recommendations_by_head[head].append(recommendation)
 
     # Related Priority Action IDs per head (links only — PA detail stays in Priority Actions).
     pa_ids_by_head: dict[AssessmentHead, list[str]] = {h: [] for h in ASSESSMENT_RESULT_HEADS}
@@ -238,6 +250,7 @@ def build_assessment_head_sections(
         AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE: technical_debt_present,
         AssessmentHead.DEPENDENCY_INTELLIGENCE: dependency_present,
         AssessmentHead.SECURITY_INTELLIGENCE: security_present,
+        AssessmentHead.QUALITY_INTELLIGENCE: testing_present,
         AssessmentHead.CLOUD_READINESS: cloud_present,
         AssessmentHead.AI_READINESS: ai_readiness_present,
         AssessmentHead.MODERNIZATION_ASSESSMENT: False,  # synthesis; content routed separately
@@ -254,7 +267,8 @@ def build_assessment_head_sections(
             pack_enabled=enabled,
             finding_count=len(head_findings),
             recommendation_count=len(head_recs),
-            has_inventory_facts=head is AssessmentHead.TECHNOLOGY_INVENTORY and technologies_present,
+            has_inventory_facts=head is AssessmentHead.TECHNOLOGY_INVENTORY
+            and technologies_present,
         )
         # Modernization is a synthesis section — partially assessed when opportunities/recs exist.
         if head is AssessmentHead.MODERNIZATION_ASSESSMENT:
@@ -292,9 +306,7 @@ def build_assessment_head_sections(
             activated=present or status in {"assessed", "partially_assessed", "legacy_assessment"},
             synthesized=head is AssessmentHead.MODERNIZATION_ASSESSMENT,
         )
-        confidence, confidence_label = confidence_label_from_head_confidence(
-            head_confidence
-        )
+        confidence, confidence_label = confidence_label_from_head_confidence(head_confidence)
 
         evidence_state = _evidence_state(
             status=status,
@@ -314,9 +326,7 @@ def build_assessment_head_sections(
                 "evidence_state": evidence_state,
                 "confidence": confidence,
                 "confidence_label": confidence_label,
-                "assessment_head_confidence": assessment_head_confidence_to_json(
-                    head_confidence
-                ),
+                "assessment_head_confidence": assessment_head_confidence_to_json(head_confidence),
                 "limitations": tuple(limitations),
                 "findings": head_findings,
                 "recommendations": head_recs,
@@ -344,6 +354,8 @@ def _pack_enabled_map(
         "technical_debt": AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
         "dependency": AssessmentHead.DEPENDENCY_INTELLIGENCE,
         "security": AssessmentHead.SECURITY_INTELLIGENCE,
+        "testing": AssessmentHead.QUALITY_INTELLIGENCE,
+        "quality": AssessmentHead.QUALITY_INTELLIGENCE,
         "cloud": AssessmentHead.CLOUD_READINESS,
         "ai_readiness": AssessmentHead.AI_READINESS,
     }
@@ -406,6 +418,5 @@ def _placeholder_message(head: AssessmentHead, *, status: AssessmentStatus) -> s
 
 
 UNCLASSIFIED_LIMITATION = (
-    "Some assessment results could not yet be assigned to a customer-facing "
-    "assessment section."
+    "Some assessment results could not yet be assigned to a customer-facing assessment section."
 )

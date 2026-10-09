@@ -633,7 +633,9 @@ class HtmlFileReporter:
 
         rows: list[tuple[str, str]] = []
         self._add_bool_row(rows, "API layer", architecture.has_api_layer)
+        self._add_bool_row(rows, "Presentation layer", architecture.has_presentation_layer)
         self._add_bool_row(rows, "Service layer", architecture.has_service_layer)
+        self._add_bool_row(rows, "State layer", architecture.has_state_layer)
         self._add_bool_row(
             rows,
             "Persistence layer",

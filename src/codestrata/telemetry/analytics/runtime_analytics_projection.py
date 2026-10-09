@@ -148,9 +148,7 @@ def project_runtime_analytics_event(
     analytics_event = event.to_analytics_event()
     project_analytics_event(analytics_event)
 
-    return RuntimeAnalyticsProjection(
-        fields={key: payload[key] for key in sorted(payload)}
-    )
+    return RuntimeAnalyticsProjection(fields={key: payload[key] for key in sorted(payload)})
 
 
 def project_runtime_analytics_to_analytics_event(

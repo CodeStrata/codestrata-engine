@@ -53,10 +53,7 @@ def _validate_outcome_failure(
     if outcome in {"failure", "unavailable"}:
         if failure_category is None and policy.failure_category_required_on_failure:
             raise AnalyticsError(AnalyticsErrorCode.OUTCOME_FAILURE_MISMATCH)
-        if (
-            failure_category is not None
-            and failure_category not in APPROVED_AI_FAILURE_CATEGORIES
-        ):
+        if failure_category is not None and failure_category not in APPROVED_AI_FAILURE_CATEGORIES:
             raise AnalyticsError(AnalyticsErrorCode.INVALID_FAILURE_CATEGORY)
         return
     raise AnalyticsError(AnalyticsErrorCode.INVALID_OUTCOME)
@@ -97,9 +94,7 @@ def validate_ai_analytics_event(
     ):
         raise AnalyticsError(AnalyticsErrorCode.INVALID_DURATION_BUCKET)
 
-    _validate_outcome_failure(
-        event.outcome, event.failure_category, policy=active
-    )
+    _validate_outcome_failure(event.outcome, event.failure_category, policy=active)
 
     projected = project_ai_analytics_event(event, policy=active)
     validate_analytics_event(event.to_analytics_event())
@@ -145,23 +140,15 @@ def validate_ai_analytics_mapping(
             else None
         ),
         duration_bucket=(
-            str(payload["duration_bucket"])
-            if payload.get("duration_bucket") is not None
-            else None
+            str(payload["duration_bucket"]) if payload.get("duration_bucket") is not None else None
         ),
-        ai_used=(
-            bool(payload["ai_used"]) if payload.get("ai_used") is not None else None
-        ),
+        ai_used=(bool(payload["ai_used"]) if payload.get("ai_used") is not None else None),
         event_type=str(payload.get("event_type", "analytics_ai_usage_collected")),
         category=str(payload.get("category", "ai_usage")),
         client_name=str(payload.get("client_name", "codestrata_cli")),
         lifecycle=str(payload.get("lifecycle", "projected")),
-        schema_version=str(
-            payload.get("schema_version", COMMUNITY_AI_ANALYTICS_SCHEMA_VERSION)
-        ),
-        policy_version=str(
-            payload.get("policy_version", COMMUNITY_AI_ANALYTICS_POLICY_VERSION)
-        ),
+        schema_version=str(payload.get("schema_version", COMMUNITY_AI_ANALYTICS_SCHEMA_VERSION)),
+        policy_version=str(payload.get("policy_version", COMMUNITY_AI_ANALYTICS_POLICY_VERSION)),
         analytics_schema_version=str(payload.get("analytics_schema_version", "1.0")),
         analytics_policy_version=str(payload.get("analytics_policy_version", "1.0")),
         privacy_projection_applied=bool(payload["privacy_projection_applied"]),

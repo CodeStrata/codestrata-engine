@@ -7,13 +7,6 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-
-from codestrata.application.evidence.repository_ai_readiness.discovery import (
-    classify_ai_readiness_candidate,
-)
-from codestrata.domain.evidence.repository_ai_readiness.enums import (
-    AiReadinessEvidenceFamily,
-)
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.ai_readiness import (
     AiReadinessExpectation,
@@ -23,7 +16,6 @@ from validation.ai_readiness import (
     AiReadinessRecommendationActual,
     AiReadinessRecommendationExpectation,
     AiReadinessSignalActual,
-    AiReadinessSignalExpectation,
     aggregate_ai_readiness_results,
     extract_ai_readiness_findings,
     extract_ai_readiness_signals,
@@ -36,6 +28,13 @@ from validation.registry import load_all_repositories, resolve_expected_results
 from validation.runner import run_validation_suite
 from validation.summary import build_validation_summary
 
+from codestrata.application.evidence.repository_ai_readiness.discovery import (
+    classify_ai_readiness_candidate,
+)
+from codestrata.domain.evidence.repository_ai_readiness.enums import (
+    AiReadinessEvidenceFamily,
+)
+
 
 def test_contradictory_ai_readiness_expectations_rejected() -> None:
     with pytest.raises(ValidationError, match="contradictory"):
@@ -45,19 +44,13 @@ def test_contradictory_ai_readiness_expectations_rejected() -> None:
         )
     with pytest.raises(ValidationError, match="contradictory"):
         AiReadinessExpectation(
-            required_signal_families=(
-                AiReadinessFamilyExpectation(family_id="ai_integration"),
-            ),
-            forbidden_signal_families=(
-                AiReadinessFamilyExpectation(family_id="ai_integration"),
-            ),
+            required_signal_families=(AiReadinessFamilyExpectation(family_id="ai_integration"),),
+            forbidden_signal_families=(AiReadinessFamilyExpectation(family_id="ai_integration"),),
         )
     with pytest.raises(ValidationError, match="contradictory"):
         ExpectedResults(
             ai_readiness=AiReadinessExpectation(
-                required_findings=(
-                    AiReadinessFindingExpectation(rule_id="ai_readiness.ai-040"),
-                ),
+                required_findings=(AiReadinessFindingExpectation(rule_id="ai_readiness.ai-040"),),
                 forbidden_rule_ids=("ai_readiness.ai-040",),
             )
         )
@@ -65,12 +58,8 @@ def test_contradictory_ai_readiness_expectations_rejected() -> None:
 
 def test_classify_tp_fp_fn_and_metrics() -> None:
     expectation = AiReadinessExpectation(
-        required_signal_families=(
-            AiReadinessFamilyExpectation(family_id="ai_integration"),
-        ),
-        required_findings=(
-            AiReadinessFindingExpectation(rule_id="ai_readiness.ai-030"),
-        ),
+        required_signal_families=(AiReadinessFamilyExpectation(family_id="ai_integration"),),
+        required_findings=(AiReadinessFindingExpectation(rule_id="ai_readiness.ai-030"),),
         forbidden_rule_ids=("ai_readiness.ai-032",),
         forbidden_conclusions=("ai ready",),
     )
@@ -124,9 +113,7 @@ def test_precision_recall_zero_denominator_unavailable() -> None:
 
 def test_aggregate_deterministic_order() -> None:
     expectation = AiReadinessExpectation(
-        required_signal_families=(
-            AiReadinessFamilyExpectation(family_id="tool_mcp"),
-        )
+        required_signal_families=(AiReadinessFamilyExpectation(family_id="tool_mcp"),)
     )
     signals = (
         AiReadinessSignalActual(
@@ -182,7 +169,9 @@ def test_generic_negative_controls_not_discovered() -> None:
     for path, expected_family in cases:
         classified = classify_ai_readiness_candidate(path)
         if expected_family is None:
-            assert classified is None or classified.family is AiReadinessEvidenceFamily.UNKNOWN, path
+            assert classified is None or classified.family is AiReadinessEvidenceFamily.UNKNOWN, (
+                path
+            )
             if classified is not None:
                 assert classified.family not in {
                     AiReadinessEvidenceFamily.AI_INTEGRATION,
@@ -228,8 +217,7 @@ def test_recommendation_and_count_range_expectations() -> None:
     )
     assert result.false_positives >= 1
     assert any(
-        item.classification is FactClassification.TRUE_POSITIVE
-        and "recommendation" in item.rule_id
+        item.classification is FactClassification.TRUE_POSITIVE and "recommendation" in item.rule_id
         for item in result.classifications
     )
 
@@ -289,11 +277,7 @@ def test_controlled_ai_readiness_fixture_precision(tmp_path: Path) -> None:
     )
 
     expected = resolve_expected_results(
-        next(
-            item
-            for item in load_all_repositories()
-            if item.repository_id == "local-ai-readiness"
-        )
+        next(item for item in load_all_repositories() if item.repository_id == "local-ai-readiness")
     )
     assert expected.ai_readiness is not None
     result = validate_ai_readiness_precision(

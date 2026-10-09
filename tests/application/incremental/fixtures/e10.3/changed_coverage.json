@@ -1,0 +1,38 @@
+{
+  "scenario": "changed_coverage",
+  "description": "Candidate coverage drops; missing findings must evaluate to UNKNOWN and never synthetic resolution.",
+  "base": {
+    "source_digest": "sha256:source_abc123",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "rule-maintainability-02",
+        "identity_key": "rule-maintainability-02::src/legacy.py:100",
+        "title": "High cyclomatic complexity",
+        "category": "maintainability",
+        "severity": "medium"
+      }
+    ]
+  },
+  "candidate": {
+    "source_digest": "sha256:source_abc123",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "partial",
+    "findings": []
+  },
+  "expected": {
+    "attribution": "coverage_only",
+    "label": "coverage-driven",
+    "is_feed_driven": false,
+    "customer_code_deterioration": false,
+    "changed_dimensions": ["coverage"],
+    "controlled_rerun_performed": false,
+    "finding_lifecycle": "unknown",
+    "finding_cause": "coverage",
+    "compatibility_reasons": ["incomplete_candidate_coverage"],
+    "evidence_note": "coverage_change_forces_unknown_lifecycle"
+  }
+}

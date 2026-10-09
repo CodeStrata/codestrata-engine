@@ -25,9 +25,11 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
         f"**Client:** `{catalog.client_name}`  ",
         f"**Transmission:** {catalog.transmission_status.replace('_', ' ')}  ",
         f"**Installation identity:** {catalog.installation_identity_status.replace('_', ' ')}  ",
-        f"**Consent scope:** {catalog.consent_scope} (persistence: {catalog.consent_persistence})  ",
+        f"**Consent scope:** {catalog.consent_scope} "
+        f"(persistence: {catalog.consent_persistence})  ",
         f"**Consent expands fields:** {'yes' if catalog.consent_expands_fields else 'no'}  ",
-        f"**Privacy filtering:** {'required' if catalog.privacy_filtering_required else 'optional'}",
+        f"**Privacy filtering:** "
+        f"{'required' if catalog.privacy_filtering_required else 'optional'}",
         "",
         "This catalog describes what the Engine privacy-first runtime **may**",
         "project. Not every defined event is necessarily emitted today.",
@@ -45,7 +47,8 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
                 f"- **Purpose:** {event.purpose}",
                 f"- **Lifecycle meaning:** {event.lifecycle_meaning}",
                 f"- **Usage:** `{event.usage_status}`",
-                f"- **Transmission operational:** {'yes' if event.transmission_operational else 'no'}",
+                f"- **Transmission operational:** "
+                f"{'yes' if event.transmission_operational else 'no'}",
                 f"- **Required fields:** {', '.join(f'`{f}`' for f in event.required_fields)}",
                 f"- **Optional fields:** {', '.join(f'`{f}`' for f in event.optional_fields)}",
                 f"- **Prohibited fields:** {event.prohibited_fields_note}",
@@ -69,14 +72,16 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
                 "",
                 f"- **Type:** `{field.field_type}`",
                 f"- **Requiredness:** `{field.requiredness}`",
-                f"- **Omitted when unavailable:** {'yes' if field.omitted_when_unavailable else 'no'}",
+                f"- **Omitted when unavailable:** "
+                f"{'yes' if field.omitted_when_unavailable else 'no'}",
                 f"- **Enum:** `{field.enum_ref}`" if field.enum_ref else "- **Enum:** none",
                 f"- **Max length:** {field.max_length if field.max_length is not None else 'n/a'}",
                 f"- **Privacy classification:** `{field.privacy_classification}`",
                 f"- **Source:** `{field.source}`",
                 f"- **Normalization:** {field.normalization}",
                 f"- **Bucketed:** {'yes' if field.bucketed else 'no'}",
-                f"- **Set ordering normalized:** {'yes' if field.set_ordering_normalized else 'no'}",
+                f"- **Set ordering normalized:** "
+                f"{'yes' if field.set_ordering_normalized else 'no'}",
                 f"- **Transmitted currently:** {'yes' if field.transmitted_currently else 'no'}",
                 f"- **Example:** `{field.example}`",
             ]
@@ -108,8 +113,8 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
     lines.append("")
 
     lines.extend(["## Validation and rejection", ""])
-    for item in catalog.validation_behavior:
-        lines.append(f"- `{item}`")
+    for behavior in catalog.validation_behavior:
+        lines.append(f"- `{behavior}`")
     lines.append("")
 
     lines.extend(
@@ -128,8 +133,8 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
             "",
         ]
     )
-    for item in catalog.change_policy:
-        lines.append(f"- `{item}`")
+    for policy_item in catalog.change_policy:
+        lines.append(f"- `{policy_item}`")
     lines.append("")
     lines.extend(
         [
@@ -137,8 +142,8 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
             "",
         ]
     )
-    for item in catalog.limitations:
-        lines.append(f"- `{item}`")
+    for limitation in catalog.limitations:
+        lines.append(f"- `{limitation}`")
     lines.append("")
     lines.extend(
         [
@@ -160,7 +165,7 @@ def format_catalog_markdown(catalog: TelemetryCatalog) -> str:
     return text
 
 
-def _compact_json(payload: dict) -> str:
+def _compact_json(payload: dict[str, object]) -> str:
     import json
 
     return json.dumps(payload, sort_keys=True, indent=2, ensure_ascii=True)

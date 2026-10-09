@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import pytest
-
 from verification.repository_assessment.commands import (
     assert_no_ai_flag,
     assessment_environ,

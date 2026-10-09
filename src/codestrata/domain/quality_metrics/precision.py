@@ -12,8 +12,9 @@ assessment coverage, recall, severity, priority, or a product-wide accuracy clai
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from decimal import Decimal
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -211,15 +212,11 @@ def build_precision_metric(
     if true_positive_count < 0 or false_positive_count < 0:
         raise ValueError("TP and FP counts must be non-negative")
 
-    scope_enum = (
-        scope if isinstance(scope, QualityMetricScope) else QualityMetricScope(str(scope))
-    )
+    scope_enum = scope if isinstance(scope, QualityMetricScope) else QualityMetricScope(str(scope))
     normalized_scope_id = normalize_scope_id(scope_id)
     metric_id = build_precision_metric_id(scope=scope_enum, scope_id=normalized_scope_id)
     source_enum = (
-        source
-        if isinstance(source, QualityMetricSource)
-        else QualityMetricSource(str(source))
+        source if isinstance(source, QualityMetricSource) else QualityMetricSource(str(source))
     )
     sample_model = (
         sample
@@ -278,9 +275,7 @@ def build_precision_metric(
         notes.append(provisional_note.replace("provisional metric", "provisional precision"))
 
     if source_enum is QualityMetricSource.CONTROLLED_FIXTURE:
-        notes.append(
-            "controlled-fixture scope only; not representative of arbitrary repositories"
-        )
+        notes.append("controlled-fixture scope only; not representative of arbitrary repositories")
 
     return PrecisionMetric(
         metric_id=metric_id,

@@ -1,0 +1,16 @@
+tier: dogfood
+repositories:
+- id: codestrata-engine
+  github_repository: CodeStrata/codestrata-engine
+  github_url: https://github.com/CodeStrata/codestrata-engine
+  sha: ca18a660f164f8c2bd9983a81faf1f82094a1abc
+  license: MIT
+  size_kib: 4152
+  language: Python
+  language_group: python
+  project_shape: engine_mirror
+  tier: dogfood
+  depth_class: dogfood
+  notes:
+  - Public-reproducible Community Engine mirror.
+  - Size is below the external-large bar on purpose; dogfood is a different tier.

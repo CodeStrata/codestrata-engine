@@ -6,7 +6,6 @@ import ast
 import io
 import json
 import logging
-import os
 import re
 from pathlib import Path
 from typing import Any
@@ -34,29 +33,29 @@ from codestrata.ai.provider_contracts.errors import ErrorCategory
 from codestrata.ai.provider_contracts.executor import AIProviderExecutor
 from codestrata.ai.provider_contracts.registry import AIProviderRegistry
 from codestrata.ai.provider_contracts.retry_policy import DEFAULT_RETRY_POLICY
+from codestrata.ai.providers.doctor import (
+    build_ai_configuration_report,
+    evaluate_openrouter_readiness,
+)
+from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 
 # Import factory before assess_ai to keep load order stable.
 from codestrata.ai.providers.factory import (  # noqa: I001
     create_assess_ai_provider,
     supported_assess_ai_providers,
 )
-from codestrata.ai.providers.doctor import (
-    build_ai_configuration_report,
-    evaluate_openrouter_readiness,
-)
-from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 from codestrata.config.settings import AiSettings, OpenAISettings, OpenRouterSettings
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 from codestrata.reporting.modernization_models import AIExecutionStatus
 from codestrata.telemetry.analytics.ai_analytics_catalogs import APPROVED_AI_PROVIDER_FAMILIES
 from codestrata.telemetry.analytics.ai_analytics_projection import APPROVED_AI_ANALYTICS_FIELD_NAMES
 from verification.ai_provider_privacy_boundaries.contract import (
+    AI_EXECUTION_STATUS_VALUES,
     ALLOWED_ADAPTER_DIAGNOSTIC_KEYS,
     ALLOWED_EXECUTION_DIAGNOSTIC_KEYS,
     ALLOWED_RESULT_DIAGNOSTIC_KEYS,
-    ASSESSMENT_SCHEMA_VERSION,
     ASSESS_REGISTERED_PROVIDERS,
-    AI_EXECUTION_STATUS_VALUES,
+    ASSESSMENT_SCHEMA_VERSION,
     BEDROCK_DEFAULT_MODEL,
     CLI_FORBIDDEN_FLAG_TOKENS,
     DEFAULT_PROVIDER,
@@ -71,9 +70,6 @@ from verification.ai_provider_privacy_boundaries.contract import (
 )
 from verification.ai_provider_privacy_boundaries.fixtures import (
     ALL_FORBIDDEN_MARKERS,
-    BedrockClient,
-    OpenAIStyleClient,
-    OpenAIStyleResponse,
     SYNTHETIC_APP_NAME,
     SYNTHETIC_AWS_ACCESS,
     SYNTHETIC_AWS_SECRET,
@@ -94,6 +90,9 @@ from verification.ai_provider_privacy_boundaries.fixtures import (
     SYNTHETIC_RESPONSE,
     SYNTHETIC_SESSION,
     SYNTHETIC_SITE_URL,
+    BedrockClient,
+    OpenAIStyleClient,
+    OpenAIStyleResponse,
     bedrock_client_error,
     canonical_json,
     leaked_markers,
@@ -147,7 +146,9 @@ def _module_imports(path: Path) -> set[str]:
     return names
 
 
-def _imports_forbidden(names: set[str], prefixes: tuple[str, ...] = FORBIDDEN_IMPORT_PREFIXES) -> list[str]:
+def _imports_forbidden(
+    names: set[str], prefixes: tuple[str, ...] = FORBIDDEN_IMPORT_PREFIXES
+) -> list[str]:
     offenders: list[str] = []
     for name in names:
         for prefix in prefixes:
@@ -531,9 +532,7 @@ def run_error_privacy_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         result = adapter.execute(provider_request(model_id=SYNTHETIC_MODEL_OPENAI))
         view = openai_diagnostics.diagnostic_view_of_provider_result(result)
         leaked = leaked_markers(canonical_json(view), markers)
-        category_ok = (
-            result.error is not None and result.error.category is expected
-        )
+        category_ok = result.error is not None and result.error.category is expected
         checks.append(
             CheckResult(
                 name=f"openai_error_{class_name}_diagnostics_clean",
@@ -579,9 +578,7 @@ def run_error_privacy_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         environment_reader=lambda _name: SYNTHETIC_OPENROUTER_KEY,
         api_key_present=True,
     )
-    or_result = openrouter_adapter.execute(
-        provider_request(model_id=SYNTHETIC_MODEL_OPENROUTER)
-    )
+    or_result = openrouter_adapter.execute(provider_request(model_id=SYNTHETIC_MODEL_OPENROUTER))
     or_view = openrouter_diagnostics.diagnostic_view_of_provider_result(or_result)
     or_leaked = leaked_markers(canonical_json(or_view), markers)
     checks.append(
@@ -749,7 +746,9 @@ def run_configuration_checks() -> tuple[list[CheckResult], dict[str, Any]]:
     return checks, {}
 
 
-def run_configuration_path_write_checks(engine_root: Path) -> tuple[list[CheckResult], dict[str, Any]]:
+def run_configuration_path_write_checks(
+    engine_root: Path,
+) -> tuple[list[CheckResult], dict[str, Any]]:
     hits: list[str] = []
     for rel in _ADAPTER_PACKAGES:
         for path in _collect_py_files(engine_root / rel):
@@ -778,7 +777,11 @@ def run_execution_checks(engine_root: Path) -> tuple[list[CheckResult], dict[str
         if isinstance(node, ast.Attribute) and node.attr == "getenv":
             if isinstance(node.value, ast.Name) and node.value.id == "os":
                 reads_environ = True
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "getenv":
+        if (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "getenv"
+        ):
             reads_environ = True
     checks = [
         CheckResult(
@@ -917,9 +920,7 @@ def run_retry_checks() -> tuple[list[CheckResult], dict[str, Any]]:
     )
     malformed_client = malformed_adapter._client  # noqa: SLF001
     malformed_exec = build_openai_executor(malformed_adapter)
-    malformed_result = malformed_exec.execute(
-        provider_request(model_id=SYNTHETIC_MODEL_OPENAI)
-    )
+    malformed_result = malformed_exec.execute(provider_request(model_id=SYNTHETIC_MODEL_OPENAI))
     checks.append(
         CheckResult(
             name="malformed_response_not_retried_beyond_one",
@@ -1029,15 +1030,12 @@ def run_failure_isolation_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         openai_settings=openai_settings_secret(),
         environment_reader=lambda _name: None,
     )
-    missing_result = missing_key_adapter.execute(
-        provider_request(model_id=SYNTHETIC_MODEL_OPENAI)
-    )
+    missing_result = missing_key_adapter.execute(provider_request(model_id=SYNTHETIC_MODEL_OPENAI))
     checks.append(
         CheckResult(
             name="isolation_openai_missing_key_no_fallback",
             category="failure_isolation",
-            ok=str(missing_result.provider_id) == "openai"
-            and missing_result.error is not None,
+            ok=str(missing_result.provider_id) == "openai" and missing_result.error is not None,
             detail=f"provider_id={missing_result.provider_id}",
         )
     )
@@ -1259,9 +1257,7 @@ def run_telemetry_boundary_checks(engine_root: Path) -> tuple[list[CheckResult],
     for rel in _ADAPTER_PACKAGES:
         for path in _collect_py_files(engine_root / rel):
             names = _module_imports(path)
-            hits = _imports_forbidden(
-                names, ("codestrata.telemetry", "codestrata.analytics")
-            )
+            hits = _imports_forbidden(names, ("codestrata.telemetry", "codestrata.analytics"))
             if hits:
                 offenders.append(f"{path.relative_to(engine_root)}:{hits}")
     return [
@@ -1309,7 +1305,12 @@ def run_platform_boundary_checks(engine_root: Path) -> tuple[list[CheckResult], 
         for path in _collect_py_files(root):
             hits = _imports_forbidden(
                 _module_imports(path),
-                ("codestrata.platform", "codestrata_platform", "codestrata.datalake", "codestrata_datalake"),
+                (
+                    "codestrata.platform",
+                    "codestrata_platform",
+                    "codestrata.datalake",
+                    "codestrata_datalake",
+                ),
             )
             if hits:
                 offenders.append(f"{path.relative_to(engine_root)}:{hits}")
@@ -1564,12 +1565,8 @@ def run_safety_checks() -> tuple[list[CheckResult], dict[str, Any]]:
 
 
 def run_determinism_checks() -> tuple[list[CheckResult], dict[str, Any]]:
-    first = canonical_json(
-        openai_diagnostics.diagnostic_view_of_adapter(_openai_adapter())
-    )
-    second = canonical_json(
-        openai_diagnostics.diagnostic_view_of_adapter(_openai_adapter())
-    )
+    first = canonical_json(openai_diagnostics.diagnostic_view_of_adapter(_openai_adapter()))
+    second = canonical_json(openai_diagnostics.diagnostic_view_of_adapter(_openai_adapter()))
     checks = [
         CheckResult(
             name="adapter_diagnostic_views_are_deterministic",

@@ -119,23 +119,13 @@ def test_maven_dependencies_management_plugins_profiles_properties() -> None:
         if item.declaration_kind is DependencyDeclarationKind.DEPENDENCY_MANAGEMENT
     ]
     assert managed
-    plugins = [
-        item
-        for item in decls
-        if item.declaration_kind is DependencyDeclarationKind.PLUGIN
-    ]
+    plugins = [item for item in decls if item.declaration_kind is DependencyDeclarationKind.PLUGIN]
     assert plugins
     profiled = [item for item in decls if item.profile == "mysql"]
     assert profiled
-    resolved = [
-        item
-        for item in decls
-        if item.resolved_version_local == "1.2.3"
-    ]
+    resolved = [item for item in decls if item.resolved_version_local == "1.2.3"]
     assert resolved
-    unresolved_prop = [
-        item for item in decls if item.raw_version == "${missing.version}"
-    ]
+    unresolved_prop = [item for item in decls if item.raw_version == "${missing.version}"]
     assert unresolved_prop
     assert unresolved_prop[0].resolved_version_local is None
     assert (
@@ -169,9 +159,7 @@ def test_gradle_static_and_dynamic() -> None:
     assert any(
         "unsupported_version_resolution" in item or ":dynamic:" in item
         for item in manifest.unsupported_constructs
-    ) or any(
-        "version_resolution_unsupported" in item for item in manifest.diagnostics
-    )
+    ) or any("version_resolution_unsupported" in item for item in manifest.diagnostics)
 
     kts = (FIXTURES / "gradle" / "build.gradle.kts").read_text(encoding="utf-8")
     kts_manifest, kts_decls = parse_gradle_text(
@@ -193,9 +181,7 @@ def test_pyproject_pep621_and_poetry() -> None:
     assert "requests" in names
     assert "pytest" in names
     optional = [
-        item
-        for item in decls
-        if item.declaration_kind is DependencyDeclarationKind.OPTIONAL
+        item for item in decls if item.declaration_kind is DependencyDeclarationKind.OPTIONAL
     ]
     assert optional
     poetry = [item for item in decls if item.group_name == "poetry"]
@@ -230,9 +216,10 @@ def test_requirements_includes_markers_cycles() -> None:
         text=cycle_text,
         file_texts=texts,
     )
-    assert any(
-        "cycle" in item for item in cycle_manifest.diagnostics
-    ) or cycle_manifest.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+    assert (
+        any("cycle" in item for item in cycle_manifest.diagnostics)
+        or cycle_manifest.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+    )
 
 
 def test_malformed_manifests() -> None:
@@ -248,9 +235,7 @@ def test_service_collect_deterministic_and_artifact(tmp_path: Path) -> None:
     paths = paths + (".codestrata/workspace/pom.xml",)
     texts = dict(texts)
     texts[".codestrata/workspace/pom.xml"] = "<project></project>"
-    service = DependencyEvidenceService(
-        DependencyEvidenceSettings(enabled=True)
-    )
+    service = DependencyEvidenceService(DependencyEvidenceSettings(enabled=True))
     first = service.collect(
         repository_id="repo:demo",
         relative_paths=paths,
@@ -277,9 +262,7 @@ def test_service_collect_deterministic_and_artifact(tmp_path: Path) -> None:
     restored = AggregatedDependencyEvidence.model_validate(
         {
             key: value
-            for key, value in loads_stable_json(
-                written.path.read_text(encoding="utf-8")
-            ).items()
+            for key, value in loads_stable_json(written.path.read_text(encoding="utf-8")).items()
             if key != "artifact_schema_id"
         }
     )
@@ -287,9 +270,7 @@ def test_service_collect_deterministic_and_artifact(tmp_path: Path) -> None:
 
 
 def test_disabled_service_returns_empty() -> None:
-    service = DependencyEvidenceService(
-        DependencyEvidenceSettings(enabled=False)
-    )
+    service = DependencyEvidenceService(DependencyEvidenceSettings(enabled=False))
     result = service.collect(
         repository_id="repo:x",
         relative_paths=("pom.xml",),

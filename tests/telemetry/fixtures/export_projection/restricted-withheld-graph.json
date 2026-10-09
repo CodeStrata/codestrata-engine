@@ -1,0 +1,6 @@
+{
+  "mode": "restricted",
+  "withheld_categories": ["graph"],
+  "expected_allowed": ["evidence"],
+  "expected_withheld": ["graph"]
+}

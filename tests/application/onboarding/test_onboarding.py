@@ -233,16 +233,14 @@ def test_manifest_roundtrip(tmp_path: Path) -> None:
     assert loaded.languages_detected == ("Python",)
 
 
-def test_cli_onboard_injected_settings(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_cli_onboard_injected_settings(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     repo = tmp_path / "app"
     repo.mkdir()
     config = tmp_path / "codestrata.toml"
     config.write_text(
         f"""
         [repository]
-        path = "{repo}"
+        path = "{repo.as_posix()}"
 
         [static_analysis]
         enabled = false
@@ -284,7 +282,7 @@ def test_provider_validation_in_cli(tmp_path: Path) -> None:
     config.write_text(
         f"""
         [repository]
-        path = "{repo}"
+        path = "{repo.as_posix()}"
         """,
         encoding="utf-8",
     )

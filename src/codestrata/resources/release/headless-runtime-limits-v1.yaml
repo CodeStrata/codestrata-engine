@@ -1,0 +1,57 @@
+schema_name: codestrata.release.headless-runtime-limits.v1
+schema_version: 1.0.0
+profile_id: codestrata.release.headless-runtime.v1
+launch_ratification_budgets: true
+health_status:
+  protocol: file
+  relative_filename: codestrata-local-health.json
+  refresh_seconds: 5
+retention:
+  preserve_active_baseline: true
+  interrupted_write_behavior: explicit_failure
+  max_tmp_artifacts: 32
+audit:
+  max_events: 256
+  max_event_bytes: 4096
+  redact_credentials: true
+  redact_pr_narrative: true
+cancellation:
+  grace_seconds: 2
+  process_enforced_hard_cap: true
+  signals:
+    - SIGINT
+    - SIGTERM
+container:
+  non_root_user: codestrata
+  non_root_uid: 10001
+  read_only_root: true
+  network_mode: none
+  writable_mounts:
+    - /tmp/codestrata
+    - /output
+  cpu_limit: "1.0"
+  memory_limit_bytes: 2147483648
+  wall_seconds_max: 1800
+budgets:
+  yaml_document_bytes: 1048576
+  yaml_max_nesting: 32
+  yaml_aliases_enabled: false
+  ruleset_parent_depth: 8
+  max_effective_rules: 1000
+  graph_max_depth: 32
+  graph_default_impact_depth: 4
+  graph_max_visited_nodes: 100000
+  graph_max_visited_edges: 500000
+  rule_soft_budget_seconds: 5
+  rule_hard_deadline_seconds: 15
+  cancellation_grace_seconds: 2
+  regex_match_timeout_milliseconds: 100
+  regex_max_steps: 1000000
+  max_source_file_bytes: 10485760
+  max_memory_rss_bytes_tier_10k: 2147483648
+  max_memory_rss_bytes_tier_100k: 8589934592
+  max_output_artifact_bytes: 268435456
+  wall_seconds_tier_10k: 600
+  wall_seconds_tier_100k: 1800
+  process_enforced_hard_cap: true
+  cooperative_callback_only_forbidden: true

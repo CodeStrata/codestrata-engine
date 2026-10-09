@@ -125,7 +125,9 @@ def _min_rule_severity(left: RuleSeverity, right: RuleSeverity) -> RuleSeverity:
     return left if _RULE_SEV_RANK[left] <= _RULE_SEV_RANK[right] else right
 
 
-def _min_rule_confidence(left: MatchEvidenceConfidence, right: MatchEvidenceConfidence) -> MatchEvidenceConfidence:
+def _min_rule_confidence(
+    left: MatchEvidenceConfidence, right: MatchEvidenceConfidence
+) -> MatchEvidenceConfidence:
     return left if _RULE_CONF_RANK[left] <= _RULE_CONF_RANK[right] else right
 
 

@@ -90,8 +90,7 @@ EXECUTOR_LIMITATIONS: tuple[str, ...] = (
 )
 
 _PROVIDER_ID_MISMATCH_MESSAGE = (
-    "AIProvider.execute() returned a result whose provider_id does not match "
-    "provider.provider_id"
+    "AIProvider.execute() returned a result whose provider_id does not match provider.provider_id"
 )
 
 
@@ -119,9 +118,7 @@ class AIProviderExecutor:
         if not isinstance(timeout_policy, TimeoutPolicy):
             raise ProviderContractValidationError("timeout_policy must be a TimeoutPolicy")
         if not isinstance(retry_policy, AIProviderRetryPolicy):
-            raise ProviderContractValidationError(
-                "retry_policy must be an AIProviderRetryPolicy"
-            )
+            raise ProviderContractValidationError("retry_policy must be an AIProviderRetryPolicy")
         if not isinstance(backoff_policy, BackoffPolicy):
             raise ProviderContractValidationError("backoff_policy must be a BackoffPolicy")
         self._provider = provider

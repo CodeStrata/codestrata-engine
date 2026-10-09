@@ -11,9 +11,8 @@ from codestrata.ai.provider_adapters.openrouter.factory import (
     build_openrouter_provider,
 )
 from codestrata.ai.provider_contracts.errors import ErrorCategory
-from codestrata.ai.provider_contracts.identifiers import ProviderId
+from codestrata.ai.provider_contracts.identifiers import CapabilityId, ProviderId
 from codestrata.ai.provider_contracts.registry import AIProviderRegistry, ProviderRegistration
-from codestrata.ai.provider_contracts.identifiers import CapabilityId
 from codestrata.ai.providers.factory import create_assess_ai_provider, supported_assess_ai_providers
 from codestrata.config.settings import AiSettings, CodestrataSettings
 from codestrata.extensions.assess_ai import (
@@ -109,7 +108,9 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         isinstance(openrouter, OpenAIProvider),
     )
 
-    from codestrata.ai.provider_contracts.adapter_configuration import OpenRouterAdapterConfiguration
+    from codestrata.ai.provider_contracts.adapter_configuration import (
+        OpenRouterAdapterConfiguration,
+    )
 
     redacted = str(OpenRouterAdapterConfiguration(api_key_present=True).redacted())
     add(
@@ -255,6 +256,7 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
 
     # Test-only registry may register OpenRouter without affecting assess.
     registry = AIProviderRegistry()
+
     class _Fake:
         @property
         def provider_id(self):

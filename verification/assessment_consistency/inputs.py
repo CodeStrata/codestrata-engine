@@ -39,9 +39,7 @@ def load_sv10_final_report(sv10_dir: Path) -> dict[str, Any]:
         raise Sv10InputError("missing curated-repository-validation.json")
     report = _read_json(path)
     if report.get("schema_name") != SV10_SCHEMA:
-        raise Sv10InputError(
-            f"unexpected SV.10 schema_name={report.get('schema_name')!r}"
-        )
+        raise Sv10InputError(f"unexpected SV.10 schema_name={report.get('schema_name')!r}")
     return report
 
 
@@ -56,14 +54,10 @@ def load_sv10_records(sv10_dir: Path) -> dict[str, dict[str, Any]]:
         if rid in records:
             raise Sv10InputError(f"duplicate repository record: {rid}")
         if path.stem != rid:
-            raise Sv10InputError(
-                f"record filename {path.name} does not match repository_id={rid}"
-            )
+            raise Sv10InputError(f"record filename {path.name} does not match repository_id={rid}")
         records[rid] = row
     if len(records) != RELEASE_VALIDATION_TARGET:
-        raise Sv10InputError(
-            f"expected {RELEASE_VALIDATION_TARGET} records, found {len(records)}"
-        )
+        raise Sv10InputError(f"expected {RELEASE_VALIDATION_TARGET} records, found {len(records)}")
     return records
 
 
@@ -80,8 +74,7 @@ def _resolve_artifact_dir(sv10_dir: Path, repository_id: str, sha: str) -> Path:
     if not children:
         raise Sv10InputError(f"empty artifact directory for {repository_id}")
     raise Sv10InputError(
-        f"ambiguous artifact directories for {repository_id}: "
-        f"expected sha12={sha[:12]}"
+        f"ambiguous artifact directories for {repository_id}: expected sha12={sha[:12]}"
     )
 
 
@@ -101,15 +94,11 @@ def load_repository_bundle(
     run_dir = _resolve_artifact_dir(sv10_dir, repository_id, sha)
     for name in REQUIRED_ARTIFACT_NAMES:
         if not (run_dir / name).is_file():
-            raise Sv10InputError(
-                f"{repository_id}: missing required artifact {name}"
-            )
+            raise Sv10InputError(f"{repository_id}: missing required artifact {name}")
     report = _read_json(run_dir / "report.json")
     schema = str(report.get("schema_version") or "")
     if schema != ASSESSMENT_SCHEMA_VERSION:
-        raise Sv10InputError(
-            f"{repository_id}: unsupported schema_version={schema!r}"
-        )
+        raise Sv10InputError(f"{repository_id}: unsupported schema_version={schema!r}")
     findings_doc = _read_json(run_dir / "findings.json")
     recommendations_doc = _read_json(run_dir / "recommendations.json")
     html_path = run_dir / "report.html"
@@ -135,8 +124,5 @@ def load_all_bundles(
         raise Sv10InputError(f"SV.10 output directory missing: {root.name}")
     final_report = load_sv10_final_report(root)
     records = load_sv10_records(root)
-    bundles = [
-        load_repository_bundle(root, rid, records[rid])
-        for rid in sorted(records)
-    ]
+    bundles = [load_repository_bundle(root, rid, records[rid]) for rid in sorted(records)]
     return final_report, records, bundles

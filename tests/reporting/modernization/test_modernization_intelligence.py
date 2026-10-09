@@ -294,8 +294,7 @@ def test_build_uses_canonical_priority_actions_and_heads() -> None:
     )
     assert {item.action_id for item in intel.priority_actions} == {"pa-sec", "pa-dep"}
     assert all(
-        not item.action_id.startswith("presentation:finding:")
-        for item in intel.priority_actions
+        not item.action_id.startswith("presentation:finding:") for item in intel.priority_actions
     )
     head_ids = {item.head_id for item in intel.contributing_heads}
     assert "security_intelligence" in head_ids
@@ -316,9 +315,10 @@ def test_build_uses_canonical_priority_actions_and_heads() -> None:
     theme_ids = {item.head_id for item in intel.themes}
     assert "security_intelligence" in theme_ids
     assert "dependency_intelligence" in theme_ids
-    assert "platform transformation" not in " ".join(
-        t for theme in intel.themes for t in theme.top_titles
-    ).lower()
+    assert (
+        "platform transformation"
+        not in " ".join(t for theme in intel.themes for t in theme.top_titles).lower()
+    )
     joined = " ".join(intel.limitations).lower()
     assert "derived from enabled assessment heads" in joined
     assert "no delivery estimate" in joined
@@ -344,9 +344,7 @@ def test_zero_actions_does_not_claim_no_modernization_need() -> None:
     assert "no deterministic modernization priority actions" in lowered
     assert "does not establish absence of modernization need" in lowered
     assert "no modernization needed" not in lowered
-    assert "no modernization need" not in lowered.replace(
-        "absence of modernization need", ""
-    )
+    assert "no modernization need" not in lowered.replace("absence of modernization need", "")
     overview = " ".join(
         f"{fact.label} {fact.value} {fact.note or ''}" for fact in intel.overview_facts
     ).lower()
@@ -422,9 +420,7 @@ def test_html_modernization_assessment_section(tmp_path: Path) -> None:
         supporting_finding_ids=(finding.id,),
         primary_finding_id=finding.id,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
-        actions=(
-            RecommendationAction(order=1, title="Rotate", description="Rotate secret"),
-        ),
+        actions=(RecommendationAction(order=1, title="Rotate", description="Rotate secret"),),
         subject_keys=("repo",),
     )
     analysis = AnalysisResult(

@@ -11,8 +11,6 @@ import re
 from pathlib import Path
 from urllib.parse import unquote, urlparse
 
-from codestrata.artifacts.layout import sanitize_repository_slug
-
 # Prefer existing GitHub URL parser when available.
 try:
     from codestrata.repository_auth.github_urls import parse_github_repository_url

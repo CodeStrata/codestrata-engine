@@ -100,7 +100,7 @@ def normalize_profile_name(value: str | None) -> str:
         raise ConfigurationProfileError(
             "Execution profile is empty.\n\n"
             f"Fix: set profile to one of {sorted(ALLOWED_PROFILES)} via "
-            f"--profile, {PROFILE_ENV_VAR}, or profile = \"...\" in codestrata.toml"
+            f'--profile, {PROFILE_ENV_VAR}, or profile = "..." in codestrata.toml'
         )
     if compact not in ALLOWED_PROFILES:
         raise ConfigurationProfileError(
@@ -115,11 +115,7 @@ def deep_merge(base: dict[str, Any], overlay: dict[str, Any]) -> dict[str, Any]:
 
     result: dict[str, Any] = deepcopy(base)
     for key, value in overlay.items():
-        if (
-            key in result
-            and isinstance(result[key], dict)
-            and isinstance(value, dict)
-        ):
+        if key in result and isinstance(result[key], dict) and isinstance(value, dict):
             result[key] = deep_merge(result[key], value)
         else:
             result[key] = deepcopy(value)
@@ -309,8 +305,8 @@ def validate_profile_settings(
                     message=(
                         f"Profile 'local' requires a deterministic embedding provider, "
                         f"got {embedding!r}.\n"
-                        "Fix: set [ai].embedding_provider = \"deterministic\" "
-                        "or switch profile (for example profile = \"bedrock\")."
+                        'Fix: set [ai].embedding_provider = "deterministic" '
+                        'or switch profile (for example profile = "bedrock").'
                     ),
                 )
             )
@@ -321,7 +317,7 @@ def validate_profile_settings(
                     message=(
                         f"Profile 'local' requires a deterministic answer provider, "
                         f"got {answer!r}.\n"
-                        "Fix: set [ai].answer_provider = \"deterministic_extractive\" "
+                        'Fix: set [ai].answer_provider = "deterministic_extractive" '
                         "or switch profile."
                     ),
                 )
@@ -332,22 +328,20 @@ def validate_profile_settings(
                     code="local_external_assessment",
                     message=(
                         "Profile 'local' cannot use OpenAI for assessment enrichment.\n"
-                        "Fix: use profile = \"openai\" for OpenAI knowledge providers, "
+                        'Fix: use profile = "openai" for OpenAI knowledge providers, '
                         "or keep local/deterministic assessment (omit --with-ai)."
                     ),
                 )
             )
 
     if name == ExecutionProfile.COMMUNITY:
-        if not _is_deterministic_provider(embedding) or not _is_deterministic_provider(
-            answer
-        ):
+        if not _is_deterministic_provider(embedding) or not _is_deterministic_provider(answer):
             issues.append(
                 ConfigurationIssue(
                     code="community_external_ai",
                     message=(
                         "Community profile is using external AI providers. "
-                        "Prefer profile = \"bedrock\" or profile = \"openai\" "
+                        'Prefer profile = "bedrock" or profile = "openai" '
                         "when enabling production providers."
                     ),
                     severity="warning",
@@ -361,7 +355,7 @@ def validate_profile_settings(
                 message=(
                     "Profile 'enterprise' requires [enterprise].enabled = true.\n"
                     "Fix: enable enterprise in codestrata.toml or choose profile = "
-                    "\"community\" / \"local\"."
+                    '"community" / "local".'
                 ),
             )
         )
@@ -383,7 +377,7 @@ def validate_profile_settings(
                     code="bedrock_embedding_provider",
                     message=(
                         f"Profile 'bedrock' expects embedding_provider "
-                        f"\"bedrock\" (or deterministic), got {embedding!r}."
+                        f'"bedrock" (or deterministic), got {embedding!r}.'
                     ),
                 )
             )
@@ -393,7 +387,7 @@ def validate_profile_settings(
                     code="bedrock_answer_provider",
                     message=(
                         f"Profile 'bedrock' expects answer_provider "
-                        f"\"bedrock\" (or deterministic), got {answer!r}."
+                        f'"bedrock" (or deterministic), got {answer!r}.'
                     ),
                 )
             )
@@ -438,7 +432,7 @@ def validate_profile_settings(
                     message=(
                         "Profile 'openai' requires [ai.openai].api_key_env "
                         "(environment variable *name*, not the secret).\n"
-                        "Fix: api_key_env = \"OPENAI_API_KEY\""
+                        'Fix: api_key_env = "OPENAI_API_KEY"'
                     ),
                 )
             )
@@ -449,7 +443,7 @@ def validate_profile_settings(
                     message=(
                         f"Environment variable {api_key_env!r} is not set.\n"
                         f"Fix: export {api_key_env}=... (value is never written to "
-                        "logs, reports, or config dumps) or use profile = \"local\"."
+                        'logs, reports, or config dumps) or use profile = "local".'
                     ),
                 )
             )
@@ -462,7 +456,7 @@ def validate_profile_settings(
                 message=(
                     "Community profile with [enterprise].enabled = true. "
                     "Platform Engineering Knowledge Graph features are active. "
-                    "Prefer profile = \"enterprise\" for clarity "
+                    'Prefer profile = "enterprise" for clarity '
                     "(CodeStrata Platform capability)."
                 ),
                 severity="warning",

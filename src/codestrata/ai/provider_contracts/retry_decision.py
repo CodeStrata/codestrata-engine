@@ -51,13 +51,9 @@ class RetryDecision:
         if not isinstance(self.terminal, bool):
             raise ProviderContractValidationError("terminal must be a bool")
         if self.should_retry and self.terminal:
-            raise ProviderContractValidationError(
-                "a should_retry decision cannot also be terminal"
-            )
+            raise ProviderContractValidationError("a should_retry decision cannot also be terminal")
         if not self.should_retry and not self.terminal:
-            raise ProviderContractValidationError(
-                "a decision that does not retry must be terminal"
-            )
+            raise ProviderContractValidationError("a decision that does not retry must be terminal")
         if not self.should_retry and self.delay_seconds != 0:
             raise ProviderContractValidationError(
                 "a decision that does not retry must have delay_seconds == 0"

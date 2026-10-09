@@ -1,0 +1,48 @@
+api_version: codestrata.io/ruleset/v1
+kind: RuleSet
+metadata:
+  id: codestrata.security.core
+  version: 1.0.0
+  title: Security Intelligence Core
+  owner: codestrata
+extends: []
+selectors: {}
+rules:
+  security.private-key-material:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.credential-literal:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.placeholder-credential:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.tls-verification-disabled:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.hostname-verification-disabled:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.authentication-disabled:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.permissive-cors-origin:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  security.debug-enabled:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+deferred_rule_ids:
+  - security.plaintext-http-endpoint
+  - security.source-code-secret-regex
+  - security.certificate-expiry
+  - security.keystore-inspection
+  - security.dependency-cve

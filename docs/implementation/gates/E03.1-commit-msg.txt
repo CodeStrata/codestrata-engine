@@ -1,0 +1,5 @@
+E03.1: Validate YAML and compile typed selector ASTs
+
+Safe loader plus pinned selector plans so presentation metadata cannot
+masquerade as a selector change, and unsupported facts/operators stay
+structured capability errors.

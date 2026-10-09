@@ -6,7 +6,10 @@ import argparse
 from pathlib import Path
 
 from verification.openrouter_doctor_integration.contract import REPORT_FILENAME, REPORT_MD_FILENAME
-from verification.openrouter_doctor_integration.reporting import report_directory, verdict_is_allowed
+from verification.openrouter_doctor_integration.reporting import (
+    report_directory,
+    verdict_is_allowed,
+)
 from verification.openrouter_doctor_integration.runner import engine_root, run_verification
 
 

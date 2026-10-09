@@ -187,7 +187,8 @@ def _validate_priority_actions(
         for rid in supporting_recs:
             rec = recommendations_by_id[rid]
             expected_findings.update(
-                str(x) for x in (rec.get("supporting_finding_ids") or rec.get("related_finding_ids") or [])
+                str(x)
+                for x in (rec.get("supporting_finding_ids") or rec.get("related_finding_ids") or [])
             )
         actual_findings = {str(x) for x in (action.get("supporting_finding_ids") or [])}
         if actual_findings != expected_findings:
@@ -224,7 +225,8 @@ def _validate_roadmap(
         if initiative_type in {"priority_action_backed", "merged"}:
             if not supporting_pas:
                 raise AssessmentTraceabilityError(
-                    f"roadmap initiative {iid!r} claims PA backing without supporting_priority_action_ids"
+                    f"roadmap initiative {iid!r} claims PA backing "
+                    "without supporting_priority_action_ids"
                 )
             for paid in supporting_pas:
                 if paid not in actions_by_id:
@@ -255,7 +257,8 @@ def _validate_roadmap(
             actual_findings = {str(x) for x in (item.get("supporting_finding_ids") or [])}
             if actual_recs != expected_recs:
                 raise AssessmentTraceabilityError(
-                    f"roadmap initiative {iid!r} supporting_recommendation_ids mismatch derived union"
+                    f"roadmap initiative {iid!r} supporting_recommendation_ids "
+                    "mismatch derived union"
                 )
             if actual_findings != expected_findings:
                 raise AssessmentTraceabilityError(

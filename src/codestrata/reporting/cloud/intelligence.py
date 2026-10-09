@@ -104,28 +104,13 @@ _FAMILY_TITLES: dict[str, str] = {
 }
 
 _FAMILY_NOTES: dict[str, str] = {
-    "platforms": (
-        "Detected platform declarations do not prove a live deployment."
-    ),
-    "containers": (
-        "Container declarations do not establish cloud readiness."
-    ),
-    "orchestration": (
-        "Orchestration declarations do not prove successful deployment."
-    ),
-    "iac": (
-        "Infrastructure-as-code declarations do not establish quality or "
-        "drift posture."
-    ),
-    "serverless": (
-        "Serverless declarations do not prove a production resource."
-    ),
-    "managed_services": (
-        "Managed-service declarations do not prove a live deployment."
-    ),
-    "deployment_pipelines": (
-        "Pipeline declarations do not prove successful delivery."
-    ),
+    "platforms": ("Detected platform declarations do not prove a live deployment."),
+    "containers": ("Container declarations do not establish cloud readiness."),
+    "orchestration": ("Orchestration declarations do not prove successful deployment."),
+    "iac": ("Infrastructure-as-code declarations do not establish quality or drift posture."),
+    "serverless": ("Serverless declarations do not prove a production resource."),
+    "managed_services": ("Managed-service declarations do not prove a live deployment."),
+    "deployment_pipelines": ("Pipeline declarations do not prove successful delivery."),
     "other": "Detected declarations do not prove successful deployment.",
 }
 
@@ -150,15 +135,11 @@ def build_cloud_intelligence(
         if str(getattr(item, "finding_id", "") or "").strip()
     }
     cloud_recs = tuple(
-        item
-        for item in recommendations
-        if _is_cloud_recommendation(item, cloud_finding_ids)
+        item for item in recommendations if _is_cloud_recommendation(item, cloud_finding_ids)
     )
 
     finding_links = _finding_links(cloud_findings)
-    recommendation_links = _recommendation_links(
-        cloud_recs, report, cloud_finding_ids
-    )
+    recommendation_links = _recommendation_links(cloud_recs, report, cloud_finding_ids)
     signal_groups = _signal_groups(report, cloud_findings)
     coverage_rows = _coverage_rows(report)
     overview = _overview(
@@ -254,14 +235,11 @@ def _finding_links(findings: Sequence[Any]) -> tuple[CloudFindingLink, ...]:
             severity=item.severity,
             confidence=_finding_confidence_label(item),
             evidence_ids=_evidence_ids(item),
-            recommendation_ids=tuple(
-                getattr(item, "driven_recommendation_ids", ()) or ()
-            ),
+            recommendation_ids=tuple(getattr(item, "driven_recommendation_ids", ()) or ()),
             path=_finding_path(item),
             rule_id=str(getattr(item, "rule_id", "") or "cloud.unknown"),
             evidence_completeness=(
-                str(getattr(item, "evidence_completeness", "") or "").strip()
-                or None
+                str(getattr(item, "evidence_completeness", "") or "").strip() or None
             ),
         )
         for item in findings
@@ -300,9 +278,7 @@ def _evidence_ids(item: Any) -> tuple[str, ...]:
     refs = getattr(item, "evidence_refs", None)
     if refs:
         return tuple(
-            getattr(ref, "evidence_id", "")
-            for ref in refs
-            if getattr(ref, "evidence_id", None)
+            getattr(ref, "evidence_id", "") for ref in refs if getattr(ref, "evidence_id", None)
         )
     ids = getattr(item, "evidence_ids", None)
     if ids:
@@ -404,10 +380,8 @@ def _signals_for_family(
     if entry.technologies:
         rows = [
             CloudSignalRow(
-                label=(
-                    f"Repository signals associated with {tech} were detected."
-                ),
-                family=family,  # type: ignore[arg-type]
+                label=(f"Repository signals associated with {tech} were detected."),
+                family=family,
                 path=path,
                 evidence_ids=(),
                 finding_id=first_finding_id,
@@ -421,11 +395,8 @@ def _signals_for_family(
     family_label = family.replace("_", " ")
     return (
         CloudSignalRow(
-            label=(
-                f"Repository signals associated with {family_label} "
-                "were detected."
-            ),
-            family=family,  # type: ignore[arg-type]
+            label=(f"Repository signals associated with {family_label} were detected."),
+            family=family,
             path=path,
             evidence_ids=(),
             finding_id=first_finding_id,
@@ -581,9 +552,7 @@ def _limitations(
     if report.status in {"disabled", "not_requested", "not_applicable", "failed"}:
         notes.append("Cloud analysis did not produce a complete assessment.")
     if not finding_links and report.inventory_summary.finding_count == 0:
-        notes.append(
-            "No cloud findings were produced within the assessed repository scope."
-        )
+        notes.append("No cloud findings were produced within the assessed repository scope.")
     # Soft-scrub legacy posture / none-detected if they carry soft claims.
     posture = (report.overall_posture_summary or "").strip()
     if posture and _contains_soft_claim(posture):

@@ -137,9 +137,7 @@ class AIProviderPlatformCompletionVerificationReport:
             "registry_decision_label": self.registry_decision_label,
             "release": self.release,
             "release_posture": dict(sorted(self.release_posture.items())),
-            "reporting_boundary_status": self.status_fields.get(
-                "reporting_boundary", "not_run"
-            ),
+            "reporting_boundary_status": self.status_fields.get("reporting_boundary", "not_run"),
             "schema_name": self.schema_name,
             "schema_registry": dict(sorted(self.schema_registry.items())),
             "schema_version": self.schema_version,

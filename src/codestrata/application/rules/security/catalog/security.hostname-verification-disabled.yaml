@@ -1,0 +1,42 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: security.hostname-verification-disabled
+  version: 1.0.0
+  title: Hostname verification disabled
+  category: security
+  owner: codestrata
+  measurement: M11
+  tags: [security, hygiene, configuration]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_sensitive.configuration_facts]
+select:
+  source: repository_sensitive
+  configuration_facts:
+    all:
+      - key_family: hostname_verification
+      - value_kind: boolean
+condition:
+  operator: security.hostname_verification_disabled
+emit:
+  finding:
+    default_severity: high
+    message:
+      template: >-
+        Hostname verification control '{{normalized_key}}' in '{{path}}' is
+        explicitly disabled. This is a static configuration observation only.
+      bindings:
+        normalized_key: {type: string, evidence: normalized_key}
+        path: {type: string, evidence: path}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: insecure_hostname_verification_disabled_count
+    operation: count
+evidence:
+  include:
+    - source_location
+    - value_classification
+    - security_context
+parameters: {}

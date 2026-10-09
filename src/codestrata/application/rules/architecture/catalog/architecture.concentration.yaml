@@ -1,0 +1,47 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: architecture.concentration
+  version: 1.0.0
+  title: Component line share above the configured concentration
+  category: architecture
+  owner: codestrata
+applies_to:
+  languages:
+    - java
+    - python
+    - javascript
+    - typescript
+    - php
+    - csharp
+  facts:
+    - metric.component_concentration
+    - repository.files
+select:
+  source: repository_graph
+  nodes:
+    all:
+      - type: module
+condition:
+  operator: threshold
+  fact: metric.component_concentration
+  value: 0.60
+finding:
+  default_severity: low
+  message_template: Component source-line share exceeds the configured concentration
+  bindings:
+    - name: max_share
+      type: string
+      evidence: max_share
+  documentation_url: https://docs.codestrata.ai/rules/architecture/concentration
+metric:
+  name: component_concentration_share
+  operation: max
+evidence_include:
+  - source_location
+parameter_schema:
+  - name: max_share
+    value_type: number
+    minimum: 0
+    maximum: 1
+    default: 0.60

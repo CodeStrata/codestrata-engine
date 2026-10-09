@@ -6,9 +6,9 @@ Internal validation/calibration only — not customer assessment runtime reports
 from __future__ import annotations
 
 import re
-from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+from collections.abc import Iterable, Sequence
+from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from enum import StrEnum
-from typing import Iterable, Sequence
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -88,9 +88,7 @@ def build_quality_metric_id(
     """Deterministic metric id: ``{kind}:{scope}:{scope_id}``."""
 
     kind_value = require_nonblank(str(kind), label="metric kind").strip().lower()
-    scope_value = (
-        scope.value if isinstance(scope, QualityMetricScope) else str(scope).strip()
-    )
+    scope_value = scope.value if isinstance(scope, QualityMetricScope) else str(scope).strip()
     if scope_value not in {item.value for item in QualityMetricScope}:
         raise ValueError(f"unknown quality metric scope: {scope_value!r}")
     return f"{kind_value}:{scope_value}:{normalize_scope_id(scope_id)}"
@@ -112,18 +110,11 @@ def quantize_metric_display(value: Decimal) -> Decimal:
 
 
 def dedupe_limitations(
-    items: Iterable[object],
+    items: Iterable[object] | object,
     *,
     label: str = "quality metric limitation",
 ) -> tuple[str, ...]:
-    return tuple(
-        sorted(
-            {
-                require_nonblank(str(item), label=label)
-                for item in as_tuple(items)
-            }
-        )
-    )
+    return tuple(sorted({require_nonblank(str(item), label=label) for item in as_tuple(items)}))
 
 
 def resolve_quality_metric_source(
@@ -184,9 +175,7 @@ def provisional_availability_for_denominator(
     """Shared provisional / insufficient-sample policy (Slice 5.7 / 5.8)."""
 
     if denominator < PROVISIONAL_POSITIVE_DENOM_THRESHOLD:
-        note = (
-            f"provisional metric: positive classification sample size is {denominator}"
-        )
+        note = f"provisional metric: positive classification sample size is {denominator}"
         availability = (
             QualityMetricAvailability.INSUFFICIENT_SAMPLE
             if denominator == 1

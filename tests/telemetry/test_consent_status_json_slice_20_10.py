@@ -53,9 +53,7 @@ def test_status_json_stable_contract(tmp_path: Path, monkeypatch) -> None:
     assert v2["assessment_metadata_allowed"] is True
 
     persist_disabled(path=home / "telemetry.json")
-    disabled = json.loads(
-        runner.invoke(app, ["telemetry", "status", "--json"]).stdout
-    )
+    disabled = json.loads(runner.invoke(app, ["telemetry", "status", "--json"]).stdout)
     assert disabled["state"] == "disabled"
 
 

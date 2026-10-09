@@ -154,9 +154,7 @@ class OnboardingApplicationService:
         elapsed_ms = round((perf_counter() - started) * 1000, 2)
         status = OnboardingStatus.SUCCEEDED
         if warnings and (
-            skip_index
-            or skip_report
-            or assessment.knowledge_index_status in {"failed", "disabled"}
+            skip_index or skip_report or assessment.knowledge_index_status in {"failed", "disabled"}
         ):
             # Partial when user intentionally skipped stages or index soft-failed.
             if assessment.knowledge_index_status == "failed":

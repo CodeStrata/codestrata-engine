@@ -21,12 +21,11 @@ from codestrata.domain.findings.finding_confidence import (
 from codestrata.domain.rules.enums import MatchEvidenceConfidence
 from codestrata.domain.rules.rule_confidence import RuleConfidence, RuleConfidenceLevel
 from codestrata.domain.traceability import EvidenceCompleteness, EvidenceRef
+from codestrata.domain.traceability.enums import EvidenceKind, EvidenceProductionMode
 from codestrata.domain.traceability.evidence_confidence import (
     EvidenceConfidence,
     EvidenceConfidenceLevel,
 )
-from codestrata.domain.traceability.enums import EvidenceKind, EvidenceProductionMode
-
 
 # MatchEvidenceConfidence → FindingConfidenceLevel support scale.
 _MATCH_SUPPORT: dict[MatchEvidenceConfidence, FindingConfidenceLevel] = {
@@ -107,9 +106,7 @@ def derive_finding_confidence(
             weakest_conf.level.value if weakest_conf is not None else None
         ),
         evidence_count=len(refs),
-        evidence_completeness=(
-            completeness.value if completeness is not None else None
-        ),
+        evidence_completeness=(completeness.value if completeness is not None else None),
         traceability_complete=False,
     )
 
@@ -124,9 +121,7 @@ def derive_finding_confidence(
             component_summary=components,
         )
 
-    if rule_confidence is None or (
-        rule_confidence.level is RuleConfidenceLevel.UNAVAILABLE
-    ):
+    if rule_confidence is None or (rule_confidence.level is RuleConfidenceLevel.UNAVAILABLE):
         return FindingConfidence.unavailable(
             basis=(
                 FindingConfidenceBasis.LEGACY_FINDING,
@@ -213,9 +208,7 @@ def derive_finding_confidence(
     }
     if len(levels_present) > 1:
         bases.append(FindingConfidenceBasis.CONFLICTING_EVIDENCE)
-        out_limits.append(
-            "Material EvidenceRefs report more than one Evidence Confidence level."
-        )
+        out_limits.append("Material EvidenceRefs report more than one Evidence Confidence level.")
 
     if any(
         item.production_mode is EvidenceProductionMode.SYNTHESIZED
@@ -241,8 +234,7 @@ def derive_finding_confidence(
         item.evidence_id == primary_evidence_id for item in refs
     )
     traceability_complete = bool(
-        rule_confidence.level is not RuleConfidenceLevel.UNAVAILABLE
-        and refs
+        refs
         and primary_ok
         and completeness is EvidenceCompleteness.COMPLETE
         and not deferred
@@ -251,9 +243,7 @@ def derive_finding_confidence(
         and weakest_conf is not None
         and weakest_conf.level is not EvidenceConfidenceLevel.UNAVAILABLE
     )
-    components = components.model_copy(
-        update={"traceability_complete": traceability_complete}
-    )
+    components = components.model_copy(update={"traceability_complete": traceability_complete})
 
     if not traceability_complete:
         caps.append(FindingConfidenceLevel.LIMITED)
@@ -262,10 +252,7 @@ def derive_finding_confidence(
     level = min_finding_confidence_level(tuple(caps))
     if level is FindingConfidenceLevel.HIGH and not traceability_complete:
         level = FindingConfidenceLevel.MODERATE
-    if (
-        level is FindingConfidenceLevel.HIGH
-        and FindingConfidenceBasis.PARTIAL_EVIDENCE in bases
-    ):
+    if level is FindingConfidenceLevel.HIGH and FindingConfidenceBasis.PARTIAL_EVIDENCE in bases:
         level = FindingConfidenceLevel.LIMITED
     if primary_conf is not None and primary_conf.level is EvidenceConfidenceLevel.HIGH:
         bases.append(FindingConfidenceBasis.STRONG_PRIMARY_EVIDENCE)

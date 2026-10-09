@@ -27,9 +27,7 @@ COMMUNITY_AI_ANALYTICS_SCHEMA_URN = (
     f"{COMMUNITY_AI_ANALYTICS_SCHEMA_ID}:{COMMUNITY_AI_ANALYTICS_SCHEMA_VERSION}"
 )
 
-_REVIEW_STATUS = (
-    "local_construction_only_no_transmission_no_analytics_persistence_unwired"
-)
+_REVIEW_STATUS = "local_construction_only_no_transmission_no_analytics_persistence_unwired"
 
 _LIMITATIONS: tuple[str, ...] = (
     "ai_usage_category_only",
@@ -127,37 +125,23 @@ class CommunityAIAnalyticsPolicy:
         if not self.installation_id_required:
             raise AIAnalyticsPolicyError("installation_id_required must be true")
         if not self.installation_id_only_identifier:
-            raise AIAnalyticsPolicyError(
-                "installation_id_only_identifier must be true"
-            )
+            raise AIAnalyticsPolicyError("installation_id_only_identifier must be true")
         if not self.requires_prior_privacy_projection:
-            raise AIAnalyticsPolicyError(
-                "requires_prior_privacy_projection must be true"
-            )
+            raise AIAnalyticsPolicyError("requires_prior_privacy_projection must be true")
         if not self.category_ai_usage_only:
             raise AIAnalyticsPolicyError("category_ai_usage_only must be true")
         if not self.raw_provider_ids_prohibited or not self.raw_model_ids_prohibited:
             raise AIAnalyticsPolicyError("raw provider/model IDs must be prohibited")
         if not self.prompts_responses_source_prohibited:
-            raise AIAnalyticsPolicyError(
-                "prompts_responses_source_prohibited must be true"
-            )
+            raise AIAnalyticsPolicyError("prompts_responses_source_prohibited must be true")
         if not self.exact_tokens_latency_cost_prohibited:
-            raise AIAnalyticsPolicyError(
-                "exact_tokens_latency_cost_prohibited must be true"
-            )
+            raise AIAnalyticsPolicyError("exact_tokens_latency_cost_prohibited must be true")
         if self.token_usage_bucket_allowed:
-            raise AIAnalyticsPolicyError(
-                "token_usage_bucket_allowed must be false in Slice 10.6"
-            )
+            raise AIAnalyticsPolicyError("token_usage_bucket_allowed must be false in Slice 10.6")
         if self.tool_rag_graph_allowed:
-            raise AIAnalyticsPolicyError(
-                "tool_rag_graph_allowed must be false in Slice 10.6"
-            )
+            raise AIAnalyticsPolicyError("tool_rag_graph_allowed must be false in Slice 10.6")
         if not self.fail_silent_optional_integration:
-            raise AIAnalyticsPolicyError(
-                "fail_silent_optional_integration must be true"
-            )
+            raise AIAnalyticsPolicyError("fail_silent_optional_integration must be true")
 
     def to_stable_dict(self) -> dict[str, Any]:
         return {
@@ -165,16 +149,10 @@ class CommunityAIAnalyticsPolicy:
             "analytics_schema_version": self.analytics_schema_version,
             "capability_catalog_version": self.capability_catalog_version,
             "category_ai_usage_only": self.category_ai_usage_only,
-            "exact_tokens_latency_cost_prohibited": (
-                self.exact_tokens_latency_cost_prohibited
-            ),
+            "exact_tokens_latency_cost_prohibited": (self.exact_tokens_latency_cost_prohibited),
             "fail_silent_optional_integration": self.fail_silent_optional_integration,
-            "failure_category_forbidden_on_success": (
-                self.failure_category_forbidden_on_success
-            ),
-            "failure_category_required_on_failure": (
-                self.failure_category_required_on_failure
-            ),
+            "failure_category_forbidden_on_success": (self.failure_category_forbidden_on_success),
+            "failure_category_required_on_failure": (self.failure_category_required_on_failure),
             "installation_id_only_identifier": self.installation_id_only_identifier,
             "installation_id_required": self.installation_id_required,
             "limitations": list(self.limitations),
@@ -184,9 +162,7 @@ class CommunityAIAnalyticsPolicy:
             "policy_id": self.policy_id,
             "policy_token": self.policy_token,
             "policy_version": self.policy_version,
-            "prompts_responses_source_prohibited": (
-                self.prompts_responses_source_prohibited
-            ),
+            "prompts_responses_source_prohibited": (self.prompts_responses_source_prohibited),
             "provider_family_catalog_version": self.provider_family_catalog_version,
             "raw_model_ids_prohibited": self.raw_model_ids_prohibited,
             "raw_provider_ids_prohibited": self.raw_provider_ids_prohibited,

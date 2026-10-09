@@ -166,9 +166,7 @@ def extract_converse_response(response: Any) -> ExtractionOutcome:
         usage_payload = response.get(USAGE_KEY)
         stop_reason = _optional_str(response.get(STOP_REASON_KEY))
         request_id = extract_request_id(response)
-        reported_latency_ms = usage_mapping.extract_reported_latency_ms(
-            response.get(METRICS_KEY)
-        )
+        reported_latency_ms = usage_mapping.extract_reported_latency_ms(response.get(METRICS_KEY))
     except Exception as error:  # noqa: BLE001 - provider response boundary
         return ExtractionOutcome(failure=error_mapping.classify_unreadable_response(error))
 
@@ -226,9 +224,7 @@ def build_success_result(
         provider_id=provider_id,
         capability=capability,
         status=ProviderExecutionStatus.SUCCESS,
-        content=AIProviderResultContent(
-            text=extracted.text, structured_payload=structured_payload
-        ),
+        content=AIProviderResultContent(text=extracted.text, structured_payload=structured_payload),
         usage=mapped_usage.usage,
         limitations=limitations,
     )

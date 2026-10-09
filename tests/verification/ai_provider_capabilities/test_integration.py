@@ -32,9 +32,7 @@ def test_engine_root_from_package_resolves_to_engine_directory() -> None:
 
 def test_run_verification_end_to_end(tmp_path: Path) -> None:
     output_dir = tmp_path / "reports"
-    report = run_ai_provider_capability_verification(
-        engine_root=ENGINE_ROOT, output_dir=output_dir
-    )
+    report = run_ai_provider_capability_verification(engine_root=ENGINE_ROOT, output_dir=output_dir)
 
     assert report.verdict == "pass_with_limitations"
     assert report.schema_name == SCHEMA_NAME

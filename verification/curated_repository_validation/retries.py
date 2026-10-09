@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Callable, TypeVar
-
-T = TypeVar("T")
+from collections.abc import Callable
 
 
 def should_retry_clone(detail: str) -> bool:
@@ -24,7 +22,7 @@ def should_retry_clone(detail: str) -> bool:
     return any(token in lowered for token in transient)
 
 
-def retry_once(
+def retry_once[T](
     operation: Callable[[], T],
     *,
     should_retry: Callable[[T], bool],

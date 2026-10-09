@@ -89,14 +89,14 @@ def check_artifact_parity(run: AssessmentRunArtifacts) -> list[CheckResult]:
     # HTML should not invent finding/recommendation IDs absent from JSON.
     html = run.html
     invented = []
-    for prefix, ids in (
+    for prefix, _ids in (
         ("finding-", set(report_f_ids)),
         ("recommendation-", set(report_r_ids)),
     ):
         # Look for id="finding-..." anchors only when prefix matches known pattern.
         import re
 
-        for match in re.finditer(rf'id="({re.escape(prefix)}[^"]+)"', html):
+        for _match in re.finditer(rf'id="({re.escape(prefix)}[^"]+)"', html):
             # Entity anchors may encode IDs differently; only flag presentation:finding:
             pass
     if "presentation:finding:" in html:

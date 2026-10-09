@@ -1,0 +1,80 @@
+{
+  "schema_version": "1.2",
+  "assessment_id": "run-e12-3",
+  "assessment_status": "completed",
+  "canonical_digest": "abababababababababababababababababababababababababababababababab",
+  "repository_id": "repo-e12-3",
+  "assessment": {
+    "findings": [
+      {
+        "finding_id": "f-sql",
+        "rule_id": "sec.sql_injection",
+        "severity": "high",
+        "category": "security",
+        "message": "Potential SQL injection",
+        "evidence_refs": ["ev-001"]
+      },
+      {
+        "finding_id": "f-cycle",
+        "rule_id": "arch.cycle",
+        "severity": "medium",
+        "category": "architecture",
+        "message": "Boundary cycle",
+        "evidence_refs": ["ev-002"]
+      }
+    ],
+    "metrics": [
+      {
+        "metric_id": "m.test_association",
+        "name": "Test association",
+        "category": "quality",
+        "value": null,
+        "unit": "count",
+        "coverage": null,
+        "description": "Associated tests are unknown"
+      },
+      {
+        "metric_id": "health_score",
+        "origin": "ai",
+        "category": "score",
+        "value": 100,
+        "coverage": 1.0
+      }
+    ],
+    "coverage": [
+      {
+        "capability_id": "git.history",
+        "coverage_ratio": null,
+        "reason": "missing_git_history"
+      },
+      {
+        "capability_id": "ai.narrative",
+        "origin": "ai",
+        "coverage_ratio": 1.0,
+        "reason": "model claimed full coverage"
+      }
+    ],
+    "verdicts": [
+      {"family": "security", "verdict": "deteriorated"},
+      {"family": "ai", "origin": "ai", "verdict": "improved"}
+    ],
+    "evidence": [
+      {"evidence_id": "ev-001", "kind": "source", "snippet": "query"},
+      {"evidence_id": "ev-002", "kind": "source", "snippet": "cycle"}
+    ],
+    "summary": {
+      "scores": {
+        "quality": 3,
+        "health_score": 99
+      }
+    },
+    "ai_explanation": {
+      "health_score": 100,
+      "severity": "low",
+      "verdict": "improved",
+      "coverage": 1.0,
+      "scores": {"health": 100},
+      "narrative": "unsupported claim"
+    }
+  }
+}

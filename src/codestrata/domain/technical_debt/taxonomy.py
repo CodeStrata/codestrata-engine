@@ -31,6 +31,4 @@ class TechnicalDebtCategory(StrEnum):
 
 
 # Stable ordered tuple for deterministic iteration / serialization helpers.
-TECHNICAL_DEBT_CATEGORIES: tuple[TechnicalDebtCategory, ...] = tuple(
-    TechnicalDebtCategory
-)
+TECHNICAL_DEBT_CATEGORIES: tuple[TechnicalDebtCategory, ...] = tuple(TechnicalDebtCategory)

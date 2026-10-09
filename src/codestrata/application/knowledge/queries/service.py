@@ -519,9 +519,7 @@ class KnowledgeQueryService:
         rec_map = recommendation_map(recommendations)
         recommendation = rec_map.get(recommendation_id.strip())
         if recommendation is None:
-            raise RecommendationNotFoundError(
-                f"Recommendation not found: {recommendation_id}"
-            )
+            raise RecommendationNotFoundError(f"Recommendation not found: {recommendation_id}")
 
         findings = finding_map(evaluation)
         related_findings = tuple(
@@ -610,9 +608,7 @@ class KnowledgeQueryService:
         limit: int | None = None,
     ) -> DependencyQueryResult:
         if depth < 1 or depth > MAX_DEPENDENCY_DEPTH:
-            raise QueryLimitError(
-                f"Dependency depth must be between 1 and {MAX_DEPENDENCY_DEPTH}"
-            )
+            raise QueryLimitError(f"Dependency depth must be between 1 and {MAX_DEPENDENCY_DEPTH}")
         capped = _bounded_limit(
             limit,
             default=DEFAULT_DEPENDENCY_LIMIT,
@@ -910,9 +906,10 @@ def _to_finding_view(
         for item in getattr(finding, "evidence_refs", ()) or ()
     )
     completeness = getattr(finding, "evidence_completeness", None)
-    completeness_value = (
-        completeness.value if hasattr(completeness, "value") else str(completeness or "legacy")
-    )
+    if completeness is not None and hasattr(completeness, "value"):
+        completeness_value = str(completeness.value)
+    else:
+        completeness_value = str(completeness or "legacy")
     return FindingView(
         finding_id=finding.id,
         rule_id=finding.rule_id,
@@ -950,13 +947,15 @@ def _to_recommendation_view(recommendation: Recommendation) -> RecommendationVie
     )
     related = tuple(recommendation.related_finding_ids or supporting)
     completeness = getattr(recommendation, "evidence_completeness", None)
-    completeness_value = (
-        completeness.value if hasattr(completeness, "value") else str(completeness or "legacy")
-    )
+    if completeness is not None and hasattr(completeness, "value"):
+        completeness_value = str(completeness.value)
+    else:
+        completeness_value = str(completeness or "legacy")
     rec_type = getattr(recommendation, "recommendation_type", None)
-    rec_type_value = (
-        rec_type.value if hasattr(rec_type, "value") else str(rec_type or "legacy")
-    )
+    if rec_type is not None and hasattr(rec_type, "value"):
+        rec_type_value = str(rec_type.value)
+    else:
+        rec_type_value = str(rec_type or "legacy")
     return RecommendationView(
         recommendation_id=recommendation.id,
         provider_id=recommendation.provider_id,

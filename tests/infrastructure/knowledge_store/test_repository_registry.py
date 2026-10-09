@@ -16,7 +16,7 @@ from codestrata.application.knowledge import (
     RepositoryIdentityHints,
 )
 from codestrata.domain.repository.enums import RepositorySourceType
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 
 
 @pytest.fixture

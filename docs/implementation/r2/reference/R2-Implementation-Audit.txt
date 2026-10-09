@@ -1,0 +1,649 @@
+R2 Report Implementation Audit
+Checkout used for this audit (read-only, no commands that mutate the tree):
+
+Field	Value
+Branch
+release/engine-next (tracks origin/release/engine-next)
+HEAD
+b9b71b45d8e5039257d7f209b0a45662b2604382
+HEAD date
+2026-10-03 05:10:26 -0700
+HEAD subject
+Merge pull request #72 engine/frontend-frameworks-and-scan-optimization
+Working tree
+Dirty: 4 Gradle fixture fileHashes.bin / .lock files under engine/tests/.../gradle/ and engine/validation/fixtures/gradle-multimodule/
+Engine version
+engine/src/codestrata/__init__.py: __version__ = "0.2.1"; RULESET_VERSION = "1.2.0"; engine/pyproject.toml version = "0.2.1"
+Intended branch
+Yes — this is release/engine-next
+1. Baseline readiness
+PARTIAL
+
+The Engine can run one local codestrata assess --repo <path> --no-ai and write a polished HTML + JSON customer report plus a separate canonical sidecar. It does not today emit the R2 Engineering Health baseline as the primary report. Four public outcomes exist in contracts; the customer HTML still uses Technology Inventory / Architecture / Technical Debt / Dependencies / Security / Cloud Readiness / AI Readiness / Modernization. M22/M25/M26 exist as formulas and as a report-time observer, but are not first-class assess analysis outputs wired into assessment.html.
+
+Capability	Existing implementation/module	Status	Missing work
+Architecture outcome
+OutcomeFamily.ARCHITECTURE in engine/src/codestrata/domain/contracts/enums.py; codestrata.analyzer.architecture.v1 in engine/src/codestrata/domain/contracts/descriptors.py; ArchitectureAnalyzer in engine/src/codestrata/services/analyzers/architecture_analyzer.py; build_architecture_intelligence() in engine/src/codestrata/reporting/architecture/; customer head AssessmentHead.ARCHITECTURE_INTELLIGENCE in engine/src/codestrata/reporting/html_v2/assessment_heads.py
+READY_NEEDS_REPORT_WIRING
+Promote this head to one of four R2 headlines; stop treating Cloud/AI/Modernization as peer headlines
+Security outcome
+OutcomeFamily.SECURITY; SecurityAnalyzer; engine/src/codestrata/reporting/security/; AssessmentHead.SECURITY_INTELLIGENCE; YAML security catalog under engine/src/codestrata/application/rules/
+READY_NEEDS_REPORT_WIRING
+Same: keep as R2 headline; do not invent a new family
+Quality outcome
+OutcomeFamily.QUALITY; codestrata.analyzer.quality.v1 (M16/M22/M25); engine/src/codestrata/application/evidence/quality/; complexity/clone collectors
+PARTIAL
+No AssessmentHead.QUALITY. Quality is not a customer HTML section. Findings land in Technical Debt / testing packs. Need a first-class Quality head that projects quality evidence, not a new analyzer family
+Maintainability & Technical Debt
+OutcomeFamily.MAINTAINABILITY; codestrata.analyzer.maintainability.v1 (M24/M27/M29); engine/src/codestrata/application/evidence/maintainability/; AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE; engine/src/codestrata/reporting/technical_debt/
+READY_NEEDS_REPORT_WIRING
+Relabel/group as Maintainability & Technical Debt; attach M22/M23/M24 from canonical records rather than only TD pack HTML
+Outcome verdicts / conclusions
+build_leadership_verdict() in engine/src/codestrata/reporting/html_v2/leadership.py; per-head conclusions in html_v2/builder.py (_overlay_*); architecture conclusions in reporting/architecture/
+PARTIAL
+Verdicts are legacy assessment-head verdicts (incl. Cloud/AI/Modernization), not the four R2 OutcomeFamily verdicts. M30 evaluate_outcome_movement() is comparison-only
+Outcome drivers
+build_outcome_driver_manifest() in engine/src/codestrata/domain/contracts/driver_manifest.py; copied into canonical HTML via canonical_views._driver_catalog()
+READY_NEEDS_REPORT_WIRING
+Customer assessment.html does not lead with the four-family driver manifest. M30 movement drivers only appear after compare
+Findings
+Finding in engine/src/codestrata/models/finding.py; FindingRecord in engine/src/codestrata/domain/contracts/facts.py; canonical_finding_id() in engine/src/codestrata/domain/contracts/identity_map.py; customer FindingView in html_v2/builder.py _build_findings()
+READY
+Identity exists. R2 must keep HTML as a copy of these IDs
+Recommendations
+Recommendation models; resolve_customer_recommendations() in engine/src/codestrata/reporting/customer_universe.py
+READY
+Already feed Priority Actions
+Priority Actions
+codestrata.domain.priority_actions.PriorityAction; build_leadership_priority_actions() in html_v2/leadership.py (recommendation-backed; findings without recs stay Engineering Risks)
+READY
+Do not let HTML invent PAs from M22 rank
+Deterministic priority ordering
+severity_rank / contract_sorted_findings() in engine/src/codestrata/reporting/contract/ordering.py; hotspot_rank_key() in engine/src/codestrata/domain/contracts/hotspot.py
+PARTIAL
+Finding/PA order is canonical. Hotspot rank exists but is not what customer HTML uses for PA order
+Evidence drill-down
+EvidenceRecord; html_v2/evidence_presentation.py; customer_universe.write_customer_finding_artifacts(); MCP artifact queries
+READY_NEEDS_REPORT_WIRING
+Present in customer HTML for pack findings; M22/M25/M26 evidence IDs exist only on the canonical sidecar path
+Technology inventory
+InventoryAnalyzer first in builtin_analyzers() (engine/src/codestrata/services/default_pipeline.py); AssessmentHead.TECHNOLOGY_INVENTORY
+READY
+Must be demoted from headline to supporting context
+Repository metrics
+RepositoryMetricsAnalyzer; RepositoryFacts on AnalysisResult
+READY
+Same: supporting context, not a fifth outcome
+Test / CI evidence
+CicdDiscoveryAnalyzer; engine/src/codestrata/application/evidence/testing/; testing pack reports
+READY
+Supporting evidence under Quality / Maintainability, not a fifth headline
+Engineering Hotspots M22
+Formula m22_hotspot_value() in engine/src/codestrata/domain/contracts/formulas.py; EngineeringHotspot in engine/src/codestrata/domain/contracts/hotspot.py; collect_hotspots() in engine/src/codestrata/application/evidence/maintainability/derive.py; observer observe_repository() in engine/src/codestrata/reporting/journey_observations.py; tests engine/tests/application/evidence/maintainability/test_m22.py
+READY_NEEDS_REPORT_WIRING
+Assess does not write AnalysisResult.metadata["canonical_hotspots"]. Sidecar projector calls observe_repository(root) at report time. Customer assessment.html has no Hotspots section
+Ownership concentration M25
+m25_ownership(); OwnershipConcentration; history_index.ConcentrationRecord; observe_repository._ownership(); tests engine/tests/application/incremental/test_history_index.py, fixture engine/tests/application/incremental/fixtures/e09.3/expected-m25-joined.json
+READY_NEEDS_REPORT_WIRING
+Same: not on the assess result; not in customer HTML
+Temporal co-change M26
+m26_jaccard(); CochangeRecord in history_index.py; CochangeView in canonical_views.py; observe_repository._cochange() (caps COCHANGE_FILE_BUDGET = 200)
+READY_NEEDS_REPORT_WIRING
+Same. Quality descriptor lists M22/M25, not M26; M26 lives on history/maintainability
+Coverage / freshness
+CapabilityCoverage / CapabilityFreshness in engine/src/codestrata/domain/contracts/envelope.py; journey _capability_rows(); head coverage engine/src/codestrata/application/assessment_heads/coverage.py
+PARTIAL
+Two coverage systems: (1) assessment-head coverage on customer HTML; (2) capability coverage on canonical sidecar. They are not the same object
+Git history context (baseline allowed)
+observe_local_git_state() / build_history_index(); journey _read_git()
+PARTIAL
+History is readable on a single assess of the current tree. Journey path uses current HEAD git log and window="all_observed_local_commits", plus hardcoded JOURNEY_EVALUATION_TIME = 2026-09-27
+Vulnerability-feed freshness
+load_osv_snapshot() / SupplyChainEvidenceService; journey _read_feed(); CapabilityFreshness
+PARTIAL
+Feed matching exists. Freshness rows appear on canonical sidecar via observe_repository, not as a first-class customer-HTML trust strip
+HTML projection (primary)
+write_modernization_assessment_reports() → ModernizationHTMLReportRenderer → html_v2
+PARTIAL
+Polished renderer exists but projects legacy heads, not R2 four outcomes + hotspots/ownership/co-change
+HTML projection (canonical sidecar)
+project_canonical_html() in canonical_views.py; written as canonical-report.html
+READY
+Acceptance/debug HTML. Copies supplied records; does not rank. This is not the customer primary report
+Baseline can use Git history for M22/M25/M26 without becoming a comparison: collect_hotspots() + build_history_index() only need one current tree + history ending at that tree’s commit. That is allowed. What is missing is attaching those records during assess and projecting them in the primary HTML. Baseline must not auto-compare current/ vs previous/ (see §3: assess does not; legacy scan does).
+
+2. Five-commit trend readiness
+NOT_READY (comparison primitives exist; five-snapshot orchestration does not)
+
+Item	Existing code/module	Status	Missing work
+Select clean committed HEAD
+observe_local_git_state().head_sha; observe_repository_revision() uses rev-parse HEAD; run_readonly_git allows rev-parse / rev-list (engine/src/codestrata/repository_auth/read_only_git.py ALLOWED_GIT_COMMANDS)
+READY
+CLI assess has no --commit / --revision. It always scans the working directory files via LocalRepositoryScanner (service.py _scan_repository)
+Four first-parent predecessors (rev-list --first-parent --max-count=5 HEAD)
+rev-list is an allowed read-only verb. No caller builds a five-SHA first-parent list. read_reachable_commit_metadata() docstring: “Never uses first-parent” — it is git log --no-merges <head>
+MISSING
+New orchestrator must run rev-list --first-parent --max-count=5 HEAD and reverse oldest→newest. Do not reuse --no-merges history-index log as the snapshot list
+Immutable historical snapshot assessment
+GitHub-only GitHubRepositoryScanner(ephemeral=True) + dispose_ephemeral_repository(). Local assess uses LocalRepositoryScanner on the user path. read_only_git refuses checkout, worktree, archive (not in ALLOWED_GIT_COMMANDS)
+MISSING
+Need a new snapshot materializer that does not mutate the user worktree. git archive / ls-tree+show extract is not implemented. Commenting “never checkout” is policy; there is no extract helper
+Same Engine/rules/config/feed/eval time
+Assess reads one codestrata.toml, bundled catalog, pinned OSV loader. No multi-run pin of evaluation_time, feed digest, engine digest, ruleset digest across N snapshots
+PARTIAL
+Orchestrator must freeze those inputs once and pass them into each assess. HistoryIndexRequest.evaluation_time exists; assess does not expose it
+Adjacent comparisons
+ScanComparisonService.compare_results() in engine/src/codestrata/services/scan_comparison_service.py; CLI codestrata compare --baseline --candidate loads two AnalysisResult JSON files (engine/src/codestrata/cli/compare_cmd.py)
+READY
+Pairwise only. No five-run loop. Compare writes comparison-canonical-report.html beside the candidate file
+Oldest → HEAD comparison
+Same compare_results() can take oldest and HEAD report JSON
+READY_NEEDS_REPORT_WIRING
+No orchestrator produces that pair or a bundle
+M27 change summary
+resolve_git_inputs() + summarize_change() in engine/src/codestrata/application/incremental/git_inputs.py (GitInputMode.RANGE / WORKING / STAGED / PATCH); ChangeSummary dataclass; ChangeSummary contract in domain/contracts/hotspot.py
+READY_NEEDS_REPORT_WIRING
+Range mode can diff two SHAs without checkout. Not invoked by assess or compare. Compare uses finding/metric deltas on completed reports, not M27 file/component facts unless those were already on the results
+M28 finding lifecycle
+engine/src/codestrata/application/incremental/lifecycle.py; ScanComparisonService(..., evaluate_lifecycle=True) on CLI compare
+READY
+Needs five completed compatible assessments. Identity matching is rule/subject/occurrence
+M29 blast radius / graph delta
+calculate_graph_delta() in engine/src/codestrata/application/incremental/graph_delta.py (DEFAULT_IMPACT_DEPTH = 4, cutoff/lower-bound UNKNOWN); tests test_m29_graph_delta_blast_radius.py
+READY_NEEDS_REPORT_WIRING
+Requires two graphs + changed seeds. Assess graphs exist on AnalysisResult; compare service must be wired to call this for each adjacent pair (NOT PROVEN that CLI compare currently populates StaticBlastRadius on every path — service has the types; confirm in compare implementation before claiming READY)
+M30 outcome movement
+evaluate_outcome_movement() in engine/src/codestrata/application/incremental/outcome_movement.py; families architecture/security/quality/maintainability/testing; CLI compare copies overall_movement
+PARTIAL
+Testing is an extra family in this module vs four public outcomes. Customer compare HTML is canonical sidecar, not R2 trend bundle
+M31 attribution
+evaluate_cause_attribution() in engine/src/codestrata/application/incremental/cause_attribution.py
+READY_NEEDS_REPORT_WIRING
+Needs bound digests per snapshot (source/feed/config). Orchestrator must record those digests
+Before / After / Delta
+MetricDelta / ScanComparison in engine/src/codestrata/models/scan_comparison.py; _delta() in canonical_views.py copies comparison envelope; does not compute deltas
+READY_NEEDS_REPORT_WIRING
+Rendered only on canonical HTML when a ComparisonEnvelope is supplied. Customer assessment.html has no Before/After/Delta section
+Historical evidence identity
+canonical_finding_id(), evidence_id(), source_revision / working_state_digest on envelope (assessment_canonical._source_revision, _working_digest)
+PARTIAL
+Revision is observed from the scanned path. If five assesses run on the same dirty worktree, all five get the same HEAD/working digest. Snapshots must be distinct trees with their own source_revision
+Failed/missing snapshot slots
+Comparison CompatibilityStatus.NO_BASELINE / INSUFFICIENT; G40 regressions for incompatible / missing tests
+PARTIAL
+No five-slot bundle schema that preserves a failed SHA as UNKNOWN instead of dropping it
+One local report bundle
+Artifacts: assessments/<repo>/{current,previous}/ only (max two versions, MAX_VERSIONS = 2 in artifacts/lifecycle.py)
+MISSING
+Five snapshots cannot live in current/previous. Need a trend bundle directory (still file artifacts, no DB)
+3. Current CLI integration points
+Primary Community commands (engine/src/codestrata/cli/community_contract.py): init, doctor, assess, compare.
+
+codestrata assess — baseline entry point (keep)
+Registered in engine/src/codestrata/cli/assess.py register_assess_command(). Implementation: run_assessment() → AssessmentApplicationService.run() in engine/src/codestrata/application/assessment/service.py.
+
+Options that exist today:
+
+Option	Role
+--repo / -r
+Local path or GitHub URL; overrides repository.path / repository.url
+--output / -o
+Default .codestrata-artifacts/assessments; layout <root>/<repository-id>/current|previous/
+--with-ai / --no-ai
+Default --no-ai
+--model-id
+AI only
+--pmd-path, --pmd-profile, --static-analysis/--no-static-analysis
+Optional PMD
+--branch
+GitHub repositories only (GitHubRepositoryScanner)
+--report-title, --organization-name
+HTML chrome
+--config / -c, --profile / -p
+TOML / community|local|enterprise|bedrock|openai
+--assessment-activation
+default / minimal / full / custom packs
+--verbose, --quiet, --json-summary
+UX / CI
+--telemetry-allow, --telemetry-deny
+Session telemetry; cannot invent consent
+No --commit, --revision, --range, --first-parent, --format json|html|sarif on assess. HTML+JSON are always written when write_reports=True.
+
+What assess actually scans
+
+Local: LocalRepositoryScanner.scan(path) — files on disk in that directory (service.py _scan_repository). Dirty working tree is assessed. There is no “assess clean HEAD tree only” mode.
+GitHub URL: ephemeral clone (ephemeral=True), optional --branch, then deleted via dispose_ephemeral_repository(). Never deletes a local user checkout.
+Committed HEAD vs working tree vs dirty
+
+Question	Answer	Evidence
+Assess committed HEAD only?
+Not safely, not as a dedicated mode. Assess reads the worktree. Clean tree ≈ HEAD tree. Dirty tree includes uncommitted files
+LocalRepositoryScanner on Path(repo)
+Assess working tree?
+Yes — that is the default
+Same
+Assess dirty working tree?
+Yes. Dirty is not rejected
+observe_repository_revision() / observe_local_git_state() set dirty=True from git status --porcelain / diff HEAD; they do not block assess
+Dirty representation (observation, not a scan filter)
+
+ObservedRepositoryRevision.dirty — engine/src/codestrata/infrastructure/knowledge_store/git_revision.py observe_repository_revision()
+LocalGitState.dirty, working_tree_digest, index_digest, state_digest, head_sha — observe_local_git_state()
+GitInputMode.WORKING vs committed RANGE — git_inputs.py (resolved_head = "WORKING_TREE")
+codestrata compare — pairwise completed reports, not revisions
+engine/src/codestrata/cli/compare_cmd.py:
+
+Required --baseline <report.json> and --candidate <report.json>
+Loads AnalysisResult (payload.pop("comparison", None) then model_validate)
+ScanComparisonService().compare_results(..., evaluate_lifecycle=True)
+Writes comparison-canonical-report.html next to the candidate
+Prints a JSON summary (resolved_findings, compatibility_status, overall_movement)
+Exit 2 if a file is missing; exit 1 if unreadable/incompatible
+Does not accept two Git revisions
+Other related surfaces (not the R2 primary)
+Command	Module	Notes
+codestrata scan
+cli/__init__.py scan()
+Legacy. After analyze, auto-compares via ScanComparisonService().compare() against prior run dirs. Hidden baseline. Prefer assess
+codestrata incremental plan|execute|inspect
+cli/incremental.py
+Advanced; [incremental].rollout_mode. Docs: assess remains a full rebuild
+codestrata report validate|open, codestrata open
+cli/report.py
+Opens */current/assessment.html
+codestrata rules list|inspect|explain
+cli/rules.py
+Custom create/load unsupported (UNSUPPORTED_RULE_COMMANDS)
+codestrata mcp serve
+cli/mcp.py
+After G40: artifact MCP, not run_assessment
+--version, version, doctor, init
+various
+Metadata / setup
+JSON / HTML / SARIF today
+
+Customer: assessment.html + lightweight assessment.json + heads/ via write_modernization_assessment_reports()
+Sidecar: canonical-report.html, canonical-report.json, canonical-report.sarif.json, analysis-result.json (modernization_serialization.py)
+Legacy scan: HtmlFileReporter + extra canonical-report.html in cli/__init__.py
+Baseline retention
+
+promote_staged_report() in engine/src/codestrata/artifacts/lifecycle.py: rotate current → previous, promote staging → current. Max two slots. Not five.
+Natural place for five-commit trend (do not name it yet)
+
+Keep assess as the single-snapshot producer.
+Keep compare as the pairwise completed-assessment consumer.
+Trend is orchestration that calls those, not incremental selective scan and not hidden scan baseline.
+4. Missing canonical wiring
+Capability	Canonical producer	Where wiring stops	Required R2 wiring
+M22 hotspots
+collect_hotspots() (maintainability/derive.py); observe_repository()
+Assess pipeline never sets metadata["canonical_hotspots"]. canonical_report_from_analysis() falls back to observe_repository(root) at write time. Customer HTML builder never reads EngineeringHotspot
+During assess, attach sealed hotspot records to the analysis/envelope. Primary HTML must copy them. Do not rank in HTML
+M25 ownership
+build_history_index() concentrations; observe_repository._ownership()
+Same metadata gap; no customer section
+Attach OwnershipConcentration on assess; project as context (not a rank driver)
+M26 co-change
+history_index._cochange(); observe_repository._cochange()
+Same; CochangeView only on canonical sidecar
+Attach pairs; project Jaccard already computed
+M27 change summary
+resolve_git_inputs() / summarize_change()
+Not called from assess or compare CLI
+For trend pairs, call GitInputMode.RANGE with the two snapshot SHAs; put ChangeSummary on the comparison envelope
+M28 lifecycle
+lifecycle.py; compare CLI evaluate_lifecycle=True
+Only when someone runs compare on two JSONs
+Orchestrator runs compare per adjacent pair + oldest→HEAD
+M29 blast / graph delta
+graph_delta.calculate_graph_delta()
+Not proven on the CLI compare happy path as a populated customer field
+After two assesses, pass both graphs + M27 changed files into calculate_graph_delta; copy StaticBlastRadius into comparison
+M30 movement
+outcome_movement.evaluate_outcome_movement()
+Compare summary has overall_movement; four-family verdicts not the customer HTML headlines
+Project per-outcome movement from the comparison object; map testing drivers under Quality, do not add a fifth headline
+M31 attribution
+cause_attribution.evaluate_cause_attribution()
+Needs digest pair; not on customer HTML
+Orchestrator records source/feed/config/engine digests per snapshot
+Capability coverage / freshness
+Envelope types; journey _capability_rows(); separate assessment_heads.coverage
+Two systems. Customer HTML uses head coverage (Architecture/TD/Deps/Security/Cloud/AI/Modernization)
+Project envelope coverage/freshness (Git + feed + engine) on the R2 trust strip; keep pack coverage as supporting
+Four public outcomes
+OutcomeFamily + analyzer descriptors
+Customer heads ≠ OutcomeFamily
+Map Architecture/Security/Quality/Maintainability heads; demote inventory/deps/git
+Quality as first-class outcome
+Quality descriptor + evidence modules
+No AssessmentHead.QUALITY; no reporting/quality intelligence pack equivalent to architecture/security
+New projection section (not a new analyzer) fed by existing quality evidence
+Before / After / Delta
+ComparisonEnvelope / MetricDelta; canonical_views._delta()
+Only canonical sidecar when comparison attached. Assess baseline has no comparison (correct). Trend has no bundle
+Trend projector copies named metric deltas from ScanComparison; HTML must not subtract
+Priority Actions
+PriorityAction + recommendations
+Already on customer HTML
+Keep; do not replace with hotspot rank
+Signatures / result digest
+Envelope operational.signature; E14 headless signing
+Assess customer HTML is unsigned polished report
+Optional trust line from envelope digest; do not require live Sigstore for R2 HTML
+Why sample assessments showed Hotspots / ownership / co-change / blast / coverage / delta as unavailable
+
+AnalysisResult from assess typically has no canonical_hotspots / canonical_ownership.
+assessment_canonical._journey_observation() then calls observe_repository(root) if the repo path still exists.
+That observer uses git log of current HEAD and JOURNEY_EVALUATION_TIME (2026-09-27). If Git/history/feed is missing, records are empty/UNKNOWN.
+canonical_views.project_canonical_html() prints “unavailable” / unranked when lists are empty (HotspotListKind, limitations).
+Customer assessment.html never had those sections. Users looking at the polished report would not see them; users looking at canonical-report.html would see empty/unavailable blocks.
+Blast radius and Before/After/Delta require a comparison object. A single assess correctly has none.
+5. Genuine missing Engine capability
+No new analyzer family, public outcome, health score, or LLM-canonical path is required.
+
+New Engine capability that is not “just a CSS section”:
+
+Non-mutating snapshot materialization for a local commit SHA (extract tree to an ephemeral directory). read_only_git forbids checkout/worktree; archive is not allowed. GitHub ephemeral clone is URL-only. This is new infrastructure, not new analysis.
+Five-snapshot local orchestrator (select first-parent chain, pin inputs, run five assesses, five-slot artifact bundle, four adjacent + one span compares). Orchestration.
+Assess pin to a commit tree (so a snapshot assess does not read dirty worktree files). Today LocalRepositoryScanner has no revision pin.
+NONE of: new M-measurements, new OutcomeFamily, GraphRAG, Platform import, Community custom-rule authoring, database, opaque score.
+
+If snapshot extract is implemented with git archive/ls-tree+show (read-only), that is a small allowed-verb expansion, not a new analyzer.
+
+6. Current report architecture
+Polished customer HTML (what codestrata open shows)
+Path:
+
+AssessmentApplicationService._run_assessment_pipeline builds ModernizationReportInput (service.py ~3140–3169) including architecture_report, technical_debt_report, dependency_report, security_report, testing_report, cloud_report, ai_readiness_report, performance_report, roadmap_report.
+write_modernization_assessment_reports() in engine/src/codestrata/reporting/modernization_serialization.py.
+ModernizationHTMLReportRenderer.render() in engine/src/codestrata/reporting/modernization_html.py.
+build_customer_report_document() / build_html_report_view_model() in engine/src/codestrata/reporting/html_v2/builder.py.
+HtmlReportRenderer in engine/src/codestrata/reporting/html_v2/renderer.py.
+Written as assessment.html; promoted to assessments/<id>/current/.
+Heads (html_v2/assessment_heads.py ASSESSMENT_RESULT_HEADS):
+
+Technology Inventory
+Architecture Intelligence
+Technical Debt Intelligence
+Dependency Intelligence
+Security Intelligence
+Cloud Readiness
+AI Readiness
+Modernization Assessment
+Plus “Assessment Overview” (ENGINEERING_INTELLIGENCE).
+
+Cloud / AI / Modernization introduction
+
+Analyzers: CloudReadinessAnalyzer is in builtin_analyzers().
+Report builders: build_cloud_intelligence(), build_ai_readiness_intelligence(), modernization intelligence in html_v2/builder.py / renderer.py (_render_cloud_*, _render_ai_*, _render_modernization_intelligence).
+Activation: --assessment-activation / TOML pack toggles.
+Leadership themes in leadership.py still label cloud_readiness and ai_readiness.
+These are legacy pack heads. They must not become R2 headlines. They may remain appendix/supporting if already produced.
+
+Quality as a first-class report section: No. There is no AssessmentHead.QUALITY. Quality evidence is folded into Technical Debt / testing.
+
+Priority Actions / attention-first summary: leadership.py build_leadership_priority_actions, build_executive_summary_narrative, build_leadership_verdict. Recommendation-backed. This is the polished attention-first surface — it is not four-outcome Engineering Health.
+
+Canonical acceptance / debug HTML
+Path:
+
+_canonical_html() → canonical_html_for_report() / canonical_html_for_analysis() in assessment_canonical.py.
+canonical_report_from_analysis() seals CanonicalReportInput (copies metadata or observe_repository()).
+project_canonical_html() in canonical_views.py — simple tables: findings, hotspots, ownership, co-change, change, coverage, delta, inventory. health_score: None. Docstring: does not rank or compute deltas.
+Written beside customer HTML as canonical-report.html (+ .json + .sarif.json).
+compare writes only this canonical HTML (comparison-canonical-report.html), not the polished v2 document.
+
+HTML that calculates vs projects
+Location	Behavior
+canonical_views.py
+Projects supplied records. Safe for R2
+assessment_canonical.py
+Copies analysis → envelope. If metadata missing, re-observes the live repo (observe_repository) — that is extra analysis at report time, not HTML math, but it is not the assess-time canonical object
+html_v2/builder.py / leadership.py
+Presentation grouping, title rewriting, top-N PA filter. Must not gain ranking/delta/lifecycle math
+html_v2/assessment_head_grouping.py
+Assigns findings to legacy heads
+application/assessment_heads/coverage.py
+Derives head coverage for those legacy heads
+7. Five-commit orchestration
+Reusable existing code
+Need	Reuse
+Git history window
+build_history_index(HistoryIndexRequest) — pass head=<snapshot SHA> and pinned evaluation_time
+Revision / dirty observation
+observe_local_git_state(), observe_repository_revision()
+Diff two commits without checkout
+resolve_git_inputs(GitInputMode.RANGE, base=, head=)
+Working vs HEAD identity
+GitInputMode.WORKING
+Read-only Git
+run_readonly_git / ALLOWED_GIT_COMMANDS (rev-list, log, show, ls-tree, cat-file, diff, …)
+Assess one tree
+run_assessment() / AssessmentApplicationService with write_reports=True
+Compare two completed results
+ScanComparisonService.compare_results()
+Lifecycle
+lifecycle.py (already hooked when evaluate_lifecycle=True)
+Graph delta / blast
+graph_delta.calculate_graph_delta()
+Movement / cause
+outcome_movement.py, cause_attribution.py
+Artifact files
+artifacts/layout.py (new subdir; do not overload current/previous)
+Ephemeral GitHub clone only
+GitHubRepositoryScanner + dispose_ephemeral_repository() — do not use this to rewrite a user’s local repo
+New orchestration required
+Resolve HEAD SHA; rev-list --first-parent --max-count=5 HEAD; reverse to oldest→newest; if <5, mark missing slots UNKNOWN.
+Materialize each SHA to an ephemeral directory without git checkout of the user worktree (archive/ls-tree extract; add read-only verb if needed).
+Run run_assessment(--repo <ephemeral>, --no-ai) five times with identical config path, profile, activation, feed snapshot, engine version, and a pinned evaluation_time.
+For each snapshot, force history HistoryIndexRequest.head = that SHA (do not use observe_repository()’s unscoped git log).
+Store five run directories + four adjacent comparison JSONs + one span comparison + one bundle index.
+Failed snapshot: keep the slot, skip compares that need it, project UNKNOWN.
+Render one R2 HTML bundle by projecting those objects.
+Do not use incremental selective scan as the five-commit engine. Do not design a second analyzer pipeline.
+
+8. Future-history leakage risk
+This is real if R2 reuses the current journey observer or assesses the live worktree five times.
+
+Path A — build_history_index() (safer if head is the snapshot)
+engine/src/codestrata/application/incremental/history_index.py:
+
+head = request.head or state.head_sha
+Reads read_reachable_commit_metadata(root, head=head) → git log --no-merges <head>
+(git_revision.py lines 175–190). Git reachability stops at that commit. Later first-parent children are not listed.
+Time filter: window_start <= committer_unix <= evaluation_unix (select_included_commits).
+Commits with committer_unix > evaluation_unix go to excluded_future_shas.
+If each snapshot assess uses HistoryIndexRequest.head = S_i and evaluation_time is pinned (same clock is OK; graph bound is the SHA): S1 cannot see S2+ via git log.
+
+Leakage still possible:
+
+observe_local_git_state(root) always describes the current checkout, not request.head. If the index stores local_state.head_sha from the user worktree while request.head is S1, identity/freshness metadata can claim HEAD. Must pin observation to the snapshot root or to request.head.
+Clock-skewed committer dates: a commit reachable from S1 with a timestamp after evaluation_time is dropped (future_timestamp); a commit not ancestor of S1 cannot appear if head=S1.
+Path B — observe_repository() / _read_git() (unsafe for historical snapshots)
+engine/src/codestrata/reporting/journey_observations.py _read_git():
+
+git rev-parse HEAD
+git log --numstat --pretty=format:COMMIT... -- .
+window = "all_observed_local_commits"
+evaluation_time_unix = JOURNEY_EVALUATION_TIME  # 2026-09-27 hardcoded
+No head= argument. If the user repo is at HEAD, every call sees HEAD’s full history, including commits after S1–S4.
+
+canonical_report_from_analysis() and _write_canonical_sidecars() call this when canonical_hotspots is missing. Five assesses of the same dirty repo + sidecar observe = five copies of HEAD history. That is future leakage for S1–S4.
+
+Path C — assess file contents
+LocalRepositoryScanner reads whatever files are on disk. Five assesses of the user worktree all see HEAD (and dirt). S1 source files would include S5 code. This is source-state leakage, not only history leakage.
+
+What must be verified / changed
+Materialize each snapshot as its own tree; assess that path.
+For history, call build_history_index(HistoryIndexRequest(repository_root=snapshot_or_user_git_dir, head=S_i, evaluation_time=pinned)). Prefer GIT_DIR of the original repo + head=S_i so objects exist without copying .git.
+Do not call observe_repository() on the user HEAD for historical slots.
+Remove/replace JOURNEY_EVALUATION_TIME for production R2 (fixture-only).
+Fixture: repo with 5 first-parent commits; S1 hotspot/churn must not include files only added at HEAD.
+read_reachable_commit_metadata is not first-parent; that is OK for M24 window inside a snapshot. The snapshot list must still be first-parent rev-list.
+9. Proposed R2 patch groups
+R2-A — Engineering Health report projection
+Behavior: Primary assessment.html projects four outcomes (Architecture, Security, Quality, Maintainability & Technical Debt), attention-first summary, findings/PAs, inventory/metrics as support, M22/M25/M26/coverage/freshness from supplied records. No HTML ranking/deltas/lifecycle. Demote Cloud/AI/Modernization from headlines (appendix or omit). Keep canonical-report.html as acceptance sidecar.
+Reuse: html_v2 renderer/layout; leadership.py PA/summary (copy only); canonical_views.py as the contract for what may be displayed; assessment_heads remapped.
+Likely files: reporting/html_v2/assessment_heads.py, assessment_head_grouping.py, builder.py, renderer.py, leadership.py, modernization_html.py, modernization_serialization.py, maybe new reporting/engineering_health/ projector that only copies envelope fields.
+Tests: extend tests/reporting/html_v2/test_assessment_head_organization.py, test_modernization_html_report.py, test_canonical_views.py, test_g40_assessment_canonical.py.
+Exclusions: no new OutcomeFamily; no health_score; no LLM text as truth.
+R2-B — Baseline canonical wiring
+Behavior: One assess of current source state writes sealed M22/M25/M26/coverage/freshness/source_revision/working_digest onto the analysis/envelope during assess, using history ending at the assessed commit. Dirty: record dirty=true and assess worktree files (honest current state). No auto-compare.
+Reuse: collect_hotspots(), build_history_index(), envelope types, observe_local_git_state().
+Likely files: application/assessment/service.py (attach metadata before write_modernization_assessment_reports); stop relying on observe_repository() fallback in assessment_canonical.py / modernization_serialization.py for production; journey_observations.py either gains a head= pin or is not used for assess.
+Tests: test_m22.py, test_history_index.py, test_e11_3_journey_observations.py, test_g40_assessment_canonical.py, new assess-integration that asserts metadata["canonical_hotspots"] present after run_assessment.
+Depends on: none. Enables R2-A.
+R2-C — Five-snapshot local orchestrator
+Behavior: First-parent 5 SHAs; extract each tree; five run_assessment with pinned config/feed/engine/eval time; history head=S_i; file-artifact bundle; preserve failures.
+Reuse: run_assessment, run_readonly_git (rev-list, ls-tree, show), artifact layout patterns (new path), GitHub ephemeral only as a pattern for temp dirs (not for local checkout mutation).
+Likely files: new module e.g. application/assessment/source_state_series.py (name not finalized); small git_revision / read_only_git allow-list for archive if used; CLI hook later (not named here).
+Tests: new fixture repo with 5 first-parent commits; leakage tests; dirty-user-WT unchanged.
+Depends on: R2-B (each snapshot must emit the same canonical records).
+Exclusions: no git checkout of user WT; no incremental selective pipeline; no DB.
+R2-D — Five-commit trend projection
+Behavior: Four adjacent compare_results + one oldest→HEAD; attach M27 range facts, M28–M31, named Before/After/Delta; one HTML bundle; evidence IDs carry source_revision.
+Reuse: ScanComparisonService, git_inputs.RANGE, lifecycle, graph_delta, outcome_movement, cause_attribution, canonical_views._delta.
+Likely files: compare service glue; R2-A projector trend mode; not cli/compare_cmd.py semantics change (keep explicit two-file compare).
+Tests: test_m28_* … test_m31_*, test_git_inputs.py range, test_canonical_views.py incompatible/no-baseline, new series bundle fixture.
+Depends on: R2-C outputs + R2-A projector.
+R2-E — Acceptance / fixtures / docs / gates
+Behavior: Fixtures for complete/partial/UNKNOWN/missing-feed/shallow/dirty/no-baseline/incompatible; determinism (two series runs, equal digests); installed-wheel HTML still has four heads; docs: baseline vs trend; Community custom-rule unchanged.
+Likely files: engine/tests/reporting/, engine/tests/cli/, engine/docs/implementation/ gate note only if the team requires it; examples/journeys/ already used by e11.3.
+Tests/gates: extend E11.3 journeys; do not treat G52 as passed by R2.
+Dependencies: R2-B → R2-A (baseline usable). R2-B → R2-C → R2-D. R2-E spans all.
+
+10. Files likely affected
+engine/src/codestrata/reporting/html_v2/assessment_heads.py
+engine/src/codestrata/reporting/html_v2/assessment_head_grouping.py
+engine/src/codestrata/reporting/html_v2/builder.py
+engine/src/codestrata/reporting/html_v2/renderer.py
+engine/src/codestrata/reporting/html_v2/leadership.py
+engine/src/codestrata/reporting/html_v2/models.py
+engine/src/codestrata/reporting/modernization_html.py
+engine/src/codestrata/reporting/modernization_serialization.py
+engine/src/codestrata/reporting/assessment_canonical.py
+engine/src/codestrata/reporting/canonical_views.py
+engine/src/codestrata/reporting/journey_observations.py
+engine/src/codestrata/application/assessment/service.py
+engine/src/codestrata/application/incremental/history_index.py
+engine/src/codestrata/application/incremental/git_inputs.py
+engine/src/codestrata/infrastructure/knowledge_store/git_revision.py
+engine/src/codestrata/repository_auth/read_only_git.py
+engine/src/codestrata/services/scan_comparison_service.py
+engine/src/codestrata/cli/assess.py          # only if a revision pin is added later
+engine/src/codestrata/artifacts/layout.py    # trend bundle paths
+engine/src/codestrata/application/assessment/source_state_series.py  # new if required
+engine/tests/reporting/html_v2/test_assessment_head_organization.py
+engine/tests/reporting/test_canonical_views.py
+engine/tests/reporting/test_g40_assessment_canonical.py
+engine/tests/reporting/test_e11_3_journey_observations.py
+engine/tests/reporting/test_e11_3_installed_journeys.py
+engine/tests/application/evidence/maintainability/test_m22.py
+engine/tests/application/incremental/test_history_index.py
+engine/tests/application/incremental/test_git_inputs.py
+engine/tests/application/incremental/test_m28_finding_lifecycle.py
+engine/tests/application/incremental/test_m29_graph_delta_blast_radius.py
+engine/tests/application/incremental/test_m30_outcome_movement.py
+engine/tests/application/incremental/test_m31_cause_attribution.py
+engine/tests/cli/test_e11_3_assessment_journeys.py
+11. Files/modules that should remain untouched
+Anything under platform/, insights/, knowledge/, infrastructure/ (AWS), root docs/ product site
+Root .github/workflows/ except the existing Engine-only exception already recorded
+engine/src/codestrata/cli/community_contract.py custom-rule exclusions (create/load/new/import) — do not lift
+engine/src/codestrata/cli/rules.py authoring
+New analyzer modules / new OutcomeFamily values / canonical_health_score
+engine/src/codestrata/ai/** as a source of findings/metrics/verdicts
+engine/src/codestrata/infrastructure/knowledge_store/sqlite/** as a new default
+Portfolio / EIR paths (artifacts/portfolio_identity.py, intelligence/ lifecycle) — Community portfolio remains removed
+VS Code / Webapp / MVP wireframes
+Published PyPI 0.2.1 bytes / G52 publish path
+Schema breaks of CanonicalEnvelope / EngineeringHotspot — extend only if a reviewer records it
+12. Existing tests/fixtures we should reuse
+Area	Existing tests	Extend vs new
+M22
+engine/tests/application/evidence/maintainability/test_m22.py; test_e11_3_journey_observations.py; examples/journeys/complete-js
+Extend assess to assert metadata hotspots; new “unavailable when no history”
+M23
+engine/tests/application/evidence/maintainability/test_m23.py
+Reuse; not an R2 headline
+M25
+test_history_index.py; fixtures/e09.3/expected-m25-joined.json
+Extend to head=S_i pin
+M26
+test_history_index.py co-change; journey observations
+Extend leakage (S1 must not include HEAD-only pairs)
+M27
+test_git_inputs.py; test_change_facts.py
+Extend RANGE between two of five SHAs
+M28
+test_m28_finding_lifecycle.py
+Reuse pairwise; new five-slot missing-middle
+M29
+test_m29_graph_delta_blast_radius.py
+Reuse; new cutoff/UNKNOWN in bundle
+M30
+test_m30_outcome_movement.py
+Extend four public families; watch extra testing family
+M31
+test_m31_cause_attribution.py
+Reuse digest-pair cases
+Assess
+test_assess_cli.py; cli/test_e11_3_assessment_journeys.py
+Extend dirty-tree + no hidden compare
+Compare
+compare_cmd.py covered via e11.1/e11.3; tests/validation/test_compare.py
+Reuse two-file contract; do not change it
+HTML
+test_modernization_html_report.py; html_v2/test_assessment_head_organization.py; test_assessment_report_parity.py
+Extend four heads; assert Cloud/AI not headlines
+Canonical HTML
+test_canonical_views.py; test_g40_assessment_canonical.py
+Reuse no-compute invariants
+Git history
+test_history_index.py; git_repo_helpers.py
+New first-parent series + as-of-commit window
+No baseline
+test_e11_3_journey_observations.py test_complete_fixture_ranks_one_hotspot_and_says_no_baseline
+Reuse for baseline HTML
+Incompatible compare
+test_canonical_views.py (G40-D003)
+Reuse
+Missing feed
+journey observations / supply-chain tests
+Reuse UNKNOWN freshness
+Shallow Git
+LocalGitState.shallow; history_index limitations shallow_history
+Extend explicit fixture
+Installed artifact
+test_e11_3_installed_journeys.py
+Extend four-outcome HTML on wheel
+Determinism
+test_assessment_analytics_determinism.py; E15.2 harness; e12.3 canonical equivalence
+New two-run series digest equality
+Dirty WT
+test_git_inputs.py WORKING mode
+New “user WT unchanged after series”
+13. Top implementation risks
+Future-history leakage via observe_repository() / _read_git() (journey_observations.py) if historical slots observe user HEAD.
+Source-state leakage if five assesses use LocalRepositoryScanner on the dirty user path instead of extracted trees.
+Mutating the user worktree (checkout/worktree are forbidden in read_only_git.py; using raw git checkout would violate Engine Git policy).
+HTML recomputing health if v2 builder starts ranking hotspots or subtracting metrics instead of copying envelope/comparison.
+Two coverage systems (assessment heads vs envelope capability coverage) producing contradictory trust text.
+current/previous only holds two runs (lifecycle.py MAX_VERSIONS = 2); stuffing five snapshots there will delete evidence.
+Hardcoded JOURNEY_EVALUATION_TIME = 2026-09-27 making recency/freshness wrong on real repos.
+M30 testing family vs four public outcomes — easy to grow a fifth headline.
+Cloud/AI/Modernization packs still in builtin_analyzers / activation — they will still emit heads unless R2-A explicitly demotes them.
+Compare CLI remains two files only — if trend is bolted onto compare without an orchestrator, users get no five-commit bundle and no slot preservation.
+14. Final recommendation
+R2 is a combination, in this order:
+
+Projection / wiring (majority of baseline) — R2-A + R2-B. The Engine already has four OutcomeFamily values, findings, PAs, inventory, quality/maintainability evidence, M22–M31 modules, and a projector that is not allowed to compute health. The primary HTML is the wrong document.
+Orchestration (majority of trend) — R2-C + R2-D. Pairwise compare and Git range/history APIs exist. Five first-parent snapshots, immutable extract, pinned inputs, and a bundle do not.
+New analysis capability — essentially none. Do not add a family, score, or LLM-canonical path. The only new Engine-adjacent capability is read-only snapshot extract + series runner.
+Baseline readiness: PARTIAL — one assess can produce most raw evidence; it cannot yet emit the R2 Engineering Health report as the customer primary artifact with M22/M25/M26/trust attached at assess time.
+
+Five-commit trend readiness: NOT_READY — comparison and history libraries exist; snapshot isolation, first-parent selection, leakage-safe history-as-of-commit, and a five-slot bundle do not.
+
+No files were modified. No packages were installed. No production code was generated.
+

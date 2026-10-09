@@ -50,12 +50,8 @@ class TestLimitationCategory(StrEnum):
     BUILD_INSPECTION_NOT_IMPLEMENTED = "build-inspection-not-implemented"
     TEST_EXECUTION_NOT_PERFORMED = "test-execution-not-performed"
     COVERAGE_NOT_MEASURED = "coverage-not-measured"
-    DISABLED_TEST_DETECTION_NOT_IMPLEMENTED = (
-        "disabled-test-detection-not-implemented"
-    )
-    TEST_TO_SOURCE_MAPPING_NOT_IMPLEMENTED = (
-        "test-to-source-mapping-not-implemented"
-    )
+    DISABLED_TEST_DETECTION_NOT_IMPLEMENTED = "disabled-test-detection-not-implemented"
+    TEST_TO_SOURCE_MAPPING_NOT_IMPLEMENTED = "test-to-source-mapping-not-implemented"
     CI_INSPECTION_NOT_IMPLEMENTED = "ci-inspection-not-implemented"
     MUTATION_TESTING_NOT_EVALUATED = "mutation-testing-not-evaluated"
     NO_TEST_QUALITY_CONCLUSION = "no-test-quality-conclusion"

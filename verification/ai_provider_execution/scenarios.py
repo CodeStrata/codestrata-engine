@@ -314,9 +314,7 @@ def build_negative_scenarios(
             "C",
             "Execution modules never import os/pathlib/subprocess/threading/asyncio/signal",
             "an execution_* module imports os, pathlib, subprocess, threading, asyncio, or signal",
-            get(
-                "execution_modules_never_import_os_pathlib_subprocess_threading_asyncio_or_signal"
-            ),
+            get("execution_modules_never_import_os_pathlib_subprocess_threading_asyncio_or_signal"),
         ),
         _scenario_from_check(
             "D",

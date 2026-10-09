@@ -13,7 +13,11 @@ from codestrata.domain.findings.ids import build_finding_id
 from codestrata.domain.findings.severity import FindingSeverityAssessment
 from codestrata.domain.graph.ids import NodeId
 from codestrata.domain.graph.validation import as_tuple, optional_nonblank, require_nonblank
-from codestrata.domain.traceability import EvidenceCompleteness, EvidenceRef, TraceabilityValidationError
+from codestrata.domain.traceability import (
+    EvidenceCompleteness,
+    EvidenceRef,
+    TraceabilityValidationError,
+)
 from codestrata.domain.traceability.validators import normalize_limitations, sorted_unique_ids
 
 
@@ -221,6 +225,7 @@ class Finding(BaseModel):
             base_severity=base_severity,
             severity_assessment=severity_assessment,
         )
+
 
 class RuleEvaluationResult(BaseModel):
     """Aggregated deterministic output of one Rule Engine execution."""

@@ -106,9 +106,7 @@ def correlate_findings(
                     rejected += 1
                     continue
                 policy_matches += 1
-                bases = tuple(
-                    dict.fromkeys((*policy.required_bases, *bases))
-                )
+                bases = tuple(dict.fromkeys((*policy.required_bases, *bases)))
                 # Ensure explicit rule relationship basis for policy hits.
                 if FindingCorrelationBasis.EXPLICIT_RULE_RELATIONSHIP not in bases:
                     bases = (
@@ -142,9 +140,7 @@ def correlate_findings(
     cross_head = 0
     correlated_ids: set[str] = set()
     for item in deduped:
-        by_type[item.correlation_type.value] = (
-            by_type.get(item.correlation_type.value, 0) + 1
-        )
+        by_type[item.correlation_type.value] = by_type.get(item.correlation_type.value, 0) + 1
         correlated_ids.update(item.finding_ids)
         if len(set(item.assessment_head_ids)) > 1:
             cross_head += 1
@@ -186,7 +182,7 @@ def correlate_rule_evaluation(
 
     result = correlate_findings(evaluation.findings, policies=policies)
     updated = RuleEvaluationResult.from_findings(
-        findings=result.findings,  # type: ignore[arg-type]
+        findings=result.findings,
         rules_evaluated=evaluation.rules_evaluated,
         rules_skipped=evaluation.rules_skipped,
     )
@@ -292,12 +288,13 @@ def _shared_evidence_pairs(
             by_evidence.setdefault(evidence_id, []).append(item)
     pairs: list[tuple[Finding, Finding, tuple[str, ...]]] = []
     seen: set[tuple[str, str]] = set()
-    for evidence_id, group in by_evidence.items():
+    for _, group in by_evidence.items():
         unique = {item.id: item for item in group}
         ordered = sorted(unique.values(), key=lambda item: item.id)
         for i, left in enumerate(ordered):
             for right in ordered[i + 1 :]:
-                key = tuple(sorted((left.id, right.id)))
+                left_id, right_id = sorted((left.id, right.id))
+                key = (left_id, right_id)
                 if key in seen:
                     continue
                 seen.add(key)
@@ -635,9 +632,7 @@ def _dedupe_correlations(
             by_id[item.correlation_id] = item
             continue
         # Prefer higher confidence / richer basis.
-        if _CONFIDENCE_RANK[item.confidence.level] > _CONFIDENCE_RANK[
-            existing.confidence.level
-        ]:
+        if _CONFIDENCE_RANK[item.confidence.level] > _CONFIDENCE_RANK[existing.confidence.level]:
             by_id[item.correlation_id] = item
     return list(by_id.values())
 
@@ -676,8 +671,8 @@ def _build_clusters(
         groups.setdefault(find(fid), []).append(fid)
 
     clusters: list[FindingCorrelationCluster] = []
-    for root, members in sorted(groups.items()):
-        member_ids = tuple(sorted(set(members)))
+    for _root, member_list in sorted(groups.items()):
+        member_ids = tuple(sorted(set(member_list)))
         if len(member_ids) < 2:
             continue
         corr_ids = tuple(
@@ -705,8 +700,7 @@ def _build_clusters(
                 primary_finding_id=primary.id,
                 assessment_head_ids=heads,
                 limitations=(
-                    "Cluster membership does not invent direct correlations "
-                    "between all members.",
+                    "Cluster membership does not invent direct correlations between all members.",
                 ),
             )
         )

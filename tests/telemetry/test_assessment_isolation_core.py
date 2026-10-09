@@ -6,6 +6,7 @@ from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
+from tests.telemetry.transport_test_helpers import make_http_transport
 
 from codestrata.telemetry.assessment_isolation import (
     run_assessment_with_telemetry_isolation,
@@ -13,8 +14,8 @@ from codestrata.telemetry.assessment_isolation import (
 from codestrata.telemetry.assessment_isolation_models import AssessmentPrimaryStatus
 from codestrata.telemetry.assessment_isolation_policy import (
     COMMUNITY_TELEMETRY_ASSESSMENT_ISOLATION_POLICY_URN,
-    CommunityTelemetryAssessmentIsolationPolicy,
     AssessmentIsolationPolicyError,
+    CommunityTelemetryAssessmentIsolationPolicy,
     default_assessment_isolation_policy,
 )
 from codestrata.telemetry.assessment_lifecycle import lifecycle_event_names
@@ -23,8 +24,6 @@ from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
 from codestrata.telemetry.infrastructure.capture_transport import CaptureTelemetryTransport
 from codestrata.telemetry.infrastructure.http_client import FakeTelemetryHttpResponse
 from codestrata.telemetry.runtime_factory import create_session_telemetry_runtime
-from codestrata.telemetry.transport import TelemetryTransportResultKind
-from tests.telemetry.transport_test_helpers import make_http_transport
 
 
 def test_isolation_policy_defaults() -> None:
@@ -39,9 +38,7 @@ def test_isolation_policy_defaults() -> None:
 
 def test_isolation_policy_rejects_weakening() -> None:
     with pytest.raises(AssessmentIsolationPolicyError):
-        CommunityTelemetryAssessmentIsolationPolicy(
-            primary_operation_authoritative=False
-        )
+        CommunityTelemetryAssessmentIsolationPolicy(primary_operation_authoritative=False)
 
 
 def test_lifecycle_event_names() -> None:
@@ -129,9 +126,7 @@ def test_http_timeout_does_not_alter_success() -> None:
             transport=transport,
         )
     )
-    result, isolation = run_assessment_with_telemetry_isolation(
-        lambda: 7, telemetry=facade
-    )
+    result, isolation = run_assessment_with_telemetry_isolation(lambda: 7, telemetry=facade)
     assert result == 7
     assert isolation.primary_status == AssessmentPrimaryStatus.SUCCESS.value
     assert client.calls  # transport attempted under allow
@@ -159,9 +154,7 @@ def test_record_methods_raising_still_preserve_primary() -> None:
     facade.record_assessment_started.side_effect = RuntimeError("start boom")
     facade.record_assessment_completed.side_effect = RuntimeError("end boom")
 
-    result, isolation = run_assessment_with_telemetry_isolation(
-        lambda: "done", telemetry=facade
-    )
+    result, isolation = run_assessment_with_telemetry_isolation(lambda: "done", telemetry=facade)
     assert result == "done"
     assert isolation.primary_status == AssessmentPrimaryStatus.SUCCESS.value
     assert isolation.telemetry_event_failures >= 1
@@ -176,6 +169,4 @@ def test_isolation_result_has_no_secrets() -> None:
     assert "/tmp/secret-repo" not in blob
     assert "endpoint" not in blob
     assert "cscc_v1_" not in blob
-    assert list(isolation.to_stable_dict().keys()) == sorted(
-        isolation.to_stable_dict().keys()
-    )
+    assert list(isolation.to_stable_dict().keys()) == sorted(isolation.to_stable_dict().keys())

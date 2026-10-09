@@ -84,9 +84,7 @@ def _settings(
         ),
         assessment=AssessmentSettings(
             sections=AssessmentSectionsSettings(
-                technical_debt=TechnicalDebtAssessmentSectionSettings(
-                    enabled=section_enabled
-                )
+                technical_debt=TechnicalDebtAssessmentSectionSettings(enabled=section_enabled)
             )
         ),
     )
@@ -108,7 +106,7 @@ def test_orchestration_exclusions_roles_thresholds(tmp_path: Path) -> None:
     paths = {
         "src/app.py": "def big():\n" + ("    x = 1\n" * 80),
         "src/edge.py": "def edge():\n" + ("    x = 1\n" * 49),
-        "src/web.js": "function f(a,b,c,d,e,f){ if(a){ if(b){ return c; }} }",
+        "src/web.rb": "def f(a,b,c,d,e,f); if a && b; return c; end; end",
         "tests/test_app.py": "def test_ok():\n    assert True\n",
         ".codestrata/workspace/clone/Bad.java": (
             "public class Bad { public void m(){ " + ("if(true){ " * 8) + ("}" * 8) + "} }"
@@ -125,7 +123,7 @@ def test_orchestration_exclusions_roles_thresholds(tmp_path: Path) -> None:
     )
     assert result.complexity_evidence is not None
     assert all(".codestrata/" not in item.path for item in result.complexity_evidence.files)
-    assert all(not item.path.endswith(".js") for item in result.complexity_evidence.files)
+    assert all(not item.path.endswith(".rb") for item in result.complexity_evidence.files)
     test_files = [item for item in result.complexity_evidence.files if "tests/" in item.path]
     assert test_files
     assert all(item.classification.value == "test" for item in test_files)

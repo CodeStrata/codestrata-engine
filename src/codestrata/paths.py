@@ -17,9 +17,7 @@ def engine_root() -> Path:
     # engine/src/codestrata/<this module's package> — walk up to engine/
     here = Path(__file__).resolve()
     for candidate in here.parents:
-        if (candidate / "pyproject.toml").is_file() and (
-            candidate / "src" / "codestrata"
-        ).is_dir():
+        if (candidate / "pyproject.toml").is_file() and (candidate / "src" / "codestrata").is_dir():
             return candidate
     # Fallback: src/codestrata/paths.py → parents[2] == package root when flat
     return here.parents[2]

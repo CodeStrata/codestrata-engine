@@ -58,9 +58,7 @@ NOTES: tuple[str, ...] = (
 def resolve_verdict(checks: list[CheckResult], scenarios: list[ScenarioResult]) -> str:
     """PASS_WITH_LIMITATIONS when everything holds; a failure means FAIL."""
 
-    if any(not check.ok for check in checks) or any(
-        not scenario.ok for scenario in scenarios
-    ):
+    if any(not check.ok for check in checks) or any(not scenario.ok for scenario in scenarios):
         return "fail"
     return "pass_with_limitations"
 

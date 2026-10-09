@@ -7,22 +7,6 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-
-from codestrata.application.rules.cloud.helpers import (
-    deployment_fact_is_confirmed,
-    known_deployment_systems,
-)
-from codestrata.domain.evidence.language.provenance import EvidenceProvenance
-from codestrata.domain.evidence.repository_cloud.enums import (
-    CloudDeploymentSystem,
-    EvidenceConfirmationLevel,
-)
-from codestrata.domain.evidence.repository_cloud.models import (
-    AggregatedRepositoryCloudEvidence,
-    CloudDeploymentFactEvidence,
-    RepositoryCloudEvidenceCoverage,
-)
-from codestrata.domain.evidence.repository_cloud.enums import RepositoryCloudParseStatus
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.cloud import (
     CloudExpectation,
@@ -42,6 +26,22 @@ from validation.paths import VALIDATION_ROOT
 from validation.registry import load_all_repositories, resolve_expected_results
 from validation.runner import run_validation_suite
 from validation.summary import build_validation_summary
+
+from codestrata.application.rules.cloud.helpers import (
+    deployment_fact_is_confirmed,
+    known_deployment_systems,
+)
+from codestrata.domain.evidence.language.provenance import EvidenceProvenance
+from codestrata.domain.evidence.repository_cloud.enums import (
+    CloudDeploymentSystem,
+    EvidenceConfirmationLevel,
+    RepositoryCloudParseStatus,
+)
+from codestrata.domain.evidence.repository_cloud.models import (
+    AggregatedRepositoryCloudEvidence,
+    CloudDeploymentFactEvidence,
+    RepositoryCloudEvidenceCoverage,
+)
 
 
 def _prov() -> EvidenceProvenance:
@@ -67,9 +67,7 @@ def test_contradictory_cloud_expectations_rejected() -> None:
     with pytest.raises(ValidationError, match="contradictory"):
         ExpectedResults(
             cloud=CloudExpectation(
-                required_findings=(
-                    CloudFindingExpectation(rule_id="cloud.cloud-011"),
-                ),
+                required_findings=(CloudFindingExpectation(rule_id="cloud.cloud-011"),),
                 forbidden_rule_ids=("cloud.cloud-011",),
             )
         )
@@ -77,12 +75,8 @@ def test_contradictory_cloud_expectations_rejected() -> None:
 
 def test_classify_tp_fp_fn_and_metrics() -> None:
     expectation = CloudExpectation(
-        required_signal_families=(
-            CloudFamilyExpectation(family_id="container"),
-        ),
-        required_findings=(
-            CloudFindingExpectation(rule_id="cloud.cloud-010"),
-        ),
+        required_signal_families=(CloudFamilyExpectation(family_id="container"),),
+        required_findings=(CloudFindingExpectation(rule_id="cloud.cloud-010"),),
         forbidden_rule_ids=("cloud.cloud-030",),
         forbidden_conclusions=("cloud ready",),
     )
@@ -237,9 +231,7 @@ def test_controlled_cloud_signals_fixture_precision(tmp_path: Path) -> None:
 
     expected = resolve_expected_results(
         next(
-            item
-            for item in load_all_repositories()
-            if item.repository_id == "local-cloud-signals"
+            item for item in load_all_repositories() if item.repository_id == "local-cloud-signals"
         )
     )
     assert expected.cloud is not None
@@ -265,12 +257,8 @@ def test_controlled_cloud_signals_fixture_precision(tmp_path: Path) -> None:
 
 def test_cloud_signals_repeat_run_determinism(tmp_path: Path) -> None:
     fixture = (VALIDATION_ROOT / "fixtures" / "cloud-signals").resolve()
-    first, _ = run_real_assessment(
-        repository_path=fixture, output_directory=tmp_path / "a"
-    )
-    second, _ = run_real_assessment(
-        repository_path=fixture, output_directory=tmp_path / "b"
-    )
+    first, _ = run_real_assessment(repository_path=fixture, output_directory=tmp_path / "a")
+    second, _ = run_real_assessment(repository_path=fixture, output_directory=tmp_path / "b")
     assert sorted(item.finding_id or "" for item in first.cloud_findings) == sorted(
         item.finding_id or "" for item in second.cloud_findings
     )
@@ -316,9 +304,7 @@ def test_negative_control_repositories_cloud(tmp_path_factory) -> None:
         evidence = report.parent / "repository-cloud-evidence.json"
         if evidence.is_file():
             artifact_paths["repository-cloud-evidence.json"] = str(evidence)
-        findings = extract_cloud_findings(
-            (document.get("assessment") or {}).get("findings") or []
-        )
+        findings = extract_cloud_findings((document.get("assessment") or {}).get("findings") or [])
         signals = extract_cloud_signals(document, artifact_paths=artifact_paths)
         for forbidden in expected.cloud.forbidden_rule_ids:
             assert forbidden not in {item.rule_id for item in findings}

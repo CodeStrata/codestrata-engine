@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+
 def test_test_source_integrity_module_importable() -> None:
     import verification.curated_repository_validation as pkg
+
     assert pkg.CURATED_REPOSITORY_VALIDATION_ID

@@ -22,9 +22,7 @@ CLOUD_EVENT_TYPES: frozenset[str] = frozenset(
         "operation_failed",
     }
 )
-CLOUD_OUTCOMES: frozenset[str] = frozenset(
-    {"succeeded", "failed", "cancelled", "unavailable"}
-)
+CLOUD_OUTCOMES: frozenset[str] = frozenset({"succeeded", "failed", "cancelled", "unavailable"})
 CLOUD_DURATION_BUCKETS: frozenset[str] = frozenset(
     {
         "under_1s",
@@ -108,9 +106,7 @@ class CommunityCloudTelemetryWireRequest:
         if self.installation_id:
             payload["installation_id"] = self.installation_id
         if self.properties:
-            payload["properties"] = {
-                key: self.properties[key] for key in sorted(self.properties)
-            }
+            payload["properties"] = {key: self.properties[key] for key in sorted(self.properties)}
         return {key: payload[key] for key in sorted(payload)}
 
     def to_canonical_bytes(self) -> bytes:

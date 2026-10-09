@@ -66,9 +66,7 @@ def validate_generated_config(
         failures.append("profile_not_community")
     evidence["profile"] = profile
     evidence["profile_location"] = (
-        "top_level"
-        if "profile" in data
-        else ("repository" if "profile" in repo else "missing")
+        "top_level" if "profile" in data else ("repository" if "profile" in repo else "missing")
     )
 
     knowledge = data.get("knowledge") or {}

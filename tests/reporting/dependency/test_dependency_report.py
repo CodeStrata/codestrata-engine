@@ -59,8 +59,7 @@ from codestrata.reporting.html_v2.renderer import HtmlReportRenderer
 from codestrata.reporting.modernization_models import AssessmentMode, ModernizationReportInput
 
 _NONE_DETECTED = (
-    "No production dependency hygiene findings were detected by the enabled "
-    "repository-local rules."
+    "No production dependency hygiene findings were detected by the enabled repository-local rules."
 )
 _FORBIDDEN_CLAIMS = (
     "healthy",
@@ -91,9 +90,7 @@ def _decl(
     path: str,
     kind: DependencyDeclarationKind = DependencyDeclarationKind.RUNTIME,
     classification: SourceClassification = SourceClassification.SOURCE,
-    resolution: DependencyVersionResolutionStatus = (
-        DependencyVersionResolutionStatus.RESOLVED
-    ),
+    resolution: DependencyVersionResolutionStatus = (DependencyVersionResolutionStatus.RESOLVED),
     ecosystem: DependencyEcosystem = DependencyEcosystem.MAVEN,
     manifest_type: DependencyManifestType = DependencyManifestType.POM_XML,
     raw_version: str | None = "1.0.0",
@@ -108,9 +105,7 @@ def _decl(
         original_identity=identity,
         raw_version=raw_version,
         resolved_version_local=(
-            raw_version
-            if resolution is DependencyVersionResolutionStatus.RESOLVED
-            else None
+            raw_version if resolution is DependencyVersionResolutionStatus.RESOLVED else None
         ),
         version_availability=DependencyEvidenceAvailability.AVAILABLE,
         version_resolution_status=resolution,
@@ -154,9 +149,7 @@ def _evidence(
         manifests_discovered=len(manifests),
         manifests_supported=len(manifests),
         manifests_parsed=sum(
-            1
-            for item in manifests
-            if item.parse_status is DependencyParseStatus.SUCCEEDED
+            1 for item in manifests if item.parse_status is DependencyParseStatus.SUCCEEDED
         ),
         manifests_partially_parsed=sum(
             1
@@ -167,9 +160,7 @@ def _evidence(
             1 for item in manifests if item.parse_status is DependencyParseStatus.FAILED
         ),
         declarations_collected=len(declarations),
-        unsupported_construct_count=sum(
-            len(item.unsupported_constructs) for item in manifests
-        ),
+        unsupported_construct_count=sum(len(item.unsupported_constructs) for item in manifests),
         unresolved_expression_count=sum(
             1
             for item in declarations
@@ -418,9 +409,7 @@ def test_codestrata_style_production_test_separation() -> None:
     assert all(item.source_role == "test" for item in report.test_observations.findings)
     assert "do not contribute to the production-primary view" in report.executive_summary
     assert _NONE_DETECTED in report.executive_summary
-    assert all(
-        claim not in report.executive_summary.lower() for claim in _FORBIDDEN_CLAIMS
-    )
+    assert all(claim not in report.executive_summary.lower() for claim in _FORBIDDEN_CLAIMS)
 
 
 def test_petclinic_style_unsupported_gradle_coverage() -> None:
@@ -464,9 +453,7 @@ def test_landscape_count_reconciliation_and_kind_separation() -> None:
     assert by_key["production_management"] == decls.dependency_management_count
     assert by_key["production_plugins"] == decls.plugin_count
     assert by_key["production_active"] != by_key["production_plugins"]
-    assert by_key["declarations_collected"] == (
-        assessment.evidence_summary.declarations_collected
-    )
+    assert by_key["declarations_collected"] == (assessment.evidence_summary.declarations_collected)
     labels = " ".join(item.label.lower() for item in report.landscape)
     assert "active" in labels
     assert "plugin" in labels
@@ -565,9 +552,7 @@ def test_conclusion_recommendation_grouping_and_traceability() -> None:
 
 
 def test_empty_subsection_omission_for_disabled_assessment() -> None:
-    disabled = DependencyAssessmentAssembler().assemble_disabled(
-        repository_id="repo:x"
-    )
+    disabled = DependencyAssessmentAssembler().assemble_disabled(repository_id="repo:x")
     report = DependencyReportAdapter().adapt(disabled)
     assert report.status == DependencyAssessmentStatus.DISABLED.value
     assert report.test_observations.present is False

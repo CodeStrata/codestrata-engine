@@ -1,5 +1,7 @@
 """Finding application helpers."""
 
+from typing import Any
+
 from codestrata.application.findings.finding_confidence import (
     derive_finding_confidence,
     derive_finding_confidence_from_finding_inputs,
@@ -20,7 +22,7 @@ __all__ = [
 ]
 
 
-def __getattr__(name: str):
+def __getattr__(name: str) -> Any:
     # Lazy export to avoid circular import with application.traceability.merge.
     if name in {
         "consolidate_findings",

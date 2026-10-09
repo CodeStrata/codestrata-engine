@@ -279,8 +279,8 @@ This package ships `test-fixtures/sample-js-app` for offline smoke tests.
 | [docs/telemetry-status.md](docs/telemetry-status.md) | Slice 9.7 privacy-first telemetry status |
 | [docs/telemetry-transport.md](docs/telemetry-transport.md) | Slice 9.11 fail-silent HTTP transport (explicit) |
 | [docs/telemetry-assessment-isolation.md](docs/telemetry-assessment-isolation.md) | Slice 9.12 assessment isolation |
-| [../verification/privacy_first_telemetry/README.md](../verification/privacy_first_telemetry/README.md) | Slice 9.14 cross-client privacy verification |
-| [../verification/privacy_first_telemetry_completion/README.md](../verification/privacy_first_telemetry_completion/README.md) | Slice 9.15 Epic 9 completion (v0.2.0) |
+| `verification/privacy_first_telemetry/README.md` (not included in this export) | Slice 9.14 cross-client privacy verification |
+| `verification/privacy_first_telemetry_completion/README.md` (not included in this export) | Slice 9.15 Epic 9 completion (v0.2.0) |
 | [docs/telemetry-anonymous-analytics.md](docs/telemetry-anonymous-analytics.md) | Slice 10.1 anonymous analytics contract (no collection) |
 | [docs/telemetry-installation-identity.md](docs/telemetry-installation-identity.md) | Slice 10.2 anonymous installation identity (local only) |
 | [docs/telemetry-runtime-analytics.md](docs/telemetry-runtime-analytics.md) | Slice 10.3 runtime analytics (local construction only) |
@@ -288,8 +288,8 @@ This package ships `test-fixtures/sample-js-app` for offline smoke tests.
 | [docs/telemetry-repository-aggregate-analytics.md](docs/telemetry-repository-aggregate-analytics.md) | Slice 10.5 repository aggregate analytics (construction API only) |
 | [docs/telemetry-ai-analytics.md](docs/telemetry-ai-analytics.md) | Slice 10.6 AI analytics (construction API only) |
 | [VS Code extension docs](https://docs.codestrata.ai/extensions/vscode) | VS Code extension ([Marketplace](https://marketplace.visualstudio.com/items?itemName=CodeStrataAI.codestrata-assessment); source private) |
-| [../verification/anonymous_analytics_privacy/README.md](../verification/anonymous_analytics_privacy/README.md) | Slice 10.8 anonymous analytics privacy verification |
-| [../verification/anonymous_analytics_completion/README.md](../verification/anonymous_analytics_completion/README.md) | Slice 10.9 Epic 10 completion verification (contracts-only; not operational) |
+| `verification/anonymous_analytics_privacy/README.md` (not included in this export) | Slice 10.8 anonymous analytics privacy verification |
+| `verification/anonymous_analytics_completion/README.md` (not included in this export) | Slice 10.9 Epic 10 completion verification (contracts-only; not operational) |
 | [docs/ai-enrichment.md](docs/ai-enrichment.md) | AI providers / Modernization Advisor enrichment |
 | [verification/ai_provider_baseline/README.md](verification/ai_provider_baseline/README.md) | Slice 11.1 existing AI provider compatibility baseline (characterization only) |
 | [docs/ai-provider-contracts.md](docs/ai-provider-contracts.md) | Slice 11.2 Common AI Provider Contracts (new, unwired) |

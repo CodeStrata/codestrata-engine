@@ -51,3 +51,37 @@ def test_merge_removes_duplicate_manifests() -> None:
     result = DependencyFacts(manifests=[manifest]).merge(DependencyFacts(manifests=[manifest]))
 
     assert result.manifests == [manifest]
+
+
+def test_merge_overrides_generic_scope_from_inventory_with_metadata() -> None:
+    inventory = DependencyFacts(
+        dependencies=[
+            Dependency(
+                name="jest",
+                version="^29.7.0",
+                ecosystem="npm",
+                scope="runtime",
+                manifest_path="package.json",
+                unmanaged_version=True,
+            )
+        ]
+    )
+
+    metadata = DependencyFacts(
+        dependencies=[
+            Dependency(
+                name="jest",
+                version="^29.7.0",
+                ecosystem="npm",
+                scope="development",
+                manifest_path="package.json",
+                unmanaged_version=False,
+            )
+        ]
+    )
+
+    merged = inventory.merge(metadata)
+    assert len(merged.dependencies) == 1
+    assert merged.dependencies[0].scope == "development"
+    assert merged.dependencies[0].unmanaged_version is False
+

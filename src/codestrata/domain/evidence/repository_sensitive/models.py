@@ -103,9 +103,7 @@ class ConfigurationFactEvidence(BaseModel):
     section: str | None = None
     profile: str | None = None
     line_start: int | None = Field(default=None, ge=1)
-    parse_status: RepositorySensitiveParseStatus = (
-        RepositorySensitiveParseStatus.SUCCEEDED
-    )
+    parse_status: RepositorySensitiveParseStatus = RepositorySensitiveParseStatus.SUCCEEDED
     provenance: EvidenceProvenance
     metadata: dict[str, str] = Field(default_factory=dict)
 
@@ -211,9 +209,7 @@ class RepositorySensitiveEvidenceCoverage(BaseModel):
     @field_validator("formats_represented", mode="before")
     @classmethod
     def normalize_formats(cls, value: object) -> tuple[str, ...]:
-        return tuple(
-            sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()})
-        )
+        return tuple(sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()}))
 
 
 class AggregatedRepositorySensitiveEvidence(BaseModel):

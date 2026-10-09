@@ -24,9 +24,7 @@ APPROVED_AI_PROVIDER_OWNERSHIPS: frozenset[str] = frozenset(
     {"customer_managed", "codestrata_managed", "unavailable"}
 )
 
-APPROVED_AI_OUTCOMES: frozenset[str] = frozenset(
-    {"success", "failure", "unavailable", "skipped"}
-)
+APPROVED_AI_OUTCOMES: frozenset[str] = frozenset({"success", "failure", "unavailable", "skipped"})
 
 APPROVED_AI_FAILURE_CATEGORIES: frozenset[str] = frozenset(
     {

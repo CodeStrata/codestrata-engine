@@ -143,9 +143,7 @@ def test_inventory_merge_rejects_path_traversal() -> None:
     )
 
     changes = RepositoryChangeSet(
-        added=(
-            FileChange(path="/etc/passwd", kind=FileChangeKind.ADDED),
-        ),
+        added=(FileChange(path="/etc/passwd", kind=FileChangeKind.ADDED),),
         change_count=1,
     )
     with pytest.raises(IncrementalArtifactMergeError):

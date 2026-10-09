@@ -196,13 +196,10 @@ def probe_aws_session_for_bedrock(
             resolved=resolved,
             effective_region=None,
             credential_source=credential_source,
-            detail=(
-                "AWS region missing (set AWS_REGION, [aws].region, "
-                "or [ai.bedrock].region)"
-            ),
+            detail=("AWS region missing (set AWS_REGION, [aws].region, or [ai.bedrock].region)"),
             guidance=(
                 "export AWS_REGION=us-east-1\n"
-                "# or add region = \"us-east-1\" under [aws] in codestrata.toml"
+                '# or add region = "us-east-1" under [aws] in codestrata.toml'
             ),
         )
 
@@ -225,10 +222,7 @@ def probe_aws_session_for_bedrock(
             guidance=format_aws_authentication_error(profile=resolved.profile),
         )
 
-    detail = (
-        f"credentials via {credential_source}; "
-        f"region={effective_region} ({region_source})"
-    )
+    detail = f"credentials via {credential_source}; region={effective_region} ({region_source})"
     return AwsSessionProbe(
         ok=True,
         resolved=resolved,
@@ -325,9 +319,10 @@ def _describe_credential_source(resolved: ResolvedAwsConfig) -> str:
         return f"profile {resolved.profile!r} ({resolved.source_profile})"
     if os.environ.get("AWS_ACCESS_KEY_ID", "").strip():
         return "environment AWS_ACCESS_KEY_ID (default chain)"
-    if os.environ.get("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI", "").strip() or os.environ.get(
-        "AWS_CONTAINER_CREDENTIALS_FULL_URI", ""
-    ).strip():
+    if (
+        os.environ.get("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI", "").strip()
+        or os.environ.get("AWS_CONTAINER_CREDENTIALS_FULL_URI", "").strip()
+    ):
         return "container credential provider (default chain)"
     if os.environ.get("AWS_WEB_IDENTITY_TOKEN_FILE", "").strip():
         return "web identity token (default chain)"

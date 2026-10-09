@@ -126,8 +126,7 @@ class RoadmapInitiative(BaseModel):
         primary = self.primary_priority_action_id
         if primary is not None and primary not in supporting:
             raise TraceabilityValidationError(
-                "primary_priority_action_id must reference a "
-                "supporting_priority_action_ids entry"
+                "primary_priority_action_id must reference a supporting_priority_action_ids entry"
             )
         if primary is None and len(supporting) == 1:
             primary = supporting[0]
@@ -136,8 +135,7 @@ class RoadmapInitiative(BaseModel):
             or self.initiative_type is RoadmapInitiativeType.MERGED
         ) and not supporting:
             raise TraceabilityValidationError(
-                "priority-action-backed Roadmap Initiatives require "
-                "supporting_priority_action_ids"
+                "priority-action-backed Roadmap Initiatives require supporting_priority_action_ids"
             )
         if primary != self.primary_priority_action_id:
             return self.model_copy(update={"primary_priority_action_id": primary})
@@ -222,9 +220,7 @@ class RoadmapAssessmentSection(BaseModel):
                 "Recommendations and Findings.",
             ),
             limitations=tuple(limitations)
-            or (
-                "No Priority Actions were available for roadmap generation.",
-            ),
+            or ("No Priority Actions were available for roadmap generation.",),
             confidence=RoadmapConfidence.NONE,
             metadata={"initiative_count": "0", "phase_count": "0"},
         )

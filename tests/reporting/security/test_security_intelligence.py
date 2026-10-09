@@ -54,9 +54,7 @@ def _prov() -> EvidenceProvenance:
 
 
 def _facts_all_ok():
-    return execution_facts_from_status_map(
-        {rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS}
-    )
+    return execution_facts_from_status_map({rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS})
 
 
 def _evidence() -> AggregatedRepositorySensitiveEvidence:
@@ -69,9 +67,7 @@ def _evidence() -> AggregatedRepositorySensitiveEvidence:
                 path="tls/server.key",
                 kind=SensitiveArtifactKind.PRIVATE_KEY,
                 inspection_status=InspectionStatus.INSPECTED,
-                content_classifications=(
-                    ContentClassification.PRIVATE_KEY_MATERIAL,
-                ),
+                content_classifications=(ContentClassification.PRIVATE_KEY_MATERIAL,),
                 classification=SourceClassification.SOURCE,
                 provenance=_prov(),
             ),
@@ -328,7 +324,9 @@ def test_absolute_paths_omitted_and_no_raw_secrets() -> None:
         finding_id="f-pk",
         rule_id=RULE_PRIVATE_KEY_MATERIAL,
         title="Private key material",
-        description="-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC",
+        description=(
+            "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC"
+        ),
         severity="high",
         category="security",
         affected_nodes=("/Users/secret/tls/server.key",),

@@ -18,6 +18,7 @@ from codestrata.scan_boundary import default_ignore_path_markers
 def _default_ignore_path_markers_list() -> list[str]:
     return list(default_ignore_path_markers())
 
+
 if TYPE_CHECKING:
     from codestrata.config.profiles import ConfigurationIssue
 
@@ -97,8 +98,7 @@ class ScanBoundarySettings(BaseModel):
     include_default_directories: list[str] = Field(
         default_factory=list,
         description=(
-            "Directory names to keep despite defaults (e.g. vendor when it is "
-            "first-party source)."
+            "Directory names to keep despite defaults (e.g. vendor when it is first-party source)."
         ),
     )
     include_paths: list[str] = Field(default_factory=list)
@@ -406,9 +406,7 @@ class AiSettings(BaseModel):
     def validate_embedding_provider(cls, value: str) -> str:
         allowed = {"deterministic", "bedrock", "openai"}
         if value not in allowed:
-            raise ValueError(
-                f"ai.embedding_provider must be one of {sorted(allowed)}"
-            )
+            raise ValueError(f"ai.embedding_provider must be one of {sorted(allowed)}")
         return value
 
     @field_validator("answer_provider")
@@ -422,9 +420,7 @@ class AiSettings(BaseModel):
             "openai",
         }
         if value not in allowed:
-            raise ValueError(
-                f"ai.answer_provider must be one of {sorted(allowed)}"
-            )
+            raise ValueError(f"ai.answer_provider must be one of {sorted(allowed)}")
         return value
 
 
@@ -453,9 +449,7 @@ class KnowledgeVectorStoreSettings(BaseModel):
         compact = value.strip().lower()
         allowed = {"memory", "pgvector"}
         if compact not in allowed:
-            raise ValueError(
-                f"knowledge.vector_store.provider must be one of {sorted(allowed)}"
-            )
+            raise ValueError(f"knowledge.vector_store.provider must be one of {sorted(allowed)}")
         return compact
 
     @field_validator("schema_name")
@@ -561,9 +555,7 @@ class KnowledgeEmbeddingSettings(BaseModel):
             "local_sentence_transformer",
         }
         if compact not in allowed:
-            raise ValueError(
-                f"knowledge.embedding.provider must be one of {sorted(allowed)}"
-            )
+            raise ValueError(f"knowledge.embedding.provider must be one of {sorted(allowed)}")
         return compact
 
     @field_validator("model", "model_version")
@@ -629,9 +621,7 @@ class KnowledgeRetrievalSettings(BaseModel):
         compact = str(value or "vector").strip().lower()
         allowed = {"vector", "lexical", "hybrid"}
         if compact not in allowed:
-            raise ValueError(
-                f"knowledge.retrieval.mode must be one of {sorted(allowed)}"
-            )
+            raise ValueError(f"knowledge.retrieval.mode must be one of {sorted(allowed)}")
         return compact
 
     @field_validator("vector_weight", "lexical_weight")
@@ -732,10 +722,7 @@ class KnowledgeAnsweringSettings(BaseModel):
             "local_model",
         }
         if value not in allowed:
-            raise ValueError(
-                "knowledge.answering.provider must be one of "
-                f"{sorted(allowed)}"
-            )
+            raise ValueError(f"knowledge.answering.provider must be one of {sorted(allowed)}")
         return value
 
     @field_validator("style")
@@ -750,10 +737,7 @@ class KnowledgeAnsweringSettings(BaseModel):
             "evidence_only",
         }
         if value not in allowed:
-            raise ValueError(
-                "knowledge.answering.style must be one of "
-                f"{sorted(allowed)}"
-            )
+            raise ValueError(f"knowledge.answering.style must be one of {sorted(allowed)}")
         return value
 
     @field_validator(
@@ -794,23 +778,13 @@ class KnowledgeSettings(BaseModel):
 
     directory: Path = Path(".codestrata/knowledge")
     enabled: bool = False
-    projection: KnowledgeProjectionSettings = Field(
-        default_factory=KnowledgeProjectionSettings
-    )
+    projection: KnowledgeProjectionSettings = Field(default_factory=KnowledgeProjectionSettings)
     chunking: KnowledgeChunkingSettings = Field(default_factory=KnowledgeChunkingSettings)
-    embedding: KnowledgeEmbeddingSettings = Field(
-        default_factory=KnowledgeEmbeddingSettings
-    )
+    embedding: KnowledgeEmbeddingSettings = Field(default_factory=KnowledgeEmbeddingSettings)
     indexing: KnowledgeIndexingSettings = Field(default_factory=KnowledgeIndexingSettings)
-    vector_store: KnowledgeVectorStoreSettings = Field(
-        default_factory=KnowledgeVectorStoreSettings
-    )
-    retrieval: KnowledgeRetrievalSettings = Field(
-        default_factory=KnowledgeRetrievalSettings
-    )
-    answering: KnowledgeAnsweringSettings = Field(
-        default_factory=KnowledgeAnsweringSettings
-    )
+    vector_store: KnowledgeVectorStoreSettings = Field(default_factory=KnowledgeVectorStoreSettings)
+    retrieval: KnowledgeRetrievalSettings = Field(default_factory=KnowledgeRetrievalSettings)
+    answering: KnowledgeAnsweringSettings = Field(default_factory=KnowledgeAnsweringSettings)
 
 
 class McpToolsSettings(BaseModel):
@@ -861,9 +835,7 @@ class McpSettings(BaseModel):
             return "streamable-http"
         allowed = {"stdio", "sse", "streamable-http"}
         if compact not in allowed:
-            raise ValueError(
-                "mcp.transport must be one of: stdio, streamable-http (http), sse"
-            )
+            raise ValueError("mcp.transport must be one of: stdio, streamable-http (http), sse")
         return compact
 
     @field_validator("host", "server_name", mode="before")
@@ -1267,9 +1239,7 @@ class ArchitectureUnitSelectionSettings(BaseModel):
     registration_markers: list[str] = Field(
         default_factory=lambda: sorted(_DEFAULT_REGISTRATION_MARKERS)
     )
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("module_depth")
     @classmethod
@@ -1312,9 +1282,7 @@ class ArchitectureRulesSettings(BaseModel):
     invalid_dependency_direction: ArchitectureRuleToggle = Field(
         default_factory=ArchitectureRuleToggle
     )
-    layer_boundary_violation: ArchitectureRuleToggle = Field(
-        default_factory=ArchitectureRuleToggle
-    )
+    layer_boundary_violation: ArchitectureRuleToggle = Field(default_factory=ArchitectureRuleToggle)
     excessive_cross_module_coupling: ExcessiveCouplingRuleSettings = Field(
         default_factory=ExcessiveCouplingRuleSettings
     )
@@ -1322,9 +1290,7 @@ class ArchitectureRulesSettings(BaseModel):
         default_factory=ComponentConcentrationRuleSettings
     )
     framework_leakage: ArchitectureRuleToggle = Field(default_factory=ArchitectureRuleToggle)
-    service_dependency_cycle: ArchitectureRuleToggle = Field(
-        default_factory=ArchitectureRuleToggle
-    )
+    service_dependency_cycle: ArchitectureRuleToggle = Field(default_factory=ArchitectureRuleToggle)
     enterprise_standard_mismatch: ArchitectureRuleToggle = Field(
         default_factory=ArchitectureRuleToggle
     )
@@ -1440,46 +1406,26 @@ class DependencyRulesSettings(BaseModel):
     """Dependency Intelligence pack settings (disabled by default; Phase 4.4.3)."""
 
     enabled: bool = False
-    unresolved_version: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
+    unresolved_version: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
     mutable_version: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
-    unbounded_requirement: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
-    conflicting_exact_versions: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
-    duplicate_declaration: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
+    unbounded_requirement: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
+    conflicting_exact_versions: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
+    duplicate_declaration: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
 
 
 class SecurityRulesSettings(BaseModel):
     """Security Intelligence pack settings (disabled by default; Phase 4.5.3)."""
 
     enabled: bool = False
-    private_key_material: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
-    credential_literal: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
-    placeholder_credential: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
-    tls_verification_disabled: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
+    private_key_material: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
+    credential_literal: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
+    placeholder_credential: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
+    tls_verification_disabled: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
     hostname_verification_disabled: DependencyRuleToggle = Field(
         default_factory=DependencyRuleToggle
     )
-    authentication_disabled: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
-    permissive_cors_origin: DependencyRuleToggle = Field(
-        default_factory=DependencyRuleToggle
-    )
+    authentication_disabled: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
+    permissive_cors_origin: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
     debug_enabled: DependencyRuleToggle = Field(default_factory=DependencyRuleToggle)
 
 
@@ -1570,19 +1516,13 @@ class RulesSettings(BaseModel):
     max_evidence_per_match: int = 100
     default_categories: list[str] = Field(default_factory=list)
     architecture: ArchitectureRulesSettings = Field(default_factory=ArchitectureRulesSettings)
-    technical_debt: TechnicalDebtRulesSettings = Field(
-        default_factory=TechnicalDebtRulesSettings
-    )
+    technical_debt: TechnicalDebtRulesSettings = Field(default_factory=TechnicalDebtRulesSettings)
     dependency: DependencyRulesSettings = Field(default_factory=DependencyRulesSettings)
     security: SecurityRulesSettings = Field(default_factory=SecurityRulesSettings)
     testing: TestingRulesSettings = Field(default_factory=TestingRulesSettings)
     cloud: CloudRulesSettings = Field(default_factory=CloudRulesSettings)
-    ai_readiness: AiReadinessRulesSettings = Field(
-        default_factory=AiReadinessRulesSettings
-    )
-    performance: PerformanceRulesSettings = Field(
-        default_factory=PerformanceRulesSettings
-    )
+    ai_readiness: AiReadinessRulesSettings = Field(default_factory=AiReadinessRulesSettings)
+    performance: PerformanceRulesSettings = Field(default_factory=PerformanceRulesSettings)
 
     @field_validator(
         "max_rules_per_run",
@@ -1691,13 +1631,12 @@ class ComplexityEvidenceSettings(BaseModel):
     enabled: bool = True
     python: LanguageProviderToggle = Field(default_factory=LanguageProviderToggle)
     java: LanguageProviderToggle = Field(default_factory=LanguageProviderToggle)
+    javascript: LanguageProviderToggle = Field(default_factory=LanguageProviderToggle)
     php: LanguageProviderToggle = Field(default_factory=LanguageProviderToggle)
     csharp: LanguageProviderToggle = Field(default_factory=LanguageProviderToggle)
     max_files: int = 2000
     max_file_chars: int = 100_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars")
     @classmethod
@@ -1721,9 +1660,7 @@ class DependencyEvidenceSettings(BaseModel):
     nuget: LanguageProviderToggle = Field(default_factory=LanguageProviderToggle)
     max_files: int = 500
     max_file_chars: int = 500_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars")
     @classmethod
@@ -1744,9 +1681,7 @@ class RepositorySensitiveEvidenceSettings(BaseModel):
     max_files: int = 500
     max_file_chars: int = 500_000
     max_file_bytes: int = 2_000_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars", "max_file_bytes")
     @classmethod
@@ -1767,9 +1702,7 @@ class RepositoryTestingEvidenceSettings(BaseModel):
     max_files: int = 500
     max_file_chars: int = 500_000
     max_file_bytes: int = 2_000_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars", "max_file_bytes")
     @classmethod
@@ -1790,9 +1723,7 @@ class RepositoryCloudEvidenceSettings(BaseModel):
     max_files: int = 500
     max_file_chars: int = 500_000
     max_file_bytes: int = 2_000_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars", "max_file_bytes")
     @classmethod
@@ -1813,9 +1744,7 @@ class RepositoryAiReadinessEvidenceSettings(BaseModel):
     max_files: int = 500
     max_file_chars: int = 500_000
     max_file_bytes: int = 2_000_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars", "max_file_bytes")
     @classmethod
@@ -1836,9 +1765,7 @@ class RepositoryPerformanceEvidenceSettings(BaseModel):
     max_files: int = 500
     max_file_chars: int = 500_000
     max_file_bytes: int = 2_000_000
-    ignore_path_markers: list[str] = Field(
-        default_factory=_default_ignore_path_markers_list
-    )
+    ignore_path_markers: list[str] = Field(default_factory=_default_ignore_path_markers_list)
 
     @field_validator("max_files", "max_file_chars", "max_file_bytes")
     @classmethod
@@ -1852,12 +1779,8 @@ class EvidenceSettings(BaseModel):
     """Evidence collection settings."""
 
     language: LanguageEvidenceSettings = Field(default_factory=LanguageEvidenceSettings)
-    complexity: ComplexityEvidenceSettings = Field(
-        default_factory=ComplexityEvidenceSettings
-    )
-    dependency: DependencyEvidenceSettings = Field(
-        default_factory=DependencyEvidenceSettings
-    )
+    complexity: ComplexityEvidenceSettings = Field(default_factory=ComplexityEvidenceSettings)
+    dependency: DependencyEvidenceSettings = Field(default_factory=DependencyEvidenceSettings)
     repository_sensitive: RepositorySensitiveEvidenceSettings = Field(
         default_factory=RepositorySensitiveEvidenceSettings
     )
@@ -1965,12 +1888,8 @@ class AnalysisSettings(BaseModel):
         default_factory=ArchitectureConclusionsSettings
     )
     cloud: CloudAnalysisSettings = Field(default_factory=CloudAnalysisSettings)
-    ai_readiness: AiReadinessAnalysisSettings = Field(
-        default_factory=AiReadinessAnalysisSettings
-    )
-    performance: PerformanceAnalysisSettings = Field(
-        default_factory=PerformanceAnalysisSettings
-    )
+    ai_readiness: AiReadinessAnalysisSettings = Field(default_factory=AiReadinessAnalysisSettings)
+    performance: PerformanceAnalysisSettings = Field(default_factory=PerformanceAnalysisSettings)
     runtime: AnalysisRuntimeSettings = Field(default_factory=AnalysisRuntimeSettings)
 
 
@@ -2057,9 +1976,7 @@ class AssessmentSettings(BaseModel):
     """Formal assessment composition settings."""
 
     activation: str = "default"
-    sections: AssessmentSectionsSettings = Field(
-        default_factory=AssessmentSectionsSettings
-    )
+    sections: AssessmentSectionsSettings = Field(default_factory=AssessmentSectionsSettings)
 
     @field_validator("activation")
     @classmethod
@@ -2222,12 +2139,8 @@ class ReportSectionsSettings(BaseModel):
     dependency: DependencyReportSectionSettings = Field(
         default_factory=DependencyReportSectionSettings
     )
-    security: SecurityReportSectionSettings = Field(
-        default_factory=SecurityReportSectionSettings
-    )
-    testing: TestingReportSectionSettings = Field(
-        default_factory=TestingReportSectionSettings
-    )
+    security: SecurityReportSectionSettings = Field(default_factory=SecurityReportSectionSettings)
+    testing: TestingReportSectionSettings = Field(default_factory=TestingReportSectionSettings)
     cloud: CloudReportSectionSettings = Field(default_factory=CloudReportSectionSettings)
     ai_readiness: AiReadinessReportSectionSettings = Field(
         default_factory=AiReadinessReportSectionSettings
@@ -2235,9 +2148,7 @@ class ReportSectionsSettings(BaseModel):
     performance: PerformanceReportSectionSettings = Field(
         default_factory=PerformanceReportSectionSettings
     )
-    roadmap: RoadmapReportSectionSettings = Field(
-        default_factory=RoadmapReportSectionSettings
-    )
+    roadmap: RoadmapReportSectionSettings = Field(default_factory=RoadmapReportSectionSettings)
 
 
 class ReportSettings(BaseModel):

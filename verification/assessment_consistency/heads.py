@@ -64,7 +64,8 @@ def check_heads(
                     )
                 )
 
-        # Technology inventory is inventory, not a Finding head producing findings ownership conflict.
+        # Technology inventory is inventory, not a Finding head producing findings ownership
+        # conflict.
         # Modernization remains synthesized — record presence only.
         if "technology_inventory" not in cov:
             outliers.append(

@@ -249,9 +249,7 @@ class ArchitectureAssessmentSection(BaseModel):
     execution_summary: ArchitectureExecutionSummary = Field(
         default_factory=ArchitectureExecutionSummary
     )
-    coverage: ArchitectureCoverageSummary = Field(
-        default_factory=ArchitectureCoverageSummary
-    )
+    coverage: ArchitectureCoverageSummary = Field(default_factory=ArchitectureCoverageSummary)
     finding_ids: tuple[str, ...] = ()
     finding_summaries: tuple[ArchitectureFindingReference, ...] = ()
     conclusion_ids: tuple[str, ...] = ()

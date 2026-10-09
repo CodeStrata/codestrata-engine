@@ -74,7 +74,7 @@ def test_verify_falls_back_to_early_meta(monkeypatch: pytest.MonkeyPatch) -> Non
     html = (
         f'<html><head><meta name="codestrata-public-id" content="{pid}"></head>'
         "<body>report</body></html>"
-    ).encode("utf-8")
+    ).encode()
     _patch_opener(monkeypatch, _FakeResponse(body=html))
     assert (
         verify_public_report_get(

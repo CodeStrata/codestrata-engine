@@ -1,0 +1,21 @@
+# Local no-network, non-root verification profile for E14.2.
+services:
+  codestrata:
+    build:
+      context: ../..
+      dockerfile: examples/non-root-container/Dockerfile
+    read_only: true
+    network_mode: none
+    user: "10001:10001"
+    tmpfs:
+      - /tmp/codestrata:rw,noexec,nosuid,size=256m
+    volumes:
+      - type: bind
+        source: ./output
+        target: /output
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
+    command: ["--version"]

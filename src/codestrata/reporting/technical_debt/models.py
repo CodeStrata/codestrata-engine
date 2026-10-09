@@ -221,9 +221,7 @@ class TechnicalDebtReportTestObservation(BaseModel):
     present: bool = False
     finding_count: int = Field(default=0, ge=0)
     title: str = "No separate test-maintainability observation"
-    summary: str = (
-        "No test-source complexity findings were recorded for this assessment."
-    )
+    summary: str = "No test-source complexity findings were recorded for this assessment."
     conclusion_ids: tuple[str, ...] = ()
 
     @field_validator("title", "summary", mode="before")

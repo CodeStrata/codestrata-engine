@@ -30,7 +30,9 @@ from codestrata.domain.traceability import (
 RuleSeverity = FindingSeverity
 
 
-def _match(evidence: tuple[RuleEvidence, ...], *, rule_id: str = "security.credential-literal") -> RuleMatch:
+def _match(
+    evidence: tuple[RuleEvidence, ...], *, rule_id: str = "security.credential-literal"
+) -> RuleMatch:
     return RuleMatch(
         rule_id=RuleId(rule_id),
         rule_version=RuleVersion.parse("1.0.0"),

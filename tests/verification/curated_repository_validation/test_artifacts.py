@@ -17,7 +17,7 @@ def test_ci_home_runner_paths_are_not_harness_leaks() -> None:
     """OSS CI scripts often mention /home/runner/; that is not operator identity."""
     document = {
         "evidence": [
-            {"snippet": '#export TMPDIR=/home/runner/work/doris/doris/.tmp'},
+            {"snippet": "#export TMPDIR=/home/runner/work/doris/doris/.tmp"},
             {"path": "build-support/ci.sh"},
         ]
     }

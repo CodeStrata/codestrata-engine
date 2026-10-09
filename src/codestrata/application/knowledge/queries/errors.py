@@ -53,3 +53,35 @@ class SnapshotComparisonError(KnowledgeQueryError):
 
 class QueryLimitError(KnowledgeQueryError):
     """Raised when a collection limit is invalid or exceeds the allowed maximum."""
+
+
+class QueryBudgetExceededError(QueryLimitError):
+    """Raised when a query limit or result size exceeds the authorized budget."""
+
+
+class ArtifactPathSecurityError(KnowledgeQueryError):
+    """Raised when an artifact path escapes the authorized root or accesses unauthorized files."""
+
+
+class UnknownArtifactVersionError(IncompatibleArtifactVersionError):
+    """Raised when an artifact version is unknown or unsupported."""
+
+
+class MetricNotFoundError(KnowledgeQueryError):
+    """Raised when a requested metric is not found in the run artifacts."""
+
+
+class DependencyNotFoundError(KnowledgeQueryError):
+    """Raised when requested dependencies are not found in the run artifacts."""
+
+
+class ChangeFactNotFoundError(KnowledgeQueryError):
+    """Raised when requested change facts or deltas are not found in the run artifacts."""
+
+
+class EvidenceNotFoundError(KnowledgeQueryError):
+    """Raised when a requested evidence item is not found in the run artifacts."""
+
+
+class LineageNotFoundError(KnowledgeQueryError):
+    """Raised when requested lineage or provenance is not found in the run artifacts."""

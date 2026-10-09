@@ -34,11 +34,7 @@ def _scope_tokens(finding: Finding) -> frozenset[str]:
 def build_finding_relationships(
     findings: Sequence[Finding],
 ) -> tuple[FindingRelationship, ...]:
-    architecture = [
-        finding
-        for finding in findings
-        if finding.rule_id.startswith("architecture.")
-    ]
+    architecture = [finding for finding in findings if finding.rule_id.startswith("architecture.")]
     ordered = sorted(architecture, key=lambda item: (item.rule_id, item.id))
     relationships: list[FindingRelationship] = []
 
@@ -66,14 +62,13 @@ def build_finding_relationships(
                 reason = "coupled_unit_also_in_boundary_concern"
                 confidence = MatchEvidenceConfidence.LOW
             else:
-                confidence = MatchEvidenceConfidence.HIGH if shared else MatchEvidenceConfidence.MEDIUM
+                confidence = (
+                    MatchEvidenceConfidence.HIGH if shared else MatchEvidenceConfidence.MEDIUM
+                )
                 if not shared and rel_type is FindingRelationshipType.OVERLAPS:
                     # Overlaps require shared dependency scope.
                     continue
-                if (
-                    not shared
-                    and reason == "cycle_and_direction_same_boundary"
-                ):
+                if not shared and reason == "cycle_and_direction_same_boundary":
                     # Still relate if both mention same pair via subject intersection
                     # of any non-noise tokens; otherwise skip.
                     continue

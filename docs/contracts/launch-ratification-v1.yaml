@@ -1,0 +1,1951 @@
+budgets:
+  cancellation_grace_seconds: 2
+  cooperative_callback_only_forbidden: true
+  graph_default_impact_depth: 4
+  graph_max_depth: 32
+  graph_max_visited_edges: 500000
+  graph_max_visited_nodes: 100000
+  max_effective_rules: 1000
+  max_memory_rss_bytes_tier_100k: 8589934592
+  max_memory_rss_bytes_tier_10k: 2147483648
+  max_output_artifact_bytes: 268435456
+  max_source_file_bytes: 10485760
+  process_enforced_hard_cap: true
+  regex_match_timeout_milliseconds: 100
+  regex_max_steps: 1000000
+  rule_hard_deadline_seconds: 15
+  rule_soft_budget_seconds: 5
+  ruleset_parent_depth: 8
+  wall_seconds_tier_100k: 1800
+  wall_seconds_tier_10k: 600
+  yaml_aliases_enabled: false
+  yaml_document_bytes: 1048576
+  yaml_max_nesting: 32
+confidence_map:
+- contract_level: high
+  existing_enum: RuleConfidenceLevel.HIGH | MatchEvidenceConfidence.HIGH
+  existing_token: high
+  notes: Exact syntax/manifest/lock/Git evidence and fully resolved witness.
+- contract_level: high
+  existing_enum: MatchEvidenceConfidence.CERTAIN
+  existing_token: certain
+  notes: CERTAIN is high with an exact witness; not a calibrated probability.
+- contract_level: medium
+  existing_enum: RuleConfidenceLevel.MODERATE
+  existing_token: moderate
+  notes: Documented static convention or association.
+- contract_level: medium
+  existing_enum: MatchEvidenceConfidence.MEDIUM
+  existing_token: medium
+  notes: Evidence-certainty medium maps to contract medium.
+- contract_level: low
+  existing_enum: RuleConfidenceLevel.LIMITED
+  existing_token: limited
+  notes: Labeled non-authoritative indicator only.
+- contract_level: low
+  existing_enum: MatchEvidenceConfidence.LOW
+  existing_token: low
+  notes: Evidence-certainty low maps to contract low.
+- contract_level: unsupported
+  existing_enum: RuleConfidenceLevel.UNAVAILABLE
+  existing_token: unavailable
+  notes: No fabricated confidence for unsupported evidence.
+contract_version: '1.2'
+coverage_freshness_reasons:
+- applies_to: vulnerability
+  cannot_prove_clean: true
+  code: feed_missing
+  meaning: No pinned feed snapshot is present.
+- applies_to: vulnerability
+  cannot_prove_clean: true
+  code: feed_stale
+  meaning: Feed age exceeds seven days at pinned evaluation_time.
+- applies_to: vulnerability
+  cannot_prove_clean: true
+  code: feed_unsupported
+  meaning: Ecosystem or range type is outside the ratified OSV profile.
+- applies_to: git
+  cannot_prove_clean: true
+  code: git_history_missing
+  meaning: No usable local Git history for the requested window.
+- applies_to: git
+  cannot_prove_clean: true
+  code: git_history_shallow
+  meaning: Shallow or truncated history; full-window measurement UNKNOWN.
+- applies_to: git
+  cannot_prove_clean: true
+  code: git_window_partial
+  meaning: Included commits exist but the 180-day/1000-commit bound cut off coverage.
+- applies_to: coverage
+  cannot_prove_clean: true
+  code: unknown_denominator
+  meaning: Eligible unit count is unknown; never emit 0% or 100%.
+- applies_to: freshness
+  cannot_prove_clean: false
+  code: not_time_sensitive
+  meaning: Capability has no time-sensitive source; freshness NOT_APPLICABLE.
+- applies_to: freshness
+  cannot_prove_clean: true
+  code: source_time_missing
+  meaning: Missing source publication time; do not use report generation time.
+- applies_to: comparison
+  cannot_prove_clean: true
+  code: no_baseline
+  meaning: First run; delta and outcome movement unavailable.
+depth_matrix:
+- complexity: launch deepest path; current inventory PARTIAL brace-aware regex, not
+    javac
+  current_verified: PARTIAL structural and PARTIAL complexity (E05.1 pin)
+  detection: true
+  frameworks: jpa, spring-web structural patterns only
+  language: java
+  launch_tier: deepest_target
+  promotion_rule: File detection is not structural support. Promote a syntax/framework
+    only after parser/version evidence and fixtures. JS/TS complexity is currently
+    unsupported and stays UNKNOWN until E08.1 lands a mapped extractor.
+  structural: launch deepest path; current inventory PARTIAL package/Spring-JPA
+- complexity: required for deepest launch quality; currently no extractor (UNKNOWN)
+  current_verified: PARTIAL imports; complexity unsupported (E05.1 pin)
+  detection: true
+  frameworks: react detection-listed, not structural
+  language: javascript
+  launch_tier: deepest_target
+  promotion_rule: File detection is not structural support. Promote a syntax/framework
+    only after parser/version evidence and fixtures. JS/TS complexity is currently
+    unsupported and stays UNKNOWN until E08.1 lands a mapped extractor.
+  structural: launch deepest path with TypeScript via the JS provider
+- complexity: same as javascript; currently unsupported
+  current_verified: detected; structurally JS provider
+  detection: true
+  frameworks: same as javascript
+  language: typescript
+  launch_tier: deepest_target
+  promotion_rule: File detection is not structural support. Promote a syntax/framework
+    only after parser/version evidence and fixtures. JS/TS complexity is currently
+    unsupported and stays UNKNOWN until E08.1 lands a mapped extractor.
+  structural: served by javascript provider
+- complexity: retain verified stdlib AST; do not silently match Java/JS launch depth
+  current_verified: PARTIAL (E05.1 pin)
+  detection: true
+  frameworks: none structural (django/flask/fastapi unsupported)
+  language: python
+  launch_tier: verified_retained
+  promotion_rule: File detection is not structural support. Promote a syntax/framework
+    only after parser/version evidence and fixtures. JS/TS complexity is currently
+    unsupported and stays UNKNOWN until E08.1 lands a mapped extractor.
+  structural: retain verified PARTIAL package-path / TYPE_CHECKING imports
+- complexity: retain verified existing complexity provider
+  current_verified: PARTIAL (E05.1 pin)
+  detection: true
+  frameworks: codeigniter/laminas/laravel/symfony as currently evidenced
+  language: php
+  launch_tier: verified_retained
+  promotion_rule: File detection is not structural support. Promote a syntax/framework
+    only after parser/version evidence and fixtures. JS/TS complexity is currently
+    unsupported and stays UNKNOWN until E08.1 lands a mapped extractor.
+  structural: retain verified use/require/include units
+- complexity: retain verified existing complexity provider
+  current_verified: PARTIAL (E05.1 pin)
+  detection: true
+  frameworks: aspnet/efcore/wcf as currently evidenced
+  language: csharp
+  launch_tier: verified_retained
+  promotion_rule: File detection is not structural support. Promote a syntax/framework
+    only after parser/version evidence and fixtures. JS/TS complexity is currently
+    unsupported and stays UNKNOWN until E08.1 lands a mapped extractor.
+  structural: retain verified using/using-static units; no Roslyn
+feed:
+  cache_kind: versioned offline cache of published OSV records; no live fetch during
+    assess
+  evaluation_time_binding: pinned evaluation_time; age = evaluation_time - feed publication/update
+    time
+  freshness_max_age_days: 7
+  license_metadata: License and release-date facts use permitted deterministic metadata
+    only; absence remains UNKNOWN. No registry install.
+  provider_id: osv.dev
+  provider_name: OSV (osv-vulnerabilities snapshot)
+  range_semantics: 'OSV affected.ranges: ECOSYSTEM and SEMVER as declared per ecosystem;
+    GIT ranges only when the assessed repository commit is the OSV GIT repo. Alias
+    groups use OSV aliases. Withdrawn records do not count as matches.'
+  redistribution: Use the published OSV data license/terms on the pinned snapshot.
+    Do not scrape NVD HTML. Redistribute only the snapshot Engine is licensed to ship.
+  silent_online_fallback: false
+  stale_behavior: Emit stale freshness; cached observed matches remain qualified;
+    no clean claim.
+  unavailable_behavior: M13 matching scope UNKNOWN; remainder of the offline assessment
+    continues. Cannot prove a clean vulnerability result.
+formula_fixtures:
+- case: same-component and cross-component distinct edges
+  expected_denominator: 3
+  expected_extra: {}
+  expected_numerator: 2
+  expected_reason: null
+  expected_serialized: '0.666667'
+  expected_status: value
+  id: M06-external-ratio-mixed
+  measurement_id: M06
+  notes: 'Independent: (f1,f2,A,A),(f1,f3,A,B),(f2,f3,A,B) => 2/3.'
+- case: duplicate file edges excluded
+  expected_denominator: 2
+  expected_extra: {}
+  expected_numerator: 1
+  expected_reason: null
+  expected_serialized: '0.500000'
+  expected_status: value
+  id: M06-duplicate-edges
+  measurement_id: M06
+  notes: Duplicate (f1,f3) counted once; remaining same-component edge stays in denom.
+- case: zero eligible edges
+  expected_denominator: 0
+  expected_extra: {}
+  expected_numerator: 0
+  expected_reason: null
+  expected_serialized: null
+  expected_status: not_applicable
+  id: M06-zero-edges
+  measurement_id: M06
+  notes: ''
+- case: diamond incoming to c
+  expected_denominator: 3
+  expected_extra: {}
+  expected_numerator: 2
+  expected_reason: null
+  expected_serialized: '0.666667'
+  expected_status: value
+  id: M09-diamond
+  measurement_id: M09
+  notes: V={a,b,c,d}; incoming(c)={a,b}; 2/max(1,3)=2/3.
+- case: singleton universe
+  expected_denominator: 1
+  expected_extra: {}
+  expected_numerator: 0
+  expected_reason: null
+  expected_serialized: '0.000000'
+  expected_status: value
+  id: M09-singleton
+  measurement_id: M09
+  notes: max(1, |V|-1)=1 even when |V|=1.
+- case: self-loop excluded from numerator
+  expected_denominator: 1
+  expected_extra: {}
+  expected_numerator: 0
+  expected_reason: null
+  expected_serialized: '0.000000'
+  expected_status: value
+  id: M09-self-loop
+  measurement_id: M09
+  notes: V={a,b}; incoming(a)={a} does not count.
+- case: three of four declarations resolved
+  expected_denominator: 4
+  expected_extra: {}
+  expected_numerator: 3
+  expected_reason: null
+  expected_serialized: '0.750000'
+  expected_status: value
+  id: M12-partial
+  measurement_id: M12
+  notes: ''
+- case: known positive denominator none resolved
+  expected_denominator: 4
+  expected_extra: {}
+  expected_numerator: 0
+  expected_reason: null
+  expected_serialized: '0.000000'
+  expected_status: value
+  id: M12-none-resolved
+  measurement_id: M12
+  notes: ''
+- case: zero eligible declarations
+  expected_denominator: 0
+  expected_extra: {}
+  expected_numerator: 0
+  expected_reason: null
+  expected_serialized: null
+  expected_status: not_applicable
+  id: M12-zero-eligible
+  measurement_id: M12
+  notes: ''
+- case: unknown eligible set
+  expected_denominator: null
+  expected_extra: {}
+  expected_numerator: null
+  expected_reason: unknown_denominator
+  expected_serialized: null
+  expected_status: unknown
+  id: M12-unknown-denom
+  measurement_id: M12
+  notes: ''
+- case: equal ranking values then component id
+  expected_denominator: null
+  expected_extra:
+    partial:
+    - omega
+    ranked:
+    - alpha
+    - beta
+    - gamma
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: null
+  expected_status: value
+  id: M22-tie-break
+  measurement_id: M22
+  notes: 30,30,20 complete; omega incomplete excluded from comparable ranking.
+- case: 70/30 attributable lines
+  expected_denominator: 100
+  expected_extra:
+    contributors_to_50_percent: 1
+  expected_numerator: 70
+  expected_reason: null
+  expected_serialized: '0.700000'
+  expected_status: value
+  id: M25-two-contributors
+  measurement_id: M25
+  notes: ''
+- case: zero attributable churn
+  expected_denominator: 0
+  expected_extra: {}
+  expected_numerator: null
+  expected_reason: zero_attributable_churn
+  expected_serialized: null
+  expected_status: not_applicable
+  id: M25-zero
+  measurement_id: M25
+  notes: ''
+- case: support 3 union 5
+  expected_denominator: 5
+  expected_extra: {}
+  expected_numerator: 3
+  expected_reason: null
+  expected_serialized: '0.600000'
+  expected_status: value
+  id: M26-jaccard
+  measurement_id: M26
+  notes: ''
+- case: 800 days before evaluation_time
+  expected_denominator: null
+  expected_extra: {}
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: '800'
+  expected_status: value
+  id: M23-staleness
+  measurement_id: M23
+  notes: ''
+- case: missing publication time
+  expected_denominator: null
+  expected_extra: {}
+  expected_numerator: null
+  expected_reason: missing_timestamp
+  expected_serialized: null
+  expected_status: unknown
+  id: M23-missing
+  measurement_id: M23
+  notes: ''
+- case: above p90 churn below p90 centrality
+  expected_denominator: null
+  expected_extra:
+    class: high_churn
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: null
+  expected_status: value
+  id: M29-churn-only
+  measurement_id: M29
+  notes: ''
+- case: empty eligible driver set
+  expected_denominator: null
+  expected_extra:
+    movement: not_applicable
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: null
+  expected_status: not_applicable
+  id: M30-empty-drivers
+  measurement_id: M30
+  notes: ''
+- case: one favorable no unfavorable
+  expected_denominator: null
+  expected_extra:
+    movement: improved
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: null
+  expected_status: value
+  id: M30-improved
+  measurement_id: M30
+  notes: ''
+- case: favorable and unfavorable
+  expected_denominator: null
+  expected_extra:
+    movement: mixed
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: null
+  expected_status: value
+  id: M30-mixed
+  measurement_id: M30
+  notes: ''
+- case: required covered metric unknown
+  expected_denominator: null
+  expected_extra:
+    movement: insufficient
+  expected_numerator: null
+  expected_reason: null
+  expected_serialized: null
+  expected_status: unknown
+  id: M30-insufficient
+  measurement_id: M30
+  notes: ''
+- case: hard deadline exceeded is not PASS
+  expected_denominator: null
+  expected_extra: {}
+  expected_numerator: null
+  expected_reason: hard_deadline_exceeded
+  expected_serialized: null
+  expected_status: error
+  id: M33-budget-failure
+  measurement_id: M33
+  notes: Failed/unrun checks are never recorded as PASS.
+freshness_states:
+- fresh
+- stale
+- unknown
+- not_applicable
+history:
+  bugfix_markers:
+  - \bfix(?:es|ed)?\b
+  - \bbugfix\b
+  - \bhotfix\b
+  - \bresolve[sd]?\b
+  bugfix_markers_are_proven_defects: false
+  future_timestamp: invalid for recency; disclose and exclude from recency numerator
+  mailmap_policy: apply repository .mailmap when present; unlabeled bots are ordinary
+    identities
+  max_commits: 1000
+  merge_policy: Exclude merge commits. Disclose merge-only conflict-resolution edits.
+    Do not combine first-parent-only traversal with skipping merges. A first-parent-diff
+    profile is a different version.
+  order: committer timestamp descending, then SHA ascending
+  profile_id: git.history.reachable-non-merge-180d-1000
+  rename_policy: Git rename mapping when the pinned history records it; ambiguous
+    stays unknown
+  root_diff: root commits compare to the empty tree; others to their sole parent
+  traversal: all non-merge commits reachable from the pinned head
+  version: v1
+  window_days: 180
+independent_reviewer: Sangram Gaikwad (accepted 2026-09-19; Cursor cannot self-ratify)
+m22_roles:
+  context_only_contributors:
+  - centrality
+  - reach
+  - ownership
+  - active_finding_references
+  contextual_missing_does_not_invalidate_rank: true
+  missing_required: UNKNOWN rank in separately identified partial list by subject
+    ID
+  no_hidden_weights: true
+  ranking_contributors:
+  - complexity
+  - churn
+  ranking_value: sum(supported function complexity) * component changed lines
+  tie_break: stable component ID ascending
+m29_predicate:
+  default_role: context_only
+  high_centrality: M09 centrality(v) > nearest-rank p90 of the comparable universe
+    V
+  high_churn: changed_lines > 0 and changed_lines > nearest-rank p90 of components
+    with >0 churn in the same pinned M24 window
+  no_composite_score: true
+  ranking: class both > churn-only > centrality-only > ordinary; then more changed
+    lines; then higher centrality; then subject ID. No weighted score.
+  verdict_requires_yaml: true
+measurements:
+- driver_kind: null
+  evidence:
+  - normalized relative path
+  - content digest
+  - classifier version
+  - ignore reason
+  - manifest location
+  family: inventory
+  fixtures:
+  - mixed-language
+  - generated-vendor
+  - symlink-escape
+  - binary
+  - empty-repo
+  - unreadable-subtree
+  formula: Count files by mutually exclusive primary class source/test/config/infra/docs/generated/vendor/binary/unknown.
+    supported_fraction = supported eligible files / eligible files. Ignored files
+    remain in scope inventory. Zero eligible files => NOT_APPLICABLE.
+  formula_version: v1
+  id: M01
+  inputs:
+  - source tree
+  - exclusions
+  - manifests
+  missing_data: Unreadable or dynamic regions classified unknown; detection is not
+    structural support.
+  name: Repository classification and scope
+  notes: []
+  opaque_score: false
+  outcome_role: context
+  owning_stories:
+  - E05.1
+  - E05.2
+  - E05.3
+  subject: repository file
+- driver_kind: null
+  evidence:
+  - manifest/lock location
+  - ecosystem/package identity
+  - source roots
+  - parser version
+  family: inventory
+  fixtures:
+  - maven-resolved
+  - npm-missing-lock
+  - composer-nuget-lower-tier
+  - workspace-packages
+  - duplicate-coordinates
+  formula: Distinct normalized technology/component records with evidence. Dependency
+    counts by declared coordinate and separately by resolved package identity/version.
+    Edges retain directness and resolution status.
+  formula_version: v1
+  id: M02
+  inputs:
+  - manifests
+  - lockfiles
+  - source roots
+  - build configuration
+  missing_data: Missing resolution is not zero dependencies; unsupported manifests
+    UNKNOWN for depth.
+  name: Technology, component and dependency inventory
+  notes: []
+  opaque_score: false
+  outcome_role: context
+  owning_stories:
+  - E05.1
+  - E05.2
+  - E05.3
+  subject: package/component declaration
+- driver_kind: null
+  evidence:
+  - CI path/line
+  - literal command
+  - condition
+  - deterministic parser rule
+  family: inventory
+  fixtures:
+  - direct-command
+  - conditional-job
+  - delegated-script
+  - no-ci
+  - malformed-yaml
+  formula: For each configured job/step record literal or safely parsed command, condition,
+    tool category and target. Count statically observed test/coverage/lint/security
+    invocations.
+  formula_version: v1
+  id: M03
+  inputs:
+  - CI/build/config source
+  missing_data: Indirect scripts or unknown expressions are unresolved invocations,
+    not absent checks.
+  name: Configured build and CI checks
+  notes: []
+  opaque_score: false
+  outcome_role: context
+  owning_stories:
+  - E05.1
+  - E05.2
+  - E05.3
+  subject: CI job/step
+- driver_kind: null
+  evidence:
+  - declaration symbol/path/line
+  - extraction capability
+  family: inventory
+  fixtures:
+  - supported-route
+  - no-routes
+  - dynamic-route
+  - generated-config
+  - unresolved-framework
+  formula: Distinct statically declared API entrypoints and config/deployment surfaces
+    keyed by source subject and declaration kind.
+  formula_version: v1
+  id: M04
+  inputs:
+  - supported source AST
+  - config
+  missing_data: Dynamic routing or unsupported framework => UNKNOWN area; detection-only
+    if available.
+  name: API and configuration surfaces
+  notes: []
+  opaque_score: false
+  outcome_role: context
+  owning_stories:
+  - E05.2
+  - E05.3
+  subject: declared API/config surface
+- driver_kind: null
+  evidence:
+  - observed module edges
+  - source locations
+  - SCC membership
+  - witness path
+  family: architecture
+  fixtures:
+  - a-b-a
+  - acyclic-a-b
+  - self-loop
+  - unresolved-import
+  - reordered-traversal
+  formula: Number of strongly connected components of size >1 plus single-node self-loops,
+    each reported once, with member IDs and witness edges. Lower is favorable. FAIL
+    when count > 0.
+  formula_version: v1
+  id: M05
+  inputs:
+  - resolved module graph
+  missing_data: Known cycle can FAIL despite unrelated unknown edges; absent cycle
+    needs complete coverage.
+  name: Module dependency cycles
+  notes: []
+  opaque_score: false
+  outcome_role: architecture
+  owning_stories:
+  - E07.1
+  - E07.3
+  subject: module SCC
+- driver_kind: null
+  evidence:
+  - module edge IDs
+  - denominator
+  - unresolved/unmapped exclusions
+  - coverage
+  family: architecture
+  fixtures:
+  - boundary-10-11
+  - duplicate-edges
+  - zero-edges
+  - unknown-imports
+  formula: Per module fan_in/out = distinct other modules using/used by it. File import-edge
+    external-edge ratio = distinct eligible resolved file import edges whose endpoint
+    component IDs differ / all eligible resolved file import edges with both endpoint
+    component IDs known. Same-component edges stay in the denominator; duplicates
+    excluded. Zero edges => NOT_APPLICABLE.
+  formula_version: v1
+  id: M06
+  inputs:
+  - module import/depends_on graph
+  - component IDs
+  missing_data: Unresolved imports make counts a lower bound; no confident threshold
+    PASS.
+  name: Cross-module coupling
+  notes:
+  - revised_denominator_same_component_included
+  opaque_score: false
+  outcome_role: architecture
+  owning_stories:
+  - E07.1
+  - E07.3
+  subject: module / file import edge
+- driver_kind: null
+  evidence:
+  - constraint identity
+  - configured scope
+  - direct dependency witness
+  family: architecture
+  fixtures:
+  - compliant-api-public
+  - violating-api-internal
+  - unresolved-import
+  - selector-rebinding
+  formula: Count unique disallowed source-target edge identities against declared
+    layer/module constraints. No declared pattern => NOT_APPLICABLE.
+  formula_version: v1
+  id: M07
+  inputs:
+  - module graph
+  - explicit local pattern configuration
+  missing_data: Unresolved relevant edge => UNKNOWN for unproven negative scope; never
+    invent layers.
+  name: Declared boundary and direction violations
+  notes: []
+  opaque_score: false
+  outcome_role: architecture
+  owning_stories:
+  - E07.2
+  - E07.3
+  subject: disallowed edge identity
+- driver_kind: null
+  evidence:
+  - line-count derivation
+  - component membership
+  - denominator
+  family: architecture
+  fixtures:
+  - share-60-61
+  - single-component
+  - unmapped-files
+  - generated-exclusion
+  formula: 'Per component: nonblank noncomment source lines / total such lines in
+    scoped repository. Advisory above 0.60 only with >=2 components.'
+  formula_version: v1
+  id: M08
+  inputs:
+  - eligible source files
+  - component mapping
+  missing_data: Unmapped or unreadable eligible files invalidate full-repo share;
+    report partial.
+  name: Component concentration
+  notes: []
+  opaque_score: false
+  outcome_role: architecture
+  owning_stories:
+  - E07.2
+  - E07.3
+  subject: component
+- driver_kind: null
+  evidence:
+  - seed
+  - edge types
+  - node set
+  - traversal depth/direction/cutoff
+  family: architecture
+  fixtures:
+  - diamond-dedupe
+  - cycle-termination
+  - disconnected
+  - depth-cutoff
+  - singleton
+  - self-loop
+  - two-node-with-self-loop
+  - parallel-edges
+  - unknown-universe
+  formula: centrality(v) = count of distinct incoming neighbors u in V with u != v
+    / max(1, |V|-1). Deduplicate parallel edges. Self-loops do not enter the numerator.
+    Reach = unique nodes via chosen edge/direction/depth excluding seed. Descriptive
+    only.
+  formula_version: v1
+  id: M09
+  inputs:
+  - versioned module/file graph
+  missing_data: Unresolved edges or exhausted bound => lower-bound reach plus UNKNOWN
+    completeness.
+  name: Structural centrality and reach
+  notes:
+  - self_loops_excluded_from_numerator
+  opaque_score: false
+  outcome_role: architecture
+  owning_stories:
+  - E07.2
+  - E07.3
+  subject: graph node
+- driver_kind: null
+  evidence:
+  - path/line
+  - detector ID
+  - safe secret type
+  - redacted span
+  family: security
+  fixtures:
+  - synthetic-valid-format-key
+  - placeholder
+  - encoded-unsupported
+  - duplicate-literal
+  - zero-raw-secret-canary
+  formula: Count unique rule + source-subject + occurrence findings after supported
+    placeholder classification. Identity independent of raw secret bytes.
+  formula_version: v1
+  id: M10
+  inputs:
+  - supported source/config literal evidence
+  missing_data: Unsupported encoding/language prevents a clean claim; never scan full
+    Git history by default.
+  name: Secret and private-key findings
+  notes: []
+  opaque_score: false
+  outcome_role: security
+  owning_stories:
+  - E06.1
+  subject: rule+subject+occurrence
+- driver_kind: null
+  evidence:
+  - config path/line/value classification
+  - context evidence
+  family: security
+  fixtures:
+  - true-false-settings
+  - placeholder
+  - conditional-environment
+  - conflicting-configuration
+  - unsupported-expression
+  formula: Separate counts for disabled verification/auth, permissive CORS and debug
+    production configuration; production context must be evidenced.
+  formula_version: v1
+  id: M11
+  inputs:
+  - static TLS/auth/CORS/debug config
+  missing_data: Unknown environment or indirect config => UNKNOWN context, not assumed
+    production.
+  name: Insecure configuration findings
+  notes: []
+  opaque_score: false
+  outcome_role: security
+  owning_stories:
+  - E06.1
+  subject: named configuration condition
+- driver_kind: null
+  evidence:
+  - declaration and lock paths
+  - package coordinates
+  - direct/transitive dependency path
+  family: security
+  fixtures:
+  - pinned-vs-wildcard
+  - duplicate-conflict
+  - lock-mismatch
+  - transitive-package
+  - unknown-version-scheme
+  - one-declaration-two-resolved
+  - partly-resolved
+  - zero-denominator
+  - unknown-denominator
+  - ratio-not-above-one
+  formula: resolution_coverage = fully resolved eligible declaration IDs / all eligible
+    declaration IDs in the same manifest/workspace/environment scope. Count each declaration
+    once. Known positive denominator with none resolved = 0 coverage. Unknown denominator
+    = UNKNOWN. Zero eligible = NOT_APPLICABLE. Mutable/unbounded/unresolved/duplicate/conflicting
+    counted separately.
+  formula_version: v1
+  id: M12
+  inputs:
+  - manifest declarations
+  - available lock resolution
+  missing_data: Unknown ecosystem/range resolution => UNKNOWN; never install packages
+    to infer resolution.
+  name: Resolved dependency and version hygiene
+  notes:
+  - revised_same_scope_denominator
+  opaque_score: false
+  outcome_role: security
+  owning_stories:
+  - E06.2
+  subject: declaration ID in one scope
+- driver_kind: null
+  evidence:
+  - advisory ID/aliases/range
+  - source snapshot digest/time
+  - resolved package/path
+  family: security
+  fixtures:
+  - affected-unaffected
+  - withdrawn-advisory
+  - alias-dedupe
+  - prerelease-boundary
+  - stale-feed
+  - same-code-new-advisory
+  formula: Count distinct canonical advisory alias-group + ecosystem/package/version
+    identities; retain all dependency paths without multiplying finding count.
+  formula_version: v1
+  id: M13
+  inputs:
+  - resolved package versions
+  - pinned vulnerability feed
+  missing_data: No fresh supported feed or no exact version => UNKNOWN matching. Zero
+    matches is not secure.
+  name: Known vulnerability matches
+  notes: []
+  opaque_score: false
+  outcome_role: security
+  owning_stories:
+  - E06.2
+  subject: advisory alias-group + package/version
+- driver_kind: null
+  evidence:
+  - package/license source
+  - configured decision rule
+  family: security
+  fixtures:
+  - allowed-denied
+  - dual-license
+  - malformed-expression
+  - missing-metadata
+  - conflict
+  formula: Count known SPDX-compatible license expressions and unknowns; evaluate
+    only supported expression semantics against explicit configured policy.
+  formula_version: v1
+  id: M14
+  inputs:
+  - resolved package license metadata
+  - explicit allow/deny configuration
+  missing_data: Missing/conflicting metadata or unsupported expression => UNKNOWN,
+    not guessed allow/deny.
+  name: Deterministic license metadata and declared risk
+  notes: []
+  opaque_score: false
+  outcome_role: security
+  owning_stories:
+  - E06.3
+  subject: package license expression
+- driver_kind: null
+  evidence:
+  - label manifest
+  - result identities
+  - reviewer decisions
+  family: security
+  fixtures:
+  - planted-keys-config-advisory
+  - safe-lookalikes
+  - hidden-holdout
+  - independent-label-review
+  formula: precision=TP/(TP+FP); recall=TP/(TP+FN); report TP/FP/FN/TN and UNKNOWN
+    by rule group. Zero denominator is undefined, not 100%.
+  formula_version: v1
+  id: M15
+  inputs:
+  - labeled evaluable findings and negatives
+  missing_data: Unsupported cases disclosed separately; unexplained UNKNOWN in supported
+    cases blocks promotion.
+  name: Security classification quality
+  notes: []
+  opaque_score: false
+  outcome_role: validation
+  owning_stories:
+  - E06.3
+  subject: labeled finding group
+- driver_kind: null
+  evidence:
+  - function identity/span
+  - counted branch locations
+  - formula version
+  family: quality
+  fixtures:
+  - straight-line
+  - if-loop-case-boolean
+  - nested-functions
+  - malformed-syntax
+  - threshold-boundaries
+  formula: cyclomatic v1 = 1 + count of declared branch constructs with the frozen
+    language map. Also report physical nonblank noncomment lines.
+  formula_version: v1
+  id: M16
+  inputs:
+  - supported AST
+  - source tokens
+  missing_data: Unparsed function => UNKNOWN metric; never a misleading cross-language
+    fallback number.
+  name: Source size and function complexity
+  notes: []
+  opaque_score: false
+  outcome_role: quality
+  owning_stories:
+  - E08.1
+  subject: function
+- driver_kind: null
+  evidence:
+  - function/span
+  - maximum-depth witness constructs
+  family: quality
+  fixtures:
+  - depth-4-5
+  - nested-lambda-separation
+  - malformed-block
+  - language-specific-syntax
+  formula: Maximum control-flow nesting depth per function under the declared construct
+    map.
+  formula_version: v1
+  id: M17
+  inputs:
+  - supported AST
+  missing_data: Unknown parse sections invalidate a negative claim; absent functions
+    => NOT_APPLICABLE.
+  name: Maximum nesting depth
+  notes: []
+  opaque_score: false
+  outcome_role: quality
+  owning_stories:
+  - E08.1
+  subject: function
+- driver_kind: null
+  evidence:
+  - matched file spans
+  - normalization version
+  - merged numerator/denominator
+  family: quality
+  fixtures:
+  - exact-clone
+  - renamed-identifier-policy
+  - overlapping-runs
+  - generated-exclusions
+  - no-eligible-lines
+  formula: Exact normalized token runs >=50 tokens spanning >=5 lines; merge overlaps
+    before duplicated-line numerator / eligible source-line denominator.
+  formula_version: v1
+  id: M18
+  inputs:
+  - normalized eligible source token streams
+  missing_data: Unsupported tokenization or scan cutoff => partial ratio / UNKNOWN
+    full scope.
+  name: Token clone indicator
+  notes: []
+  opaque_score: false
+  outcome_role: quality
+  owning_stories:
+  - E08.1
+  subject: eligible source lines
+- driver_kind: null
+  evidence:
+  - test declarations
+  - source-to-test association
+  - method/confidence
+  family: quality
+  fixtures:
+  - direct-reference
+  - convention-only
+  - no-tests
+  - generated-tests
+  - ambiguous-association
+  formula: Test counts by framework; fraction of eligible production units with at
+    least one supported static test association. Not runtime coverage.
+  formula_version: v1
+  id: M19
+  inputs:
+  - test declarations
+  - imports
+  - configured conventions
+  missing_data: Unsupported framework or indirect generation => UNKNOWN association
+    scope.
+  name: Test inventory and association
+  notes: []
+  opaque_score: false
+  outcome_role: quality
+  owning_stories:
+  - E08.2
+  subject: production unit
+- driver_kind: null
+  evidence:
+  - test identity
+  - annotation/call span
+  - static condition
+  family: quality
+  fixtures:
+  - explicit-disabled
+  - enabled
+  - conditional
+  - unsupported-decorator
+  - test-deletion
+  formula: Count explicitly skipped/disabled tests, with static literal reason where
+    present.
+  formula_version: v1
+  id: M20
+  inputs:
+  - supported test source syntax
+  missing_data: Dynamic skip condition => unknown eligibility, not unconditional disabled.
+  name: Skipped/disabled tests
+  notes: []
+  opaque_score: false
+  outcome_role: quality
+  owning_stories:
+  - E08.2
+  subject: test identity
+- driver_kind: null
+  evidence:
+  - configured tool
+  - job command evidence
+  - checked scope
+  family: quality
+  fixtures:
+  - declared-invoked
+  - declared-absent
+  - delegated-script
+  - conditional-job
+  - no-ci-applicability
+  formula: Boolean/count of declared test/coverage capabilities with no statically
+    observed invocation in supported CI/build scope.
+  formula_version: v1
+  id: M21
+  inputs:
+  - M03 CI observations
+  - test/coverage configuration
+  missing_data: External workflow or uninspected script => UNKNOWN. No runtime pass/fail
+    percentage.
+  name: Configured test and coverage invocation gaps
+  notes: []
+  opaque_score: false
+  outcome_role: quality
+  owning_stories:
+  - E08.2
+  subject: declared test/coverage capability
+- driver_kind: null
+  evidence:
+  - complexity subjects
+  - commit/file churn
+  - component mapping
+  - priority explanation
+  - contributor coverage reasons
+  family: quality
+  fixtures:
+  - same-complexity-different-churn
+  - zero-churn
+  - missing-history
+  - stable-ties
+  - rename-mapping
+  - complete-unified-record
+  - equal-rank-different-context
+  - missing-context-known-rank
+  - partial-ranking-input
+  - dangling-finding-rejection
+  formula: ranking_value = sum of supported function complexities in the component
+    * component changed lines in the pinned M24 window. Sort descending, then stable
+    component ID ascending. Complexity and churn are ranking; centrality, reach, ownership
+    and active findings are context_only.
+  formula_version: v1
+  id: M22
+  inputs:
+  - M16
+  - M24 in same repository/window
+  missing_data: Missing required complexity/history => UNKNOWN rank in a separate
+    partial list.
+  name: Churn-weighted complexity hotspots
+  notes:
+  - ranking_versus_context_roles
+  - no_hidden_weights
+  opaque_score: false
+  outcome_role: maintainability
+  owning_stories:
+  - E08.3
+  subject: component
+- driver_kind: null
+  evidence:
+  - version/date source snapshot
+  - explicit evaluation_time
+  - ordering contributors
+  family: quality
+  fixtures:
+  - known-old-new
+  - unknown-date
+  - future-invalid-timestamp
+  - identical-severity-ties
+  - changed-metadata-snapshot
+  formula: 'staleness_days = evaluation_time - installed-version publication_time.
+    Finding-concern tuple: effective severity, valid evidence class, comparable hotspot,
+    stable finding ID. No weighted overall score. Incomparable hotspot values sort
+    after comparable ones, then finding ID.'
+  formula_version: v1
+  id: M23
+  inputs:
+  - permitted pinned release-date metadata
+  - M10-M22
+  - pinned evaluation_time
+  missing_data: No release-date metadata => UNKNOWN age. Assessment date must be pinned.
+  name: Dependency staleness and concern ordering
+  notes: []
+  opaque_score: false
+  outcome_role: maintainability
+  owning_stories:
+  - E08.3
+  subject: resolved package / finding
+- driver_kind: null
+  evidence:
+  - commit SHA/time
+  - numstat
+  - rename map
+  - exact window
+  family: git
+  fixtures:
+  - known-edits
+  - rename
+  - merge
+  - binary
+  - shallow-history
+  - window-boundary
+  - merge-only-integration
+  - squash
+  - merge-conflict-only
+  - future-timestamp
+  - positive-misleading-bugfix-marker
+  formula: 'Per file/component sum of added+deleted text lines in included commits.
+    Recency uses pinned UTC evaluation_time and latest valid included commit time.
+    v1 profile: all non-merge commits reachable from pinned head, committer timestamp
+    within last 180 days then latest 1000, ordered timestamp descending then SHA.
+    Root commits vs empty tree. Merge-only conflict-resolution edits excluded and
+    disclosed. Bug-fix markers are contextual and never proven defect counts.'
+  formula_version: v1
+  id: M24
+  inputs:
+  - pinned local Git history
+  - rename policy
+  missing_data: Shallow/absent history => partial/UNKNOWN; binary churn unknown.
+  name: Churn and recency
+  notes:
+  - history_profile_v1
+  - message_markers_not_defects
+  opaque_score: false
+  outcome_role: cross_cutting
+  owning_stories:
+  - E09.2
+  - E09.3
+  subject: file/component
+- driver_kind: null
+  evidence:
+  - repository-local identity mapping
+  - commit contributions
+  - scope-specific denominator
+  - unattributed coverage
+  family: git
+  fixtures:
+  - two-contributors
+  - mailmap-alias
+  - zero-lines
+  - missing-identities
+  - declared-bots
+  - different-scope-concentrations
+  - weighted-component-aggregation
+  - file-rename-ambiguous
+  - shallow-history-scope-denominators
+  formula: largest_share = max(contributor changed lines) / total attributable changed
+    lines at that scope. Also count contributors needed to reach >=50% cumulative
+    share. Do not average file ratios to obtain a component ratio. Sort contributors
+    by lines desc, then stable identity.
+  formula_version: v1
+  id: M25
+  inputs:
+  - same bounded history
+  - explicit mailmap policy
+  missing_data: Zero attributable churn => NOT_APPLICABLE; truncated history is partial-window.
+  name: Repository, component and file ownership concentration
+  notes:
+  - scoped_denominators
+  opaque_score: false
+  outcome_role: cross_cutting
+  owning_stories:
+  - E09.2
+  - E09.3
+  subject: repository|component|file
+- driver_kind: null
+  evidence:
+  - commit IDs
+  - member files/components
+  - support
+  - union denominator
+  family: git
+  fixtures:
+  - always-together
+  - unrelated
+  - exactly-3-support
+  - bulk-formatting-commit
+  - shallow-history
+  formula: 'For pair A,B: cochanged commit count / union commits touching A or B (Jaccard).
+    Support >=3 cochanged commits to label a supported relation.'
+  formula_version: v1
+  id: M26
+  inputs:
+  - included commits to file/component incidence
+  missing_data: Incomplete window is a qualified observation; support < 3 is insufficient
+    support.
+  name: Temporal co-change
+  notes: []
+  opaque_score: false
+  outcome_role: cross_cutting
+  owning_stories:
+  - E09.2
+  - E09.3
+  subject: file/component pair
+- driver_kind: null
+  evidence:
+  - diff hunks
+  - state digests
+  - file classes
+  - component IDs
+  - context digest
+  family: git
+  fixtures:
+  - staged-vs-working
+  - rename
+  - add-delete
+  - binary
+  - patch-missing-base
+  - test-only-diff
+  - absent-pr-metadata
+  - valid-pr-metadata
+  - oversized-malformed-pr
+  - injection-text
+  - sha-conflict
+  - context-only-change
+  - telemetry-exclusion
+  formula: Count changed text lines, files and mapped components. test_touch is whether
+    the changed set contains known test/config-test units. Optional PR context is
+    a bounded record with provenance/digest; narrative-only changes leave canonical
+    analysis identical. Boundary-spread uses declared M07 membership when available;
+    missing declarations are UNKNOWN not zero.
+  formula_version: v1
+  id: M27
+  inputs:
+  - working/index/base-head/patch inputs
+  - optional supplied PR context
+  missing_data: Unresolvable patch base or binary changes preserve partial size; no
+    hosted lookup.
+  name: Change size, spread and test touch
+  notes:
+  - supplied_context_untrusted
+  opaque_score: false
+  outcome_role: cross_cutting
+  owning_stories:
+  - E09.1
+  - E09.3
+  subject: explicit change set
+- driver_kind: null
+  evidence:
+  - both artifact digests
+  - matching rule version
+  - evidence pair
+  - compatibility reasons
+  family: change
+  fixtures:
+  - stable
+  - fixed
+  - new
+  - message-only
+  - rename
+  - coverage-loss
+  - policy-severity-change
+  - reduced-magnitude-still-violating
+  - binary-persistence
+  - severity-only-override
+  - unknown-comparator
+  formula: Match by versioned stable rule/subject/evidence occurrence identity. Metric
+    delta = candidate-base with pinned units/scope. Binary remaining violations are
+    unchanged. Severity overrides are configuration, not source fixes.
+  formula_version: v1
+  id: M28
+  inputs:
+  - two explicit compatible canonical states
+  missing_data: Incompatible rules/coverage/identity => UNKNOWN, never synthetic resolution.
+  name: Finding lifecycle and metric delta
+  notes: []
+  opaque_score: false
+  outcome_role: all_four_outcomes
+  owning_stories:
+  - E10.1
+  - E10.3
+  subject: matched finding / named metric
+- driver_kind: null
+  evidence:
+  - graph IDs
+  - edge witnesses
+  - seed list
+  - traversal limit
+  - test links
+  - boundary pair IDs
+  family: change
+  fixtures:
+  - diamond
+  - cycles
+  - file-deletion
+  - rename
+  - missing-edge
+  - bound-cutoff
+  - high-churn-centrality-vs-ordinary
+  - unchanged-hotspot
+  - missing-history
+  - stable-ties
+  - no-declared-boundaries
+  - repeated-edges-same-pair
+  - exact-zero-vs-unavailable-tests
+  formula: Sets of added/removed nodes/edges under stable IDs. Impact = changed seed
+    plus unique reverse reachable dependents at configured edge/depth. crossed_boundary_count
+    = distinct ordered pairs of declared boundary-member IDs joined by observed dependency
+    edges in the bounded affected subgraph. Change-concern class uses high-churn and
+    high-centrality predicates without a composite score. Default context_only.
+  formula_version: v1
+  id: M29
+  inputs:
+  - two compatible graphs
+  - changed subjects
+  - M07 membership
+  - M22/M24 context
+  missing_data: Unresolved edges/cutoff => lower-bound impact; missing boundary/tests
+    UNKNOWN not zero.
+  name: Graph delta and static blast radius
+  notes:
+  - explicit_boundary_definitions
+  - context_only_predicate
+  opaque_score: false
+  outcome_role: architecture
+  owning_stories:
+  - E10.2
+  - E10.3
+  subject: changed subject / affected subgraph
+- driver_kind: null
+  evidence:
+  - qualifying drivers
+  - excluded contextual metrics
+  - threshold profile
+  - both coverages
+  family: change
+  fixtures:
+  - all-unchanged
+  - only-improvement
+  - only-deterioration
+  - mixed
+  - coverage-drop
+  - exact-epsilon-boundary
+  - empty-outcome
+  - disabled-all-scope
+  - known-violation-partial-coverage
+  - catalog-driver-mapping
+  formula: 'Qualifying change: strict delta beyond versioned threshold. Counts epsilon
+    0; ratios epsilon 0.01 absolute. Advisory metrics excluded unless configured.
+    Classify Insufficient > Mixed > Deteriorated > Improved > Stable. Empty or entirely
+    disabled/exempt driver sets are NOT_APPLICABLE, never healthy/Stable.'
+  formula_version: v1
+  id: M30
+  inputs:
+  - compatible metric/finding deltas
+  - launch driver manifest
+  missing_data: First run/no baseline => Insufficient/no comparison. Known partial
+    deltas may display.
+  name: Thresholded outcome movement
+  notes:
+  - outcome_driver_manifest
+  opaque_score: false
+  outcome_role: all_four_outcomes
+  owning_stories:
+  - E10.2
+  - E10.3
+  subject: outcome (architecture/security/quality/maintainability)
+- driver_kind: null
+  evidence:
+  - changed input dimensions
+  - controlled rerun references if performed
+  family: change
+  fixtures:
+  - same-code-new-cve
+  - dependency-fix-same-feed
+  - severity-override
+  - source-and-feed-changed
+  formula: Source-only, feed-only, configuration-only, mixed or undetermined. Multiple
+    changed dimensions require controlled equivalent-input comparisons.
+  formula_version: v1
+  id: M31
+  inputs:
+  - input/Engine/rule/config/feed digests
+  - optional controlled paired reruns
+  missing_data: Lack of controlled evidence => mixed/undetermined, never a guessed
+    dominant cause.
+  name: Cause attribution
+  notes: []
+  opaque_score: false
+  outcome_role: security_and_other
+  owning_stories:
+  - E10.2
+  - E10.3
+  subject: comparison pair
+- driver_kind: null
+  evidence:
+  - original/projection manifest
+  - verification profile
+  - package digest
+  - withheld markers
+  family: cross_cutting
+  fixtures:
+  - full-export
+  - restricted-export
+  - no-export
+  - tampering
+  - stale-package
+  - wrong-purpose
+  - no-public-private-data-logging
+  formula: Original canonical digest preserved. Exported projection lists original
+    digest, allowed/withheld categories, export-policy version and separate signature
+    metadata.
+  formula_version: v1
+  id: M32
+  inputs:
+  - canonical artifacts
+  - selected export profile
+  missing_data: Missing original/evidence or untrusted key => unavailable/unverified/rejected
+    by purpose.
+  name: Export and trust provenance
+  notes: []
+  opaque_score: false
+  outcome_role: trust
+  owning_stories:
+  - E13.3
+  subject: canonical artifact / projection
+- driver_kind: null
+  evidence:
+  - per-repo SHA/config/feed/hardware
+  - counts
+  - resource logs
+  - semantic hashes
+  - per-capability coverage/freshness
+  family: cross_cutting
+  fixtures:
+  - dogfood
+  - fifty-large-repos
+  - labeled-flagship
+  - resource-exhaustion
+  - corruption
+  - repeat-variation
+  - sigint-sigterm-hard-kill
+  - disk-full
+  - output-collision
+  - concurrent-reader
+  - retention-active-baseline
+  - audit-redaction
+  formula: 'Per capability: evaluated eligible units / all eligible units; separately
+    unknown/not-applicable/excluded/error. Three-repeat semantic digest equality.
+    Record local health/progress/terminal, hard deadlines, cancellation grace, peak
+    output/disk and retention.'
+  formula_version: v1
+  id: M33
+  inputs:
+  - all artifacts
+  - capability records
+  - corpus manifests
+  missing_data: Unknown denominator => coverage unknown. A survival run is not analytical
+    correctness.
+  name: Coverage, determinism and performance acceptance
+  notes: []
+  opaque_score: false
+  outcome_role: validation
+  owning_stories:
+  - E15.1
+  - E15.2
+  - E15.3
+  subject: capability / corpus run
+no_opaque_score:
+  canonical_health_score: false
+  compatibility_numeric_requires_published_formula: true
+  unpublished_derivation: unavailable/UNKNOWN, never a fabricated number
+outcome_drivers:
+- applicability: resolved module graph
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.dependency-cycle
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: declared direction constraints
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.invalid-dependency-direction
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: declared M07 patterns
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.layer-boundary-violation
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: module fan_out vs threshold 10
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.excessive-cross-module-coupling
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported framework usage vs declared boundary
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: architecture
+  id: architecture.framework-leakage
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: '>=2 components'
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: partial share allowed with coverage
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: architecture
+  id: architecture.component-concentration
+  kind: metric
+  outcome_or_context_role: advisory
+- applicability: complete universe V
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: partial universe cannot prove exact centrality
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: architecture
+  id: M09.centrality
+  kind: metric
+  outcome_or_context_role: context
+- applicability: supported source/config literals
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.private-key-material
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported source/config literals
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.credential-literal
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported placeholders
+  comparison_unit: count
+  contributor_role: context_only
+  coverage_requirement: placeholders are hygiene signals
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.placeholder-credential
+  kind: rule
+  outcome_or_context_role: context
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.tls-verification-disabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.hostname-verification-disabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.authentication-disabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.permissive-cors-origin
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: evidenced production-relevant config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: security.debug-enabled
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.unresolved-version
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.mutable-version
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.unbounded-requirement
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.conflicting-exact-versions
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: eligible declarations
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: dependency.duplicate-declaration
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: resolved versions plus fresh pinned OSV snapshot
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: fresh supported feed required; else UNKNOWN not clean
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: security
+  id: M13.known_vulnerability
+  kind: metric
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST complexity map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.excessive-branching
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST size map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.large-callable
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST nesting map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.deep-nesting
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST parameter map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.excessive-parameters
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported AST type-size map
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: technical_debt.oversized-type
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported test syntax
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-001
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: unconfirmed test candidates
+  comparison_unit: count
+  contributor_role: context_only
+  coverage_requirement: candidates are not measured runtime coverage
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-002
+  kind: rule
+  outcome_or_context_role: advisory
+- applicability: declared tests without observation
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-003
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: complete supported CI config
+  comparison_unit: count
+  contributor_role: null
+  coverage_requirement: complete applicable evidence required for PASS/Stable
+  direction: lower_count_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: quality
+  id: testing.test-005
+  kind: rule
+  outcome_or_context_role: outcome_driver
+- applicability: supported tokenization
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: partial ratio cannot prove full-scope cleanliness
+  direction: lower_ratio_favorable
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: quality
+  id: M18.clone_indicator
+  kind: metric
+  outcome_or_context_role: advisory
+- applicability: complete complexity and M24 history
+  comparison_unit: count
+  contributor_role: ranking
+  coverage_requirement: partial records excluded from comparable ranking
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0'
+  family: maintainability
+  id: M22.hotspot
+  kind: metric
+  outcome_or_context_role: context
+- applicability: attributable churn at that scope
+  comparison_unit: ratio
+  contributor_role: context_only
+  coverage_requirement: scope-specific denominator; do not average file ratios
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: '0.01'
+  family: maintainability
+  id: M25.ownership_concentration
+  kind: metric
+  outcome_or_context_role: context
+- applicability: changed subjects plus comparable churn/centrality
+  comparison_unit: class
+  contributor_role: context_only
+  coverage_requirement: partial contributors visible; no verdict unless YAML maps
+    it
+  direction: descriptive
+  empty_scope: NOT_APPLICABLE, never healthy
+  epsilon: n/a
+  family: architecture
+  id: M29.change_concern
+  kind: metric
+  outcome_or_context_role: context
+package_revision: ENGINE-2026-09-15-R1
+proposed_by: Abhinav (Engineer A)
+ratification_id: e01.1-launch-ratification
+retained_existing_rule_ids:
+- architecture.component-concentration
+- architecture.dependency-cycle
+- architecture.excessive-cross-module-coupling
+- architecture.framework-leakage
+- architecture.invalid-dependency-direction
+- architecture.layer-boundary-violation
+- dependency.conflicting-exact-versions
+- dependency.duplicate-declaration
+- dependency.mutable-version
+- dependency.unbounded-requirement
+- dependency.unresolved-version
+- security.authentication-disabled
+- security.credential-literal
+- security.debug-enabled
+- security.hostname-verification-disabled
+- security.permissive-cors-origin
+- security.placeholder-credential
+- security.private-key-material
+- security.tls-verification-disabled
+- technical_debt.deep-nesting
+- technical_debt.excessive-branching
+- technical_debt.excessive-parameters
+- technical_debt.large-callable
+- technical_debt.oversized-type
+- testing.test-001
+- testing.test-002
+- testing.test-003
+- testing.test-005
+reviewer_status: accepted
+rule_id_grammar:
+  incompatible_restriction_invented: false
+  legacy_pattern: ^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$
+  notes: Keep namespace.kebab-name and legacy codestrata-rule-* identities. Do not
+    invent a new ID restriction that would reject current valid IDs. testing.test-00N
+    and security.* kebab names stay as published.
+  shared_pattern: ^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_-]*)+$
+severity:
+  context_derived_default_must_be_versioned: true
+  default_and_effective_preserved: true
+  existing_calibrator: codestrata.application.findings.severity_calibration
+  hidden_rewrite_after_override_forbidden: true
+  launch_rule: Context caps may contribute only to versioned default severity on the
+    rule/config contract before an approved override. After an approved effective-severity
+    override, later context classification must not rewrite that effective value.
+    E01.2 binds this into the descriptor; E03/E04 must not retain a hidden post-processing
+    override.

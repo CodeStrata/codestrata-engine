@@ -84,9 +84,7 @@ def check_package_exists(engine_root: Path) -> CheckResult:
 
 
 def check_adapters_root_is_a_package(engine_root: Path) -> CheckResult:
-    init_path = (
-        engine_root / "src" / "codestrata" / ADAPTERS_ROOT_RELATIVE_PATH / "__init__.py"
-    )
+    init_path = engine_root / "src" / "codestrata" / ADAPTERS_ROOT_RELATIVE_PATH / "__init__.py"
     return CheckResult(
         name="provider_adapters_root_is_an_importable_package",
         category="inventory",
@@ -97,9 +95,7 @@ def check_adapters_root_is_a_package(engine_root: Path) -> CheckResult:
 
 def check_expected_modules_present(package_dir: Path) -> CheckResult:
     actual = {
-        path.name
-        for path in package_dir.iterdir()
-        if path.is_file() and path.suffix == ".py"
+        path.name for path in package_dir.iterdir() if path.is_file() and path.suffix == ".py"
     }
     expected = set(EXPECTED_MODULES)
     missing = sorted(expected - actual)
@@ -118,12 +114,8 @@ def check_the_package_mirrors_the_openai_layout(engine_root: Path) -> CheckResul
 
     openai_dir = engine_root / "src" / "codestrata" / ADAPTERS_ROOT_RELATIVE_PATH / "openai"
     bedrock_dir = engine_root / "src" / "codestrata" / PACKAGE_RELATIVE_PATH
-    openai_modules = sorted(
-        path.name for path in openai_dir.glob("*.py") if path.is_file()
-    )
-    bedrock_modules = sorted(
-        path.name for path in bedrock_dir.glob("*.py") if path.is_file()
-    )
+    openai_modules = sorted(path.name for path in openai_dir.glob("*.py") if path.is_file())
+    bedrock_modules = sorted(path.name for path in bedrock_dir.glob("*.py") if path.is_file())
     return CheckResult(
         name="the_bedrock_package_mirrors_the_openai_module_layout",
         category="inventory",

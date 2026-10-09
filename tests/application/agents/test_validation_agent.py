@@ -12,7 +12,7 @@ from codestrata.application.agents.validation_agent import ValidationAgent
 from codestrata.application.knowledge.models import AssessmentRunStatus
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.application.knowledge.queries.models import FindingView
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from tests.application.knowledge.queries.conftest_helpers import seed_completed_assessment
 
 

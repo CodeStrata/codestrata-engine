@@ -132,9 +132,7 @@ def test_artifact_discovery_patterns_and_source_role() -> None:
 
 
 def test_candidate_filename_does_not_imply_content() -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=("id_rsa",),
@@ -156,40 +154,23 @@ def test_pem_and_openssh_and_certificate_signatures() -> None:
     cert = "-----BEGIN CERTIFICATE-----\nyy\n-----END CERTIFICATE-----\n"
     long_string = "a" * 5000
 
-    assert (
-        ContentClassification.PRIVATE_KEY_MATERIAL
-        in classify_text_signatures(private)
-    )
-    assert (
-        ContentClassification.PRIVATE_KEY_MATERIAL
-        in classify_text_signatures(openssh)
-    )
-    assert (
-        ContentClassification.PUBLIC_CERTIFICATE_MATERIAL
-        in classify_text_signatures(cert)
-    )
-    assert ContentClassification.PRIVATE_KEY_MATERIAL not in classify_text_signatures(
-        cert
-    )
+    assert ContentClassification.PRIVATE_KEY_MATERIAL in classify_text_signatures(private)
+    assert ContentClassification.PRIVATE_KEY_MATERIAL in classify_text_signatures(openssh)
+    assert ContentClassification.PUBLIC_CERTIFICATE_MATERIAL in classify_text_signatures(cert)
+    assert ContentClassification.PRIVATE_KEY_MATERIAL not in classify_text_signatures(cert)
     assert classify_text_signatures(long_string) == (
         ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,
     )
-    assert classify_text_signatures("") == (
-        ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,
+    assert classify_text_signatures("") == (ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,)
+    assert ContentClassification.CREDENTIAL_ENTRIES in classify_text_signatures(
+        "PASSWORD=example\n"
     )
-    assert (
-        ContentClassification.CREDENTIAL_ENTRIES
-        in classify_text_signatures("PASSWORD=example\n")
-    )
-    assert (
-        ContentClassification.CREDENTIAL_ENTRIES
-        in classify_text_signatures("CODESTRATA_GITHUB_TOKEN=x\n")
+    assert ContentClassification.CREDENTIAL_ENTRIES in classify_text_signatures(
+        "CODESTRATA_GITHUB_TOKEN=x\n"
     )
     assert classify_text_signatures(
         "# CODESTRATA_GITHUB_TOKEN=\nCODESTRATA_LOG_LEVEL=WARNING\n"
-    ) == (
-        ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,
-    )
+    ) == (ContentClassification.NO_SUPPORTED_SENSITIVE_SIGNATURE,)
 
 
 def test_no_private_key_content_serialized() -> None:
@@ -198,9 +179,7 @@ def test_no_private_key_content_serialized() -> None:
         "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC7SECRETVALUE\n"
         "-----END PRIVATE KEY-----\n"
     )
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=("tls/server.key",),
@@ -211,15 +190,12 @@ def test_no_private_key_content_serialized() -> None:
     assert "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC7" not in payload
     assert evidence.artifacts[0].kind is SensitiveArtifactKind.PRIVATE_KEY
     assert (
-        ContentClassification.PRIVATE_KEY_MATERIAL
-        in evidence.artifacts[0].content_classifications
+        ContentClassification.PRIVATE_KEY_MATERIAL in evidence.artifacts[0].content_classifications
     )
 
 
 def test_binary_keystore_metadata_only() -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     raw = b"\x00\x01\xfeJKS-BINARY-NOT-A-SECRET"
     evidence = service.collect(
         repository_id="fixture",
@@ -254,18 +230,13 @@ def test_configuration_parsers_collect_literals_not_findings() -> None:
     assert "app_password" in keys or "password" in str(keys)
     assert any(item["redacted_preview"] == REDACTED_PREVIEW for item in props)
     assert any(
-        item["placeholder_status"] is PlaceholderStatus.PLACEHOLDER_LITERAL
-        for item in props
+        item["placeholder_status"] is PlaceholderStatus.PLACEHOLDER_LITERAL for item in props
     )
 
     dotenv, _ = parse_dotenv("API_TOKEN=${API_TOKEN}\nDEBUG=true\n")
-    assert any(
-        item["value_kind"] is ValueKind.ENVIRONMENT_REFERENCE for item in dotenv
-    )
+    assert any(item["value_kind"] is ValueKind.ENVIRONMENT_REFERENCE for item in dotenv)
 
-    yaml_facts, _ = parse_yaml(
-        "spring:\n  datasource:\n    password: secret\n  profiles: prod\n"
-    )
+    yaml_facts, _ = parse_yaml("spring:\n  datasource:\n    password: secret\n  profiles: prod\n")
     assert yaml_facts
     assert all(item["redacted_preview"] != "secret" for item in yaml_facts)
 
@@ -276,18 +247,14 @@ def test_configuration_parsers_collect_literals_not_findings() -> None:
     toml_facts, _ = parse_toml('[auth]\ntoken = "sample"\n')
     assert toml_facts
 
-    fmt, facts, diags = parse_configuration(
-        "application.properties", "db.password=\n"
-    )
+    fmt, facts, diags = parse_configuration("application.properties", "db.password=\n")
     assert fmt.value == "properties"
     assert facts
     assert not diags
 
 
 def test_malformed_json_diagnostic_safe() -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     bad = '{"password": "should-not-leak"'
     evidence = service.collect(
         repository_id="fixture",
@@ -303,10 +270,7 @@ def test_malformed_json_diagnostic_safe() -> None:
 def test_placeholders_and_redaction() -> None:
     assert classify_placeholder("")[0] is PlaceholderStatus.EMPTY
     assert classify_placeholder("changeme")[0] is PlaceholderStatus.PLACEHOLDER_LITERAL
-    assert (
-        classify_placeholder("${ENV_VAR}")[0]
-        is PlaceholderStatus.ENVIRONMENT_INTERPOLATION
-    )
+    assert classify_placeholder("${ENV_VAR}")[0] is PlaceholderStatus.ENVIRONMENT_INTERPOLATION
     assert classify_placeholder("$ENV_VAR")[0] is PlaceholderStatus.ENVIRONMENT_INTERPOLATION
     assert (
         classify_placeholder("${MYSQL_PASS:petclinic}")[0]
@@ -328,15 +292,14 @@ def test_placeholders_and_redaction() -> None:
     oidc = value_facts("${{ steps.oidc.outputs.token }}", sensitive=True)
     assert "steps.oidc.outputs.token" in oidc["redacted_preview"]
     assert oidc["value_kind"] is ValueKind.ENVIRONMENT_REFERENCE
-    assert value_facts("real-hardcoded-pat-value", sensitive=True)[
-        "redacted_preview"
-    ] == REDACTED_PREVIEW
+    assert (
+        value_facts("real-hardcoded-pat-value", sensitive=True)["redacted_preview"]
+        == REDACTED_PREVIEW
+    )
 
 
 def test_oversized_and_coverage_reconcile() -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=(".env", "store/app.jks"),
@@ -347,30 +310,20 @@ def test_oversized_and_coverage_reconcile() -> None:
     assert evidence.coverage.candidate_files_discovered == 2
     assert evidence.coverage.skipped_files >= 1
     assert evidence.coverage.unsupported_binaries == 1
-    assert evidence.coverage.configuration_facts_collected == len(
-        evidence.configuration_facts
-    )
-    assert all(
-        "Finding" not in item.summary for item in evidence.limitations
-    )
+    assert evidence.coverage.configuration_facts_collected == len(evidence.configuration_facts)
+    assert all("Finding" not in item.summary for item in evidence.limitations)
 
 
 def test_determinism_and_no_absolute_paths(tmp_path: Path) -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     paths = (".env", "tls/server.crt", "app.properties")
     texts = {
         ".env": "PASSWORD=example\n",
         "tls/server.crt": "-----BEGIN CERTIFICATE-----\nAA\n-----END CERTIFICATE-----\n",
         "app.properties": "ssl.enabled=true\ndebug=false\n",
     }
-    first = service.collect(
-        repository_id="fixture", relative_paths=paths, file_texts=texts
-    )
-    second = service.collect(
-        repository_id="fixture", relative_paths=paths, file_texts=texts
-    )
+    first = service.collect(repository_id="fixture", relative_paths=paths, file_texts=texts)
+    second = service.collect(repository_id="fixture", relative_paths=paths, file_texts=texts)
     a = dumps_stable_json(repository_sensitive_evidence_payload(first))
     b = dumps_stable_json(repository_sensitive_evidence_payload(second))
     assert a == b
@@ -387,9 +340,7 @@ def test_determinism_and_no_absolute_paths(tmp_path: Path) -> None:
 
 
 def test_disabled_gate_skips_collection() -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=False)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=False))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=(".env",),
@@ -401,9 +352,7 @@ def test_disabled_gate_skips_collection() -> None:
 
 
 def test_source_role_preserved() -> None:
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=("src/main/resources/.env", "src/test/resources/.env"),

@@ -25,8 +25,7 @@ PRIVATE_REPO_WARNING = (
     "Anyone with the resulting link can view it."
 )
 PUBLIC_PUBLISH_WARNING = (
-    "This will publish your current Assessment Report. "
-    "Anyone with the resulting link can view it."
+    "This will publish your current Assessment Report. Anyone with the resulting link can view it."
 )
 
 
@@ -103,8 +102,7 @@ def user_facing_publish_error(exc: BaseException) -> str:
             )
         if "credential" in lowered or CREDENTIAL_ENV.lower() in lowered:
             return (
-                "Community publishing is temporarily unavailable. "
-                "Local report remains unchanged."
+                "Community publishing is temporarily unavailable. Local report remains unchanged."
             )
         if "confirm" in lowered:
             return text
@@ -113,8 +111,7 @@ def user_facing_publish_error(exc: BaseException) -> str:
         # Never leak credential env var names or AWS guidance.
         if CREDENTIAL_ENV in text or "aws" in lowered or "secret" in lowered:
             return (
-                "Community publishing is temporarily unavailable. "
-                "Local report remains unchanged."
+                "Community publishing is temporarily unavailable. Local report remains unchanged."
             )
         return text or "Publishing failed. Local report remains unchanged."
     return "Publishing failed. Local report remains unchanged."
@@ -163,15 +160,11 @@ def _request_json(
         raw = exc.read(1_000_000)
         status = int(exc.code)
     except Exception as exc:  # noqa: BLE001
-        raise ReportPublishError(
-            "Publishing failed. Local report remains unchanged."
-        ) from exc
+        raise ReportPublishError("Publishing failed. Local report remains unchanged.") from exc
     try:
         payload = json.loads(raw.decode("utf-8")) if raw else {}
     except json.JSONDecodeError as exc:
-        raise ReportPublishError(
-            "Publishing failed. Local report remains unchanged."
-        ) from exc
+        raise ReportPublishError("Publishing failed. Local report remains unchanged.") from exc
     if not isinstance(payload, dict):
         raise ReportPublishError("Publishing failed. Local report remains unchanged.")
     return status, payload
@@ -313,7 +306,7 @@ def _put_bytes(url: str, body: bytes, *, content_type: str) -> None:
         raise ReportPublishError("Publishing failed. Local report remains unchanged.")
 
     class _PutRedirectHandler(urllib.request.HTTPRedirectHandler):
-        def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: ANN001
+        def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
             if code not in {301, 302, 303, 307, 308}:
                 return None
             method = req.get_method()
@@ -321,8 +314,7 @@ def _put_bytes(url: str, body: bytes, *, content_type: str) -> None:
             headers_out = {
                 k: v
                 for k, v in req.headers.items()
-                if k.lower() not in {"content-length", "content-type"}
-                or method in {"GET", "HEAD"}
+                if k.lower() not in {"content-length", "content-type"} or method in {"GET", "HEAD"}
             }
             if method not in {"GET", "HEAD"} and req.headers.get("Content-type"):
                 headers_out["Content-type"] = req.headers.get("Content-type")
@@ -350,13 +342,9 @@ def _put_bytes(url: str, body: bytes, *, content_type: str) -> None:
             _ = response.read(1024)
             status = int(getattr(response, "status", 200))
     except urllib.error.HTTPError as exc:
-        raise ReportPublishError(
-            "Publishing failed. Local report remains unchanged."
-        ) from exc
+        raise ReportPublishError("Publishing failed. Local report remains unchanged.") from exc
     except Exception as exc:  # noqa: BLE001
-        raise ReportPublishError(
-            "Publishing failed. Local report remains unchanged."
-        ) from exc
+        raise ReportPublishError("Publishing failed. Local report remains unchanged.") from exc
     if status >= 300:
         raise ReportPublishError("Publishing failed. Local report remains unchanged.")
 
@@ -370,100 +358,19 @@ def publish_local_assessment(
     confirm_public_publish: bool,
     credential: TelemetryTransportCredential | None = None,
 ) -> ReportPublishResult:
-    """Upload local CURRENT assessment HTML+JSON and return branded public URL."""
+    """Removed Community Cloud upload path. Local files are not modified."""
 
-    _ = session  # publish is independent of telemetry consent
-    if not confirm_public_publish:
-        raise ReportPublishError("Explicit publish confirmation is required.")
-    if logical_repository_id.startswith("local-") and not private_repository_acknowledged:
-        raise ReportPublishError(PRIVATE_REPO_WARNING)
+    from codestrata.integration.community_runtime import COMMUNITY_CLOUD_PUBLISH_REMOVED
 
-    html_path = current_dir / "assessment.html"
-    json_path = current_dir / "assessment.json"
-    if not html_path.is_file() or not json_path.is_file():
-        raise ReportPublishError("No current report found. Run `codestrata assess --repo .` first.")
-
-    active_cred = credential or resolve_community_credential()
-    status, intent = _request_json(
-        method="POST",
-        url=_api_url("/api/v1/reports/upload-intents"),
-        credential=active_cred,
-        body={
-            "schema_version": "1.0",
-            "report_type": "assessment",
-            "logical_identity_type": "repository",
-            "logical_identity_key": logical_repository_id,
-            "artifacts": ["assessment.html", "assessment.json"],
-            "private_repository_acknowledged": private_repository_acknowledged,
-            "confirm_public_publish": True,
-        },
+    _ = (
+        current_dir,
+        logical_repository_id,
+        session,
+        private_repository_acknowledged,
+        confirm_public_publish,
+        credential,
     )
-    if status >= 300:
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    upload_id = str(intent.get("upload_id") or "")
-    puts = intent.get("puts") or []
-    if not upload_id or not isinstance(puts, list):
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-
-    local_files = {
-        "assessment.html": html_path.read_bytes(),
-        "assessment.json": json_path.read_bytes(),
-    }
-    for item in puts:
-        if not isinstance(item, dict):
-            continue
-        name = str(item.get("artifact") or "")
-        url = str(item.get("upload_url") or "")
-        ctype = str(item.get("content_type") or "application/octet-stream")
-        if name not in local_files or not url:
-            raise ReportPublishError(
-                "Community publishing is temporarily unavailable. Local report remains unchanged."
-            )
-        _put_bytes(url, local_files[name], content_type=ctype)
-
-    status, published = _request_json(
-        method="POST",
-        url=_api_url("/api/v1/reports"),
-        credential=active_cred,
-        body={
-            "schema_version": "1.0",
-            "upload_id": upload_id,
-            "confirm_public_publish": True,
-            "private_repository_acknowledged": private_repository_acknowledged,
-        },
-    )
-    if status >= 300:
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    public_url = str(published.get("public_url") or "")
-    public_id = str(published.get("public_id") or "")
-    if not public_url.startswith(PUBLIC_REPORTS_BASE_URL + "/r/"):
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    if "s3.amazonaws.com" in public_url or "amazonaws.com" in public_url:
-        # Never return/accept raw S3 public share links.
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    verify_status = verify_public_report_get(public_url, expected_public_id=public_id)
-    confirm_public_report_verification(
-        public_id=public_id,
-        credential=active_cred,
-        http_status=verify_status,
-        verification_status="verified",
-    )
-    return ReportPublishResult(
-        public_id=public_id,
-        public_url=public_url,
-        report_type="assessment",
-        local_html_path=str(html_path),
-    )
+    raise ReportPublishError(COMMUNITY_CLOUD_PUBLISH_REMOVED)
 
 
 def publish_local_eir(
@@ -474,85 +381,12 @@ def publish_local_eir(
     confirm_public_publish: bool,
     credential: TelemetryTransportCredential | None = None,
 ) -> ReportPublishResult:
-    _ = session
-    if not confirm_public_publish:
-        raise ReportPublishError("Explicit publish confirmation is required.")
+    """Removed Community Cloud EIR upload path. Local files are not modified."""
 
-    html_path = current_dir / "engineering-intelligence-report.html"
-    json_path = current_dir / "engineering-intelligence-report.json"
-    if not html_path.is_file() or not json_path.is_file():
-        raise ReportPublishError("No current EIR found. Generate an Engineering Intelligence report first.")
+    from codestrata.integration.community_runtime import COMMUNITY_CLOUD_PUBLISH_REMOVED
 
-    active_cred = credential or resolve_community_credential()
-    status, intent = _request_json(
-        method="POST",
-        url=_api_url("/api/v1/reports/upload-intents"),
-        credential=active_cred,
-        body={
-            "schema_version": "1.0",
-            "report_type": "engineering_intelligence",
-            "logical_identity_type": "portfolio",
-            "logical_identity_key": portfolio_id,
-            "artifacts": [
-                "engineering-intelligence-report.html",
-                "engineering-intelligence-report.json",
-            ],
-            "private_repository_acknowledged": True,
-            "confirm_public_publish": True,
-        },
-    )
-    if status >= 300:
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    upload_id = str(intent.get("upload_id") or "")
-    puts = intent.get("puts") or []
-    local_files = {
-        "engineering-intelligence-report.html": html_path.read_bytes(),
-        "engineering-intelligence-report.json": json_path.read_bytes(),
-    }
-    for item in puts:
-        if not isinstance(item, dict):
-            continue
-        name = str(item.get("artifact") or "")
-        url = str(item.get("upload_url") or "")
-        ctype = str(item.get("content_type") or "application/octet-stream")
-        _put_bytes(url, local_files[name], content_type=ctype)
-
-    status, published = _request_json(
-        method="POST",
-        url=_api_url("/api/v1/reports"),
-        credential=active_cred,
-        body={
-            "schema_version": "1.0",
-            "upload_id": upload_id,
-            "confirm_public_publish": True,
-            "private_repository_acknowledged": True,
-        },
-    )
-    if status >= 300:
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    public_url = str(published.get("public_url") or "")
-    public_id = str(published.get("public_id") or "")
-    if not public_url.startswith(PUBLIC_REPORTS_BASE_URL + "/r/"):
-        raise ReportPublishError(
-            "Community publishing is temporarily unavailable. Local report remains unchanged."
-        )
-    verify_status = verify_public_report_get(public_url, expected_public_id=public_id)
-    confirm_public_report_verification(
-        public_id=public_id,
-        credential=active_cred,
-        http_status=verify_status,
-        verification_status="verified",
-    )
-    return ReportPublishResult(
-        public_id=public_id,
-        public_url=public_url,
-        report_type="engineering_intelligence",
-        local_html_path=str(html_path),
-    )
+    _ = (current_dir, portfolio_id, session, confirm_public_publish, credential)
+    raise ReportPublishError(COMMUNITY_CLOUD_PUBLISH_REMOVED)
 
 
 __all__ = [

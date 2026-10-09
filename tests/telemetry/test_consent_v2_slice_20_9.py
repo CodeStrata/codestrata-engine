@@ -41,7 +41,6 @@ from codestrata.telemetry.persisted_consent import (
     decline_v2_upgrade,
     format_consent_status,
     persist_disabled,
-    persist_v1_yes,
     persist_v2_yes,
 )
 from codestrata.telemetry.prompt_runtime_factory import (
@@ -303,9 +302,7 @@ def test_c9_v2_revoke(tmp_path: Path) -> None:
         preference_path=pref,
     )
     assert facade.runtime.session.consent.transmission_authorized is False
-    policy = assessment_metadata_policy_for_session(
-        path=pref, transmission_authorized=False
-    )
+    policy = assessment_metadata_policy_for_session(path=pref, transmission_authorized=False)
     assert policy.emission_enabled is False
 
 
@@ -485,9 +482,7 @@ def test_successful_assess_e2e_v2_emits_lifecycle_and_amd(
             transport=life,
         )
     )
-    policy = assessment_metadata_policy_for_session(
-        path=pref, transmission_authorized=True
-    )
+    policy = assessment_metadata_policy_for_session(path=pref, transmission_authorized=True)
     assert policy.emission_enabled is True
 
     result, _ = run_assessment_with_telemetry_isolation(
@@ -523,9 +518,7 @@ def test_legacy_v1_e2e_lifecycle_only_no_amd(tmp_path: Path) -> None:
             transport=life,
         )
     )
-    policy = assessment_metadata_policy_for_session(
-        path=pref, transmission_authorized=True
-    )
+    policy = assessment_metadata_policy_for_session(path=pref, transmission_authorized=True)
     assert policy.emission_enabled is False
     run_assessment_with_telemetry_isolation(
         lambda: _OkResult(),
@@ -548,9 +541,12 @@ def test_revoke_blocks_allow_flag(tmp_path: Path) -> None:
         preference_path=pref,
     )
     assert facade.runtime.session.consent.transmission_authorized is False
-    assert assessment_metadata_policy_for_session(
-        path=pref, transmission_authorized=False
-    ).emission_enabled is False
+    assert (
+        assessment_metadata_policy_for_session(
+            path=pref, transmission_authorized=False
+        ).emission_enabled
+        is False
+    )
 
 
 def test_offline_v2_keeps_consent_skips_amd_network(tmp_path: Path) -> None:
@@ -591,12 +587,7 @@ def test_report_publish_independence_from_consent() -> None:
     from codestrata.telemetry.session import TelemetrySession
 
     assert telemetry_eligible_for_publish(None) is True
-    assert (
-        telemetry_eligible_for_publish(
-            TelemetrySession(consent=deny_session_consent())
-        )
-        is True
-    )
+    assert telemetry_eligible_for_publish(TelemetrySession(consent=deny_session_consent())) is True
     # Default amd policy remains off without V2.
     assert default_assessment_metadata_emission_policy().emission_enabled is False
 

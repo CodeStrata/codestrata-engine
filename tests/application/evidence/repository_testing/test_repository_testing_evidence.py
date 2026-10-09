@@ -55,9 +55,7 @@ from codestrata.domain.testing.assessment.identifiers import (
 )
 from codestrata.services.artifact_serialization import dumps_stable_json
 
-_APP_PACKAGE = Path(
-    "src/codestrata/application/evidence/repository_testing"
-)
+_APP_PACKAGE = Path("src/codestrata/application/evidence/repository_testing")
 _FORBIDDEN_IMPORT_PREFIXES = (
     "codestrata.domain.testing",
     "codestrata.application.testing",
@@ -97,18 +95,13 @@ def test_package_boundary_no_forbidden_imports() -> None:
 
 
 def test_collecting_evidence_does_not_create_findings() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=("tests/test_sample.py",),
         file_texts={
             "tests/test_sample.py": (
-                "import pytest\n"
-                "@pytest.mark.skip\n"
-                "def test_ok():\n"
-                "    assert True\n"
+                "import pytest\n@pytest.mark.skip\ndef test_ok():\n    assert True\n"
             ),
         },
     )
@@ -147,10 +140,7 @@ def test_discovery_dirs_filenames_and_exclusions() -> None:
     assert by_path["src/test/java/com/example/FooTest.java"][0] is FileRole.UNIT_TEST
 
     assert "src/test/java/com/example/FooIT.java" in by_path
-    assert (
-        by_path["src/test/java/com/example/FooIT.java"][0]
-        is FileRole.INTEGRATION_TEST
-    )
+    assert by_path["src/test/java/com/example/FooIT.java"][0] is FileRole.INTEGRATION_TEST
 
     assert "__tests__/widget.test.ts" in by_path
     assert by_path["cypress/e2e/login.cy.js"][0] is FileRole.END_TO_END_TEST
@@ -164,9 +154,7 @@ def test_discovery_dirs_filenames_and_exclusions() -> None:
     assert "vendor/lib/foo_test.go" not in by_path
 
     # Visit.java must not match *IT.java via lowercase endswith("it.java").
-    assert classify_test_candidate(
-        "src/main/java/org/example/owner/Visit.java"
-    ) == (None, (), None)
+    assert classify_test_candidate("src/main/java/org/example/owner/Visit.java") == (None, (), None)
     assert classify_test_candidate("tests/.DS_Store") == (None, (), None)
     integration_role, _, _ = classify_test_candidate(
         "src/test/java/org/example/MySqlIntegrationTests.java"
@@ -187,9 +175,7 @@ def test_discovery_dirs_filenames_and_exclusions() -> None:
 
 
 def test_candidate_confirmation_is_discovered_until_inspected() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     # Discovered path without text stays discovered_candidate (or skipped).
     evidence = service.collect(
         repository_id="fixture",
@@ -199,18 +185,13 @@ def test_candidate_confirmation_is_discovered_until_inspected() -> None:
     )
     assert len(evidence.file_candidates) == 1
     candidate = evidence.file_candidates[0]
-    assert (
-        candidate.confirmation_level
-        is EvidenceConfirmationLevel.DISCOVERED_CANDIDATE
-    )
+    assert candidate.confirmation_level is EvidenceConfirmationLevel.DISCOVERED_CANDIDATE
     assert candidate.confirmation_level is not EvidenceConfirmationLevel.DECLARED
     assert DiscoveryBasis.DIRECTORY_CONVENTION in candidate.discovery_bases
 
 
 def test_structural_indicators_across_languages() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     paths = (
         "tests/test_pytest.py",
         "src/test/java/ExampleTest.java",
@@ -246,8 +227,7 @@ def test_structural_indicators_across_languages() -> None:
             "});\n"
         ),
         "e2e/login.spec.ts": (
-            "import { test } from '@playwright/test';\n"
-            "test('login', async () => {});\n"
+            "import { test } from '@playwright/test';\ntest('login', async () => {});\n"
         ),
         "pkg/foo_test.go": "func TestFoo(t *testing.T) {}\n",
         "tests/broken.xyz": "not a supported structural body\n",
@@ -283,9 +263,7 @@ def test_structural_indicators_across_languages() -> None:
 
 
 def test_frameworks_declared_vs_structurally_observed() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     pom = """
     <project>
       <dependencies>
@@ -311,7 +289,7 @@ def test_frameworks_declared_vs_structurally_observed() -> None:
             "scripts": {"test": "jest"},
         }
     )
-    pyproject = "[project]\ndependencies = [\"pytest>=8\"]\n"
+    pyproject = '[project]\ndependencies = ["pytest>=8"]\n'
     requirements = "pytest==8.0.0\n"
     evidence = service.collect(
         repository_id="fixture",
@@ -347,9 +325,7 @@ def test_frameworks_declared_vs_structurally_observed() -> None:
     assert FrameworkFamily.PYTEST in observed
     # Same family may appear under both bases when both exist.
     pytest_bases = {
-        item.basis
-        for item in evidence.framework_facts
-        if item.framework is FrameworkFamily.PYTEST
+        item.basis for item in evidence.framework_facts if item.framework is FrameworkFamily.PYTEST
     }
     assert FrameworkEvidenceBasis.DECLARED in pytest_bases
     assert FrameworkEvidenceBasis.STRUCTURALLY_OBSERVED in pytest_bases
@@ -358,9 +334,7 @@ def test_frameworks_declared_vs_structurally_observed() -> None:
 
 
 def test_test_type_classifications() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=(
@@ -381,18 +355,14 @@ def test_test_type_classifications() -> None:
 
     # Overlapping discovery bases preserved when applicable.
     it_candidate = next(
-        item
-        for item in evidence.file_candidates
-        if item.path == "src/test/java/FooIT.java"
+        item for item in evidence.file_candidates if item.path == "src/test/java/FooIT.java"
     )
     assert DiscoveryBasis.FILENAME_CONVENTION in it_candidate.discovery_bases
     assert DiscoveryBasis.DIRECTORY_CONVENTION in it_candidate.discovery_bases
 
 
 def test_markers_collected_without_findings() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=(
@@ -409,10 +379,7 @@ def test_markers_collected_without_findings() -> None:
                 "def test_a():\n"
                 "    pass\n"
             ),
-            "__tests__/focus.test.ts": (
-                "test.skip('a', () => {});\n"
-                "test.only('b', () => {});\n"
-            ),
+            "__tests__/focus.test.ts": ("test.skip('a', () => {});\ntest.only('b', () => {});\n"),
         },
     )
     types = {item.marker_type for item in evidence.marker_facts}
@@ -427,9 +394,7 @@ def test_markers_collected_without_findings() -> None:
 
 
 def test_fixtures_metadata_only_no_content() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     secret_fixture = '{"password":"should-not-appear","rows":[1,2,3]}'
     evidence = service.collect(
         repository_id="fixture",
@@ -447,17 +412,13 @@ def test_fixtures_metadata_only_no_content() -> None:
 
 
 def test_coverage_configuration_no_percentages() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=(".coveragerc", "pom.xml", "tests/test_ok.py"),
         file_texts={
             ".coveragerc": "[run]\nsource = src\nomit = */tests/*\n",
-            "pom.xml": (
-                "<plugin><artifactId>jacoco-maven-plugin</artifactId></plugin>\n"
-            ),
+            "pom.xml": ("<plugin><artifactId>jacoco-maven-plugin</artifactId></plugin>\n"),
             "tests/test_ok.py": "def test_ok():\n    assert True\n",
         },
     )
@@ -468,10 +429,7 @@ def test_coverage_configuration_no_percentages() -> None:
     )
     assert evidence.coverage.coverage_configurations >= 1
     # Jacoco plugin mention is recorded as declared framework evidence.
-    assert any(
-        item.framework is FrameworkFamily.JACOCO
-        for item in evidence.framework_facts
-    )
+    assert any(item.framework is FrameworkFamily.JACOCO for item in evidence.framework_facts)
     payload = dumps_stable_json(repository_testing_evidence_payload(evidence))
     for forbidden in (
         "percentage",
@@ -484,9 +442,7 @@ def test_coverage_configuration_no_percentages() -> None:
 
 
 def test_ci_invocation_redaction_and_relative_paths() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     workflow = """
 name: CI
 jobs:
@@ -517,9 +473,7 @@ jobs:
 
 
 def test_lifecycle_disabled_succeeded_partial_insufficient() -> None:
-    disabled = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=False)
-    )
+    disabled = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=False))
     na = disabled.collect(
         repository_id="fixture",
         relative_paths=("tests/test_ok.py",),
@@ -528,9 +482,7 @@ def test_lifecycle_disabled_succeeded_partial_insufficient() -> None:
     assert na.status is RepositoryTestingParseStatus.NOT_APPLICABLE
     assert na.file_candidates == ()
 
-    enabled = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    enabled = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     ok = enabled.collect(
         repository_id="fixture",
         relative_paths=("tests/test_ok.py", "fixtures/data.json"),
@@ -554,24 +506,17 @@ def test_lifecycle_disabled_succeeded_partial_insufficient() -> None:
 
     # Orchestration-level empty inventory construction (collector has paths).
     insufficient = AggregatedRepositoryTestingEvidence(
-        bundle_id=make_bundle_id(
-            repository_id="empty", fingerprint="insufficient"
-        ),
+        bundle_id=make_bundle_id(repository_id="empty", fingerprint="insufficient"),
         repository_id="empty",
         status=RepositoryTestingParseStatus.INSUFFICIENT_EVIDENCE,
         limitations=standard_limitations(),
         evidence_fingerprint="insufficient",
     )
-    assert (
-        insufficient.status
-        is RepositoryTestingParseStatus.INSUFFICIENT_EVIDENCE
-    )
+    assert insufficient.status is RepositoryTestingParseStatus.INSUFFICIENT_EVIDENCE
 
 
 def test_coverage_summary_reconciles_with_record_lengths() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=(
@@ -582,16 +527,13 @@ def test_coverage_summary_reconciles_with_record_lengths() -> None:
             ".github/workflows/ci.yml",
         ),
         file_texts={
-            "tests/test_ok.py": (
-                "@pytest.mark.skip\ndef test_ok():\n    assert True\n"
-            ),
+            "tests/test_ok.py": ("@pytest.mark.skip\ndef test_ok():\n    assert True\n"),
             "fixtures/data.json": "{}",
             ".coveragerc": "[run]\nsource=src\n",
             "package.json": json.dumps(
                 {"devDependencies": {"jest": "29"}, "scripts": {"test": "jest"}}
             ),
-            ".github/workflows/ci.yml": "jobs:\n  t:\n    steps:\n"
-            "      - run: npm test\n",
+            ".github/workflows/ci.yml": "jobs:\n  t:\n    steps:\n      - run: npm test\n",
         },
     )
     cov = evidence.coverage
@@ -599,14 +541,10 @@ def test_coverage_summary_reconciles_with_record_lengths() -> None:
     assert cov.marker_facts == len(evidence.marker_facts)
     assert cov.fixture_support_candidates == len(evidence.fixture_facts)
     assert cov.coverage_configurations == sum(
-        1
-        for item in evidence.coverage_facts
-        if "configuration" in item.fact_type.value
+        1 for item in evidence.coverage_facts if "configuration" in item.fact_type.value
     )
     assert cov.frameworks_declared == sum(
-        1
-        for item in evidence.framework_facts
-        if item.basis is FrameworkEvidenceBasis.DECLARED
+        1 for item in evidence.framework_facts if item.basis is FrameworkEvidenceBasis.DECLARED
     )
     assert cov.frameworks_structurally_observed == sum(
         1
@@ -616,9 +554,7 @@ def test_coverage_summary_reconciles_with_record_lengths() -> None:
 
 
 def test_determinism_shuffle_paths() -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     paths = [
         "tests/test_b.py",
         "tests/test_a.py",
@@ -657,9 +593,7 @@ def test_determinism_shuffle_paths() -> None:
 
 
 def test_artifact_write_stable(tmp_path: Path) -> None:
-    service = RepositoryTestingEvidenceService(
-        RepositoryTestingEvidenceSettings(enabled=True)
-    )
+    service = RepositoryTestingEvidenceService(RepositoryTestingEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=("tests/test_ok.py",),
@@ -723,9 +657,7 @@ def test_regression_testing_assessment_and_security_imports() -> None:
 
     assert TESTING_ASSESSMENT_SCHEMA_VERSION == "1.2.0"
     assert SCHEMA_NAME == "testing-assessment"
-    section = TestAssessmentAssembler().assemble_empty(
-        repository_id="fixture", pack_enabled=True
-    )
+    section = TestAssessmentAssembler().assemble_empty(repository_id="fixture", pack_enabled=True)
     assert section.section_version == "1.2.0"
     assert section.findings == ()
     assert section.execution_summary.total_finding_count == 0

@@ -37,7 +37,9 @@ def test_constructor_is_lazy_with_injected_client() -> None:
 
 
 def test_throttling_still_raises_timeout_error() -> None:
-    provider = BedrockAIModelProvider(client=fakes.Client(fakes.client_error("ThrottlingException")))
+    provider = BedrockAIModelProvider(
+        client=fakes.Client(fakes.client_error("ThrottlingException"))
+    )
     with pytest.raises(AIProviderTimeoutError):
         provider.invoke(fixtures.model_request(), fixtures.invocation_options())
 

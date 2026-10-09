@@ -124,9 +124,7 @@ def _finding(
 
 
 def _facts_all_ok():
-    return execution_facts_from_status_map(
-        {rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS}
-    )
+    return execution_facts_from_status_map({rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS})
 
 
 def _evidence(
@@ -143,9 +141,7 @@ def _evidence(
                 path="tls/server.key",
                 kind=SensitiveArtifactKind.PRIVATE_KEY,
                 inspection_status=InspectionStatus.INSPECTED,
-                content_classifications=(
-                    ContentClassification.PRIVATE_KEY_MATERIAL,
-                ),
+                content_classifications=(ContentClassification.PRIVATE_KEY_MATERIAL,),
                 classification=SourceClassification.SOURCE,
                 provenance=_prov(),
             ),
@@ -277,8 +273,7 @@ def test_adapter_purity_no_reanalysis() -> None:
     after = dumps_stable_json(assessment.model_dump(mode="json"))
     assert before == after
     assert (
-        report.finding_summary.all_finding_count
-        == assessment.finding_inventory.total_finding_count
+        report.finding_summary.all_finding_count == assessment.finding_inventory.total_finding_count
     )
 
 
@@ -286,15 +281,11 @@ def test_adapter_purity_no_reanalysis() -> None:
     ("factory", "expected"),
     [
         (
-            lambda: SecurityAssessmentAssembler().assemble_disabled(
-                repository_id="repo:x"
-            ),
+            lambda: SecurityAssessmentAssembler().assemble_disabled(repository_id="repo:x"),
             "disabled",
         ),
         (
-            lambda: SecurityAssessmentAssembler().assemble_not_requested(
-                repository_id="repo:x"
-            ),
+            lambda: SecurityAssessmentAssembler().assemble_not_requested(repository_id="repo:x"),
             "not_requested",
         ),
         (
@@ -304,9 +295,7 @@ def test_adapter_purity_no_reanalysis() -> None:
             "insufficient_evidence",
         ),
         (
-            lambda: SecurityAssessmentAssembler().assemble_failed(
-                repository_id="repo:x"
-            ),
+            lambda: SecurityAssessmentAssembler().assemble_failed(repository_id="repo:x"),
             "failed",
         ),
         (
@@ -442,16 +431,12 @@ def test_partial_evidence_executive_summary() -> None:
     report = SecurityReportAdapter().adapt(_assemble(evidence=evidence))
     assert "Evidence collection was partial" in report.executive_summary
     assert any(item.diagnostic_code == "malformed_yaml" for item in report.diagnostics)
-    assert all(
-        item.finding_id != "d1" for item in report.finding_summary.production_findings
-    )
+    assert all(item.finding_id != "d1" for item in report.finding_summary.production_findings)
 
 
 def test_insufficient_and_failed_summaries() -> None:
     insufficient = SecurityReportAdapter().adapt(
-        SecurityAssessmentAssembler().assemble_insufficient_evidence(
-            repository_id="repo:x"
-        )
+        SecurityAssessmentAssembler().assemble_insufficient_evidence(repository_id="repo:x")
     )
     assert "unavailable or insufficient" in insufficient.executive_summary
     failed = SecurityReportAdapter().adapt(
@@ -480,9 +465,7 @@ def test_projection_without_regeneration() -> None:
     assert {item.recommendation_id for item in report.recommendations} <= {
         item.recommendation_id for item in assessment.recommendations
     }
-    assert SecurityThemeKind.PRIVATE_KEY_EXPOSURE.value in {
-        item.kind for item in report.themes
-    }
+    assert SecurityThemeKind.PRIVATE_KEY_EXPOSURE.value in {item.kind for item in report.themes}
     assert SecurityConclusionKind.PRIVATE_KEY_MATERIAL_DETECTED.value in {
         item.kind for item in report.conclusions
     }
@@ -550,9 +533,7 @@ def test_json_optional_and_deterministic() -> None:
     assert "security" in with_sec["assessment"]
     assert "security" not in without["assessment"]
     left = dumps_stable_json(with_sec)
-    right = dumps_stable_json(
-        build_assessment_json_document(_report_input(security_report=report))
-    )
+    right = dumps_stable_json(build_assessment_json_document(_report_input(security_report=report)))
     assert left == right
     assert "all_finding_summaries" not in left
 

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/PolicyOverrideBundle.json",
+  "title": "CodeStrata Engine Policy Override Bundle (E04.2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.policy-override-bundle.v1" },
+    "schema_version": { "type": "string" },
+    "policies": { "type": "array" },
+    "exceptions": { "type": "array" }
+  }
+}

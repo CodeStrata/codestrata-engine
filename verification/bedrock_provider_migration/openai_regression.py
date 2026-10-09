@@ -122,6 +122,7 @@ def check_the_openai_adapter_module_set_is_unchanged(engine_root: Path) -> Check
         "configuration.py",
         "diagnostics.py",
         "error_mapping.py",
+        "explanation_call.py",
         "factory.py",
         "legacy_bridge.py",
         "request_mapping.py",

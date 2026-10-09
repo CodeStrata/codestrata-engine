@@ -1,0 +1,43 @@
+package_revision: ENGINE-2026-09-15-R1
+measurement_id: M33
+story: E15.1
+scan:
+  public_scan_readonly: true
+  may_modify_assessed_repository: false
+  may_run_assessed_builds_or_tests: false
+  silent_fetch_in_default_tests: false
+  private_or_customer_content_allowed: false
+selection:
+  min_github_size_kib: 50000
+  require_unique_canonical_clones: true
+  discovery_22_counts_as_fifty: false
+  convenience_replacement_to_hide_failures: false
+  axes:
+  - language_group
+  - project_shape
+  - license_family
+  - monorepo_vs_library
+  - retained_vs_unsupported_depth
+  - intentionally_vulnerable_subset
+window:
+  history_days: 180
+  history_commit_cap: 1000
+  proposed_budget_le_10k: '<=10k eligible files: 10min/2GiB'
+  proposed_budget_le_100k: '<=100k eligible files: 30min/8GiB on 4vCPU'
+  budgets_published: true
+  measured_budget_le_10k: '<=10k eligible files: 12min/1GiB'
+  measured_budget_le_100k: '<=100k eligible files: 60min/2GiB'
+  budget_evidence: 'verification/validation/corpus/results/summary.json'
+inputs:
+  git_state: detached HEAD at the pinned SHA; no branch switch of the assessed remote
+  config: Community default YAML rule pack; single YAML runtime boundary
+  feed: pinned offline OSV snapshot from E01.1; no silent online fallback
+  invocation: codestrata assess --repo <checkout> --no-ai; do not execute scanned
+    project tests or builds
+expectations:
+  crash_free_or_explicit_error: true
+  unsupported_is_not_success: true
+  budget_exceeded_never_silent_truncate: true
+  survival_is_not_analytical_correctness: true
+  coverage_unknown_if_denominator_unknown: true
+  failed_or_unrun_never_pass: true

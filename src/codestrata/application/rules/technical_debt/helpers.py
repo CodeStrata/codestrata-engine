@@ -17,8 +17,8 @@ from codestrata.domain.evidence.language.complexity.models import (
 )
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -26,8 +26,8 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
-from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.technical_debt.ids import PACK_ID, PACK_VERSION
 
 
@@ -55,7 +55,14 @@ def make_metadata(
         category=RuleCategory.TECHNICAL_DEBT,
         default_severity=severity,
         confidence=confidence_for_rule(rule_id),
-        supported_languages=("java", "python", "php", "csharp"),
+        supported_languages=(
+            "java",
+            "python",
+            "php",
+            "csharp",
+            "javascript",
+            "typescript",
+        ),
         tags=(
             "technical_debt",
             PACK_ID,
@@ -64,9 +71,7 @@ def make_metadata(
             "dimension:technical-debt",
         ),
         remediation_summary=remediation,
-        documentation_reference=(
-            "docs/analysis-intelligence/technical-debt/complexity-rules.md"
-        ),
+        documentation_reference=("docs/analysis-intelligence/technical-debt/complexity-rules.md"),
         enabled_by_default=True,
         experimental=False,
         requires_enterprise_context=False,

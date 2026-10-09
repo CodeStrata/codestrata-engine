@@ -140,9 +140,7 @@ def _recommendation(
         recommendation_type=recommendation_type,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
         recommendation_confidence=_rec_confidence(confidence),
-        actions=(
-            RecommendationAction(order=1, title="Do", description="Do it"),
-        ),
+        actions=(RecommendationAction(order=1, title="Do", description="Do it"),),
     )
 
 
@@ -203,7 +201,10 @@ def test_recommendation_confidence_caps_urgency() -> None:
         RecommendationPriority.HIGH,
     }
     assert limited_a.priority is not RecommendationPriority.IMMEDIATE
-    assert RecommendationPriorityBasis.CONFIDENCE_CAP in limited_a.basis or limited_a.score < BAND_IMMEDIATE_MIN
+    assert (
+        RecommendationPriorityBasis.CONFIDENCE_CAP in limited_a.basis
+        or limited_a.score < BAND_IMMEDIATE_MIN
+    )
 
 
 def test_title_does_not_affect_priority() -> None:
@@ -279,7 +280,9 @@ def test_correlation_aware_bounded_adjustment() -> None:
     assert RecommendationPriorityBasis.CORRELATED_SUPPORTING_FINDINGS in assessment.basis
     assert assessment.component_summary.correlation_count >= 1
     # Unrelated correlation count metadata must not inflate further.
-    noisy = rec.model_copy(update={"metadata": {"correlation_aware": "true", "correlation_count": 99}})
+    noisy = rec.model_copy(
+        update={"metadata": {"correlation_aware": "true", "correlation_count": 99}}
+    )
     noisy_a = calibrate_recommendation_priority(noisy, findings=(f1, f2))
     assert noisy_a.score == assessment.score
 
@@ -363,5 +366,7 @@ def test_resolve_finding_backed_compatibility_for_unknown_provider() -> None:
         has_supporting_findings=True,
     )
     assert policy.policy_id == "priority.finding_backed.compatibility"
-    legacy = resolve_priority_policy(None, recommendation_type="legacy", has_supporting_findings=False)
+    legacy = resolve_priority_policy(
+        None, recommendation_type="legacy", has_supporting_findings=False
+    )
     assert legacy.policy_id == "priority.legacy.compatibility"

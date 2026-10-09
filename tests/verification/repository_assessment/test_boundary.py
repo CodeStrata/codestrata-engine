@@ -36,7 +36,9 @@ def test_catalog_not_duplicated() -> None:
     # Suite must reference permanent catalog path, not invent a second list.
     contract_py = (VERIFICATION / "contract.py").read_text(encoding="utf-8")
     assert "validation/repository-catalog/catalog.json" in contract_py
-    assert "spring-petclinic" not in (VERIFICATION / "catalog.py").read_text(encoding="utf-8").lower()
+    assert (
+        "spring-petclinic" not in (VERIFICATION / "catalog.py").read_text(encoding="utf-8").lower()
+    )
     assert "spring-petclinic" not in contract_py.lower()
 
 

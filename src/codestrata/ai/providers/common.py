@@ -80,7 +80,4 @@ def redact_headers(headers: dict[str, str] | None) -> dict[str, str]:
     if not headers:
         return {}
     blocked = {"authorization", "api-key", "x-api-key", "cookie"}
-    return {
-        key: ("***" if key.lower() in blocked else value)
-        for key, value in headers.items()
-    }
+    return {key: ("***" if key.lower() in blocked else value) for key, value in headers.items()}

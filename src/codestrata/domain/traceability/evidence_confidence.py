@@ -123,10 +123,7 @@ class EvidenceConfidence(BaseModel):
         if EvidenceConfidenceBasis.LEGACY_EVIDENCE in self.basis:
             if self.level is not EvidenceConfidenceLevel.UNAVAILABLE:
                 raise ValueError("legacy_evidence must be UNAVAILABLE")
-            if (
-                self.derivation_status
-                is not EvidenceConfidenceDerivationStatus.UNAVAILABLE
-            ):
+            if self.derivation_status is not EvidenceConfidenceDerivationStatus.UNAVAILABLE:
                 raise ValueError("legacy_evidence requires unavailable derivation_status")
         if self.level is EvidenceConfidenceLevel.HIGH:
             if not _STRONG_BASES.intersection(self.basis):
@@ -143,9 +140,7 @@ class EvidenceConfidence(BaseModel):
         cls,
         *,
         limitations: tuple[str, ...] = ("Evidence confidence could not be derived.",),
-        basis: tuple[EvidenceConfidenceBasis, ...] = (
-            EvidenceConfidenceBasis.LEGACY_EVIDENCE,
-        ),
+        basis: tuple[EvidenceConfidenceBasis, ...] = (EvidenceConfidenceBasis.LEGACY_EVIDENCE,),
     ) -> EvidenceConfidence:
         return cls(
             level=EvidenceConfidenceLevel.UNAVAILABLE,
@@ -159,4 +154,7 @@ def evidence_confidence_to_json(confidence: EvidenceConfidence) -> dict[str, Any
     """Return a deterministic JSON-compatible report projection."""
 
     payload = confidence.model_dump(mode="json")
-    return json.loads(json.dumps(payload, sort_keys=True))
+    loaded = json.loads(json.dumps(payload, sort_keys=True))
+    if not isinstance(loaded, dict):
+        raise TypeError("JSON projection must be an object")
+    return loaded

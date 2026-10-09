@@ -85,8 +85,7 @@ class PhpTechnologyDetector:
             )
 
         if any(
-            name in file_set
-            for name in ("spark", "system/CodeIgniter.php", "app/Config/Paths.php")
+            name in file_set for name in ("spark", "system/CodeIgniter.php", "app/Config/Paths.php")
         ) or any(
             path.startswith("system/") and path.endswith("CodeIgniter.php")
             for path in repository.files

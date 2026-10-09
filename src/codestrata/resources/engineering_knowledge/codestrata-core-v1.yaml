@@ -82,6 +82,15 @@ nodes:
       vendor: VMware
       lifecycle_status: unknown
 
+  - node_type: language
+    canonical_key: typescript
+    properties:
+      name: TypeScript
+      description: Typed superset of JavaScript that compiles to plain JavaScript.
+      paradigm: [multi-paradigm, functional, object-oriented]
+      compiled: true
+      managed_runtime: true
+
   - node_type: framework
     canonical_key: react
     properties:
@@ -89,6 +98,25 @@ nodes:
       description: Component-oriented library commonly used as a UI framework.
       ecosystem: javascript
       lifecycle_status: unknown
+      aliases: [reactjs, react-js]
+
+  - node_type: framework
+    canonical_key: angular
+    properties:
+      name: Angular
+      description: Component-based framework for building scalable web applications.
+      ecosystem: typescript
+      lifecycle_status: unknown
+      aliases: [angular-core, angularjs]
+
+  - node_type: framework
+    canonical_key: vue
+    properties:
+      name: Vue.js
+      description: Progressive JavaScript framework for building user interfaces.
+      ecosystem: javascript
+      lifecycle_status: unknown
+      aliases: [vuejs, vue-js]
 
   - node_type: framework
     canonical_key: django
@@ -362,6 +390,14 @@ relationships:
 
   - relationship_type: depends_on
     source: framework:react
+    target: language:javascript
+
+  - relationship_type: depends_on
+    source: framework:angular
+    target: language:typescript
+
+  - relationship_type: depends_on
+    source: framework:vue
     target: language:javascript
 
   - relationship_type: depends_on

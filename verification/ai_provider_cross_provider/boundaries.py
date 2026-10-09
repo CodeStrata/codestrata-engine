@@ -326,9 +326,7 @@ def check_openrouter_registered_in_assess_registry() -> CheckResult:
 def check_doctor_has_openrouter_local_readiness(engine_root: Path) -> CheckResult:
     path = engine_root / "src" / "codestrata" / "ai" / "providers" / "doctor.py"
     source = path.read_text(encoding="utf-8")
-    has_readiness = (
-        "evaluate_openrouter_readiness" in source and 'name="openrouter"' in source
-    )
+    has_readiness = "evaluate_openrouter_readiness" in source and 'name="openrouter"' in source
     construction_offenders = [
         token
         for token in (
@@ -343,10 +341,7 @@ def check_doctor_has_openrouter_local_readiness(engine_root: Path) -> CheckResul
         name="doctor_has_openrouter_local_readiness",
         category="openrouter_absent",
         ok=has_readiness and not construction_offenders,
-        detail=(
-            f"has_readiness={has_readiness} "
-            f"construction_offenders={construction_offenders}"
-        ),
+        detail=(f"has_readiness={has_readiness} construction_offenders={construction_offenders}"),
     )
 
 
@@ -363,7 +358,9 @@ def run_openrouter_absent_checks(engine_root: Path) -> tuple[list[CheckResult], 
     }
 
 
-def run_privacy_checks(report_payload: dict[str, Any] | None = None) -> tuple[list[CheckResult], dict[str, Any]]:
+def run_privacy_checks(
+    report_payload: dict[str, Any] | None = None,
+) -> tuple[list[CheckResult], dict[str, Any]]:
     forbidden = (
         "sk-",
         "AKIA",

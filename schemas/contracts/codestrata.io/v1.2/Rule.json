@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/Rule.json",
+  "title": "CodeStrata Engine Rule",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "api_version", "kind", "metadata", "digest", "applies_to", "select", "condition", "finding"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.rule.v1" },
+    "schema_version": { "type": "string" },
+    "api_version": { "type": "string" },
+    "kind": { "type": "string", "const": "Rule" },
+    "metadata": { "type": "object", "additionalProperties": false },
+    "digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "applies_to": { "type": "object", "additionalProperties": false },
+    "select": { "type": "object", "additionalProperties": false },
+    "condition": { "type": "object", "additionalProperties": false },
+    "finding": { "type": "object", "additionalProperties": false },
+    "metric": { "type": ["object", "null"] },
+    "evidence_include": { "type": "array" },
+    "parameter_schema": { "type": "array" }
+  }
+}

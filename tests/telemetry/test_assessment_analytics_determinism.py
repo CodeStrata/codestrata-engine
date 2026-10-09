@@ -33,9 +33,7 @@ from codestrata.telemetry.analytics.installation_identity import (
 
 
 def _identity() -> AnonymousInstallationIdentity:
-    return AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    return AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
 
 
 def test_determinism() -> None:
@@ -53,9 +51,7 @@ def test_determinism() -> None:
     )
     parsed = json.loads(assessment_analytics_event_to_stable_json(event))
     assert list(parsed.keys()) == sorted(parsed.keys())
-    assert parsed["enabled_assessment_heads"] == sorted(
-        parsed["enabled_assessment_heads"]
-    )
+    assert parsed["enabled_assessment_heads"] == sorted(parsed["enabled_assessment_heads"])
 
 
 def test_diagnostics_never_include_identity_or_head_list() -> None:

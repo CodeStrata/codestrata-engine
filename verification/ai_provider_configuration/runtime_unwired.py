@@ -53,10 +53,10 @@ def check_bedrock_and_openai_settings_declare_the_same_timeout_retry_fields() ->
 
     bedrock_fields = set(BedrockSettings.model_fields)
     openai_fields = set(OpenAISettings.model_fields)
-    ok = (
-        {"timeout_seconds", "max_retries"} <= bedrock_fields
-        and {"timeout_seconds", "max_retries"} <= openai_fields
-    )
+    ok = {"timeout_seconds", "max_retries"} <= bedrock_fields and {
+        "timeout_seconds",
+        "max_retries",
+    } <= openai_fields
     return CheckResult(
         name="bedrock_and_openai_settings_still_declare_timeout_and_max_retries_fields",
         category="runtime_unwired",

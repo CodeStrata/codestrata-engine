@@ -1,0 +1,70 @@
+package_revision: ENGINE-2026-09-15-R1
+measurement_id: M33
+story: E15.2
+repeats: 3
+coverage:
+  source: codestrata
+  branch: true
+  fail_under: 80
+  separate_branch_threshold: false
+scan:
+  public_scan_readonly: true
+  may_modify_assessed_repository: false
+  may_run_assessed_builds_or_tests: false
+  silent_fetch_in_default_tests: false
+  no_egress_default: true
+semantic:
+  exclude_only_declared_operational_fields: true
+  operational_fields:
+  - generated_at
+  - duration_ms
+  - wall_seconds
+  - peak_rss_bytes
+  - run_id
+  - pid
+  - host
+  - timing
+  - latency_ms
+invocation:
+  argv_prefix:
+  - codestrata
+  - assess
+  - --no-ai
+  forbidden_substrings:
+  - npm test
+  - npm run
+  - mvn
+  - gradle
+  - pytest
+  - make
+  - cargo test
+  - go test
+disclosed_skips:
+- id: posix-execute-bits
+  reason_substring: POSIX execute bits are not available
+  platforms: []
+- id: host-symlink
+  reason_substring: symlink
+  platforms: []
+- id: remote-validation
+  reason_substring: CODESTRATA_RUN_REMOTE_VALIDATION
+  platforms: []
+- id: missing-spring-petclinic
+  reason_substring: spring-petclinic
+  platforms: []
+- id: historical-frozen
+  reason_substring: HISTORICAL_FROZEN
+  platforms: []
+not_yet_due:
+- G50
+- G52
+- published-m33-budgets
+- e11.2-html-views
+- g40-install-smoke
+corpus_configurations:
+- id: planted-local
+  notes: Default tests use Engine-owned planted artifacts; remotes stay opt-in.
+- id: representative-java
+  notes: Doris pin identity only; no remote clone in default tests.
+- id: dogfood
+  notes: Public codestrata-engine pin identity only.

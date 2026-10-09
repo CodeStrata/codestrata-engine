@@ -69,9 +69,7 @@ def _testing_applicability(context: RuleExecutionContext) -> RuleApplicability:
     if not evidence_is_usable(evidence):
         return RuleApplicability.not_applicable(
             reason_code=RuleSkipReason.OTHER,
-            message=(
-                f"Repository-testing evidence status is {evidence.status.value}"
-            ),
+            message=(f"Repository-testing evidence status is {evidence.status.value}"),
         )
     return RuleApplicability.applicable()
 
@@ -90,15 +88,12 @@ class DisabledOrSkippedMarkersRule:
                 "Does not claim tests are obsolete, failing, or unjustified."
             ),
             remediation=(
-                "Review disabled or skipped markers and restore or remove them "
-                "intentionally."
+                "Review disabled or skipped markers and restore or remove them intentionally."
             ),
             severity=severity_for_marker_count(1),
         )
 
-    def evaluate_applicability(
-        self, context: RuleExecutionContext
-    ) -> RuleApplicability:
+    def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
         return _testing_applicability(context)
 
     def evaluate(self, context: RuleExecutionContext) -> SharedRuleEvaluationResult:
@@ -128,9 +123,7 @@ class DisabledOrSkippedMarkersRule:
             if path_count >= TEST001_HOTSPOT_MIN_COUNT
         ][:TEST001_HOTSPOT_MAX_PATHS]
 
-        hotspot_text = "; ".join(
-            f"{path} ({path_count})" for path, path_count in hotspots
-        )
+        hotspot_text = "; ".join(f"{path} ({path_count})" for path, path_count in hotspots)
         type_text = ", ".join(
             f"{name}={value}"
             for name, value in sorted(type_counts.items(), key=lambda pair: pair[0])
@@ -178,8 +171,7 @@ class DisabledOrSkippedMarkersRule:
                 evidence_marker(
                     item=item,
                     message=(
-                        f"marker_type={item.marker_type.value}; "
-                        f"marker_text={item.marker_text}"
+                        f"marker_type={item.marker_type.value}; marker_text={item.marker_text}"
                     ),
                     testing_category=category,
                 )
@@ -223,22 +215,14 @@ class UnconfirmedCandidatesRule:
             ),
         )
 
-    def evaluate_applicability(
-        self, context: RuleExecutionContext
-    ) -> RuleApplicability:
+    def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
         return _testing_applicability(context)
 
     def evaluate(self, context: RuleExecutionContext) -> SharedRuleEvaluationResult:
         evidence = repository_testing_evidence(context)
         assert evidence is not None
-        considered = [
-            item
-            for item in evidence.file_candidates
-            if is_considered_candidate(item)
-        ]
-        unconfirmed = [
-            item for item in considered if is_unconfirmed_candidate(item)
-        ]
+        considered = [item for item in evidence.file_candidates if is_considered_candidate(item)]
+        unconfirmed = [item for item in considered if is_unconfirmed_candidate(item)]
         considered_count = len(considered)
         unconfirmed_count = len(unconfirmed)
         if considered_count < TEST002_MIN_CONSIDERED:
@@ -327,9 +311,7 @@ class DeclaredWithoutObservationRule:
             ),
         )
 
-    def evaluate_applicability(
-        self, context: RuleExecutionContext
-    ) -> RuleApplicability:
+    def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
         return _testing_applicability(context)
 
     def evaluate(self, context: RuleExecutionContext) -> SharedRuleEvaluationResult:
@@ -339,14 +321,10 @@ class DeclaredWithoutObservationRule:
             return SharedRuleEvaluationResult.not_matched()
 
         declared_items = [
-            item
-            for item in evidence.framework_facts
-            if is_declared_test_framework(item)
+            item for item in evidence.framework_facts if is_declared_test_framework(item)
         ]
         observed_frameworks = [
-            item.framework
-            for item in evidence.framework_facts
-            if is_observed_test_framework(item)
+            item.framework for item in evidence.framework_facts if is_observed_test_framework(item)
         ]
         declared_by_framework: dict[str, FrameworkFactEvidence] = {}
         for item in declared_items:
@@ -356,10 +334,7 @@ class DeclaredWithoutObservationRule:
         for framework_value in sorted(declared_by_framework):
             item = declared_by_framework[framework_value]
             framework = item.framework
-            if any(
-                frameworks_equivalent(framework, observed)
-                for observed in observed_frameworks
-            ):
+            if any(frameworks_equivalent(framework, observed) for observed in observed_frameworks):
                 continue
             if not language_support_present(
                 framework=framework,
@@ -399,9 +374,7 @@ class DeclaredWithoutObservationRule:
                     title="Declared test framework lacks structural observation",
                     summary=(
                         "Declared test framework(s) without corresponding "
-                        "structural observation: "
-                        + ", ".join(framework_names)
-                        + "."
+                        "structural observation: " + ", ".join(framework_names) + "."
                     ),
                     severity=RuleSeverity.LOW,
                     confidence=MatchEvidenceConfidence.MEDIUM,
@@ -436,9 +409,7 @@ class CoverageWithoutCiInvocationRule:
             severity=RuleSeverity.INFORMATIONAL,
         )
 
-    def evaluate_applicability(
-        self, context: RuleExecutionContext
-    ) -> RuleApplicability:
+    def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
         return _testing_applicability(context)
 
     def evaluate(self, context: RuleExecutionContext) -> SharedRuleEvaluationResult:
@@ -447,9 +418,7 @@ class CoverageWithoutCiInvocationRule:
         coverage_items = [
             item for item in evidence.coverage_facts if is_coverage_configuration(item)
         ]
-        has_coverage = bool(coverage_items) or (
-            evidence.coverage.coverage_configurations > 0
-        )
+        has_coverage = bool(coverage_items) or (evidence.coverage.coverage_configurations > 0)
         if not has_coverage:
             return SharedRuleEvaluationResult.not_matched()
         if evidence.coverage.ci_files_inspected == 0:
@@ -463,8 +432,7 @@ class CoverageWithoutCiInvocationRule:
                 evidence_coverage(
                     item=item,
                     message=(
-                        f"fact_type={item.fact_type.value}; "
-                        "no CI test/coverage invocation observed"
+                        f"fact_type={item.fact_type.value}; no CI test/coverage invocation observed"
                     ),
                     testing_category=category,
                 )
@@ -477,20 +445,13 @@ class CoverageWithoutCiInvocationRule:
             evidence_items = (
                 RuleEvidence(
                     kind=RuleEvidenceKind.REPOSITORY_FACT,
-                    subject_reference=(
-                        f"{RULE_COVERAGE_WITHOUT_CI_INVOCATION}:coverage_config"
-                    ),
+                    subject_reference=(f"{RULE_COVERAGE_WITHOUT_CI_INVOCATION}:coverage_config"),
                     message=(
-                        "coverage_configurations="
-                        f"{evidence.coverage.coverage_configurations}"
+                        f"coverage_configurations={evidence.coverage.coverage_configurations}"
                     ),
                     attributes={
-                        "coverage_configurations": str(
-                            evidence.coverage.coverage_configurations
-                        ),
-                        "ci_files_inspected": str(
-                            evidence.coverage.ci_files_inspected
-                        ),
+                        "coverage_configurations": str(evidence.coverage.coverage_configurations),
+                        "ci_files_inspected": str(evidence.coverage.ci_files_inspected),
                         "testing_category": category.value,
                     },
                     provenance="aggregated_repository_testing_evidence",

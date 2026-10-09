@@ -164,14 +164,30 @@ def run_cli_initialization_verification(
         work.mkdir()
 
         scenario_runners = [
-            ("A", lambda: run_scenario_a_minimal(work / "A", codestrata=codestrata, env=env, contract=active)),
+            (
+                "A",
+                lambda: run_scenario_a_minimal(
+                    work / "A", codestrata=codestrata, env=env, contract=active
+                ),
+            ),
             ("B", lambda: run_scenario_b_empty(work / "B", codestrata=codestrata, env=env)),
-            ("C", lambda: run_scenario_c_existing_valid(work / "C", codestrata=codestrata, env=env)),
+            (
+                "C",
+                lambda: run_scenario_c_existing_valid(work / "C", codestrata=codestrata, env=env),
+            ),
             ("D", lambda: run_scenario_d_malformed(work / "D", codestrata=codestrata, env=env)),
             ("E", lambda: run_scenario_e_unwritable(work / "E", codestrata=codestrata, env=env)),
-            ("F", lambda: run_scenario_f_nested(work / "F", codestrata=codestrata, env=env, contract=active)),
+            (
+                "F",
+                lambda: run_scenario_f_nested(
+                    work / "F", codestrata=codestrata, env=env, contract=active
+                ),
+            ),
             ("G", lambda: run_scenario_g_spaces(work / "G_parent", codestrata=codestrata, env=env)),
-            ("H", lambda: run_scenario_h_noninteractive(work / "H", codestrata=codestrata, env=env)),
+            (
+                "H",
+                lambda: run_scenario_h_noninteractive(work / "H", codestrata=codestrata, env=env),
+            ),
             ("I", lambda: run_scenario_i_unsupported(work / "I", codestrata=codestrata, env=env)),
             ("J", lambda: run_scenario_j_unrelated(work / "J", codestrata=codestrata, env=env)),
             (

@@ -155,10 +155,7 @@ def check_bedrock_routes_through_its_own_adapter(engine_root: Path) -> CheckResu
         name="bedrock_routes_through_its_own_adapter_and_never_the_openai_one",
         category="mixed_mode",
         ok=not from_openai_adapter and uses_own_adapter,
-        detail=(
-            f"openai_imports={from_openai_adapter} "
-            f"uses_bedrock_adapter={uses_own_adapter}"
-        ),
+        detail=(f"openai_imports={from_openai_adapter} uses_bedrock_adapter={uses_own_adapter}"),
     )
 
 

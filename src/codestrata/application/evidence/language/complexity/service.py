@@ -12,6 +12,7 @@ from codestrata.application.evidence.language.complexity.collector import (
     aggregate_complexity_bundles,
     collect_csharp_complexity_bundle,
     collect_java_complexity_bundle,
+    collect_javascript_complexity_bundle,
     collect_php_complexity_bundle,
     collect_python_complexity_bundle,
 )
@@ -73,6 +74,17 @@ class ComplexityEvidenceService:
         if self._settings.php.enabled:
             bundles.append(
                 collect_php_complexity_bundle(
+                    relative_paths=relative_paths,
+                    file_texts=file_texts,
+                    ignore_path_markers=ignore,
+                    max_files=self._settings.max_files,
+                    max_file_chars=self._settings.max_file_chars,
+                    configuration_fingerprint=configuration_fingerprint,
+                )
+            )
+        if self._settings.javascript.enabled:
+            bundles.append(
+                collect_javascript_complexity_bundle(
                     relative_paths=relative_paths,
                     file_texts=file_texts,
                     ignore_path_markers=ignore,

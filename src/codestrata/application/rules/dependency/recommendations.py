@@ -38,6 +38,5 @@ _REMEDIATIONS: dict[str, str] = {
 def recommendation_for(rule_id: str) -> str:
     return _REMEDIATIONS.get(
         rule_id,
-        "Address the dependency declaration hygiene issue using repository-"
-        "local evidence only.",
+        "Address the dependency declaration hygiene issue using repository-local evidence only.",
     )

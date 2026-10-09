@@ -26,8 +26,8 @@ from codestrata.telemetry.analytics.installation_identity_errors import (
 from codestrata.telemetry.analytics.installation_identity_policy import (
     COMMUNITY_ANONYMOUS_INSTALLATION_IDENTITY_SCHEMA_ID,
     IDENTITY_FILENAME,
-    InstallationIdentityPolicyError,
     CommunityAnonymousInstallationIdentityPolicy,
+    InstallationIdentityPolicyError,
 )
 from codestrata.telemetry.analytics.installation_identity_serialization import (
     identity_policy_to_stable_json,
@@ -103,9 +103,7 @@ def test_rejects_invalid_mappings(
     with pytest.raises(InstallationIdentityError) as exc:
         parse_identity_mapping(payload)
     assert exc.value.code is code
-    assert payload.get("installation_id", "sentinel") == payload.get(
-        "installation_id", "sentinel"
-    )
+    assert payload.get("installation_id", "sentinel") == payload.get("installation_id", "sentinel")
     # Error message is the code value only — no payload echo.
     assert str(exc.value) == code.value
 
@@ -140,9 +138,7 @@ def test_migrate_identity_mapping_noop_for_1_0() -> None:
 
 
 def test_deterministic_serialization() -> None:
-    record = AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    record = AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
     a = identity_to_stable_json(record)
     b = identity_to_stable_json(record)
     assert a == b

@@ -1,0 +1,30 @@
+{
+  "engine_git_sha": "83963e2b809bc222f961c449c1728054f6fc7d5f",
+  "engine_tree_dirty": true,
+  "host": "Windows 11 cpu=16",
+  "measured_budgets": {
+    "le_100k_files": {
+      "count": 15,
+      "max_peak_rss_bytes": 965130000,
+      "max_wall_seconds": 3590.65,
+      "slowest": "nextcloud"
+    },
+    "le_10k_files": {
+      "count": 36,
+      "max_peak_rss_bytes": 503812096,
+      "max_wall_seconds": 696.963,
+      "slowest": "codestrata-engine"
+    }
+  },
+  "note": "peak_rss_bytes is the direct codestrata process; helper subprocesses are not included. Budget publication is a separate reviewed edit of policy.yaml.",
+  "python": "3.14.7",
+  "record_count": 51,
+  "schema": "codestrata.m33.tier-summary.v1",
+  "source_tree_digest": "e660d3315c7c7cd87a64c20791b195a68a299ded813000dcce5657d5bfb7f2ff",
+  "status_counts": {
+    "PASS": 42,
+    "UNSUPPORTED": 9
+  },
+  "wheel_sha256": "421d4d8d083b93605b3873340c0ff1154b79151f2a64330424989b1f48507ff0",
+  "written_at": "2026-09-30T10:54:00+00:00"
+}

@@ -21,6 +21,7 @@ from codestrata.models.scan_comparison import (
     ComparedRecommendation,
     ComparisonSummary,
     FactChange,
+    MetricDelta,
     PriorityChange,
     ScanComparison,
     SeverityChange,
@@ -47,10 +48,13 @@ _PRIORITY_RANK = {
 # Identity keys for structured object lists in repository facts.
 _OBJECT_LIST_IDENTITIES: dict[str, tuple[str, ...]] = {
     "facts.cicd.pipelines": ("provider", "path"),
+    # Generated Technology.id values are not semantic identity.
+    "facts.technologies": ("category", "name"),
 }
 
 _OBJECT_LIST_SKIP_FIELDS: dict[str, frozenset[str]] = {
     "facts.cicd.pipelines": frozenset({"metadata"}),
+    "facts.technologies": frozenset({"id"}),
 }
 
 _PIPELINE_FIELD_LABELS: dict[str, str] = {
@@ -66,6 +70,27 @@ _PIPELINE_FIELD_LABELS: dict[str, str] = {
     "jobs": "jobs",
     "pipeline_name": "pipeline name",
 }
+
+
+def _structured_presence_summary(
+    *,
+    path: str,
+    action: str,
+    item: Mapping[str, Any],
+    identity: str,
+) -> str:
+    """Describe an added or removed structured fact without using generated ids."""
+
+    if path == "facts.cicd.pipelines":
+        provider = str(item.get("provider", "unknown"))
+        item_path = str(item.get("path", identity))
+        return f"{action} pipeline {item_path} ({provider})"
+    name = str(item.get("name") or identity)
+    category = str(item.get("category") or "")
+    if category:
+        return f"{action} {name} ({category})"
+    return f"{action} {name}"
+
 
 _VERSION_DIFFERENCE_NOTE = "Some differences may result from analyzer or ruleset version changes."
 
@@ -152,8 +177,61 @@ class ScanComparisonService:
         baseline: AnalysisResult,
         current_timestamp: str,
         baseline_timestamp: str,
+        *,
+        evaluate_lifecycle: bool = False,
+        rule_specs: Mapping[str, Any] | None = None,
+        rename_map: Mapping[str, str] | None = None,
+        base_graph: Any | None = None,
+        candidate_graph: Any | None = None,
+        test_associations: Any | None = None,
+        boundaries: Mapping[str, str] | None = None,
+        boundary_dimension: str | None = None,
+        changed_files: Sequence[str] = (),
+        churn_by_component: Mapping[str, int] | None = None,
+        centrality_by_component: Mapping[str, Any] | None = None,
+        comparable_universe: Sequence[str] = (),
+        source_changed: bool = False,
+        feed_changed: bool = False,
+        config_changed: bool = False,
+        coverage_changed: bool = False,
+        engine_changed: bool = False,
+        controlled_rerun: bool = False,
+        controlled_reruns: Sequence[Any] = (),
+        base_digests: Mapping[str, str | None] | None = None,
+        candidate_digests: Mapping[str, str | None] | None = None,
+        finding_causes: Mapping[str, str] | None = None,
+        isolated_causes: Mapping[str, Sequence[str]] | None = None,
     ) -> ScanComparison:
         """Compare two in-memory analysis results deterministically."""
+        if evaluate_lifecycle:
+            return self.compare_with_lifecycle(
+                current=current,
+                baseline=baseline,
+                current_timestamp=current_timestamp,
+                baseline_timestamp=baseline_timestamp,
+                rule_specs=rule_specs,
+                rename_map=rename_map,
+                base_graph=base_graph,
+                candidate_graph=candidate_graph,
+                test_associations=test_associations,
+                boundaries=boundaries,
+                boundary_dimension=boundary_dimension,
+                changed_files=changed_files,
+                churn_by_component=churn_by_component,
+                centrality_by_component=centrality_by_component,
+                comparable_universe=comparable_universe,
+                source_changed=source_changed,
+                feed_changed=feed_changed,
+                config_changed=config_changed,
+                coverage_changed=coverage_changed,
+                engine_changed=engine_changed,
+                controlled_rerun=controlled_rerun,
+                controlled_reruns=controlled_reruns,
+                base_digests=base_digests,
+                candidate_digests=candidate_digests,
+                finding_causes=finding_causes,
+                isolated_causes=isolated_causes,
+            )
 
         new_findings, resolved_findings, unchanged_findings, severity_changes = (
             self._compare_findings(
@@ -173,6 +251,8 @@ class ScanComparisonService:
         fact_changes = self._compare_facts(
             current=current.facts,
             baseline=baseline.facts,
+            current_technologies=current.technologies,
+            baseline_technologies=baseline.technologies,
         )
 
         baseline_analyzer_version = baseline.analyzer_version
@@ -221,6 +301,358 @@ class ScanComparisonService:
             priority_changes=priority_changes,
             fact_changes=fact_changes,
             summary=summary,
+        )
+
+    def compare_with_lifecycle(
+        self,
+        current: AnalysisResult,
+        baseline: AnalysisResult,
+        current_timestamp: str,
+        baseline_timestamp: str,
+        *,
+        rule_specs: Mapping[str, Any] | None = None,
+        rename_map: Mapping[str, str] | None = None,
+        base_graph: Any | None = None,
+        candidate_graph: Any | None = None,
+        test_associations: Any | None = None,
+        boundaries: Mapping[str, str] | None = None,
+        boundary_dimension: str | None = None,
+        changed_files: Sequence[str] = (),
+        churn_by_component: Mapping[str, int] | None = None,
+        centrality_by_component: Mapping[str, Any] | None = None,
+        comparable_universe: Sequence[str] = (),
+        source_changed: bool = False,
+        feed_changed: bool = False,
+        config_changed: bool = False,
+        coverage_changed: bool = False,
+        engine_changed: bool = False,
+        controlled_rerun: bool = False,
+        controlled_reruns: Sequence[Any] = (),
+        base_digests: Mapping[str, str | None] | None = None,
+        candidate_digests: Mapping[str, str | None] | None = None,
+        finding_causes: Mapping[str, str] | None = None,
+        isolated_causes: Mapping[str, Sequence[str]] | None = None,
+    ) -> ScanComparison:
+        """Compare two analysis results using versioned M28, M29, M30, and M31."""
+        from codestrata.application.incremental.lifecycle import (
+            canonical_state_from_analysis_result,
+            evaluate_m28,
+            scan_comparison_from_m28,
+        )
+
+        base_state = canonical_state_from_analysis_result(
+            baseline,
+            artifact_digest=str(baseline.metadata.get("artifact_digest") or baseline.id),
+            coverage_status=baseline.metadata.get("coverage_status", "pass"),
+            rule_specs=rule_specs,
+        )
+        cand_state = canonical_state_from_analysis_result(
+            current,
+            artifact_digest=str(current.metadata.get("artifact_digest") or current.id),
+            coverage_status=current.metadata.get("coverage_status", "pass"),
+            rename_map=rename_map,
+            rule_specs=rule_specs,
+        )
+        m28_result = evaluate_m28(
+            base_state,
+            cand_state,
+            rule_specs=rule_specs,
+            finding_causes=finding_causes,
+            feed_changed=feed_changed,
+            source_changed=source_changed,
+        )
+
+        (
+            new_recs,
+            resolved_recs,
+            unchanged_recs,
+            priority_changes,
+        ) = self._compare_recommendations(
+            current=current.recommendations,
+            baseline=baseline.recommendations,
+        )
+        fact_changes = self._compare_facts(
+            current=current.facts,
+            baseline=baseline.facts,
+            current_technologies=current.technologies,
+            baseline_technologies=baseline.technologies,
+        )
+
+        notes: list[str] = []
+        if (
+            baseline.analyzer_version != current.analyzer_version
+            or baseline.ruleset_version != current.ruleset_version
+        ):
+            notes.append(_VERSION_DIFFERENCE_NOTE)
+
+        if self._provider_versions_differ(current=current, baseline=baseline):
+            notes.append(_PROVIDER_VERSION_NOTE)
+
+        # M29 Graph delta and blast radius
+        graph_delta = None
+        blast_radius = None
+        change_summary = None
+        if base_graph is not None or candidate_graph is not None:
+            from codestrata.application.incremental.graph_delta import (
+                calculate_graph_delta,
+                calculate_static_blast_radius,
+            )
+
+            graph_delta = calculate_graph_delta(
+                base_graph=base_graph,
+                candidate_graph=candidate_graph,
+                changed_files=changed_files,
+            )
+            blast_seeds = (
+                list(graph_delta.changed_seeds)
+                if graph_delta.changed_seeds
+                else list(changed_files)
+            )
+            target_graph = candidate_graph if candidate_graph is not None else base_graph
+            blast_radius, change_summary = calculate_static_blast_radius(
+                seeds=blast_seeds,
+                graph=target_graph,
+                test_associations=test_associations,
+                boundaries=boundaries,
+                boundary_dimension=boundary_dimension,
+                changed_files=changed_files,
+            )
+
+        # M29 Change concerns
+        change_concerns_list = []
+        if churn_by_component is not None or centrality_by_component is not None:
+            from codestrata.application.incremental.change_concerns import (
+                evaluate_change_concerns,
+            )
+
+            seeds_tuple = (
+                tuple(graph_delta.changed_seeds)
+                if graph_delta and graph_delta.changed_seeds
+                else ()
+            )
+            concern_subjects = list(dict.fromkeys((*seeds_tuple, *changed_files)))
+            if not concern_subjects and churn_by_component:
+                concern_subjects = list(churn_by_component.keys())
+
+            change_concerns_list = evaluate_change_concerns(
+                changed_subjects=concern_subjects,
+                churn_by_component=churn_by_component,
+                centrality_by_component=centrality_by_component,
+                comparable_universe=comparable_universe,
+                deleted_subjects=graph_delta.removed_nodes if graph_delta else (),
+            )
+
+        # M31 Cause attribution
+        cause_attribution = None
+        if (
+            source_changed
+            or feed_changed
+            or config_changed
+            or coverage_changed
+            or engine_changed
+            or controlled_rerun
+            or bool(controlled_reruns)
+            or (base_digests and candidate_digests)
+        ):
+            from codestrata.application.incremental.cause_attribution import (
+                evaluate_cause_attribution,
+            )
+
+            cause_attribution = evaluate_cause_attribution(
+                source_changed=source_changed,
+                feed_changed=feed_changed,
+                config_changed=config_changed,
+                coverage_changed=coverage_changed,
+                engine_changed=engine_changed,
+                controlled_rerun=controlled_rerun,
+                controlled_reruns=controlled_reruns,
+                base_digests=base_digests,
+                candidate_digests=candidate_digests,
+                finding_causes=finding_causes,
+                isolated_causes=isolated_causes,
+            )
+
+        return scan_comparison_from_m28(
+            m28_result,
+            base_timestamp=baseline_timestamp,
+            candidate_timestamp=current_timestamp,
+            notes=notes,
+            fact_changes=fact_changes,
+            new_recommendations=new_recs,
+            resolved_recommendations=resolved_recs,
+            unchanged_recommendations=unchanged_recs,
+            priority_changes=priority_changes,
+            graph_delta=graph_delta,
+            blast_radius=blast_radius,
+            change_summary=change_summary,
+            change_concerns=change_concerns_list,
+            cause_attribution=cause_attribution,
+        )
+
+    def compare_m28(
+        self,
+        current: AnalysisResult,
+        baseline: AnalysisResult,
+        *,
+        rule_specs: Mapping[str, Any] | None = None,
+        rename_map: Mapping[str, str] | None = None,
+    ) -> Any:
+        """Run complete M28 evaluation returning M28ComparisonResult."""
+        from codestrata.application.incremental.lifecycle import (
+            canonical_state_from_analysis_result,
+            evaluate_m28,
+        )
+
+        base_state = canonical_state_from_analysis_result(
+            baseline,
+            artifact_digest=str(baseline.metadata.get("artifact_digest") or baseline.id),
+            coverage_status=baseline.metadata.get("coverage_status", "pass"),
+            rule_specs=rule_specs,
+        )
+        cand_state = canonical_state_from_analysis_result(
+            current,
+            artifact_digest=str(current.metadata.get("artifact_digest") or current.id),
+            coverage_status=current.metadata.get("coverage_status", "pass"),
+            rename_map=rename_map,
+            rule_specs=rule_specs,
+        )
+        return evaluate_m28(base_state, cand_state, rule_specs=rule_specs)
+
+    def compare_m29(
+        self,
+        base_graph: Any | None,
+        candidate_graph: Any | None,
+        *,
+        seeds: Sequence[str] = (),
+        test_associations: Any | None = None,
+        test_evidence_complete: bool = True,
+        boundaries: Mapping[str, str] | None = None,
+        boundary_dimension: str | None = None,
+        max_depth: int = 4,
+        changed_files: Sequence[str] = (),
+        churn_by_component: Mapping[str, int] | None = None,
+        centrality_by_component: Mapping[str, Any] | None = None,
+        comparable_universe: Sequence[str] = (),
+    ) -> tuple[Any, Any, Any, list[Any]]:
+        """Run complete M29 graph delta, static blast radius, and change concerns."""
+        from codestrata.application.incremental.change_concerns import (
+            evaluate_change_concerns,
+        )
+        from codestrata.application.incremental.graph_delta import (
+            calculate_graph_delta,
+            calculate_static_blast_radius,
+        )
+
+        delta = calculate_graph_delta(
+            base_graph=base_graph,
+            candidate_graph=candidate_graph,
+            changed_files=changed_files,
+        )
+        effective_seeds = list(seeds) or list(delta.changed_seeds) or list(changed_files)
+        target_graph = candidate_graph if candidate_graph is not None else base_graph
+        blast_radius, summary = calculate_static_blast_radius(
+            seeds=effective_seeds,
+            graph=target_graph,
+            test_associations=test_associations,
+            test_evidence_complete=test_evidence_complete,
+            boundaries=boundaries,
+            boundary_dimension=boundary_dimension,
+            max_depth=max_depth,
+            changed_files=changed_files,
+        )
+        concerns = evaluate_change_concerns(
+            changed_subjects=effective_seeds,
+            churn_by_component=churn_by_component,
+            centrality_by_component=centrality_by_component,
+            comparable_universe=comparable_universe,
+            deleted_subjects=delta.removed_nodes,
+        )
+        return delta, blast_radius, summary, concerns
+
+    def compare_m30(
+        self,
+        compared_findings: Sequence[ComparedFinding] = (),
+        metric_deltas: Sequence[MetricDelta] = (),
+        *,
+        manifest_drivers: Sequence[Any] | None = None,
+        baseline_available: bool = True,
+        is_empty_outcome: bool = False,
+        disabled_all_scope: bool = False,
+        overall_coverage_pass: bool = True,
+    ) -> tuple[dict[str, Any], Any]:
+        """Run complete M30 thresholded outcome movement evaluation."""
+        from codestrata.application.incremental.outcome_movement import (
+            evaluate_outcome_movement,
+        )
+
+        return evaluate_outcome_movement(
+            compared_findings=compared_findings,
+            metric_deltas=metric_deltas,
+            manifest_drivers=manifest_drivers,
+            baseline_available=baseline_available,
+            is_empty_outcome=is_empty_outcome,
+            disabled_all_scope=disabled_all_scope,
+            overall_coverage_pass=overall_coverage_pass,
+        )
+
+    def compare_m31(
+        self,
+        *,
+        source_changed: bool = False,
+        feed_changed: bool = False,
+        config_changed: bool = False,
+        coverage_changed: bool = False,
+        engine_changed: bool = False,
+        controlled_rerun: bool = False,
+        controlled_reruns: Sequence[Any] = (),
+        base_digests: Mapping[str, str | None] | None = None,
+        candidate_digests: Mapping[str, str | None] | None = None,
+        cve_findings: Sequence[Any] = (),
+        finding_causes: Mapping[str, str] | None = None,
+        isolated_causes: Mapping[str, Sequence[str]] | None = None,
+    ) -> Any:
+        """Run complete M31 cause attribution evaluation."""
+        from codestrata.application.incremental.cause_attribution import (
+            evaluate_cause_attribution,
+        )
+
+        return evaluate_cause_attribution(
+            source_changed=source_changed,
+            feed_changed=feed_changed,
+            config_changed=config_changed,
+            coverage_changed=coverage_changed,
+            engine_changed=engine_changed,
+            controlled_rerun=controlled_rerun,
+            controlled_reruns=controlled_reruns,
+            base_digests=base_digests,
+            candidate_digests=candidate_digests,
+            cve_findings=cve_findings,
+            finding_causes=finding_causes,
+            isolated_causes=isolated_causes,
+        )
+
+    def isolate_controlled_reruns(
+        self,
+        *,
+        base_finding_keys: Sequence[str],
+        candidate_finding_keys: Sequence[str],
+        source_rerun_finding_keys: Sequence[str] | None = None,
+        feed_rerun_finding_keys: Sequence[str] | None = None,
+        base_digests: Mapping[str, str | None] | None = None,
+        candidate_digests: Mapping[str, str | None] | None = None,
+    ) -> Any:
+        """Isolate causes using controlled equivalent-input reruns."""
+        from codestrata.application.incremental.cause_attribution import (
+            isolate_causes_with_controlled_reruns,
+        )
+
+        return isolate_causes_with_controlled_reruns(
+            base_finding_keys=base_finding_keys,
+            candidate_finding_keys=candidate_finding_keys,
+            source_rerun_finding_keys=source_rerun_finding_keys,
+            feed_rerun_finding_keys=feed_rerun_finding_keys,
+            base_digests=base_digests,
+            candidate_digests=candidate_digests,
         )
 
     def _load_baseline_result(self, report_json: Path) -> AnalysisResult | None:
@@ -456,6 +888,8 @@ class ScanComparisonService:
         self,
         current: RepositoryFacts,
         baseline: RepositoryFacts,
+        current_technologies: Sequence[Any] = (),
+        baseline_technologies: Sequence[Any] = (),
     ) -> list[FactChange]:
         current_data = current.model_dump(mode="json")
         baseline_data = baseline.model_dump(mode="json")
@@ -466,6 +900,21 @@ class ScanComparisonService:
             current=current_data,
             changes=changes,
         )
+        if current_technologies or baseline_technologies:
+            prev_techs = [
+                t.model_dump(mode="json") if hasattr(t, "model_dump") else t
+                for t in baseline_technologies
+            ]
+            curr_techs = [
+                t.model_dump(mode="json") if hasattr(t, "model_dump") else t
+                for t in current_technologies
+            ]
+            self._compare_fact_nodes(
+                path="facts.technologies",
+                previous=prev_techs,
+                current=curr_techs,
+                changes=changes,
+            )
         return sorted(changes, key=lambda change: change.path)
 
     def _compare_fact_nodes(
@@ -616,27 +1065,33 @@ class ScanComparisonService:
             label = self._object_identity_label(identity, identity_keys)
 
             if previous_item is None and current_item is not None:
-                provider = str(current_item.get("provider", "unknown"))
-                item_path = str(current_item.get("path", identity))
                 changes.append(
                     FactChange(
                         path=f"{path}[{identity}]",
                         change_type="added",
                         current_value={key: current_item.get(key) for key in identity_keys},
-                        summary=f"Added pipeline {item_path} ({provider})",
+                        summary=_structured_presence_summary(
+                            path=path,
+                            action="Added",
+                            item=current_item,
+                            identity=identity,
+                        ),
                     )
                 )
                 continue
 
             if previous_item is not None and current_item is None:
-                provider = str(previous_item.get("provider", "unknown"))
-                item_path = str(previous_item.get("path", identity))
                 changes.append(
                     FactChange(
                         path=f"{path}[{identity}]",
                         change_type="removed",
                         previous_value={key: previous_item.get(key) for key in identity_keys},
-                        summary=f"Removed pipeline {item_path} ({provider})",
+                        summary=_structured_presence_summary(
+                            path=path,
+                            action="Removed",
+                            item=previous_item,
+                            identity=identity,
+                        ),
                     )
                 )
                 continue
@@ -762,6 +1217,11 @@ class ScanComparisonService:
         identity_map: dict[str, Finding] = {}
 
         for finding in findings:
+            explicit_key = finding.metadata.get("identity_key")
+            if explicit_key:
+                identity_map[str(explicit_key)] = finding
+                continue
+
             external_key = external_finding_identity(finding)
             if external_key is not None:
                 identity_map[external_key] = finding
@@ -797,23 +1257,29 @@ class ScanComparisonService:
         )
 
     def _duplicate_finding_key(self, finding: Finding) -> str:
+        explicit_key = finding.metadata.get("identity_key")
+        if explicit_key:
+            return str(explicit_key)
+
         evidence_parts = [
             "|".join(
                 [
                     evidence.file_path,
                     str(evidence.line_number or ""),
-                    evidence.description or "",
                     evidence.detected_value or "",
                 ]
             )
             for evidence in finding.evidence
         ]
         evidence_parts.sort()
+        subject_id = str(finding.metadata.get("subject_id") or "")
+        occurrence = str(finding.metadata.get("occurrence_id") or "")
         return (
             "dup:"
             f"{finding.rule_id or ''}|"
             f"{self._enum_value(finding.category)}|"
-            f"{finding.title}|"
+            f"{subject_id}|"
+            f"{occurrence}|"
             f"{';'.join(evidence_parts)}"
         )
 

@@ -196,8 +196,8 @@ def _make_conclusion(
     concentration_fact_ids: Sequence[str] = (),
     metadata: dict[str, str] | None = None,
 ) -> TechnicalDebtConclusion:
-    support = tuple(theme_ids) + tuple(finding_ids) + tuple(hotspot_ids) + tuple(
-        concentration_fact_ids
+    support = (
+        tuple(theme_ids) + tuple(finding_ids) + tuple(hotspot_ids) + tuple(concentration_fact_ids)
     )
     return TechnicalDebtConclusion(
         conclusion_id=build_conclusion_id(
@@ -286,9 +286,7 @@ def synthesize_technical_debt(
         )
 
     production_refs = [
-        item
-        for item in finding_summaries
-        if item.source_role is TechnicalDebtSourceRole.PRODUCTION
+        item for item in finding_summaries if item.source_role is TechnicalDebtSourceRole.PRODUCTION
     ]
     test_refs = [
         item for item in finding_summaries if item.source_role is TechnicalDebtSourceRole.TEST
@@ -299,9 +297,7 @@ def synthesize_technical_debt(
     production_themes = _build_themes(
         production_refs, production_hotspots, source_role=TechnicalDebtSourceRole.PRODUCTION
     )
-    test_themes = _build_themes(
-        test_refs, test_hotspots, source_role=TechnicalDebtSourceRole.TEST
-    )
+    test_themes = _build_themes(test_refs, test_hotspots, source_role=TechnicalDebtSourceRole.TEST)
     themes = production_themes + test_themes
 
     package_facts = _package_concentration_facts(finding_summaries)
@@ -374,9 +370,7 @@ def synthesize_technical_debt(
                     "No production complexity-threshold findings require remediation "
                     "under the current rule pack and thresholds."
                 ),
-                rationale=(
-                    "The production-primary inventory contains zero matching findings."
-                ),
+                rationale=("The production-primary inventory contains zero matching findings."),
                 conditional=False,
             )
         )
@@ -466,9 +460,7 @@ def synthesize_technical_debt(
                 )
             )
 
-        concentrated_packages = [
-            fact for fact in package_facts if fact.exceeds_threshold
-        ]
+        concentrated_packages = [fact for fact in package_facts if fact.exceeds_threshold]
         if concentrated_packages:
             top = concentrated_packages[0]
             pkg_conclusion = _make_conclusion(
@@ -486,8 +478,7 @@ def synthesize_technical_debt(
                     "Package concentration uses finding counts and proportions only. "
                     "Packages at/above threshold: "
                     + ", ".join(
-                        f"{fact.subject}={_pct(fact.share)}"
-                        for fact in concentrated_packages[:8]
+                        f"{fact.subject}={_pct(fact.share)}" for fact in concentrated_packages[:8]
                     )
                     + "."
                 ),
@@ -557,8 +548,7 @@ def synthesize_technical_debt(
                         "refactors so metrics fall at or below thresholds."
                     ),
                     rationale=(
-                        "Top hotspots are the inventory head ordered by severity and "
-                        "finding count."
+                        "Top hotspots are the inventory head ordered by severity and finding count."
                     ),
                     conditional=True,
                 )
@@ -567,9 +557,7 @@ def synthesize_technical_debt(
         multi = [item for item in production_hotspots if len(item.rule_ids) >= 2]
         if multi:
             multi_ids = tuple(item.hotspot_id for item in multi[:20])
-            multi_findings = tuple(
-                sorted({fid for item in multi for fid in item.finding_ids})
-            )
+            multi_findings = tuple(sorted({fid for item in multi for fid in item.finding_ids}))
             multi_conclusion = _make_conclusion(
                 repository_id=repository_id,
                 policy_id=POLICY_MULTI_RULE_HOTSPOTS,

@@ -111,9 +111,7 @@ class AssessmentHeadConfidence(BaseModel):
 
     @field_validator("basis", mode="before")
     @classmethod
-    def normalize_basis(
-        cls, value: object
-    ) -> tuple[AssessmentHeadConfidenceBasis, ...]:
+    def normalize_basis(cls, value: object) -> tuple[AssessmentHeadConfidenceBasis, ...]:
         basis = tuple(AssessmentHeadConfidenceBasis(item) for item in as_tuple(value))
         if not basis:
             raise ValueError("basis must contain at least one confidence basis")
@@ -153,8 +151,7 @@ class AssessmentHeadConfidence(BaseModel):
             raise ValueError("legacy findings cannot produce HIGH head confidence")
         if (
             self.level is AssessmentHeadConfidenceLevel.HIGH
-            and AssessmentHeadConfidenceBasis.NO_FINDINGS_WITH_COMPLETE_COVERAGE
-            in self.basis
+            and AssessmentHeadConfidenceBasis.NO_FINDINGS_WITH_COMPLETE_COVERAGE in self.basis
         ):
             raise ValueError("zero findings cannot produce HIGH head confidence")
         return self
@@ -163,9 +160,7 @@ class AssessmentHeadConfidence(BaseModel):
     def unavailable(
         cls,
         *,
-        limitations: tuple[str, ...] = (
-            "Assessment-head confidence could not be derived.",
-        ),
+        limitations: tuple[str, ...] = ("Assessment-head confidence could not be derived.",),
         basis: tuple[AssessmentHeadConfidenceBasis, ...] = (
             AssessmentHeadConfidenceBasis.UNAVAILABLE_HEAD,
         ),
@@ -184,4 +179,7 @@ def assessment_head_confidence_to_json(
     confidence: AssessmentHeadConfidence,
 ) -> dict[str, Any]:
     payload = confidence.model_dump(mode="json")
-    return json.loads(json.dumps(payload, sort_keys=True))
+    loaded = json.loads(json.dumps(payload, sort_keys=True))
+    if not isinstance(loaded, dict):
+        raise TypeError("JSON projection must be an object")
+    return loaded

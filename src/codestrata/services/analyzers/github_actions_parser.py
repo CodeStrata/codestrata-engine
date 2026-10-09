@@ -53,7 +53,8 @@ class GitHubActionsParser:
     ) -> CicdPipeline:
         """Parse a GitHub Actions workflow file."""
 
-        workflow_data = self._loader.load(workflow_path)
+        document = self._loader.load_document(workflow_path)
+        workflow_data = document.data
 
         workflow_name = self._loader.optional_string(workflow_data.get("name"))
 
@@ -145,6 +146,8 @@ class GitHubActionsParser:
                 "packaging_commands": classified_commands[CicdCommandCategory.PACKAGING],
                 "infrastructure_commands": classified_commands[CicdCommandCategory.INFRASTRUCTURE],
                 "database_commands": classified_commands[CicdCommandCategory.DATABASE],
+                "parse_status": document.status.value,
+                "parse_reason": document.reason,
             },
         )
 

@@ -81,6 +81,13 @@ def _sample_nodes() -> dict[str, GraphNode]:
                 type_kind=RepositoryTypeKind.CLASS,
             )
         ),
+        "type_b": factory.type(
+            TypeProperties(
+                name="Port",
+                qualified_name="com.example.Port",
+                type_kind=RepositoryTypeKind.INTERFACE,
+            )
+        ),
         "callable_a": factory.callable(
             qualified_owner="com.example.App",
             signature="run()",
@@ -218,6 +225,23 @@ def test_wrong_graph_type_and_unknown_vocabulary_rejected() -> None:
         (RepositoryRelationshipType.DEPENDS_ON, "callable_a", "dependency", True),
         (RepositoryRelationshipType.DEPENDS_ON, "dependency", "dependency", True),
         (RepositoryRelationshipType.DEPENDS_ON, "file", "dependency", False),
+        (RepositoryRelationshipType.DEPENDS_ON, "module", "module", True),
+        (RepositoryRelationshipType.IMPORTS, "module", "module", True),
+        (RepositoryRelationshipType.IMPORTS, "file", "file", True),
+        (RepositoryRelationshipType.IMPORTS, "file", "module", True),
+        (RepositoryRelationshipType.IMPORTS, "type", "type_b", False),
+        (RepositoryRelationshipType.IMPLEMENTS, "type", "type_b", True),
+        (RepositoryRelationshipType.IMPLEMENTS, "module", "type", False),
+        (RepositoryRelationshipType.EXPOSES_API, "module", "type", True),
+        (RepositoryRelationshipType.EXPOSES_API, "file", "type", True),
+        (RepositoryRelationshipType.EXPOSES_API, "module", "callable_a", True),
+        (RepositoryRelationshipType.EXPOSES_API, "file", "callable_a", True),
+        (RepositoryRelationshipType.EXPOSES_API, "type", "type_b", False),
+        (RepositoryRelationshipType.USES_DEPENDENCY, "module", "dependency", True),
+        (RepositoryRelationshipType.USES_DEPENDENCY, "file", "dependency", True),
+        (RepositoryRelationshipType.USES_DEPENDENCY, "type", "dependency", True),
+        (RepositoryRelationshipType.USES_DEPENDENCY, "callable_a", "dependency", True),
+        (RepositoryRelationshipType.USES_DEPENDENCY, "repo", "dependency", False),
         (RepositoryRelationshipType.CALLS, "callable_a", "callable_b", True),
         (RepositoryRelationshipType.CALLS, "type", "callable_a", False),
     ],
@@ -239,6 +263,13 @@ def test_relationship_endpoint_matrix(
         snapshot_nodes = (nodes["module"], child)
         source = nodes["module"]
         target = child
+    elif source_key == "file" and target_key == "file":
+        other = factory.file(
+            FileProperties(path="src/Other.java", file_kind=RepositoryFileKind.SOURCE)
+        )
+        snapshot_nodes = (nodes["file"], other)
+        source = nodes["file"]
+        target = other
     elif source_key == "dependency" and target_key == "dependency":
         other = factory.dependency(
             DependencyProperties(

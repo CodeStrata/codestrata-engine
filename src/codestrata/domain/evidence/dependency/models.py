@@ -191,9 +191,7 @@ class DependencyEvidenceBundle(BaseModel):
     status: DependencyParseStatus = DependencyParseStatus.SUCCEEDED
     manifests: tuple[DependencyManifestEvidence, ...] = ()
     declarations: tuple[DependencyDeclarationEvidence, ...] = ()
-    coverage: DependencyEvidenceCoverage = Field(
-        default_factory=DependencyEvidenceCoverage
-    )
+    coverage: DependencyEvidenceCoverage = Field(default_factory=DependencyEvidenceCoverage)
     diagnostics: tuple[str, ...] = ()
 
     @field_validator("provider_id", "provider_version", "schema_version", mode="before")
@@ -223,9 +221,7 @@ class AggregatedDependencyEvidence(BaseModel):
     bundles: tuple[DependencyEvidenceBundle, ...] = ()
     manifests: tuple[DependencyManifestEvidence, ...] = ()
     declarations: tuple[DependencyDeclarationEvidence, ...] = ()
-    coverage: DependencyEvidenceCoverage = Field(
-        default_factory=DependencyEvidenceCoverage
-    )
+    coverage: DependencyEvidenceCoverage = Field(default_factory=DependencyEvidenceCoverage)
     contributing_provider_ids: tuple[str, ...] = ()
     diagnostics: tuple[str, ...] = ()
     evidence_fingerprint: str = ""

@@ -60,7 +60,6 @@ _OVERLAPPING_SUPPRESSIONS: tuple[tuple[str, str], ...] = (
 )
 
 
-
 def _provenance(path: str, *, configuration_fingerprint: str) -> EvidenceProvenance:
     return EvidenceProvenance(
         provider_id=PROVIDER_ID,
@@ -90,13 +89,10 @@ def collect_marker_facts(
         for token, marker_type in _MARKER_PATTERNS:
             if token not in line:
                 continue
-            if token in _BROAD_TOKENS and any(
-                specific in line for specific in _SPECIFIC_SKIP_ONLY
-            ):
+            if token in _BROAD_TOKENS and any(specific in line for specific in _SPECIFIC_SKIP_ONLY):
                 continue
             if any(
-                token == shorter and longer in line
-                for shorter, longer in _OVERLAPPING_SUPPRESSIONS
+                token == shorter and longer in line for shorter, longer in _OVERLAPPING_SUPPRESSIONS
             ):
                 continue
             found.append((line_no, token.strip()[:200], marker_type))

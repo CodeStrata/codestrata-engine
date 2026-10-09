@@ -6,14 +6,18 @@ import json
 from collections import Counter
 from pathlib import Path
 
-from verification.curated_repository_validation.contract import DATASET_DISCLAIMER, SCHEMA_NAME, SCHEMA_VERSION
+from verification.curated_repository_validation import (
+    CURATED_REPOSITORY_VALIDATION_ID,
+)
+from verification.curated_repository_validation.contract import (
+    DATASET_DISCLAIMER,
+    SCHEMA_NAME,
+    SCHEMA_VERSION,
+)
 from verification.curated_repository_validation.models import (
     CuratedValidationReport,
     RepositoryValidationResult,
     TierSummary,
-)
-from verification.curated_repository_validation import (
-    CURATED_REPOSITORY_VALIDATION_ID,
 )
 
 
@@ -82,7 +86,9 @@ def build_tier_summary(
 def write_tier_summary(summary: TierSummary, output_dir: Path) -> Path:
     path = output_dir / f"{summary.tier}-summary.json"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(summary.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(summary.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
     return path
 
 
@@ -100,14 +106,20 @@ def build_final_report(
     limitations: list[str],
 ) -> CuratedValidationReport:
     passed = sum(1 for r in records if r.verdict in {"PASS", "PASS_WITH_LIMITATIONS"})
-    failed = sum(1 for r in records if r.verdict not in {"PASS", "PASS_WITH_LIMITATIONS", "skipped"})
+    failed = sum(
+        1 for r in records if r.verdict not in {"PASS", "PASS_WITH_LIMITATIONS", "skipped"}
+    )
     skipped = sum(1 for r in records if r.verdict == "skipped")
     errors = sum(1 for r in records if r.verdict == "error")
 
     overall = "PASS"
     if blockers or len(records) < target_count:
         overall = "FAIL"
-    elif any(r.cause_scope == "engine_product" for r in records if r.verdict not in {"PASS", "PASS_WITH_LIMITATIONS"}):
+    elif any(
+        r.cause_scope == "engine_product"
+        for r in records
+        if r.verdict not in {"PASS", "PASS_WITH_LIMITATIONS"}
+    ):
         overall = "FAIL"
     elif failed:
         # Repository-specific documented limitations may yield PASS_WITH_LIMITATIONS.

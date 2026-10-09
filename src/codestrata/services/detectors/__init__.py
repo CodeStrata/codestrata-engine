@@ -18,6 +18,9 @@ from codestrata.services.detectors.php_technology_detector import (
 from codestrata.services.detectors.python_technology_detector import (
     PythonTechnologyDetector,
 )
+from codestrata.services.detectors.rust_technology_detector import (
+    RustTechnologyDetector,
+)
 
 __all__ = [
     "CompositeTechnologyDetector",
@@ -26,4 +29,5 @@ __all__ = [
     "JavaTechnologyDetector",
     "PhpTechnologyDetector",
     "PythonTechnologyDetector",
+    "RustTechnologyDetector",
 ]

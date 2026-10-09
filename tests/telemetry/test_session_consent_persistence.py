@@ -47,9 +47,7 @@ def test_A_B_allowed_and_denied_do_not_persist(tmp_path: Path, monkeypatch) -> N
     assert list(home.iterdir()) == []
 
 
-def test_C_legacy_enabled_preference_does_not_authorize(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_C_legacy_enabled_preference_does_not_authorize(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     (home / "telemetry.json").write_text(
@@ -69,21 +67,15 @@ def test_earlier_allowed_runtime_does_not_leak_into_default() -> None:
         consent=allow_session_consent(),
         transport=capture,
     )
-    allowed.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-    )
+    allowed.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert len(capture.captured) == 1
     default = create_default_telemetry_runtime(transport=capture)
-    default.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-    )
+    default.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert len(capture.captured) == 1  # no additional capture
     assert default.session.decision is TelemetryDecision.DISABLED_BY_DEFAULT
 
 
-def test_legacy_enable_command_path_does_not_authorize_product(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_legacy_enable_command_path_does_not_authorize_product(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))

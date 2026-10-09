@@ -14,7 +14,7 @@ from codestrata.ai.provider_contracts.capability_catalogs import (
 )
 from codestrata.ai.provider_contracts.identifiers import CapabilityId, ProviderId
 from codestrata.ai.providers.factory import resolve_assess_model_id
-from codestrata.config.settings import AiSettings, DEFAULT_BEDROCK_MODEL_ID
+from codestrata.config.settings import DEFAULT_BEDROCK_MODEL_ID, AiSettings
 from verification.ai_provider_cross_provider.contract import (
     BEDROCK_DEFAULT_MODEL_ID,
     OPENAI_DEFAULT_ANSWER_MODEL,
@@ -147,7 +147,9 @@ def run_configuration_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         check_bedrock_adapter_configuration_redacts_profile_region(),
         check_adapter_configuration_types_are_isolated(),
     ]
-    return checks, {"configuration_models": ["OpenAIAdapterConfiguration", "BedrockAdapterConfiguration"]}
+    return checks, {
+        "configuration_models": ["OpenAIAdapterConfiguration", "BedrockAdapterConfiguration"]
+    }
 
 
 def run_model_resolution_checks() -> tuple[list[CheckResult], dict[str, Any]]:

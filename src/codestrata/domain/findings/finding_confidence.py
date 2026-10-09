@@ -134,10 +134,7 @@ class FindingConfidence(BaseModel):
         if FindingConfidenceBasis.LEGACY_FINDING in self.basis:
             if self.level is not FindingConfidenceLevel.UNAVAILABLE:
                 raise ValueError("legacy_finding must be UNAVAILABLE")
-            if (
-                self.derivation_status
-                is not FindingConfidenceDerivationStatus.UNAVAILABLE
-            ):
+            if self.derivation_status is not FindingConfidenceDerivationStatus.UNAVAILABLE:
                 raise ValueError("legacy_finding requires unavailable derivation_status")
         if (
             self.level is FindingConfidenceLevel.HIGH
@@ -153,9 +150,7 @@ class FindingConfidence(BaseModel):
             self.level is FindingConfidenceLevel.HIGH
             and FindingConfidenceBasis.MISSING_EVIDENCE_REFERENCE in self.basis
         ):
-            raise ValueError(
-                "missing_evidence_reference cannot produce HIGH finding confidence"
-            )
+            raise ValueError("missing_evidence_reference cannot produce HIGH finding confidence")
         return self
 
     @classmethod
@@ -163,9 +158,7 @@ class FindingConfidence(BaseModel):
         cls,
         *,
         limitations: tuple[str, ...] = ("Finding confidence could not be derived.",),
-        basis: tuple[FindingConfidenceBasis, ...] = (
-            FindingConfidenceBasis.LEGACY_FINDING,
-        ),
+        basis: tuple[FindingConfidenceBasis, ...] = (FindingConfidenceBasis.LEGACY_FINDING,),
         component_summary: FindingConfidenceComponents | None = None,
     ) -> FindingConfidence:
         return cls(
@@ -181,4 +174,7 @@ def finding_confidence_to_json(confidence: FindingConfidence) -> dict[str, Any]:
     """Return a deterministic JSON-compatible report projection."""
 
     payload = confidence.model_dump(mode="json")
-    return json.loads(json.dumps(payload, sort_keys=True))
+    loaded = json.loads(json.dumps(payload, sort_keys=True))
+    if not isinstance(loaded, dict):
+        raise TypeError("JSON projection must be an object")
+    return loaded

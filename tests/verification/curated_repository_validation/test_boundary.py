@@ -19,7 +19,12 @@ def test_package_does_not_enable_ai_or_deps() -> None:
 
 
 def test_readme_exists() -> None:
-    readme = Path(__file__).resolve().parents[3] / "verification" / "curated_repository_validation" / "README.md"
+    readme = (
+        Path(__file__).resolve().parents[3]
+        / "verification"
+        / "curated_repository_validation"
+        / "README.md"
+    )
     assert readme.is_file()
     text = readme.read_text(encoding="utf-8")
     assert "22" in text

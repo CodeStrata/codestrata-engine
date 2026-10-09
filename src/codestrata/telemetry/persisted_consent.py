@@ -9,6 +9,9 @@ from __future__ import annotations
 from enum import StrEnum
 from pathlib import Path
 
+from codestrata.telemetry.assessment_metadata.policy import (
+    CommunityAssessmentMetadataEmissionPolicy,
+)
 from codestrata.telemetry.consent import TelemetrySessionConsent
 from codestrata.telemetry.consent_scope import (
     CommunityConsentState,
@@ -50,11 +53,7 @@ def persist_preference(
     """Persist consent. Enabling defaults to v2 scope (consent_scope=2)."""
 
     mark_decision(bool(enabled), path=path, consent_scope=consent_scope)
-    return (
-        TelemetryPreferenceState.ENABLED
-        if enabled
-        else TelemetryPreferenceState.DISABLED
-    )
+    return TelemetryPreferenceState.ENABLED if enabled else TelemetryPreferenceState.DISABLED
 
 
 def persist_v2_yes(*, path: Path | None = None) -> CommunityConsentState:
@@ -71,6 +70,9 @@ def persist_v1_yes(*, path: Path | None = None) -> CommunityConsentState:
 
 def persist_disabled(*, path: Path | None = None) -> CommunityConsentState:
     mark_decision(False, path=path)
+    from codestrata.telemetry.pending import cancel_pending_collection
+
+    cancel_pending_collection(preference_path=path)
     return CommunityConsentState.DISABLED
 
 
@@ -154,10 +156,7 @@ def format_consent_status(*, path: Path | None = None) -> str:
             "This consent does not publish reports."
         ),
         f"Lifecycle telemetry: {'allowed' if caps.lifecycle_allowed else 'off'}",
-        (
-            "Assessment metadata 1.1: "
-            f"{'allowed' if caps.assessment_metadata_allowed else 'off'}"
-        ),
+        (f"Assessment metadata 1.1: {'allowed' if caps.assessment_metadata_allowed else 'off'}"),
         "Change later: `codestrata telemetry enable|disable`",
         "",
     ]
@@ -168,7 +167,7 @@ def assessment_metadata_policy_for_session(
     *,
     path: Path | None = None,
     transmission_authorized: bool = False,
-):
+) -> CommunityAssessmentMetadataEmissionPolicy:
     """Authorize amd emission only for durable V2_YES with session transmission.
 
     Lifecycle consent (V1_YES) alone never enables assessment_metadata 1.1.

@@ -103,20 +103,27 @@ class JavaScriptTechnologyDetector:
             "next": "Next.js",
             "@angular/core": "Angular",
             "vue": "Vue.js",
+            "@nestjs/core": "NestJS",
+            "@nestjs/common": "NestJS",
+            "svelte": "Svelte",
+            "@sveltejs/kit": "SvelteKit",
             "express": "Express",
         }
 
+        seen_frameworks: set[str] = set()
         for dependency_name, technology_name in framework_mappings.items():
-            if dependency_name in dependencies:
-                technologies.append(
-                    Technology(
-                        name=technology_name,
-                        version=dependencies[dependency_name],
-                        category=TechnologyCategory.FRAMEWORK,
-                        confidence=1.0,
-                        source="package.json",
-                    )
+            if dependency_name not in dependencies or technology_name in seen_frameworks:
+                continue
+            seen_frameworks.add(technology_name)
+            technologies.append(
+                Technology(
+                    name=technology_name,
+                    version=dependencies[dependency_name],
+                    category=TechnologyCategory.FRAMEWORK,
+                    confidence=1.0,
+                    source="package.json",
                 )
+            )
 
         testing_mappings = {
             "jest": "Jest",
@@ -168,7 +175,7 @@ class JavaScriptTechnologyDetector:
 
         dependencies: dict[str, str] = {}
 
-        for section_name in ("dependencies", "devDependencies"):
+        for section_name in ("dependencies", "devDependencies", "peerDependencies"):
             section = package_data.get(section_name, {})
 
             if isinstance(section, dict):

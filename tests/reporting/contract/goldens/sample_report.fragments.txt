@@ -1,9 +1,9 @@
-id="leadership-verdict"
+id="attention-first"
 id="engineering-intelligence-summary"
 id="assessment-results"
 id="technology-inventory"
 id="security-intelligence"
 id="priority-actions"
-id="key-takeaways"
+Current-code baseline
 Urgent rec
 A finding

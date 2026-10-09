@@ -121,9 +121,7 @@ def _evidence(
                 path="tls/server.key",
                 kind=SensitiveArtifactKind.PRIVATE_KEY,
                 inspection_status=InspectionStatus.INSPECTED,
-                content_classifications=(
-                    ContentClassification.PRIVATE_KEY_MATERIAL,
-                ),
+                content_classifications=(ContentClassification.PRIVATE_KEY_MATERIAL,),
                 classification=SourceClassification.SOURCE,
                 provenance=_prov(),
             ),
@@ -156,9 +154,7 @@ def _evidence(
 
 
 def _facts_all_ok():
-    return execution_facts_from_status_map(
-        {rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS}
-    )
+    return execution_facts_from_status_map({rule_id: "not_matched" for rule_id in HYGIENE_RULE_IDS})
 
 
 def _assemble(*, findings=(), evidence=None, include_synthesis=True, **kwargs):
@@ -217,10 +213,7 @@ def test_zero_findings_landscape_and_no_production_wording() -> None:
     assert SecurityThemeKind.SECURITY_HYGIENE_LANDSCAPE in kinds
     assert SecurityThemeKind.NO_PRODUCTION_FINDINGS in kinds
     conclusion_kinds = {item.kind for item in section.conclusions}
-    assert (
-        SecurityConclusionKind.NO_PRODUCTION_FINDINGS_IN_SUPPORTED_SCOPE
-        in conclusion_kinds
-    )
+    assert SecurityConclusionKind.NO_PRODUCTION_FINDINGS_IN_SUPPORTED_SCOPE in conclusion_kinds
     text = dumps_stable_json(security_assessment_payload(section)).lower()
     assert "no production-role findings" in text
     assert "security passed" not in text
@@ -306,8 +299,7 @@ def test_rule_themes_and_recommendations() -> None:
         sum(
             1
             for item in section.recommendations
-            if item.kind
-            is SecurityRecommendationKind.REMOVE_COMMITTED_PRIVATE_KEY_MATERIAL
+            if item.kind is SecurityRecommendationKind.REMOVE_COMMITTED_PRIVATE_KEY_MATERIAL
         )
         == 1
     )
@@ -347,10 +339,7 @@ def test_source_role_separation() -> None:
     assert SecurityConclusionKind.UNKNOWN_ROLE_FINDINGS_PRESENT in conclusion_kinds
     rec_kinds = {item.kind for item in section.recommendations}
     assert SecurityRecommendationKind.CLASSIFY_UNKNOWN_ROLE_FILES in rec_kinds
-    assert (
-        SecurityRecommendationKind.REVIEW_TEST_FIXTURE_SECURITY_OBSERVATIONS
-        in rec_kinds
-    )
+    assert SecurityRecommendationKind.REVIEW_TEST_FIXTURE_SECURITY_OBSERVATIONS in rec_kinds
 
 
 def test_partial_evidence_and_hotspots() -> None:
@@ -386,9 +375,7 @@ def test_partial_evidence_and_hotspots() -> None:
     rec_kinds = {item.kind for item in section.recommendations}
     assert SecurityRecommendationKind.CORRECT_MALFORMED_CONFIGURATION in rec_kinds
     assert section.diagnostics_summary.evidence_diagnostics
-    assert all(
-        item.finding_id != "d1" for item in section.all_finding_summaries
-    )
+    assert all(item.finding_id != "d1" for item in section.all_finding_summaries)
 
 
 def test_insufficient_and_disabled_synthesis() -> None:
@@ -438,9 +425,7 @@ def test_determinism_privacy_and_failure_isolation(tmp_path: Path) -> None:
     assert dumps_stable_json(security_assessment_payload(left)) == dumps_stable_json(
         security_assessment_payload(right)
     )
-    text = write_security_assessment_artifact(left, tmp_path).path.read_text(
-        encoding="utf-8"
-    )
+    text = write_security_assessment_artifact(left, tmp_path).path.read_text(encoding="utf-8")
     assert "BEGIN PRIVATE" not in text
     assert "/Users/" not in text
     assert "fingerprint" not in text.lower() or "evidence_fingerprint" in text

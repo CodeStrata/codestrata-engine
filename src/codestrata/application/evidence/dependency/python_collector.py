@@ -49,9 +49,7 @@ _UNSUPPORTED_DIRECTIVE = re.compile(
     r"^\s*(?:-i|--index-url|-f|--find-links|--extra-index-url|--trusted-host|--no-index)\b",
     re.IGNORECASE,
 )
-_NAME_EXTRAS = re.compile(
-    r"^(?P<name>[A-Za-z0-9_.-]+)(?:\[(?P<extras>[^\]]+)\])?$"
-)
+_NAME_EXTRAS = re.compile(r"^(?P<name>[A-Za-z0-9_.-]+)(?:\[(?P<extras>[^\]]+)\])?$")
 
 
 def _provenance(path: str, fingerprint: str, method: str) -> EvidenceProvenance:
@@ -92,9 +90,7 @@ def _parse_requirement_token(
         return original, normalize_python_distribution_name(original), (), version, marker
     original = name_match.group("name")
     extras_raw = name_match.group("extras")
-    extras = tuple(
-        item.strip() for item in (extras_raw or "").split(",") if item.strip()
-    )
+    extras = tuple(item.strip() for item in (extras_raw or "").split(",") if item.strip())
     return (
         original,
         normalize_python_distribution_name(original),
@@ -174,9 +170,7 @@ def parse_pyproject_text(
         data = tomllib.loads(text)
     except tomllib.TOMLDecodeError as error:
         manifest = DependencyManifestEvidence(
-            evidence_id=make_manifest_evidence_id(
-                provider_id=PYTHON_PROVIDER_ID, path=path
-            ),
+            evidence_id=make_manifest_evidence_id(provider_id=PYTHON_PROVIDER_ID, path=path),
             path=path,
             ecosystem=DependencyEcosystem.PYTHON,
             manifest_type=DependencyManifestType.PYPROJECT_TOML,
@@ -213,25 +207,17 @@ def parse_pyproject_text(
                     fingerprint=configuration_fingerprint,
                 )
             )
-    optional = (
-        project.get("optional-dependencies") if isinstance(project, dict) else None
-    )
+    optional = project.get("optional-dependencies") if isinstance(project, dict) else None
     if isinstance(optional, dict):
         for group, items in sorted(optional.items()):
             if not isinstance(items, list):
-                unsupported.append(
-                    f"{path}:optional-dependencies.{group}:non_list"
-                )
+                unsupported.append(f"{path}:optional-dependencies.{group}:non_list")
                 continue
             for index, item in enumerate(items):
                 if not isinstance(item, str):
-                    unsupported.append(
-                        f"{path}:optional-dependencies.{group}[{index}]:non_string"
-                    )
+                    unsupported.append(f"{path}:optional-dependencies.{group}[{index}]:non_string")
                     continue
-                original, normalized, extras, version, marker = _parse_requirement_token(
-                    item
-                )
+                original, normalized, extras, version, marker = _parse_requirement_token(item)
                 declarations.append(
                     _declaration_from_req(
                         path=path,
@@ -266,13 +252,9 @@ def parse_pyproject_text(
                     if isinstance(version_value, str):
                         raw_version = version_value
                     else:
-                        unsupported.append(
-                            f"{path}:poetry.dependencies.{name}:complex_table"
-                        )
+                        unsupported.append(f"{path}:poetry.dependencies.{name}:complex_table")
                 else:
-                    unsupported.append(
-                        f"{path}:poetry.dependencies.{name}:unsupported_spec"
-                    )
+                    unsupported.append(f"{path}:poetry.dependencies.{name}:unsupported_spec")
                     continue
                 declarations.append(
                     _declaration_from_req(
@@ -309,9 +291,7 @@ def parse_pyproject_text(
                     raw_version = spec if isinstance(spec, str) else None
                     if raw_version is None and isinstance(spec, dict):
                         version_value = spec.get("version")
-                        raw_version = (
-                            version_value if isinstance(version_value, str) else None
-                        )
+                        raw_version = version_value if isinstance(version_value, str) else None
                     declarations.append(
                         _declaration_from_req(
                             path=path,
@@ -373,11 +353,9 @@ def parse_requirements_text(
     unsupported: list[str] = []
     diagnostics: list[str] = []
     if path in _stack:
-        diagnostics.append(f"requirements_include_cycle:{'->'.join(_stack+(path,))}")
+        diagnostics.append(f"requirements_include_cycle:{'->'.join(_stack + (path,))}")
         manifest = DependencyManifestEvidence(
-            evidence_id=make_manifest_evidence_id(
-                provider_id=PYTHON_PROVIDER_ID, path=path
-            ),
+            evidence_id=make_manifest_evidence_id(provider_id=PYTHON_PROVIDER_ID, path=path),
             path=path,
             ecosystem=DependencyEcosystem.PYTHON,
             manifest_type=DependencyManifestType.REQUIREMENTS_TXT,
@@ -391,9 +369,7 @@ def parse_requirements_text(
     if len(_stack) >= max_include_depth:
         diagnostics.append(f"requirements_include_depth_exceeded:{path}")
         manifest = DependencyManifestEvidence(
-            evidence_id=make_manifest_evidence_id(
-                provider_id=PYTHON_PROVIDER_ID, path=path
-            ),
+            evidence_id=make_manifest_evidence_id(provider_id=PYTHON_PROVIDER_ID, path=path),
             path=path,
             ecosystem=DependencyEcosystem.PYTHON,
             manifest_type=DependencyManifestType.REQUIREMENTS_TXT,
@@ -418,11 +394,7 @@ def parse_requirements_text(
             if target.startswith("/"):
                 unsupported.append(f"{path}:{line_no}:absolute_include:{target}")
                 continue
-            included_path = (
-                target
-                if parent in {"", "."}
-                else str(PurePosixPath(parent) / target)
-            )
+            included_path = target if parent in {"", "."} else str(PurePosixPath(parent) / target)
             included_path = included_path.replace("\\", "/")
             included_text = file_texts.get(included_path)
             if included_text is None:
@@ -605,19 +577,11 @@ def collect_python_dependency_bundle(
             ),
         )
     )
-    parsed = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.SUCCEEDED
-    )
+    parsed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED)
     partial = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+        1 for item in manifests_t if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
     )
-    failed = sum(
-        1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED
-    )
+    failed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED)
     unsupported_count = sum(len(item.unsupported_constructs) for item in manifests_t)
     unresolved_count = sum(len(item.unresolved_expressions) for item in manifests_t)
     if failed and not parsed and not partial:

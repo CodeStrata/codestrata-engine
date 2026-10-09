@@ -31,9 +31,7 @@ def register_technical_debt_pack(
         enabled_ids = frozenset()
     rules = technical_debt_rules(
         large_callable_max_lines=complexity.large_callable.max_physical_lines,
-        excessive_branching_max_branch_points=(
-            complexity.excessive_branching.max_branch_points
-        ),
+        excessive_branching_max_branch_points=(complexity.excessive_branching.max_branch_points),
         deep_nesting_max_depth=complexity.deep_nesting.max_nesting_depth,
         excessive_parameters_max_count=complexity.excessive_parameters.max_parameters,
         oversized_type_max_lines=complexity.oversized_type.max_physical_lines,

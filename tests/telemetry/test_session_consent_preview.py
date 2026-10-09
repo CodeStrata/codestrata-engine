@@ -14,9 +14,7 @@ def test_S_preview_never_transmits_even_when_allowed() -> None:
         consent=allow_session_consent(),
         transport=capture,
     )
-    preview = runtime.preview(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_COMPLETED)
-    )
+    preview = runtime.preview(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_COMPLETED))
     assert preview is not None
     assert preview.transmission == "none"
     assert preview.transmission_performed is False

@@ -106,9 +106,7 @@ def register_architecture_assessment_tools(server: FastMCP) -> None:
                         "title": item.get("title"),
                         "primary_action": item.get("primary_action"),
                         "source_finding_ids": item.get("source_finding_ids", []),
-                        "source_recommendation_ids": item.get(
-                            "source_recommendation_ids", []
-                        ),
+                        "source_recommendation_ids": item.get("source_recommendation_ids", []),
                         "modernization_wave": item.get("modernization_wave"),
                         "limitations": item.get("limitations", []),
                     }

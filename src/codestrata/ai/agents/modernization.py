@@ -401,9 +401,7 @@ class ModernizationAssessmentAgent:
         recommendation_count = (
             len(recommendation.recommendations) if recommendation is not None else 0
         )
-        phase_count = (
-            len(recommendation.modernization_phases) if recommendation is not None else 0
-        )
+        phase_count = len(recommendation.modernization_phases) if recommendation is not None else 0
         limitation_count = len(recommendation.limitations) if recommendation is not None else 0
         recorder.record_step(
             step_type=AgentStepType.MODEL_INVOCATION,

@@ -54,9 +54,7 @@ def test_conflict_message_stable() -> None:
 
 
 def test_conflict_without_raise() -> None:
-    selection = select_cli_telemetry_consent(
-        allow=True, deny=True, raise_on_conflict=False
-    )
+    selection = select_cli_telemetry_consent(allow=True, deny=True, raise_on_conflict=False)
     assert selection.conflict is True
     assert selection.consent is None
     assert selection.prompt_required is False

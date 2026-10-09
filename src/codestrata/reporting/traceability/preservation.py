@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import copy
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
 
@@ -211,7 +211,8 @@ def traceability_snapshot(assessment: Mapping[str, Any]) -> dict[str, Any]:
         for item in (assessment.get("priority_actions") or [])
         if isinstance(item, dict)
     ]
-    roadmap = assessment.get("roadmap") if isinstance(assessment.get("roadmap"), dict) else {}
+    roadmap_raw = assessment.get("roadmap")
+    roadmap: dict[str, Any] = roadmap_raw if isinstance(roadmap_raw, dict) else {}
     initiatives = [
         {key: item.get(key) for key in ROADMAP_INITIATIVE_TRACEABILITY_FIELDS}
         for item in (roadmap.get("initiatives") or [])
@@ -222,7 +223,8 @@ def traceability_snapshot(assessment: Mapping[str, Any]) -> dict[str, Any]:
         for item in (assessment.get("evidence") or [])
         if isinstance(item, dict)
     ]
-    summary = assessment.get("summary") if isinstance(assessment.get("summary"), dict) else {}
+    summary_raw = assessment.get("summary")
+    summary: dict[str, Any] = summary_raw if isinstance(summary_raw, dict) else {}
     return {
         "evidence": evidence,
         "findings": findings,

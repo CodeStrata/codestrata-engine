@@ -1,0 +1,16 @@
+schema_name: codestrata.ruleset.v1
+schema_version: "1.0.0"
+api_version: codestrata.io/ruleset/v1
+kind: RuleSet
+metadata:
+  id: codestrata.floating
+  version: latest
+  title: floating
+  owner: codestrata
+digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+rules:
+  - rule_id: architecture.dependency-cycle
+    revision: "1.0.0"
+    digest: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    default_enabled: true
+    adoption: recommended

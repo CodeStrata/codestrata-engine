@@ -8,11 +8,10 @@ This adapter is not an authoritative roadmap source of truth.
 
 from __future__ import annotations
 
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 
 from codestrata.domain.priority_actions import PriorityAction
-from codestrata.domain.roadmap.constants import PHASE_OBJECTIVES, PHASE_TITLES
-from codestrata.domain.roadmap.enums import RoadmapPhaseName
+from codestrata.domain.roadmap.constants import PHASE_OBJECTIVES
 from codestrata.domain.roadmap.models import RoadmapAssessmentSection, RoadmapInitiative
 from codestrata.reporting.roadmap.models import (
     RoadmapReportInitiativeView,
@@ -59,12 +58,7 @@ def project_roadmap_for_leadership(
                 phase=item.phase.value,
                 phase_label=item.phase.value.title(),
                 priority=action.priority if action is not None else item.priority.value,
-                effort=(
-                    action.effort
-                    if action is not None
-                    else item.effort.value
-                )
-                or "medium",
+                effort=(action.effort if action is not None else item.effort.value) or "medium",
                 risk=(action.risk if action is not None else item.risk.value) or "medium",
                 expected_outcome=outcome,
                 depends_on_initiative_ids=tuple(
@@ -93,13 +87,13 @@ def project_roadmap_for_leadership(
 
     # Remap depends_on after full id_map is known.
     remapped: list[RoadmapReportInitiativeView] = []
-    for item in report_initiatives:
+    for initiative in report_initiatives:
         # depends already partially remapped; ensure all use presentation ids.
         deps = tuple(
             dep if dep.startswith("leadership:") else id_map.get(dep, dep)
-            for dep in item.depends_on_initiative_ids
+            for dep in initiative.depends_on_initiative_ids
         )
-        remapped.append(item.model_copy(update={"depends_on_initiative_ids": deps}))
+        remapped.append(initiative.model_copy(update={"depends_on_initiative_ids": deps}))
 
     by_presentation = {item.initiative_id: item for item in remapped}
     phases: list[RoadmapReportPhaseView] = []
@@ -130,8 +124,7 @@ def project_roadmap_for_leadership(
     )
     summary = (
         f"{len(remapped)} initiative(s) across {len(phases)} phase(s), "
-        f"sequenced to match Priority Actions"
-        + (f" ({near} near-term)." if near else ".")
+        f"sequenced to match Priority Actions" + (f" ({near} near-term)." if near else ".")
     )
     return RoadmapReportSection(
         engine_version="leadership-presentation",

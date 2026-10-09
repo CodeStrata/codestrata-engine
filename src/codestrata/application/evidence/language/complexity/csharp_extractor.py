@@ -426,9 +426,7 @@ def _parameter_count(params_text: str) -> int:
 
 def _branch_point_count(body: str) -> int:
     return (
-        len(_BRANCH_WORD.findall(body))
-        + len(_BOOL_OP.findall(body))
-        + len(_TERNARY.findall(body))
+        len(_BRANCH_WORD.findall(body)) + len(_BOOL_OP.findall(body)) + len(_TERNARY.findall(body))
     )
 
 

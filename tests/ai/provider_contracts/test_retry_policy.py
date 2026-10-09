@@ -28,9 +28,7 @@ def test_settings_representable_retry_policy_is_not_the_default() -> None:
     assert SETTINGS_REPRESENTABLE_RETRY_POLICY != DEFAULT_RETRY_POLICY
 
 
-@pytest.mark.parametrize(
-    ("max_retries", "expected"), [(0, 1), (1, 2), (3, 4), (9, 10)]
-)
+@pytest.mark.parametrize(("max_retries", "expected"), [(0, 1), (1, 2), (3, 4), (9, 10)])
 def test_max_retries_to_maximum_attempts_adds_one(max_retries: int, expected: int) -> None:
     assert max_retries_to_maximum_attempts(max_retries) == expected
 

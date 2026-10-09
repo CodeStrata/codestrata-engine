@@ -60,9 +60,7 @@ from codestrata.domain.evidence.repository_testing.models import (
 )
 
 
-def _candidate_provenance(
-    path: str, *, configuration_fingerprint: str
-) -> EvidenceProvenance:
+def _candidate_provenance(path: str, *, configuration_fingerprint: str) -> EvidenceProvenance:
     return EvidenceProvenance(
         provider_id=PROVIDER_ID,
         provider_version=PROVIDER_VERSION,
@@ -76,9 +74,7 @@ def _candidate_provenance(
 
 def _diagnostic(*, code: str, message: str, path: str | None) -> RepositoryTestingDiagnostic:
     return RepositoryTestingDiagnostic(
-        diagnostic_id=make_diagnostic_id(
-            code=code, path=path or "", detail=message
-        ),
+        diagnostic_id=make_diagnostic_id(code=code, path=path or "", detail=message),
         diagnostic_code=code,
         message=message,
         origin="orchestration",
@@ -99,9 +95,7 @@ def collect_repository_testing_evidence(
     """Collect deterministic repository-testing evidence (no Findings)."""
 
     errors = dict(load_errors or {})
-    texts = {
-        normalize_relative_path(path): text for path, text in file_texts.items()
-    }
+    texts = {normalize_relative_path(path): text for path, text in file_texts.items()}
 
     candidates = discover_candidates(
         relative_paths,
@@ -166,9 +160,7 @@ def collect_repository_testing_evidence(
             else:
                 skipped += 1
                 message = "Candidate could not be read; content not inspected."
-            diagnostics.append(
-                _diagnostic(code=code, message=message, path=path)
-            )
+            diagnostics.append(_diagnostic(code=code, message=message, path=path))
 
         text = texts.get(path)
         if text is not None:
@@ -230,9 +222,7 @@ def collect_repository_testing_evidence(
                     test_type=role.value,
                     path=path,
                     basis=(
-                        bases[0].value
-                        if bases
-                        else TestDiscoveryBasis.DIRECTORY_CONVENTION.value
+                        bases[0].value if bases else TestDiscoveryBasis.DIRECTORY_CONVENTION.value
                     ),
                 ),
                 test_type=role,
@@ -247,11 +237,7 @@ def collect_repository_testing_evidence(
 
     # Build / framework facts from manifests present in texts.
     framework_facts, build_facts = collect_build_and_framework_facts(
-        {
-            path: texts[path]
-            for path, _ in build_paths
-            if path in texts
-        },
+        {path: texts[path] for path, _ in build_paths if path in texts},
         configuration_fingerprint=configuration_fingerprint,
     )
     for path, _ in build_paths:
@@ -286,9 +272,7 @@ def collect_repository_testing_evidence(
                 )
             )
     framework_by_id = {item.evidence_id: item for item in observed}
-    framework_facts = tuple(
-        sorted(framework_by_id.values(), key=lambda item: item.evidence_id)
-    )
+    framework_facts = tuple(sorted(framework_by_id.values(), key=lambda item: item.evidence_id))
 
     ci_facts: list[CiTestInvocationFactEvidence] = []
     for path in ci_paths:
@@ -312,9 +296,7 @@ def collect_repository_testing_evidence(
             )
         )
 
-    size_by_path = {
-        path: len(text.encode("utf-8")) for path, text in texts.items()
-    }
+    size_by_path = {path: len(text.encode("utf-8")) for path, text in texts.items()}
     fixture_facts = collect_fixture_facts(
         fixture_paths,
         size_by_path=size_by_path,
@@ -337,9 +319,7 @@ def collect_repository_testing_evidence(
     structural_facts.sort(key=lambda item: item.evidence_id)
     test_type_facts.sort(key=lambda item: item.evidence_id)
     marker_facts_sorted = sorted(marker_facts, key=lambda item: item.evidence_id)
-    build_facts_sorted = tuple(
-        sorted(build_facts, key=lambda item: item.evidence_id)
-    )
+    build_facts_sorted = tuple(sorted(build_facts, key=lambda item: item.evidence_id))
     ci_facts_sorted = tuple(sorted(ci_facts, key=lambda item: item.evidence_id))
 
     seen_diag: set[str] = set()
@@ -354,20 +334,15 @@ def collect_repository_testing_evidence(
         unique_diagnostics.append(item)
 
     declared_frameworks = sum(
-        1
-        for item in framework_facts
-        if item.basis is FrameworkEvidenceBasis.DECLARED
+        1 for item in framework_facts if item.basis is FrameworkEvidenceBasis.DECLARED
     )
     observed_frameworks = sum(
-        1
-        for item in framework_facts
-        if item.basis is FrameworkEvidenceBasis.STRUCTURALLY_OBSERVED
+        1 for item in framework_facts if item.basis is FrameworkEvidenceBasis.STRUCTURALLY_OBSERVED
     )
     coverage_configurations = sum(
         1
         for item in coverage_facts
-        if item.fact_type.value.endswith("configuration")
-        or "configuration" in item.fact_type.value
+        if item.fact_type.value.endswith("configuration") or "configuration" in item.fact_type.value
     )
 
     record_ids = tuple(
@@ -389,20 +364,13 @@ def collect_repository_testing_evidence(
         repository_id=repository_id,
         record_ids=record_ids,
     )
-    bundle_id = make_bundle_id(
-        repository_id=repository_id, fingerprint=fingerprint
-    )
+    bundle_id = make_bundle_id(repository_id=repository_id, fingerprint=fingerprint)
 
     any_facts = bool(record_ids)
     status = RepositoryTestingParseStatus.SUCCEEDED
     if unique_diagnostics or malformed or skipped or unsupported:
         status = RepositoryTestingParseStatus.PARTIALLY_SUCCEEDED
-    if (
-        relative_paths
-        and not any_facts
-        and errors
-        and not texts
-    ):
+    if relative_paths and not any_facts and errors and not texts:
         status = RepositoryTestingParseStatus.FAILED
 
     coverage = RepositoryTestingEvidenceCoverage(

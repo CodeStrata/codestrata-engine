@@ -1,0 +1,22 @@
+schema_name: codestrata.release.headless-artifact-inventory.v1
+schema_version: 1.0.0
+inventory_id: engine-headless-artifact-inventory
+inventory_version: "1.0"
+standard_artifacts:
+  - filename: EffectiveRuleSet.json
+    schema_name: codestrata.effective-ruleset.v1
+  - filename: admission.json
+    schema_name: codestrata.effective-admission.v1
+  - filename: operational-binding.json
+    schema_name: codestrata.headless-operational-binding.v1
+  - filename: export-original.json
+    schema_name: codestrata.telemetry.export-original.v1
+  - filename: export-projection.json
+    schema_name: codestrata.telemetry.export-projection.v1
+  - filename: local-job-state.json
+    schema_name: codestrata.local-job-state.v1
+  - filename: headless-run-manifest.json
+    schema_name: codestrata.headless-run-manifest.v1
+detached_operational:
+  - filename: detached-signature.json
+    schema_name: codestrata.headless-detached-signature.v1

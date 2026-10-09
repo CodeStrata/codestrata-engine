@@ -41,11 +41,7 @@ from codestrata.domain.rules.architecture.ids import PACK_ID, PACK_VERSION
 def architecture_findings(findings: Sequence[Finding]) -> tuple[Finding, ...]:
     return tuple(
         sorted(
-            (
-                finding
-                for finding in findings
-                if finding.rule_id.startswith("architecture.")
-            ),
+            (finding for finding in findings if finding.rule_id.startswith("architecture.")),
             key=lambda item: (item.rule_id, item.id),
         )
     )
@@ -157,9 +153,7 @@ def _default_limitations(
                     summary="Partial layer classification",
                 ),
                 category=ArchitectureLimitationCategory.PARTIAL_CLASSIFICATION,
-                summary=(
-                    "Layer or boundary classification coverage is incomplete for some units."
-                ),
+                summary=("Layer or boundary classification coverage is incomplete for some units."),
                 affected_capability="layer_classification",
                 importance="contextual",
             )
@@ -373,11 +367,7 @@ class ArchitectureAssessmentAssembler:
             status = force_status
         elif not pack_enabled:
             status = ArchitectureAssessmentStatus.DISABLED
-        elif (
-            extraction_coverage is not None
-            and extraction_coverage < 0.1
-            and not arch_findings
-        ):
+        elif extraction_coverage is not None and extraction_coverage < 0.1 and not arch_findings:
             status = ArchitectureAssessmentStatus.INSUFFICIENT_EVIDENCE
         elif conclusion_failures > 0 or provider_failures > 0:
             status = ArchitectureAssessmentStatus.PARTIALLY_SUCCEEDED
@@ -385,9 +375,7 @@ class ArchitectureAssessmentAssembler:
             status = ArchitectureAssessmentStatus.SUCCEEDED
 
         finding_summaries = (
-            _build_finding_references(arch_findings, conclusions)
-            if include_findings
-            else ()
+            _build_finding_references(arch_findings, conclusions) if include_findings else ()
         )
         finding_ids = tuple(item.finding_id for item in finding_summaries)
         conclusion_ids = tuple(item.conclusion_id for item in conclusions)
@@ -396,11 +384,7 @@ class ArchitectureAssessmentAssembler:
         )
 
         matched_rule_ids = {item.rule_id for item in arch_findings}
-        executed = (
-            rules_executed
-            if rules_executed is not None
-            else architecture_rules_planned
-        )
+        executed = rules_executed if rules_executed is not None else architecture_rules_planned
         execution_summary = ArchitectureExecutionSummary(
             providers_planned=providers_planned,
             providers_executed=providers_executed,
@@ -411,9 +395,7 @@ class ArchitectureAssessmentAssembler:
             rules_not_matched=max(0, executed - len(matched_rule_ids)) if pack_enabled else 0,
             suppressed_finding_count=0,
             visible_finding_count=len(arch_findings),
-            conclusion_policies_executed=conclusion_policies_executed
-            if conclusions_enabled
-            else 0,
+            conclusion_policies_executed=conclusion_policies_executed if conclusions_enabled else 0,
             conclusion_count=len(conclusions),
             recommendation_group_count=len(recommendation_groups),
         )
@@ -513,9 +495,7 @@ class ArchitectureAssessmentAssembler:
                 f"findings={include_findings}|conclusions_inc={include_conclusions}"
             )
         )
-        merged_diagnostics = tuple(
-            sorted({*diagnostics, *conclusion_diagnostics})
-        )
+        merged_diagnostics = tuple(sorted({*diagnostics, *conclusion_diagnostics}))
 
         return ArchitectureAssessmentSection(
             section_id=SECTION_ID,

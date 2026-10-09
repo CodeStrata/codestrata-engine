@@ -1,0 +1,192 @@
+schema_version: 1
+story: E00.1
+inspected_at: "2026-09-30T12:00:00Z"
+source: live registries and root GitHub Actions files (not engine/pyproject.toml)
+pyproject_version_ignored: "0.2.1"
+tags_not_used_as_live:
+  - v0.1.0
+  - v0.2.0
+pypi:
+  name: codestrata
+  live_version: "0.2.1"
+  yanked: false
+  versions:
+    - "0.2.1"
+  files:
+    - filename: codestrata-0.2.1-py3-none-any.whl
+      packagetype: bdist_wheel
+      sha256: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+      size: 2286589
+      yanked: false
+      url: https://files.pythonhosted.org/packages/df/81/24e41d964e01f557bbb57e41ef88298f91aec776a59fe644570c41840ef5/codestrata-0.2.1-py3-none-any.whl
+    - filename: codestrata-0.2.1.tar.gz
+      packagetype: sdist
+      sha256: acd8615186977d9a62f3661f8a8d71fe2be380c371c9ea29048f1bb2cd1212e6
+      size: 1673543
+      yanked: false
+      url: https://files.pythonhosted.org/packages/0d/b0/7ad19a02906ad2505a8601ed2c35ab762893d33ae37850692aa452ac5df2/codestrata-0.2.1.tar.gz
+git_identities:
+  - repository: github.com/CodeStrata/codestrata-platform
+    ref: origin/main
+    sha: 3f32ce4b82a06162062babf7e8c77451f5761e6a
+    kind: mirror_commit
+    notes: Monorepo stable branch (planning baseline). Not a PyPI publisher.
+  - repository: github.com/CodeStrata/codestrata-platform
+    ref: origin/release/engine-next
+    sha: 3cb1096d8e3be528db14a4088db968aa582aa696
+    kind: mirror_commit
+    notes: Isolated next-release integration branch. Ordinary push runs ci.yml only.
+  - repository: github.com/CodeStrata/codestrata-engine
+    ref: main
+    sha: ca18a660f164f8c2bd9983a81faf1f82094a1abc
+    kind: mirror_commit
+    notes: Public Community mirror default branch HEAD (GitHub API 2026-09-17).
+  - repository: github.com/CodeStrata/codestrata-engine
+    ref: refs/tags/v0.2.1
+    sha: ca18a660f164f8c2bd9983a81faf1f82094a1abc
+    kind: git_tag
+    notes: Tag matches live PyPI 0.2.1; other tags were not treated as live.
+  - repository: github.com/CodeStrata/codestrata-engine
+    ref: GitHub release v0.2.1
+    sha: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+    kind: release_asset
+    notes: Attached wheel digest equals PyPI wheel SHA-256.
+containers:
+  - registry: docker.io
+    repository: codestrata (org listing)
+    status: NOT_FOUND
+    digest: null
+    http_status: 200
+    notes: hub.docker.com/v2/repositories/codestrata/ count=0
+  - registry: docker.io
+    repository: codestrata/engine
+    status: NOT_FOUND
+    digest: null
+    http_status: 404
+    notes: No public Docker Hub Engine image at this name.
+  - registry: ghcr.io
+    repository: codestrata/codestrata-engine
+    status: UNAVAILABLE
+    digest: null
+    http_status: 401
+    notes: Anonymous GHCR list returned 401; not treated as proof of absence.
+r01:
+  status: PRESENT
+  engine_only_oidc_publisher: .github/workflows/engine-pypi-release.yml
+  reason: >
+    .github/workflows/engine-pypi-release.yml obtains OIDC and publishes Engine
+    alone (triggers: workflow_dispatch). PyPI Trusted Publishing and GitHub
+    environment engine-pypi must still be configured before live upload.
+  required_outside_engine_change: ""
+  workflows:
+    - path: .github/workflows/engine-pypi-release.yml
+      name: engine-pypi-release
+      triggers: [workflow_dispatch]
+      contents_write: false
+      id_token_write: true
+      aws_oidc: false
+      pypi_oidc_publish: true
+      container_publish: false
+      marketplace_publish: false
+      engine_only_publish: true
+      notes: []
+    - path: .github/workflows/aws-identity-check.yml
+      name: aws-identity-check
+      triggers: [workflow_dispatch]
+      contents_write: false
+      id_token_write: true
+      aws_oidc: true
+      pypi_oidc_publish: false
+      container_publish: false
+      marketplace_publish: false
+      engine_only_publish: false
+      notes: []
+    - path: .github/workflows/ci.yml
+      name: ci
+      triggers: [pull_request, push]
+      contents_write: false
+      id_token_write: false
+      aws_oidc: false
+      pypi_oidc_publish: false
+      container_publish: false
+      marketplace_publish: false
+      engine_only_publish: false
+      notes:
+        - marketplace publish explicitly not invoked
+        - header forbids publish
+    - path: .github/workflows/infrastructure-apply.yml
+      name: infrastructure-apply
+      triggers: [workflow_dispatch]
+      contents_write: false
+      id_token_write: true
+      aws_oidc: true
+      pypi_oidc_publish: false
+      container_publish: false
+      marketplace_publish: false
+      engine_only_publish: false
+      notes: []
+    - path: .github/workflows/infrastructure-plan.yml
+      name: infrastructure-plan
+      triggers: [pull_request, workflow_dispatch]
+      contents_write: false
+      id_token_write: true
+      aws_oidc: true
+      pypi_oidc_publish: false
+      container_publish: false
+      marketplace_publish: false
+      engine_only_publish: false
+      notes: []
+install_rollback:
+  status: PASS
+  expected_version: "0.2.1"
+  expected_sha256: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+  install:
+    argv:
+      - python
+      - -m
+      - pip
+      - install
+      - --no-deps
+      - engine/.tmp-assess/e00.1-live-wheel/codestrata-0.2.1-py3-none-any.whl
+    exit_code: 0
+    stdout: Successfully installed codestrata-0.2.1
+    stderr: ""
+    installed_version: "0.2.1"
+    observed_sha256: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+  uninstall:
+    argv:
+      - python
+      - -m
+      - pip
+      - uninstall
+      - -y
+      - codestrata
+    exit_code: 0
+    stdout: Successfully uninstalled codestrata-0.2.1
+    stderr: ""
+    installed_version: null
+    observed_sha256: null
+  reinstall:
+    argv:
+      - python
+      - -m
+      - pip
+      - install
+      - --no-deps
+      - engine/.tmp-assess/e00.1-live-wheel/codestrata-0.2.1-py3-none-any.whl
+    exit_code: 0
+    stdout: Successfully installed codestrata-0.2.1
+    stderr: ""
+    installed_version: "0.2.1"
+    observed_sha256: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+  notes:
+    - Isolated venv engine/.tmp-assess/e00.1-live-wheel (not .venv-engine-next, not live install).
+    - Wheel bytes SHA-256 verified before pip install; --no-deps so only the Engine artifact was the subject.
+    - Installed the hashed live wheel, uninstalled it, and reinstalled the same digest in an isolated venv (not the story working tree).
+notes:
+  - PyPI simple index lists only 0.2.1; GitHub engine tags also include v0.1.0 and v0.2.0 which are not live PyPI versions.
+  - Monorepo tags v0.1.0 and v0.2.0 exist; there is no monorepo v0.2.1 tag.
+  - PyPI project owner login recorded as sknampally; that is not an OIDC workflow identity.
+  - No Engine Dockerfile in engine/; container rollback is NOT_FOUND / UNAVAILABLE, not PASS.
+  - G00 on this clone is not PASS (ZIP identity, GitHub branch protection, teammate git identity still open).
+  - This story did not edit workflows, public-export-manifest.yaml, remotes, tags, or published artifacts.

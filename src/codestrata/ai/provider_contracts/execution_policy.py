@@ -84,11 +84,9 @@ DEFAULT_NON_RETRYABLE_ERROR_CATEGORIES: tuple[str, ...] = (
     "internal_failure",
 )
 
-assert set(DEFAULT_RETRYABLE_ERROR_CATEGORIES) | set(
-    DEFAULT_NON_RETRYABLE_ERROR_CATEGORIES
-) == set(ALLOWED_ERROR_CATEGORIES), (
-    "the default retryable/non-retryable partition must cover every ErrorCategory exactly once"
-)
+assert set(DEFAULT_RETRYABLE_ERROR_CATEGORIES) | set(DEFAULT_NON_RETRYABLE_ERROR_CATEGORIES) == set(
+    ALLOWED_ERROR_CATEGORIES
+), "the default retryable/non-retryable partition must cover every ErrorCategory exactly once"
 assert set(DEFAULT_RETRYABLE_ERROR_CATEGORIES).isdisjoint(DEFAULT_NON_RETRYABLE_ERROR_CATEGORIES)
 
 # Slice 11.1 compatibility requirement IDs this module must remain

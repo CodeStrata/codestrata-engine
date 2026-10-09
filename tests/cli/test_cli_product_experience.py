@@ -115,7 +115,7 @@ def test_version_help_and_doctor_smoke(tmp_path: Path) -> None:
     )
     # Point repository path at tmp so doctor path check passes.
     config.write_text(
-        f'[repository]\npath = "{tmp_path}"\nprofile = "community"\n',
+        f'[repository]\npath = "{tmp_path.as_posix()}"\nprofile = "community"\n',
         encoding="utf-8",
     )
     doctor = runner.invoke(

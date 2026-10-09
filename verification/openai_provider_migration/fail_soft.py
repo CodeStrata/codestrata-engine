@@ -157,8 +157,7 @@ def check_the_missing_key_message_names_whichever_variable_is_configured() -> Ch
     ok = (
         default_message
         == f"OpenAI API key not found in environment variable {OPENAI_API_KEY_ENV_DEFAULT}"
-        and custom_message
-        == f"OpenAI API key not found in environment variable {_UNSET_KEY_VAR}"
+        and custom_message == f"OpenAI API key not found in environment variable {_UNSET_KEY_VAR}"
     )
     return CheckResult(
         name="the_missing_key_message_names_whichever_environment_variable_is_configured",

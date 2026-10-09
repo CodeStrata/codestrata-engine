@@ -12,6 +12,7 @@ from codestrata.domain.recommendations import (
 )
 from codestrata.services.recommendations.context import RecommendationContext
 from codestrata.services.recommendations.priority import priority_from_finding_severity
+from codestrata.services.recommendations.protocol import RecommendationProvider
 
 _README = "codestrata-rule-missing-readme"
 _LICENSE = "codestrata-rule-missing-license"
@@ -743,7 +744,7 @@ class CorrelationAwareDependencyNormalizationRecommendation:
         )
 
 
-def builtin_recommendation_providers() -> tuple[object, ...]:
+def builtin_recommendation_providers() -> tuple[RecommendationProvider, ...]:
     """Return the ordered builtin recommendation provider set."""
 
     return (

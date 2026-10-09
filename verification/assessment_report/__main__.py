@@ -64,10 +64,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"verdict: {report.verdict}")
     if report.defects:
         print(f"defects: {', '.join(report.defects[:8])}")
-    out = (
-        (args.output_dir or Path("reports/verification"))
-        / "assessment-report-verification.json"
-    )
+    out = (args.output_dir or Path("reports/verification")) / "assessment-report-verification.json"
     print(f"report: {out}")
     return 0 if report.ok else 1
 

@@ -42,9 +42,7 @@ def _doctor_imports() -> set[str]:
 
 
 def check_the_doctor_surface_is_unchanged() -> CheckResult:
-    missing = sorted(
-        name for name in _EXPECTED_DOCTOR_SYMBOLS if not hasattr(doctor_module, name)
-    )
+    missing = sorted(name for name in _EXPECTED_DOCTOR_SYMBOLS if not hasattr(doctor_module, name))
     return CheckResult(
         name="the_ai_doctor_public_surface_is_unchanged",
         category="doctor",
@@ -80,9 +78,7 @@ def check_the_doctor_still_probes_through_aws_config() -> CheckResult:
 
 def check_the_doctor_still_reports_both_providers() -> CheckResult:
     source = inspect.getsource(doctor_module)
-    missing = sorted(
-        name for name in DOCTOR_COVERED_PROVIDERS if f'"{name}"' not in source
-    )
+    missing = sorted(name for name in DOCTOR_COVERED_PROVIDERS if f'"{name}"' not in source)
     return CheckResult(
         name="the_ai_doctor_still_reports_an_overview_for_both_providers",
         category="doctor",

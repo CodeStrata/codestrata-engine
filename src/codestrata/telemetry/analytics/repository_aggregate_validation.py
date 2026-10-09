@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 from codestrata.telemetry.analytics.installation_identity import is_uuid_v4
 from codestrata.telemetry.analytics.repository_aggregate import (
@@ -72,7 +74,7 @@ def validate_repository_aggregate_analytics_event(
 
 
 def validate_repository_aggregate_analytics_mapping(
-    payload: dict,
+    payload: dict[str, Any],
     *,
     policy: CommunityRepositoryAggregateAnalyticsPolicy | None = None,
 ) -> RepositoryAggregateAnalyticsProjection:
@@ -122,14 +124,10 @@ def validate_repository_aggregate_analytics_mapping(
         event_type=str(payload.get("event_type", "analytics_repository_aggregates_collected")),
         category=str(payload.get("category", "repository_aggregates")),
         schema_version=str(
-            payload.get(
-                "schema_version", COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_VERSION
-            )
+            payload.get("schema_version", COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_VERSION)
         ),
         policy_version=str(
-            payload.get(
-                "policy_version", COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_POLICY_VERSION
-            )
+            payload.get("policy_version", COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_POLICY_VERSION)
         ),
         privacy_projection_applied=bool(payload["privacy_projection_applied"]),
     )

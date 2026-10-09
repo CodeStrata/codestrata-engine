@@ -15,23 +15,14 @@ from codestrata.artifacts.layout import (
     is_assessment_run_id,
 )
 from codestrata.artifacts.lifecycle import (
-    EIR_HTML,
-    EIR_JSON,
     SLOT_CURRENT,
     SLOT_PREVIOUS,
     promote_assessment_run,
-    promote_intelligence_run,
-    refresh_artifact_index,
     staging_assessment_directory,
-    staging_intelligence_directory,
 )
-from codestrata.artifacts.portfolio_identity import (
-    RELEASE_VALIDATION_PORTFOLIO_ID,
-    resolve_portfolio_artifact_id,
-)
+from codestrata.artifacts.portfolio_identity import RELEASE_VALIDATION_PORTFOLIO_ID
 from codestrata.artifacts.repository_identity import (
     build_github_repository_artifact_id,
-    build_local_repository_artifact_id,
     resolve_repository_artifact_id,
 )
 
@@ -187,66 +178,17 @@ def migrate_intelligence_run_folders(
     workspace: Path,
     dry_run: bool = False,
 ) -> LifecycleMigrationResult:
+    """Do not migrate, promote, or delete leftover EIR trees in Community."""
+
+    _ = dry_run
     result = LifecycleMigrationResult()
     intel = workspace / ".codestrata-artifacts" / INTELLIGENCE_DIRNAME
     if not intel.is_dir():
         return result
-
-    groups: dict[str, list[Path]] = {}
     for entry in intel.iterdir():
         if entry.is_symlink() or not entry.is_dir():
             continue
-        if (entry / SLOT_CURRENT).is_dir():
-            result.intelligence_skipped += 1
-            continue
-        if not (entry / EIR_JSON).is_file():
-            result.intelligence_skipped += 1
-            continue
-        portfolio_id = resolve_portfolio_artifact_id(portfolio_name=entry.name)
-        groups.setdefault(portfolio_id, []).append(entry)
-
-    for portfolio_id, runs in sorted(groups.items()):
-        ordered = sorted(runs, key=lambda path: path.name, reverse=True)
-        keep = ordered[:2]
-        drop = ordered[2:]
-        if dry_run:
-            result.intelligence_migrated += len(keep)
-            result.deleted_excess += len(drop)
-            continue
-        for outdated in drop:
-            try:
-                shutil.rmtree(outdated)
-                result.deleted_excess += 1
-            except OSError as error:
-                result.errors.append(f"{outdated.name}: {error}")
-        for run_dir in reversed(keep):
-            try:
-                staging = staging_intelligence_directory(run_dir.name, base=workspace)
-                if staging.exists():
-                    shutil.rmtree(staging)
-                shutil.copytree(run_dir, staging, symlinks=False)
-                # Ensure required HTML exists (some exports may only have JSON).
-                if not (staging / EIR_HTML).is_file() and (run_dir / EIR_HTML).is_file():
-                    shutil.copy2(run_dir / EIR_HTML, staging / EIR_HTML)
-                if not (staging / EIR_HTML).is_file():
-                    # Create minimal placeholder HTML to satisfy promote validation
-                    # only when HTML was never produced (should be rare).
-                    (staging / EIR_HTML).write_text(
-                        "<!DOCTYPE html><html><body><p>Engineering Intelligence Report</p></body></html>\n",
-                        encoding="utf-8",
-                    )
-                promote_intelligence_run(
-                    portfolio_id=portfolio_id,
-                    staging_directory=staging,
-                    base=workspace,
-                )
-                shutil.rmtree(run_dir, ignore_errors=True)
-                result.intelligence_migrated += 1
-            except Exception as error:  # noqa: BLE001
-                result.errors.append(f"{run_dir.name}: {error}")
-
-    if not dry_run:
-        refresh_artifact_index(base=workspace)
+        result.intelligence_skipped += 1
     return result
 
 

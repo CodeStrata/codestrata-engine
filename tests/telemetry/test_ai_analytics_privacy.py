@@ -88,11 +88,7 @@ def test_forbidden_fields_not_approved(field: str) -> None:
 
 def test_installation_id_only_identifier() -> None:
     payload = _sample().to_stable_dict()
-    ids = {
-        k
-        for k in payload
-        if k.endswith("_id") or k in {"username", "email", "hostname"}
-    }
+    ids = {k for k in payload if k.endswith("_id") or k in {"username", "email", "hostname"}}
     assert ids == {"installation_id"}
 
 

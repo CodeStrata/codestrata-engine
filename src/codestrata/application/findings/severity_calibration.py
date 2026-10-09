@@ -57,7 +57,7 @@ _CI_PATH_RE = re.compile(
 )
 
 
-class SeverityCalibrationDiagnostics(dict):
+class SeverityCalibrationDiagnostics(dict[str, Any]):
     """Mutable diagnostics bag for optional CLI/summary use."""
 
 
@@ -69,12 +69,16 @@ def classify_repository_context(
     """Shared repository-context classifier for severity caps."""
 
     meta = dict(metadata or {})
-    explicit = str(
-        meta.get("repository_context")
-        or meta.get("security_evidence_context")
-        or meta.get("evidence_context")
-        or ""
-    ).strip().lower()
+    explicit = (
+        str(
+            meta.get("repository_context")
+            or meta.get("security_evidence_context")
+            or meta.get("evidence_context")
+            or ""
+        )
+        .strip()
+        .lower()
+    )
     if explicit:
         try:
             return RepositoryContextClass(explicit)
@@ -112,7 +116,10 @@ def classify_repository_context(
     if any("/example" in path or "/samples/" in path for path in normalized):
         return RepositoryContextClass.EXAMPLE
     if any(_GENERATED_PATH_RE.search(path) for path in normalized):
-        if any("vendor" in path or "third_party" in path or "node_modules" in path for path in normalized):
+        if any(
+            "vendor" in path or "third_party" in path or "node_modules" in path
+            for path in normalized
+        ):
             return RepositoryContextClass.VENDOR
         return RepositoryContextClass.GENERATED
     if any(_TEST_PATH_RE.search(path) for path in normalized):
@@ -234,7 +241,11 @@ def calibrate_finding_severity(
         calibrated is FindingSeverity.CRITICAL
         and normalize_severity_token(emitted_severity) is not FindingSeverity.CRITICAL
     ):
-        calibrated = FindingSeverity.HIGH if FindingSeverity.HIGH in active.allowed_severities else calibrated
+        calibrated = (
+            FindingSeverity.HIGH
+            if FindingSeverity.HIGH in active.allowed_severities
+            else calibrated
+        )
 
     bases = list(dict.fromkeys(bases))
     return FindingSeverityAssessment(
@@ -270,7 +281,7 @@ def calibrate_rule_match(match: RuleMatch) -> FindingSeverityAssessment:
         rule_id=str(match.rule_id),
         emitted_severity=match.severity,
         metadata=metadata,
-        evidence_paths=paths,
+        evidence_paths=tuple(path for path in paths if path),
         affected_subject_count=len(match.affected_entities or match.subject_keys),
     )
 
@@ -290,9 +301,7 @@ def apply_severity_assessment(
     metadata["severity_calibration_status"] = assessment.calibration_status.value
     metadata["severity_policy_id"] = assessment.policy_id or ""
     # Preserve rule-emitted severity_basis (e.g. technical debt value>t*2).
-    metadata["severity_calibration_basis"] = ",".join(
-        item.value for item in assessment.basis
-    )
+    metadata["severity_calibration_basis"] = ",".join(item.value for item in assessment.basis)
     if assessment.component_summary.threshold_ratio:
         metadata["threshold_ratio"] = assessment.component_summary.threshold_ratio
     if assessment.component_summary.production_context:
@@ -352,11 +361,7 @@ def _band_severity(
         return None
     for band in policy.measurement_bands:
         lo = Decimal(band.min_ratio_exclusive)
-        hi = (
-            Decimal(band.max_ratio_inclusive)
-            if band.max_ratio_inclusive is not None
-            else None
-        )
+        hi = Decimal(band.max_ratio_inclusive) if band.max_ratio_inclusive is not None else None
         if ratio > lo and (hi is None or ratio <= hi):
             return band.severity
     # > last band

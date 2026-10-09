@@ -61,9 +61,7 @@ class DisabledTelemetryFacade:
         return {
             "codestrata_version": get_package_version(),
             "decision_made": consent.explicit,
-            "disabled_by_default": (
-                consent.decision is TelemetryDecision.DISABLED_BY_DEFAULT
-            ),
+            "disabled_by_default": (consent.decision is TelemetryDecision.DISABLED_BY_DEFAULT),
             "enabled": self.is_enabled(),
             "endpoint_configured": False,
             "force_disabled_by_env": False,

@@ -54,9 +54,7 @@ def parse_run_status(value: str | None) -> AssessmentRunStatus | None:
     try:
         return AssessmentRunStatus(compact)
     except ValueError as error:
-        raise ValueError(
-            "status must be one of: running, completed, failed, aborted"
-        ) from error
+        raise ValueError("status must be one of: running, completed, failed, aborted") from error
 
 
 def parse_direction(value: str) -> DependencyDirection:

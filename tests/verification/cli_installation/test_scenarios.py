@@ -24,15 +24,11 @@ def test_expected_markers() -> None:
     assert not version_flag_ok(CommandResultView(1, "CodeStrata 0.1.0\n", ""))[0]
     help_text = "Primary workflow: assess\n  init\n  doctor\n  assess\n"
     assert help_ok(CommandResultView(0, help_text, ""))[0]
-    assert help_subcommand_absent(
-        CommandResultView(2, "", "No such command 'help'. Try --help")
-    )[0]
+    assert help_subcommand_absent(CommandResultView(2, "", "No such command 'help'. Try --help"))[0]
     assert init_ok(
         CommandResultView(0, "Wrote codestrata.toml\nSuccess: Configuration ready.\n", "")
     )[0]
-    assert doctor_ok(
-        CommandResultView(0, "[OK] python: ...\nAll doctor checks passed.\n", "")
-    )[0]
+    assert doctor_ok(CommandResultView(0, "[OK] python: ...\nAll doctor checks passed.\n", ""))[0]
 
 
 def test_failure_scenario_evaluators() -> None:

@@ -45,7 +45,9 @@ def _verify_run(run: AssessmentRunArtifacts) -> RunVerification:
 
     all_checks = structural + trace + parity + html + credibility + privacy
     failures = [f"{c.name}:{c.detail}" for c in all_checks if not c.ok]
-    assessment = run.report.get("assessment") if isinstance(run.report.get("assessment"), dict) else {}
+    assessment = (
+        run.report.get("assessment") if isinstance(run.report.get("assessment"), dict) else {}
+    )
     schema = str(run.report.get("schema_version") or assessment.get("schema_version") or "")
 
     return RunVerification(
@@ -160,9 +162,7 @@ def run_assessment_report_verification(
             keep_output=keep_output,
         )
         if local_only:
-            limitations.append(
-                "catalog-backed CleanArchitecture report skipped (--local-only)"
-            )
+            limitations.append("catalog-backed CleanArchitecture report skipped (--local-only)")
         for prepared in prepared_list:
             art = _load_prepared(prepared)
             loaded.append(art)
@@ -187,11 +187,7 @@ def run_assessment_report_verification(
             defects.extend(item.failures)
     defects.extend(f"{c.name}:{c.detail}" for c in negatives if not c.ok)
 
-    ok = (
-        not defects
-        and all(item.ok for item in run_results)
-        and all(c.ok for c in negatives)
-    )
+    ok = not defects and all(item.ok for item in run_results) and all(c.ok for c in negatives)
     report = VerificationReport(
         ok=ok,
         verdict="pass" if ok else "fail",

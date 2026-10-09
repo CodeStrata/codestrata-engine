@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import Any
-
 from codestrata.application.report_validation import validate_report_json
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 from verification.assessment_report.loaders import (

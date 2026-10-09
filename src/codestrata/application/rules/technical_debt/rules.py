@@ -96,9 +96,7 @@ class LargeCallableRule:
                     evidence=(
                         evidence_callable(
                             item=item,
-                            message=(
-                                f"physical_line_count {value} > threshold {self._threshold}"
-                            ),
+                            message=(f"physical_line_count {value} > threshold {self._threshold}"),
                             metric_name="physical_line_count",
                             metric_value=value,
                             threshold=self._threshold,
@@ -137,8 +135,7 @@ class ExcessiveBranchingRule:
                 "configured threshold."
             ),
             remediation=(
-                "Reduce branching so branch-point count falls at or below the "
-                "configured threshold."
+                "Reduce branching so branch-point count falls at or below the configured threshold."
             ),
         )
 
@@ -172,9 +169,7 @@ class ExcessiveBranchingRule:
                     evidence=(
                         evidence_callable(
                             item=item,
-                            message=(
-                                f"branch_point_count {value} > threshold {self._threshold}"
-                            ),
+                            message=(f"branch_point_count {value} > threshold {self._threshold}"),
                             metric_name="branch_point_count",
                             metric_value=value,
                             threshold=self._threshold,
@@ -248,9 +243,7 @@ class DeepNestingRule:
                     evidence=(
                         evidence_callable(
                             item=item,
-                            message=(
-                                f"max_nesting_depth {value} > threshold {self._threshold}"
-                            ),
+                            message=(f"max_nesting_depth {value} > threshold {self._threshold}"),
                             metric_name="max_nesting_depth",
                             metric_value=value,
                             threshold=self._threshold,
@@ -289,8 +282,7 @@ class ExcessiveParametersRule:
                 "configured threshold."
             ),
             remediation=(
-                "Reduce parameters so parameter count falls at or below the configured "
-                "threshold."
+                "Reduce parameters so parameter count falls at or below the configured threshold."
             ),
         )
 
@@ -324,9 +316,7 @@ class ExcessiveParametersRule:
                     evidence=(
                         evidence_callable(
                             item=item,
-                            message=(
-                                f"parameter_count {value} > threshold {self._threshold}"
-                            ),
+                            message=(f"parameter_count {value} > threshold {self._threshold}"),
                             metric_name="parameter_count",
                             metric_value=value,
                             threshold=self._threshold,
@@ -365,8 +355,7 @@ class OversizedTypeRule:
                 "the configured threshold."
             ),
             remediation=(
-                "Split the type/module so physical size falls at or below the "
-                "configured threshold."
+                "Split the type/module so physical size falls at or below the configured threshold."
             ),
         )
 
@@ -400,9 +389,7 @@ class OversizedTypeRule:
                     evidence=(
                         evidence_type(
                             item=item,
-                            message=(
-                                f"physical_line_count {value} > threshold {self._threshold}"
-                            ),
+                            message=(f"physical_line_count {value} > threshold {self._threshold}"),
                             metric_name="physical_line_count",
                             metric_value=value,
                             threshold=self._threshold,

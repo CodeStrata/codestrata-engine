@@ -47,9 +47,7 @@ def register_assessment_tools(server: FastMCP, queries: KnowledgeQueryService) -
         """
 
         def _run() -> dict[str, Any]:
-            return to_mcp_dict(
-                queries.get_assessment_run(require_nonblank(run_id, label="run_id"))
-            )
+            return to_mcp_dict(queries.get_assessment_run(require_nonblank(run_id, label="run_id")))
 
         return run_bounded("get_assessment", _run)
 

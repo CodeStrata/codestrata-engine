@@ -81,9 +81,7 @@ def write_identity_atomic(
                 except OSError:
                     pass
     except OSError as error:
-        raise InstallationIdentityError(
-            InstallationIdentityErrorCode.PERSISTENCE_FAILED
-        ) from error
+        raise InstallationIdentityError(InstallationIdentityErrorCode.PERSISTENCE_FAILED) from error
 
 
 def ensure_identity_home(*, home: Path | None = None) -> Path:

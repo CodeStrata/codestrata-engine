@@ -4,10 +4,6 @@ from __future__ import annotations
 
 import json
 
-from codestrata.telemetry.infrastructure.http_client import FakeTelemetryHttpResponse
-from codestrata.telemetry.transport import TelemetryTransportResultKind
-from codestrata.telemetry.transport_errors import TransportFailureCategory
-from codestrata.telemetry.transport_retry import should_retry
 from tests.telemetry.transport_test_helpers import (
     FIXED_EVENT_ID,
     TEST_ENDPOINT,
@@ -18,6 +14,11 @@ from tests.telemetry.transport_test_helpers import (
     gated_event,
     make_http_transport,
 )
+
+from codestrata.telemetry.infrastructure.http_client import FakeTelemetryHttpResponse
+from codestrata.telemetry.transport import TelemetryTransportResultKind
+from codestrata.telemetry.transport_errors import TransportFailureCategory
+from codestrata.telemetry.transport_retry import should_retry
 
 
 def test_accepted_and_headers() -> None:
@@ -45,9 +46,7 @@ def test_accepted_and_headers() -> None:
 
 def test_already_accepted() -> None:
     transport, _ = make_http_transport(
-        responses=FakeTelemetryHttpResponse(
-            status_code=200, body=already_accepted_body()
-        )
+        responses=FakeTelemetryHttpResponse(status_code=200, body=already_accepted_body())
     )
     result = transport.send(gated_event())
     assert result.kind is TelemetryTransportResultKind.SENT
@@ -67,16 +66,36 @@ def test_malformed_ack_not_accepted() -> None:
 
 def test_status_classification_matrix() -> None:
     cases = [
-        (401, TransportFailureCategory.AUTHENTICATION_FAILED, TelemetryTransportResultKind.REJECTED),
+        (
+            401,
+            TransportFailureCategory.AUTHENTICATION_FAILED,
+            TelemetryTransportResultKind.REJECTED,
+        ),
         (403, TransportFailureCategory.AUTHORIZATION_DENIED, TelemetryTransportResultKind.REJECTED),
         (409, TransportFailureCategory.CONFLICT, TelemetryTransportResultKind.REJECTED),
         (413, TransportFailureCategory.PAYLOAD_TOO_LARGE, TelemetryTransportResultKind.REJECTED),
         (422, TransportFailureCategory.VALIDATION_REJECTED, TelemetryTransportResultKind.REJECTED),
         (429, TransportFailureCategory.RATE_LIMITED, TelemetryTransportResultKind.FAILED_SILENTLY),
-        (500, TransportFailureCategory.SERVER_UNAVAILABLE, TelemetryTransportResultKind.FAILED_SILENTLY),
-        (502, TransportFailureCategory.SERVER_UNAVAILABLE, TelemetryTransportResultKind.FAILED_SILENTLY),
-        (503, TransportFailureCategory.SERVER_UNAVAILABLE, TelemetryTransportResultKind.FAILED_SILENTLY),
-        (504, TransportFailureCategory.SERVER_UNAVAILABLE, TelemetryTransportResultKind.FAILED_SILENTLY),
+        (
+            500,
+            TransportFailureCategory.SERVER_UNAVAILABLE,
+            TelemetryTransportResultKind.FAILED_SILENTLY,
+        ),
+        (
+            502,
+            TransportFailureCategory.SERVER_UNAVAILABLE,
+            TelemetryTransportResultKind.FAILED_SILENTLY,
+        ),
+        (
+            503,
+            TransportFailureCategory.SERVER_UNAVAILABLE,
+            TelemetryTransportResultKind.FAILED_SILENTLY,
+        ),
+        (
+            504,
+            TransportFailureCategory.SERVER_UNAVAILABLE,
+            TelemetryTransportResultKind.FAILED_SILENTLY,
+        ),
     ]
     for status, category, kind in cases:
         transport, client = make_http_transport(
@@ -111,21 +130,30 @@ def test_timeout_and_connection() -> None:
 
 
 def test_no_retry_on_auth_or_conflict() -> None:
-    assert should_retry(
-        attempt=1,
-        maximum_attempts=2,
-        category=TransportFailureCategory.AUTHENTICATION_FAILED,
-    ) is False
-    assert should_retry(
-        attempt=1,
-        maximum_attempts=2,
-        category=TransportFailureCategory.CONFLICT,
-    ) is False
-    assert should_retry(
-        attempt=1,
-        maximum_attempts=1,
-        category=TransportFailureCategory.SERVER_UNAVAILABLE,
-    ) is False
+    assert (
+        should_retry(
+            attempt=1,
+            maximum_attempts=2,
+            category=TransportFailureCategory.AUTHENTICATION_FAILED,
+        )
+        is False
+    )
+    assert (
+        should_retry(
+            attempt=1,
+            maximum_attempts=2,
+            category=TransportFailureCategory.CONFLICT,
+        )
+        is False
+    )
+    assert (
+        should_retry(
+            attempt=1,
+            maximum_attempts=1,
+            category=TransportFailureCategory.SERVER_UNAVAILABLE,
+        )
+        is False
+    )
 
 
 def test_optional_retry_reuses_event_id() -> None:

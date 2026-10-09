@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 from verification.cli_initialization.runner import run_cli_initialization_verification
@@ -31,7 +30,11 @@ def main(argv: list[str] | None = None) -> int:
     if report.failures:
         print(f"failures: {', '.join(report.failures)}")
     out = (args.output_dir or Path("reports/verification")) / "cli-initialization-verification.json"
-    print(f"report: {out if args.output_dir else 'reports/verification/cli-initialization-verification.json'}")
+    print(
+        f"report: {
+            out if args.output_dir else 'reports/verification/cli-initialization-verification.json'
+        }"
+    )
     return 0 if report.ok else 1
 
 

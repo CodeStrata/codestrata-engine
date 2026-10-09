@@ -7,6 +7,8 @@ slice. Not an ACTIVE 0.2.0 release gate. Collect with
 
 from __future__ import annotations
 
+
 def test_test_integration_module_importable() -> None:
     import verification.curated_repository_validation as pkg
+
     assert pkg.CURATED_REPOSITORY_VALIDATION_ID

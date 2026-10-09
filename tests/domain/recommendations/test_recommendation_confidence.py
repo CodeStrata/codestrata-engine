@@ -96,9 +96,7 @@ def _recommendation(
         priority=priority,
         category=RecommendationCategory.MAINTAINABILITY,
         related_finding_ids=finding_ids,
-        actions=(
-            RecommendationAction(order=1, title="Step", description="Do it"),
-        ),
+        actions=(RecommendationAction(order=1, title="Step", description="Do it"),),
         recommendation_type=rec_type,
         evidence_completeness=completeness,
         primary_finding_id=finding_ids[0] if finding_ids else None,
@@ -140,9 +138,7 @@ def test_model_rejects_invalid_high_and_legacy() -> None:
             level=RecommendationConfidenceLevel.HIGH,
             basis=(RecommendationConfidenceBasis.PARTIAL_FINDING_TRACEABILITY,),
             derivation_status=RecommendationConfidenceDerivationStatus.DERIVED,
-            component_summary=RecommendationConfidenceComponents(
-                traceability_complete=True
-            ),
+            component_summary=RecommendationConfidenceComponents(traceability_complete=True),
         )
     with pytest.raises(ValidationError):
         RecommendationConfidence(
@@ -197,9 +193,7 @@ def test_unavailable_finding_cannot_be_high_or_moderate() -> None:
         recommendation_type="finding_backed",
     )
     assert result.level is RecommendationConfidenceLevel.LIMITED
-    assert (
-        RecommendationConfidenceBasis.UNAVAILABLE_SUPPORTING_FINDING in result.basis
-    )
+    assert RecommendationConfidenceBasis.UNAVAILABLE_SUPPORTING_FINDING in result.basis
 
 
 def test_missing_and_legacy_unavailable() -> None:
@@ -265,9 +259,7 @@ def test_merged_recomputes_weakest_and_preserves_id() -> None:
         priority=RecommendationPriority.HIGH,
         category=RecommendationCategory.MAINTAINABILITY,
         related_finding_ids=("f2",),
-        actions=(
-            RecommendationAction(order=1, title="Step", description="Do it"),
-        ),
+        actions=(RecommendationAction(order=1, title="Step", description="Do it"),),
         subject_keys=(),  # may produce different id — merge uses preferred id
     )
     # Force same id for merge identity collision path.
@@ -285,9 +277,7 @@ def test_merged_recomputes_weakest_and_preserves_id() -> None:
     assert merged.id == left.id
     assert set(merged.supporting_finding_ids) == {"f1", "f2"}
     assert merged.recommendation_type is RecommendationType.MERGED
-    assert (
-        merged.recommendation_confidence.level is RecommendationConfidenceLevel.LIMITED
-    )
+    assert merged.recommendation_confidence.level is RecommendationConfidenceLevel.LIMITED
     assert (
         RecommendationConfidenceBasis.MERGED_RECOMMENDATION
         in merged.recommendation_confidence.basis

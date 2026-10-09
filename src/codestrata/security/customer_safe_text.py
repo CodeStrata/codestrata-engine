@@ -33,12 +33,9 @@ from codestrata.security.redaction import REDACTED, redact_report_payload, redac
 
 # Deterministic replacement when a field must be rewritten categorically
 # (preferred for newly authored SEC002 evidence; redaction covers legacy text).
-PRIVATE_KEY_FINDING_EVIDENCE = (
-    "Sensitive private-key material signature detected; value redacted."
-)
+PRIVATE_KEY_FINDING_EVIDENCE = "Sensitive private-key material signature detected; value redacted."
 PRIVATE_KEY_FINDING_DESCRIPTION_TEMPLATE = (
-    "Sensitive credential material was detected in repository configuration. "
-    "The value is redacted."
+    "Sensitive credential material was detected in repository configuration. The value is redacted."
 )
 
 CANONICAL_REDACTED_MARKERS: frozenset[str] = frozenset(

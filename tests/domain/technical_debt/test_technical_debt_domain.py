@@ -27,9 +27,7 @@ def test_pack_and_section_constants_stable() -> None:
 
 
 def test_taxonomy_is_deterministic_and_bounded() -> None:
-    assert TechnicalDebtCategory.DEPRECATED_TECHNOLOGY.value.startswith(
-        "technical-debt."
-    )
+    assert TechnicalDebtCategory.DEPRECATED_TECHNOLOGY.value.startswith("technical-debt.")
     assert TECHNICAL_DEBT_CATEGORIES == tuple(TechnicalDebtCategory)
     assert TECHNICAL_DEBT_CATEGORIES == tuple(TechnicalDebtCategory)
 
@@ -58,12 +56,8 @@ def test_empty_section_round_trip_deterministic() -> None:
         TechnicalDebtAssessmentAssembler,
     )
 
-    left = TechnicalDebtAssessmentAssembler().assemble_empty(
-        repository_id="repo:codestrata"
-    )
-    right = TechnicalDebtAssessmentAssembler().assemble_empty(
-        repository_id="repo:codestrata"
-    )
+    left = TechnicalDebtAssessmentAssembler().assemble_empty(repository_id="repo:codestrata")
+    right = TechnicalDebtAssessmentAssembler().assemble_empty(repository_id="repo:codestrata")
     assert left.model_dump(mode="json") == right.model_dump(mode="json")
     payload = dumps_stable_json(left.model_dump(mode="json"))
     restored = TechnicalDebtAssessmentSection.model_validate(loads_stable_json(payload))

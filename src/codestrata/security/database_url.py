@@ -63,9 +63,7 @@ def redact_database_url(url: str | None) -> str:
         netloc = f"{host}{port}"
 
     query = _redact_query(parsed.query)
-    return urlunparse(
-        (parsed.scheme, netloc, parsed.path, parsed.params, query, parsed.fragment)
-    )
+    return urlunparse((parsed.scheme, netloc, parsed.path, parsed.params, query, parsed.fragment))
 
 
 def _redact_query(query: str) -> str:

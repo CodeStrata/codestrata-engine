@@ -95,7 +95,7 @@ def render_coverage_confidence_limitations(
     detail rows are omitted to avoid duplicate coverage blocks.
     """
 
-    canonical_rows = ()
+    canonical_rows: tuple[Any, ...] = ()
     if assessment_coverage is not None:
         from codestrata.application.assessment_heads.coverage import (
             coverage_summary_rows,
@@ -116,7 +116,7 @@ def render_coverage_confidence_limitations(
     rows = canonical_rows or coverage_rows
     parts: list[str] = [
         f'<div class="{CCL_BLOCK_CLASS}" data-canonical="coverage-confidence-limitations">\n'
-        f'{_render_coverage(rows, fallback=coverage_fallback)}\n'
+        f"{_render_coverage(rows, fallback=coverage_fallback)}\n"
         f"{_render_confidence(confidence, confidence_label, note=confidence_note)}\n"
         f"{_render_limitations(limitations)}\n"
         "</div>"
@@ -184,9 +184,7 @@ def _render_confidence(
 ) -> str:
     display = normalize_confidence_display(confidence, confidence_label)
     note_html = (
-        f'\n<p class="muted">{escape_html(note.strip())}</p>'
-        if note and str(note).strip()
-        else ""
+        f'\n<p class="muted">{escape_html(note.strip())}</p>' if note and str(note).strip() else ""
     )
     return (
         f'<div class="{CCL_BLOCK_CLASS}-group" data-group="{CCL_CONFIDENCE_GROUP}">\n'
@@ -200,9 +198,11 @@ def _render_confidence(
 def _render_limitations(limitations: Sequence[str]) -> str:
     items = dedupe_limitations(limitations)
     if items:
-        body = '<ul class="plain">' + "".join(
-            f"<li>{escape_html(item)}</li>" for item in items
-        ) + "</ul>"
+        body = (
+            '<ul class="plain">'
+            + "".join(f"<li>{escape_html(item)}</li>" for item in items)
+            + "</ul>"
+        )
     else:
         body = f'<p class="muted">{escape_html(LIMITATIONS_UNAVAILABLE)}</p>'
     return (
@@ -221,9 +221,7 @@ def coverage_rows_from_assessment_head(section: Any) -> tuple[Any, ...]:
     evidence = str(getattr(section, "evidence_state", "") or "unavailable").strip()
     findings = int(getattr(section, "findings_count", 0) or 0)
     recommendations = int(getattr(section, "recommendations_count", 0) or 0)
-    display = (
-        f"findings: {findings}; recommendations: {recommendations}; evidence: {evidence}"
-    )
+    display = f"findings: {findings}; recommendations: {recommendations}; evidence: {evidence}"
     return (
         simple_coverage_row(
             label=title,
@@ -258,6 +256,4 @@ def simple_coverage_row(
     display: str,
     note: str | None = None,
 ) -> _SimpleCoverageRow:
-    return _SimpleCoverageRow(
-        label=label, status=status, display=display, note=note
-    )
+    return _SimpleCoverageRow(label=label, status=status, display=display, note=note)

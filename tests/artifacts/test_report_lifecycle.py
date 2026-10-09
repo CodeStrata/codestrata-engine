@@ -98,20 +98,12 @@ def test_assessment_rotation_abc_fail_d(tmp_path: Path) -> None:
     )
     current = json.loads(
         (
-            tmp_path
-            / ".codestrata-artifacts/assessments"
-            / rid
-            / "current"
-            / "assessment.json"
+            tmp_path / ".codestrata-artifacts/assessments" / rid / "current" / "assessment.json"
         ).read_text(encoding="utf-8")
     )
     previous = json.loads(
         (
-            tmp_path
-            / ".codestrata-artifacts/assessments"
-            / rid
-            / "previous"
-            / "assessment.json"
+            tmp_path / ".codestrata-artifacts/assessments" / rid / "previous" / "assessment.json"
         ).read_text(encoding="utf-8")
     )
     assert current["assessment_run_id"] == "example-20260101-000003"
@@ -123,42 +115,20 @@ def test_assessment_rotation_abc_fail_d(tmp_path: Path) -> None:
         promote_assessment_run(repository_id=rid, staging_directory=bad, base=tmp_path)
     current2 = json.loads(
         (
-            tmp_path
-            / ".codestrata-artifacts/assessments"
-            / rid
-            / "current"
-            / "assessment.json"
+            tmp_path / ".codestrata-artifacts/assessments" / rid / "current" / "assessment.json"
         ).read_text(encoding="utf-8")
     )
     assert current2["assessment_run_id"] == "example-20260101-000003"
 
 
-def test_portfolio_membership_change_preserves_identity(tmp_path: Path) -> None:
+def test_portfolio_lifecycle_removed_from_community(tmp_path: Path) -> None:
     pid = RELEASE_VALIDATION_PORTFOLIO_ID
-    promote_intelligence_run(
-        portfolio_id=pid,
-        staging_directory=_stage_eir(tmp_path, "r1", ["a", "b", "c"]),
-        base=tmp_path,
-    )
-    promote_intelligence_run(
-        portfolio_id=pid,
-        staging_directory=_stage_eir(tmp_path, "r2", ["a", "b", "c", "d"]),
-        base=tmp_path,
-    )
-    promote_intelligence_run(
-        portfolio_id=pid,
-        staging_directory=_stage_eir(tmp_path, "r3", ["a", "b"]),
-        base=tmp_path,
-    )
-    root = tmp_path / ".codestrata-artifacts/intelligence" / pid
-    assert root.is_dir()
-    current = json.loads(
-        (root / "current" / "engineering-intelligence-report.json").read_text(encoding="utf-8")
-    )
-    previous = json.loads(
-        (root / "previous" / "engineering-intelligence-report.json").read_text(encoding="utf-8")
-    )
-    assert current["portfolio_run_id"] == "r3"
-    assert current["repository_artifact_ids"] == ["a", "b"]
-    assert previous["portfolio_run_id"] == "r2"
-    assert previous["repository_artifact_ids"] == ["a", "b", "c", "d"]
+    with pytest.raises(LifecycleError, match="Portfolio"):
+        promote_intelligence_run(
+            portfolio_id=pid,
+            staging_directory=_stage_eir(tmp_path, "r1", ["a", "b", "c"]),
+            base=tmp_path,
+        )
+    intel = tmp_path / ".codestrata-artifacts" / "intelligence"
+    current = intel / pid / "current" / "engineering-intelligence-report.json"
+    assert not current.exists()

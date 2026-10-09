@@ -118,6 +118,10 @@ class BoundaryDecision:
     reason: str
 
 
+_MAX_EXCLUDED_PYTHON_PATHS = 512
+_MAX_PRUNED_DIRECTORIES = 512
+
+
 @dataclass
 class BoundaryDiagnostics:
     policy_version: str = BOUNDARY_POLICY_VERSION
@@ -128,6 +132,13 @@ class BoundaryDiagnostics:
     excluded_by_config_sample: list[str] = field(default_factory=list)
     included_by_override_sample: list[str] = field(default_factory=list)
     default_excluded_directories: list[str] = field(default_factory=list)
+    exclude_paths: list[str] = field(default_factory=list)
+    excluded_python_paths: list[str] = field(default_factory=list)
+    excluded_python_paths_capped: bool = False
+    pruned_directories: list[str] = field(default_factory=list)
+    pruned_directories_capped: bool = False
+    collection_truncated: bool = False
+    max_files_limit: int | None = None
 
     def to_dict(self) -> dict[str, object]:
         return {
@@ -136,6 +147,13 @@ class BoundaryDiagnostics:
             "excluded_files": self.excluded_files,
             "role_counts": dict(sorted(self.role_counts.items())),
             "default_excluded_directories": list(self.default_excluded_directories),
+            "exclude_paths": list(self.exclude_paths),
+            "excluded_python_paths": list(self.excluded_python_paths),
+            "excluded_python_paths_capped": self.excluded_python_paths_capped,
+            "pruned_directories": list(self.pruned_directories),
+            "pruned_directories_capped": self.pruned_directories_capped,
+            "collection_truncated": self.collection_truncated,
+            "max_files_limit": self.max_files_limit,
             "excluded_by_default_sample": list(self.excluded_by_default_sample[:12]),
             "excluded_by_config_sample": list(self.excluded_by_config_sample[:12]),
             "included_by_override_sample": list(self.included_by_override_sample[:12]),
@@ -238,6 +256,13 @@ class BoundaryService:
         excluded_samples_config: list[str] = []
         included_override_samples: list[str] = []
         role_counter: Counter[str] = Counter()
+        self.diagnostics.exclude_paths = sorted(self.policy.exclude_paths)
+        self.diagnostics.excluded_python_paths = []
+        self.diagnostics.excluded_python_paths_capped = False
+        self.diagnostics.pruned_directories = []
+        self.diagnostics.pruned_directories_capped = False
+        self.diagnostics.collection_truncated = False
+        self.diagnostics.max_files_limit = max_files
 
         for dirpath, dirnames, filenames in os.walk(root, topdown=True, followlinks=False):
             current = Path(dirpath)
@@ -256,6 +281,11 @@ class BoundaryService:
                 if self.should_prune_directory(name, relative_dir=relative_dir):
                     self.diagnostics.excluded_files += 1
                     sample = f"{relative_dir}/{name}/".strip("/") if relative_dir else f"{name}/"
+                    pruned_path = sample.rstrip("/")
+                    if len(self.diagnostics.pruned_directories) < _MAX_PRUNED_DIRECTORIES:
+                        self.diagnostics.pruned_directories.append(pruned_path)
+                    else:
+                        self.diagnostics.pruned_directories_capped = True
                     if len(excluded_samples_default) < 12:
                         excluded_samples_default.append(sample)
                     continue
@@ -276,6 +306,11 @@ class BoundaryService:
                 decision = self.decide(relative)
                 if not decision.included:
                     self.diagnostics.excluded_files += 1
+                    if relative.endswith(".py"):
+                        if len(self.diagnostics.excluded_python_paths) < _MAX_EXCLUDED_PYTHON_PATHS:
+                            self.diagnostics.excluded_python_paths.append(relative)
+                        else:
+                            self.diagnostics.excluded_python_paths_capped = True
                     if decision.reason == "explicit-exclude":
                         if len(excluded_samples_config) < 12:
                             excluded_samples_config.append(relative)
@@ -288,8 +323,10 @@ class BoundaryService:
                     included_override_samples.append(relative)
                 collected.append(relative)
                 if max_files is not None and len(collected) >= max_files:
+                    self.diagnostics.collection_truncated = True
                     break
             if max_files is not None and len(collected) >= max_files:
+                self.diagnostics.collection_truncated = True
                 break
 
         self.diagnostics.included_files = len(collected)

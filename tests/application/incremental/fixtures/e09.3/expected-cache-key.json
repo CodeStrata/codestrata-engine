@@ -1,0 +1,9 @@
+{
+  "operator_set_id": "codestrata.bounded-operators.v1",
+  "operator_version": "1.0.0",
+  "operator_digest": "e5f5a5e5eaa9f1ea96e738ee6abd1994f9588d20420a555dc82e0ab5528b68d1",
+  "empty_config_digest": "2c4c78bafc94eca1ce8638c1a143914aaa18d7888726b82b5c4b49c0a8c09cf9",
+  "feed_absent": "absent",
+  "rule_missing": "missing",
+  "cache_key_binds": ["source", "config", "rule", "operator", "feed"]
+}

@@ -27,12 +27,18 @@ from codestrata.reporting.html_v2.assessment_head_grouping import (
     classify_recommendation_head,
 )
 from codestrata.reporting.html_v2.assessment_heads import (
+    APPENDIX_ASSESSMENT_HEADS,
     ASSESSMENT_RESULT_HEADS,
+    ENGINEERING_HEALTH_HEADLINES,
+    SUPPORTING_ASSESSMENT_HEADS,
     AssessmentHead,
+    AssessmentHeadRole,
     all_assessment_heads,
     assessment_head_anchor,
     assessment_head_order,
+    assessment_head_role,
     assessment_head_title,
+    engineering_health_outcome_title,
 )
 from codestrata.reporting.html_v2.models import FindingView, RecommendationView
 from codestrata.reporting.modernization_models import AssessmentMode, ModernizationReportInput
@@ -76,20 +82,44 @@ def _recommendation_view(
 def test_assessment_head_contract_stable() -> None:
     heads = all_assessment_heads()
     assert AssessmentHead.ENGINEERING_INTELLIGENCE in heads
-    assert ASSESSMENT_RESULT_HEADS == (
-        AssessmentHead.TECHNOLOGY_INVENTORY,
+    assert AssessmentHead.QUALITY_INTELLIGENCE in heads
+    assert ENGINEERING_HEALTH_HEADLINES == (
         AssessmentHead.ARCHITECTURE_INTELLIGENCE,
-        AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
-        AssessmentHead.DEPENDENCY_INTELLIGENCE,
         AssessmentHead.SECURITY_INTELLIGENCE,
-        AssessmentHead.CLOUD_READINESS,
-        AssessmentHead.AI_READINESS,
-        AssessmentHead.MODERNIZATION_ASSESSMENT,
+        AssessmentHead.QUALITY_INTELLIGENCE,
+        AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
+    )
+    assert len(ENGINEERING_HEALTH_HEADLINES) == 4
+    assert AssessmentHead.QUALITY_INTELLIGENCE in ENGINEERING_HEALTH_HEADLINES
+    legacy_peers = (
+        *SUPPORTING_ASSESSMENT_HEADS,
+        *APPENDIX_ASSESSMENT_HEADS,
+    )
+    for head in legacy_peers:
+        assert head not in ENGINEERING_HEALTH_HEADLINES
+        assert assessment_head_role(head) != AssessmentHeadRole.HEADLINE
+    assert (
+        assessment_head_title(AssessmentHead.ARCHITECTURE_INTELLIGENCE)
+        == "Architecture Intelligence"
     )
     assert assessment_head_title(AssessmentHead.SECURITY_INTELLIGENCE) == "Security Intelligence"
+    assert (
+        assessment_head_title(AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE)
+        == "Technical Debt Intelligence"
+    )
+    assert engineering_health_outcome_title(AssessmentHead.ARCHITECTURE_INTELLIGENCE) == (
+        "Architecture"
+    )
+    assert engineering_health_outcome_title(AssessmentHead.SECURITY_INTELLIGENCE) == "Security"
+    assert engineering_health_outcome_title(AssessmentHead.QUALITY_INTELLIGENCE) == "Quality"
+    assert engineering_health_outcome_title(AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE) == (
+        "Maintainability & Technical Debt"
+    )
     assert assessment_head_anchor(AssessmentHead.SECURITY_INTELLIGENCE) == "security-intelligence"
-    orders = [assessment_head_order(h) for h in ASSESSMENT_RESULT_HEADS]
+    assert assessment_head_anchor(AssessmentHead.QUALITY_INTELLIGENCE) == "quality-intelligence"
+    orders = [assessment_head_order(h) for h in ENGINEERING_HEALTH_HEADLINES]
     assert orders == sorted(orders)
+    assert AssessmentHead.QUALITY_INTELLIGENCE in ASSESSMENT_RESULT_HEADS
 
 
 def test_finding_grouping_uses_category_not_title() -> None:
@@ -115,7 +145,11 @@ def test_finding_grouping_uses_category_not_title() -> None:
     architecture = _finding_view(finding_id="f-arch", category="architecture")
     assert classify_finding_head(architecture) is AssessmentHead.ARCHITECTURE_INTELLIGENCE
 
-    unknown = _finding_view(finding_id="f-unk", category="testing", rule_id="testing.skipped")
+    quality = _finding_view(finding_id="f-qa", category="testing", rule_id="testing.skipped")
+    assert classify_finding_head(quality) is AssessmentHead.QUALITY_INTELLIGENCE
+    quality_alias = _finding_view(finding_id="f-q2", category="quality", rule_id="quality.flaky")
+    assert classify_finding_head(quality_alias) is AssessmentHead.QUALITY_INTELLIGENCE
+    unknown = _finding_view(finding_id="f-unk", category="other", rule_id="unknown.skipped")
     assert classify_finding_head(unknown) is None
 
 
@@ -136,7 +170,9 @@ def test_recommendation_follows_finding_head() -> None:
     )
 
 
-def _analysis(tmp_path: Path, findings: list[Finding], recommendations: list[Recommendation]) -> AnalysisResult:
+def _analysis(
+    tmp_path: Path, findings: list[Finding], recommendations: list[Recommendation]
+) -> AnalysisResult:
     return AnalysisResult(
         repository=Repository(
             name="sample-app",
@@ -201,34 +237,50 @@ def test_report_hierarchy_and_toc_anchors(tmp_path: Path) -> None:
     document = build_html_report_view_model(report_input)
     html = HtmlReportRenderer().render(document)
 
-    for head in ASSESSMENT_RESULT_HEADS:
+    assert len(document.headline_outcomes) == 4
+    headline_ids = tuple(item.head for item in document.headline_outcomes)
+    assert headline_ids == tuple(head.value for head in ENGINEERING_HEALTH_HEADLINES)
+    assert AssessmentHead.QUALITY_INTELLIGENCE.value in headline_ids
+    for head in (*SUPPORTING_ASSESSMENT_HEADS, *APPENDIX_ASSESSMENT_HEADS):
+        assert head.value not in headline_ids
+    quality_head = next(
+        item
+        for item in document.headline_outcomes
+        if item.head == AssessmentHead.QUALITY_INTELLIGENCE.value
+    )
+    assert quality_head.title == "Quality"
+    assert any(item.finding_id for item in quality_head.findings)
+    assert all(item.finding_id for item in document.findings)
+
+    for head in ENGINEERING_HEALTH_HEADLINES:
         anchor = assessment_head_anchor(head)
         assert f'id="{anchor}"' in html
         assert f'href="#{anchor}"' in html
 
     assert 'id="engineering-intelligence-summary"' in html
-    assert 'id="executive-summary"' in html
-    assert html.find('id="executive-summary"') < html.find(
-        'id="engineering-intelligence-summary"'
-    )
+    assert html.count('id="executive-summary"') == 1
+    assert html.find('id="attention-first"') < html.find('id="executive-summary"')
+    assert 'href="#executive-summary"' not in html
+    assert html.find('id="attention-first"') < html.find('id="engineering-intelligence-summary"')
     assert 'id="assessment-results"' in html
-    assert 'id="leadership-verdict"' in html
+    assert 'id="attention-first"' in html
+    assert 'id="leadership-verdict"' not in html
     assert 'id="priority-actions"' in html
     assert 'id="technical-appendix"' in html
 
-    # No duplicate section anchors for assessment heads.
-    for head in ASSESSMENT_RESULT_HEADS:
+    # No duplicate section anchors for headline outcomes.
+    for head in ENGINEERING_HEALTH_HEADLINES:
         anchor = assessment_head_anchor(head)
         assert len(re.findall(rf'id="{re.escape(anchor)}"', html)) == 1
 
-    # Security finding grouped under Security Intelligence; unknown retained.
+    # Security finding grouped under Security; testing drivers under Quality.
     security_head = next(
         s for s in document.assessment_heads if s.head == AssessmentHead.SECURITY_INTELLIGENCE.value
     )
     assert any(f.finding_id for f in security_head.findings)
-    assert document.unclassified_findings
-    assert "could not yet be assigned" in document.unclassified_limitation
-    assert "Unclassified" in html or "could not yet be assigned" in html
+    assert not any(
+        item.category == "testing" for item in document.unclassified_findings
+    )
 
     # Unsupported conclusions must not appear for unassessed heads.
     assert "No security issues" not in html
@@ -246,7 +298,15 @@ def test_report_hierarchy_and_toc_anchors(tmp_path: Path) -> None:
         or "High confidence" in html
         or "Limited confidence" in html
     )
-    assert "Assessed" in html or "Not available" in html or "Partially assessed" in html
+    assert (
+        "Assessed" in html
+        or "Not available" in html
+        or "Partially assessed" in html
+        or "Needs attention" in html
+        or "Insufficient evidence" in html
+        or "No material issues observed" in html
+        or "Not applicable" in html
+    )
 
     # Schema / IDs unchanged contract surface.
     assert ASSESSMENT_JSON_SCHEMA_VERSION == "1.2"
@@ -258,9 +318,24 @@ def test_zero_findings_not_healthy_label(tmp_path: Path) -> None:
         assessment_mode=AssessmentMode.DETERMINISTIC,
         generated_at_utc=datetime(2026, 7, 22, 12, 0, tzinfo=UTC),
     )
-    html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
+    document = build_html_report_view_model(report_input)
+    html = HtmlReportRenderer().render(document)
     assert "No issues found" not in html
     assert "Cloud ready" not in html
     assert "AI ready" not in html
     # Status language may include Assessed/Not available — never Healthy.
     assert re.search(r"\bHealthy\b", html) is None
+    for head in document.headline_outcomes:
+        coverage = (head.assessment_coverage or {}).get("status")
+        if coverage not in {"complete"}:
+            assert head.display_label != "No material issues observed"
+            assert head.status_label.lower() not in {"complete", "succeeded", "success"}
+
+
+def test_trend_headlines_reuse_engineering_health_titles() -> None:
+    from codestrata.reporting.engineering_health.trend_report import OUTCOME_TITLES
+
+    assert [title for _family, title in OUTCOME_TITLES] == [
+        engineering_health_outcome_title(head) for head in ENGINEERING_HEALTH_HEADLINES
+    ]
+    assert "Intelligence" not in " ".join(title for _family, title in OUTCOME_TITLES)

@@ -6,8 +6,8 @@ import pytest
 
 from codestrata.telemetry.analytics.repository_aggregate_policy import (
     COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_POLICY_URN,
-    RepositoryAggregateAnalyticsPolicyError,
     CommunityRepositoryAggregateAnalyticsPolicy,
+    RepositoryAggregateAnalyticsPolicyError,
     default_repository_aggregate_analytics_policy,
 )
 from codestrata.telemetry.analytics.repository_aggregate_serialization import (
@@ -32,9 +32,7 @@ def test_policy_rejects_transmission() -> None:
 
 
 def test_policy_json_deterministic() -> None:
-    a = repository_aggregate_policy_to_stable_json(
-        default_repository_aggregate_analytics_policy()
-    )
+    a = repository_aggregate_policy_to_stable_json(default_repository_aggregate_analytics_policy())
     b = repository_aggregate_policy_to_stable_json(
         CommunityRepositoryAggregateAnalyticsPolicy.default()
     )

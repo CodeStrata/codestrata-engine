@@ -1,7 +1,7 @@
 """Authoritative Engineering Assessment HTML report stylesheet.
 
-Tokens come from ``codestrata.design_system.tokens`` (Slice 14.1 /
-``codestrata-visual-design-system:1.0``). Brand hex belongs in that token
+Tokens come from ``codestrata.design_system.tokens`` (design system 2.0.0 /
+``codestrata-visual-design-system:2.0``). Brand hex belongs in that token
 artifact only — report component CSS uses custom properties.
 """
 
@@ -89,7 +89,6 @@ body {{
 .report-product-mark {{
   display: inline-flex;
   align-self: center;
-  color: var(--accent);
 }}
 .report-product-mark .cs-mark {{
   width: 20px;
@@ -100,7 +99,7 @@ body {{
   font-weight: 600;
   font-size: 1rem;
   letter-spacing: -0.01em;
-  color: var(--accent);
+  color: var(--ink);
 }}
 .report-product-label {{
   font-size: 0.85rem;
@@ -127,7 +126,7 @@ body {{
   align-items: center;
   gap: 0.5rem;
   margin: 0 0 0.65rem;
-  color: var(--accent);
+  color: var(--ink);
 }}
 .brand-lockup .cs-mark {{
   width: 22px;
@@ -292,6 +291,42 @@ body {{
   font-size: 1.05rem;
   line-height: 1.55;
   text-wrap: pretty;
+}}
+.outcome-grid, .attention-board {{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+  margin: 1rem 0 1.25rem;
+}}
+.outcome-card, .attention-board article, .hotspot-card {{
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.9rem 1rem;
+}}
+.outcome-status {{
+  font-weight: 650;
+  margin: 0.25rem 0;
+}}
+.architecture-map, .hotspot-scatter {{
+  width: 100%;
+  max-width: 720px;
+  height: auto;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  margin: 0.75rem 0 1rem;
+}}
+.architecture-map line {{
+  stroke: var(--border);
+  stroke-width: 1.5;
+}}
+.architecture-map circle, .hotspot-scatter circle {{
+  fill: var(--accent);
+}}
+.architecture-map text, .hotspot-scatter text {{
+  fill: var(--ink);
+  font-size: 11px;
+  text-anchor: middle;
 }}
 .section-head h2 {{
   margin: 0 0 0.5rem;
@@ -1080,13 +1115,34 @@ AUTHORITATIVE_SELECTORS = (
 
 
 def css_without_print(css: str) -> str:
-    """Return stylesheet text with ``@media print`` blocks removed."""
+    """Return stylesheet text with every ``@media print`` block removed."""
 
     marker = "@media print"
-    index = css.find(marker)
-    if index < 0:
-        return css
-    return css[:index]
+    out: list[str] = []
+    index = 0
+    while index < len(css):
+        start = css.find(marker, index)
+        if start < 0:
+            out.append(css[index:])
+            break
+        out.append(css[index:start])
+        brace = css.find("{", start)
+        if brace < 0:
+            out.append(css[start:])
+            break
+        depth = 0
+        end = brace
+        for pos in range(brace, len(css)):
+            char = css[pos]
+            if char == "{":
+                depth += 1
+            elif char == "}":
+                depth -= 1
+                if depth == 0:
+                    end = pos + 1
+                    break
+        index = end
+    return "".join(out)
 
 
 __all__ = [

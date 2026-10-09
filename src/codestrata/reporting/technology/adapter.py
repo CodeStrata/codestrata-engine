@@ -181,15 +181,13 @@ def _dedupe_technologies(technologies: Sequence[Technology]) -> list[TechnologyI
                 continue
             if confidence is None or item.confidence > confidence:
                 confidence = item.confidence
-        version = (primary.version or "").strip() or None
+        declared_version: str | None = (primary.version or "").strip() or None
         limitations: list[str] = []
-        if version is None:
+        if declared_version is None:
             limitations.append("version unavailable")
         if confidence is None:
             limitations.append("detection confidence unavailable")
-        safe_sources = tuple(
-            path for raw in sources if (path := _safe_path(raw)) is not None
-        )
+        safe_sources = tuple(path for raw in sources if (path := _safe_path(raw)) is not None)
         # Keep non-path source labels (e.g. analyzer names) when they are not absolute.
         label_sources = tuple(
             raw
@@ -197,16 +195,14 @@ def _dedupe_technologies(technologies: Sequence[Technology]) -> list[TechnologyI
             if _safe_path(raw) is None and not raw.startswith("/") and not raw.startswith("file:")
         )
         display_source = (
-            safe_sources[0]
-            if safe_sources
-            else (label_sources[0] if label_sources else None)
+            safe_sources[0] if safe_sources else (label_sources[0] if label_sources else None)
         )
         facts.append(
             TechnologyInventoryFact(
                 name=primary.name.strip(),
                 category=category,
-                version=version,
-                version_state=_version_state(version),
+                version=declared_version,
+                version_state=_version_state(declared_version),
                 source=display_source,
                 evidence_paths=(),
                 confidence=confidence,
@@ -221,8 +217,7 @@ def _dedupe_technologies(technologies: Sequence[Technology]) -> list[TechnologyI
                 update={
                     "limitations": tuple(
                         sorted(
-                            set(facts[-1].limitations)
-                            | {f"sources: {', '.join(merged_labels)}"}
+                            set(facts[-1].limitations) | {f"sources: {', '.join(merged_labels)}"}
                         )
                     ),
                     "source": display_source,
@@ -249,9 +244,7 @@ def _apply_conflicting_versions(
                 out.append(
                     item.model_copy(
                         update={
-                            "version_state": "conflicting"
-                            if item.version
-                            else item.version_state,
+                            "version_state": "conflicting" if item.version else item.version_state,
                             "limitations": tuple(
                                 sorted(
                                     set(item.limitations)
@@ -289,11 +282,7 @@ def _attach_manifest_evidence(
     out: list[TechnologyInventoryFact] = []
     for fact in facts:
         needle = _normalize_name(fact.name)
-        matches = tuple(
-            path
-            for path in path_index
-            if needle and needle in path.lower()
-        )
+        matches = tuple(path for path in path_index if needle and needle in path.lower())
         # Prefer explicit source as evidence label when no path match.
         evidence = matches
         if not evidence and fact.source:
@@ -364,11 +353,7 @@ def _merge_build_system_facts(
 
     if build is None or not build.build_systems:
         return list(facts)
-    existing = {
-        _normalize_name(fact.name)
-        for fact in facts
-        if fact.category == "build_tool"
-    }
+    existing = {_normalize_name(fact.name) for fact in facts if fact.category == "build_tool"}
     evidence = tuple(
         sorted(
             {
@@ -379,7 +364,9 @@ def _merge_build_system_facts(
         )
     )
     out = list(facts)
-    for system in sorted({item.strip() for item in build.build_systems if item.strip()}, key=str.lower):
+    for system in sorted(
+        {item.strip() for item in build.build_systems if item.strip()}, key=str.lower
+    ):
         if _normalize_name(system) in existing:
             continue
         out.append(
@@ -459,7 +446,10 @@ def _composition(
         sorted(
             {
                 path
-                for raw in (*(build.build_files if build else ()), *(build.lock_files if build else ()))
+                for raw in (
+                    *(build.build_files if build else ()),
+                    *(build.lock_files if build else ()),
+                )
                 if (path := _safe_path(raw))
             }
         )
@@ -475,13 +465,18 @@ def _composition(
         )
     )
     if (
-        structure is None
-        or (
-            structure.file_count is None
-            and structure.source_file_count is None
-            and structure.test_file_count is None
+        (
+            structure is None
+            or (
+                structure.file_count is None
+                and structure.source_file_count is None
+                and structure.test_file_count is None
+            )
         )
-    ) and not modules and not manifests and not build_files:
+        and not modules
+        and not manifests
+        and not build_files
+    ):
         # Still useful if we only have ecosystems
         if not ecosystems:
             return None

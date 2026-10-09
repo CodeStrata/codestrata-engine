@@ -63,9 +63,7 @@ def test_int_metric_availability_contract() -> None:
 def test_python_normal_nested_branching_and_params() -> None:
     paths, texts = _load_tree(FIXTURES / "python")
     settings = ComplexityEvidenceSettings().model_copy(
-        update={
-            "java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False})
-        }
+        update={"java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False})}
     )
     result = ComplexityEvidenceService(settings).collect(
         repository_id="repo:fixture",
@@ -101,9 +99,7 @@ def test_python_normal_nested_branching_and_params() -> None:
 def test_python_test_role_preserved() -> None:
     paths, texts = _load_tree(FIXTURES / "python")
     settings = ComplexityEvidenceSettings().model_copy(
-        update={
-            "java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False})
-        }
+        update={"java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False})}
     )
     result = ComplexityEvidenceService(settings).collect(
         repository_id="repo:fixture",
@@ -119,9 +115,7 @@ def test_python_test_role_preserved() -> None:
 def test_python_syntax_error_keeps_physical_lines() -> None:
     paths, texts = _load_tree(FIXTURES / "python")
     settings = ComplexityEvidenceSettings().model_copy(
-        update={
-            "java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False})
-        }
+        update={"java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False})}
     )
     result = ComplexityEvidenceService(settings).collect(
         repository_id="repo:fixture",
@@ -137,9 +131,7 @@ def test_python_syntax_error_keeps_physical_lines() -> None:
 def test_java_normal_and_empty() -> None:
     paths, texts = _load_tree(FIXTURES / "java")
     settings = ComplexityEvidenceSettings().model_copy(
-        update={
-            "python": ComplexityEvidenceSettings().python.model_copy(update={"enabled": False})
-        }
+        update={"python": ComplexityEvidenceSettings().python.model_copy(update={"enabled": False})}
     )
     result = ComplexityEvidenceService(settings).collect(
         repository_id="repo:fixture",
@@ -216,12 +208,58 @@ def test_csharp_normal_branching_and_params() -> None:
     assert complex_score.branch_point_count.value >= 4
 
 
+def test_javascript_functions_methods_and_arrows() -> None:
+    source = """
+export function compute(a, b, c) {
+  if (a && b) {
+    for (const item of c) {
+      if (item) return item
+    }
+  }
+  return null
+}
+
+class Panel {
+  constructor(name) { this.name = name }
+  render(value) {
+    if (value) return value
+    return null
+  }
+}
+
+const useUser = (id) => id
+const load = async (id, force) => {
+  if (force) return id
+  return null
+}
+"""
+    result = ComplexityEvidenceService().collect(
+        repository_id="repo:js",
+        relative_paths=("src/panel.tsx",),
+        file_texts={"src/panel.tsx": source},
+    )
+    assert "language.javascript.complexity" in result.contributing_provider_ids
+    compute = next(item for item in result.callables if item.name == "compute")
+    assert compute.parameter_count.value == 3
+    assert compute.branch_point_count.value is not None
+    assert compute.branch_point_count.value >= 4
+    panel = next(item for item in result.types if item.name == "Panel")
+    assert panel.callable_count.value == 2
+    constructor = next(item for item in result.callables if item.name == "constructor")
+    assert constructor.callable_kind.value == "constructor"
+    assert constructor.parameter_count.value == 1
+    use_user = next(item for item in result.callables if item.name == "useUser")
+    assert use_user.parameter_count.value == 1
+    load = next(item for item in result.callables if item.name == "load")
+    assert load.parameter_count.value == 2
+    assert load.branch_point_count.value is not None
+    assert load.branch_point_count.value >= 1
+
+
 def test_java_test_role_preserved() -> None:
     paths, texts = _load_tree(FIXTURES / "java")
     settings = ComplexityEvidenceSettings().model_copy(
-        update={
-            "python": ComplexityEvidenceSettings().python.model_copy(update={"enabled": False})
-        }
+        update={"python": ComplexityEvidenceSettings().python.model_copy(update={"enabled": False})}
     )
     result = ComplexityEvidenceService(settings).collect(
         repository_id="repo:fixture",
@@ -284,9 +322,7 @@ def test_deterministic_serialization_and_repeated_identity() -> None:
     assert payload == dumps_stable_json(complexity_evidence_payload(second))
     restored = AggregatedComplexityEvidence.model_validate(loads_stable_json(payload))
     assert restored == first
-    assert [item.evidence_id for item in first.files] == [
-        item.evidence_id for item in second.files
-    ]
+    assert [item.evidence_id for item in first.files] == [item.evidence_id for item in second.files]
     assert [item.evidence_id for item in first.callables] == [
         item.evidence_id for item in second.callables
     ]
@@ -317,11 +353,145 @@ def test_debt_projection_is_passthrough() -> None:
     assert complexity_taxonomy_category() is TechnicalDebtCategory.COMPLEXITY
 
 
-def test_javascript_not_measured() -> None:
+def test_javascript_function_is_measured() -> None:
     result = create_complexity_evidence_service().collect(
         repository_id="repo:js",
         relative_paths=("app.js",),
         file_texts={"app.js": "function f(a,b){ if(a){ return b; } }"},
     )
-    assert result.files == ()
-    assert result.callables == ()
+    function = next(item for item in result.callables if item.name == "f")
+    assert function.parameter_count.value == 2
+    assert function.branch_point_count.value == 1
+
+
+def test_vue_file_template_braces_ignored_and_script_branch_measured() -> None:
+    vue_text = """
+<template>
+  <div class="container">
+    {{ user.name }}
+    {{ user.email }}
+    <span>{{ status }}</span>
+  </div>
+</template>
+<script>
+function check(x) {
+  if (x > 0) {
+    return true;
+  }
+  return false;
+}
+</script>
+"""
+    result = create_complexity_evidence_service().collect(
+        repository_id="repo:vue",
+        relative_paths=("Component.vue",),
+        file_texts={"Component.vue": vue_text},
+    )
+    function = next(item for item in result.callables if item.name == "check")
+    assert function.parameter_count.value == 1
+    assert function.branch_point_count.value == 1
+    assert function.span.line_start == 10
+
+
+def test_vue_file_with_no_script_reports_no_callables() -> None:
+    vue_text = """
+<template>
+  <div class="container">
+    {{ user.name }}
+    {{ user.email }}
+  </div>
+</template>
+"""
+    result = create_complexity_evidence_service().collect(
+        repository_id="repo:vue",
+        relative_paths=("Empty.vue",),
+        file_texts={"Empty.vue": vue_text},
+    )
+    assert len(result.callables) == 0
+
+
+def test_svelte_script_block_extracted() -> None:
+    svelte_text = """
+<script lang="ts">
+function compute(val: number) {
+  if (val > 10) {
+    return val * 2;
+  }
+  return val;
+}
+</script>
+<h1>{title}</h1>
+<p>{description}</p>
+"""
+    result = create_complexity_evidence_service().collect(
+        repository_id="repo:svelte",
+        relative_paths=("App.svelte",),
+        file_texts={"App.svelte": svelte_text},
+    )
+    fn = next(item for item in result.callables if item.name == "compute")
+    assert fn.branch_point_count.value == 1
+    assert fn.span.line_start == 3
+
+
+def test_vue_measures_options_and_setup_scripts_on_file_lines() -> None:
+    vue_text = """<template>
+  <div>{{ user.name }}</div>
+</template>
+<script>
+export function optionsOnly() {
+  return 1;
+}
+</script>
+<script setup lang="ts">
+function setupCheck(x: number) {
+  if (x > 0) {
+    return true;
+  }
+  return false;
+}
+</script>
+"""
+    result = create_complexity_evidence_service().collect(
+        repository_id="repo:vue",
+        relative_paths=("Panel.vue",),
+        file_texts={"Panel.vue": vue_text},
+    )
+    by_name = {item.name: item for item in result.callables}
+    assert by_name["optionsOnly"].span.line_start == 5
+    assert by_name["setupCheck"].span.line_start == 10
+    assert by_name["setupCheck"].branch_point_count.value == 1
+
+
+def test_svelte_skips_non_js_script_and_measures_both_js_blocks() -> None:
+    svelte_text = """<script context="module" lang="coffee">
+function brew() {
+  if (false) { return 1; }
+}
+</script>
+<script context="module">
+export function preload() {
+  return 1;
+}
+</script>
+<h1>{title}</h1>
+<script lang="ts">
+function compute(val: number) {
+  if (val > 10) {
+    return val * 2;
+  }
+  return val;
+}
+</script>
+"""
+    result = create_complexity_evidence_service().collect(
+        repository_id="repo:svelte",
+        relative_paths=("App.svelte",),
+        file_texts={"App.svelte": svelte_text},
+    )
+    names = {item.name for item in result.callables}
+    assert "brew" not in names
+    by_name = {item.name: item for item in result.callables}
+    assert by_name["preload"].span.line_start == 7
+    assert by_name["compute"].span.line_start == 13
+    assert by_name["compute"].branch_point_count.value == 1
+

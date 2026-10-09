@@ -5,7 +5,10 @@ from __future__ import annotations
 from typing import Any
 
 from codestrata.ai.provider_adapters.openrouter import error_mapping
-from codestrata.ai.provider_adapters.openrouter.adapter import ADAPTER_LIMITATIONS, OpenRouterProvider
+from codestrata.ai.provider_adapters.openrouter.adapter import (
+    ADAPTER_LIMITATIONS,
+    OpenRouterProvider,
+)
 from codestrata.ai.provider_adapters.openrouter.capabilities import openrouter_capability_profile
 from codestrata.ai.provider_contracts.capability_diagnostics import (
     diagnostic_view_of_capability_profile,
@@ -54,8 +57,7 @@ def diagnostic_view_of_execution(execution: AIProviderExecutionResult) -> dict[s
 
 def error_category_matrix() -> dict[str, str]:
     return {
-        code: str(category)
-        for code, category in sorted(error_mapping.CATEGORY_BY_CODE.items())
+        code: str(category) for code, category in sorted(error_mapping.CATEGORY_BY_CODE.items())
     }
 
 

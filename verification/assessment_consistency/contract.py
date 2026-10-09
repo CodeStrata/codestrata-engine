@@ -12,6 +12,8 @@ from verification.assessment_consistency import (
 )
 from verification.curated_repository_validation.contract import (
     RELEASE_VALIDATION_TARGET,
+)
+from verification.curated_repository_validation.contract import (
     SCHEMA_NAME as SV10_SCHEMA_NAME,
 )
 from verification.repository_assessment.contract import (
@@ -40,12 +42,8 @@ COVERAGE_AREA_HEAD_IDS: frozenset[str] = frozenset(
 SEVERITY_VOCAB: frozenset[str] = frozenset(
     {"critical", "high", "medium", "low", "informational", "info"}
 )
-PRIORITY_VOCAB: frozenset[str] = frozenset(
-    {"immediate", "critical", "high", "medium", "low"}
-)
-CONFIDENCE_LEVEL_VOCAB: frozenset[str] = frozenset(
-    {"high", "moderate", "limited", "unavailable"}
-)
+PRIORITY_VOCAB: frozenset[str] = frozenset({"immediate", "critical", "high", "medium", "low"})
+CONFIDENCE_LEVEL_VOCAB: frozenset[str] = frozenset({"high", "moderate", "limited", "unavailable"})
 COVERAGE_STATUS_VOCAB: frozenset[str] = frozenset(
     {
         "complete",
@@ -167,6 +165,7 @@ class ConsistencyContract:
         QUALITY_COMPARISON_GUARD,
         "Inputs: engine/reports/verification/sv10/ records and preserved artifacts.",
         "No network, clone, or reassessment by default.",
+        "Platform validate_report_document is not evaluated by this command.",
     )
 
 

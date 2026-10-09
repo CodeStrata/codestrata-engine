@@ -1,0 +1,48 @@
+{
+  "artifact_bytes": "Y29kZXN0cmF0YS1lbmdpbmUtcHVibGljLWFydGlmYWN0LXYxLjAuMAo=",
+  "bundle": {
+    "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json"
+  },
+  "evaluation_time": "2026-09-21T00:00:00Z",
+  "package": {
+    "body": {
+      "compatibility": {
+        "capability_version": "1.0.0",
+        "dsl_version": "codestrata.io/rules/v1",
+        "engine_schema_major": 1,
+        "serialization_profile": "codestrata.canonical-json.v1"
+      },
+      "effective_ruleset_digest": "fb33d17b8db0d5c99171f4bba3f9150ac6d8fc13c04bb14ed055a0722ca4cca3",
+      "execution_purpose": "production",
+      "package_id": "codestrata.engineering-standard.pkg",
+      "package_version": "1.0.0",
+      "payload_digests": [
+        {
+          "digest": "164a3daab4e5861befeb68b26cc5c0e5ffbe1801771515af41e2d9b73a178a4d",
+          "name": "artifact"
+        },
+        {
+          "digest": "fb33d17b8db0d5c99171f4bba3f9150ac6d8fc13c04bb14ed055a0722ca4cca3",
+          "name": "effective_ruleset"
+        }
+      ],
+      "preview_cannot_authorize_production": true,
+      "schema_name": "codestrata.signed-package-manifest.v1",
+      "schema_version": "1.0.0",
+      "validity_not_after": "2027-09-15T00:00:00Z",
+      "validity_not_before": null
+    },
+    "body_digest": "09129ec8cf2527af5fa1d426be8e04fff291d7fb5642ca36bd7673e187da70e2",
+    "operational": {
+      "signature": null,
+      "signed_at": null
+    },
+    "schema_name": "codestrata.signed-package-manifest.v1",
+    "schema_version": "1.0.0"
+  },
+  "profile_id": "codestrata.release.sigstore-public.v1",
+  "rekor_public_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEL8jVpTTsb1bgAGVMy/9Q8kMStm+Q\n6mjYmZLXoDWfw951OjA0IPD5KXYGlsPF8ogXoehMMM9Pda5hYFOvjgZoNw==\n-----END PUBLIC KEY-----\n",
+  "requested_purpose": "production",
+  "signer_role": "public_distribution",
+  "trust_root_pem": "-----BEGIN CERTIFICATE-----\nMIIBRjCB7aADAgECAgEBMAoGCCqGSM49BAMCMCExHzAdBgNVBAMMFkNvZGVTdHJh\ndGEgVGVzdCBGdWxjaW8wHhcNMjYwMTAxMDAwMDAwWhcNMjcwOTE1MDAwMDAwWjAh\nMR8wHQYDVQQDDBZDb2RlU3RyYXRhIFRlc3QgRnVsY2lvMFkwEwYHKoZIzj0CAQYI\nKoZIzj0DAQcDQgAEHO1duj173AC7EChMPURiRowT5mskmac9MhXkeCS1OZ4dejdv\nDdmNxT/S51WoiZyVZuaN8ZdI8cT0aC24vKPSGaMWMBQwEgYDVR0TAQH/BAgwBgEB\n/wIBADAKBggqhkjOPQQDAgNIADBFAiAWICf/EJmW6RqeS+Mw5ulbgX2ef4eot1vm\nIcCCueZHuAIhALMb6drNdM5cBWCf5DuisELr0L7Q9Sv7sOaFE8SLxZzP\n-----END CERTIFICATE-----\n"
+}

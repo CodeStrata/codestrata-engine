@@ -39,9 +39,7 @@ SYNTHETIC_DEVELOPER = "Synthetic developer text."
 SYNTHETIC_CONTEXT = '{"synthetic": true}'
 # Enrichment-shaped so the compatibility wrapper short-circuits legacy
 # AIRecommendationResult parsing (same pattern production uses for Advisor JSON).
-SYNTHETIC_RESPONSE_TEXT = (
-    '{"executive_summary": {"headline": "H", "narrative": "N"}, "themes": []}'
-)
+SYNTHETIC_RESPONSE_TEXT = '{"executive_summary": {"headline": "H", "narrative": "N"}, "themes": []}'
 SYNTHETIC_REQUEST_ID = "synthetic-request-id"
 SYNTHETIC_STOP_REASON = "end_turn"
 

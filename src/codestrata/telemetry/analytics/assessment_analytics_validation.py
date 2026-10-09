@@ -63,16 +63,10 @@ def validate_assessment_analytics_event(
         raise AnalyticsError(AnalyticsErrorCode.INVALID_OUTCOME)
 
     if event.outcome == "success":
-        if (
-            event.failure_category is not None
-            and active.failure_category_forbidden_on_success
-        ):
+        if event.failure_category is not None and active.failure_category_forbidden_on_success:
             raise AnalyticsError(AnalyticsErrorCode.OUTCOME_FAILURE_MISMATCH)
     else:
-        if (
-            event.failure_category is None
-            and active.failure_category_required_on_failure
-        ):
+        if event.failure_category is None and active.failure_category_required_on_failure:
             raise AnalyticsError(AnalyticsErrorCode.OUTCOME_FAILURE_MISMATCH)
         if (
             event.failure_category is not None
@@ -83,9 +77,7 @@ def validate_assessment_analytics_event(
     normalize_enabled_assessment_heads(
         event.enabled_assessment_heads, max_heads=active.max_enabled_heads
     )
-    if tuple(event.enabled_assessment_heads) != tuple(
-        sorted(event.enabled_assessment_heads)
-    ):
+    if tuple(event.enabled_assessment_heads) != tuple(sorted(event.enabled_assessment_heads)):
         raise AnalyticsError(AnalyticsErrorCode.VALIDATION_FAILED)
 
     projected = project_assessment_analytics_event(event, policy=active)
@@ -123,9 +115,7 @@ def validate_assessment_analytics_mapping(
         raise AnalyticsError(AnalyticsErrorCode.INVALID_HEAD)
 
     active = policy or default_assessment_analytics_policy()
-    heads = normalize_enabled_assessment_heads(
-        list(heads_raw), max_heads=active.max_enabled_heads
-    )
+    heads = normalize_enabled_assessment_heads(list(heads_raw), max_heads=active.max_enabled_heads)
 
     event = AssessmentAnalyticsEvent(
         installation_id=str(payload["installation_id"]),

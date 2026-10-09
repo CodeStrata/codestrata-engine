@@ -8,28 +8,34 @@ from typing import cast
 from codestrata.application.knowledge.ports import KnowledgeStore
 from codestrata.application.knowledge.queries.service import KnowledgeQueryService
 from codestrata.config.settings import CodestrataSettings, KnowledgeSettings
-from codestrata.infrastructure.knowledge_store.defaults import DEFAULT_KNOWLEDGE_DIRECTORY
-from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.defaults import (
+    DEFAULT_KNOWLEDGE_DIRECTORY,
+    default_knowledge_directory,
+)
+from codestrata.infrastructure.knowledge_store.file.store import FileKnowledgeStore
 
 
 def knowledge_directory_from_settings(settings: CodestrataSettings | None) -> Path:
     """Resolve the knowledge directory from settings or the default path."""
 
     if settings is None:
-        return DEFAULT_KNOWLEDGE_DIRECTORY
+        return default_knowledge_directory()
     knowledge: KnowledgeSettings = settings.knowledge
-    return Path(knowledge.directory)
+    resolved = Path(knowledge.directory)
+    if resolved == DEFAULT_KNOWLEDGE_DIRECTORY:
+        return default_knowledge_directory()
+    return resolved
 
 
 def create_knowledge_store(
     directory: Path | None = None,
     *,
     settings: CodestrataSettings | None = None,
-) -> SqliteKnowledgeStore:
-    """Create an unopened SQLite knowledge store for application use."""
+) -> FileKnowledgeStore:
+    """Create an unopened file knowledge store for application use."""
 
     resolved = directory if directory is not None else knowledge_directory_from_settings(settings)
-    return SqliteKnowledgeStore(resolved)
+    return FileKnowledgeStore(resolved)
 
 
 def create_knowledge_query_service(
@@ -40,7 +46,7 @@ def create_knowledge_query_service(
 ) -> KnowledgeQueryService:
     """Compose a :class:`KnowledgeQueryService` over an open knowledge store.
 
-    When ``store`` is omitted, a SQLite store is created from ``directory`` or
+    When ``store`` is omitted, a file store is created from ``directory`` or
     settings and opened. Callers that inject a store retain ownership of its
     lifecycle.
     """

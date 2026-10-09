@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/RuleSet.json",
+  "title": "CodeStrata Engine RuleSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "api_version", "kind", "metadata", "digest", "rules"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.ruleset.v1" },
+    "schema_version": { "type": "string" },
+    "api_version": { "type": "string" },
+    "kind": { "type": "string", "const": "RuleSet" },
+    "metadata": { "type": "object", "additionalProperties": false },
+    "digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "extends": { "type": "array" },
+    "selectors": { "type": "array" },
+    "rules": { "type": "array", "minItems": 1 }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "rule-valid": {
+    "document_digest": "b97b6d9fd8a443164020dc972219c3dc5a109cba22e50e71f56803e24a7a696c",
+    "plan_digest": "18e9c00a5d95d7f55d1871d024053c3ddb9ec397390c05f30574d52dabc6bc16",
+    "presentation_digest": "282f1516bdf3f2a61c60055fed490a9371c778297e3f67b541540187aba80951",
+    "selector_digest": "cfe47faec514e0bf86dd30f5f0781cbbbe0d142e155332e87f7facf8b90b6a76"
+  },
+  "ruleset-valid": {
+    "document_digest": "02f8ed93adea76c1fbcb8933456288b2de62bbdc9d1db61e2b97fd3173ac60ac",
+    "plan_digest": "120fd277287f18fca7989ac42b069e3678bb3e9bab437e159b5da50acb3b99b1",
+    "presentation_digest": "b643a72933c3a1a54236f6a0dbc38f39a53f247ad54dfeb088aa2fac43bfd5a6",
+    "selector_digest": "040fe69c8093328903e748b1825c12f5f18b3e6dffa6aef15b84c2f1c383cd94"
+  }
+}

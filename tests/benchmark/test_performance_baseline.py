@@ -120,9 +120,7 @@ def test_benchmark_artifact_generation(tmp_path: Path) -> None:
     PerformanceBenchmarkDocument.model_validate(payload)
     assert payload["schema_version"] == BENCHMARK_SCHEMA_VERSION
     assert payload["runs"][0]["timings"]["total_ms"] >= 0
-    assert all(
-        stage["duration_ms"] >= 0 for stage in payload["runs"][0]["timings"]["stages"]
-    )
+    assert all(stage["duration_ms"] >= 0 for stage in payload["runs"][0]["timings"]["stages"])
 
 
 def test_benchmark_collection_setting_default_off() -> None:

@@ -116,9 +116,7 @@ def sanitize_scenario(scenario: ScenarioResult) -> ScenarioResult:
     )
 
 
-def compute_verdict(
-    all_checks: list[CheckResult], scenarios: tuple[ScenarioResult, ...]
-) -> str:
+def compute_verdict(all_checks: list[CheckResult], scenarios: tuple[ScenarioResult, ...]) -> str:
     """Return the verdict. ``pass_with_limitations`` is the expected success value.
 
     The recorded limitations are intentional and permanent for this slice

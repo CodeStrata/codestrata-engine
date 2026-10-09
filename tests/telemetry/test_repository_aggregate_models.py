@@ -9,12 +9,12 @@ from codestrata.telemetry.analytics.repository_aggregate_compatibility import (
     compatible_repository_aggregate_schema_versions,
     migrate_repository_aggregate_mapping,
 )
+from codestrata.telemetry.analytics.repository_aggregate_input import (
+    build_repository_aggregate_input,
+)
 from codestrata.telemetry.analytics.repository_aggregate_models import (
     LanguageAggregate,
     RuleExecutionAggregate,
-)
-from codestrata.telemetry.analytics.repository_aggregate_input import (
-    build_repository_aggregate_input,
 )
 
 

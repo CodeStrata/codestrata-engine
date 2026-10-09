@@ -103,25 +103,17 @@ class CommunityAnonymousInstallationIdentityPolicy:
         if self.transmission_allowed:
             raise InstallationIdentityPolicyError("transmission_allowed must be false")
         if self.analytics_collection_required:
-            raise InstallationIdentityPolicyError(
-                "analytics_collection_required must be false"
-            )
+            raise InstallationIdentityPolicyError("analytics_collection_required must be false")
         if self.telemetry_consent_coupled:
-            raise InstallationIdentityPolicyError(
-                "telemetry_consent_coupled must be false"
-            )
+            raise InstallationIdentityPolicyError("telemetry_consent_coupled must be false")
         if self.authentication_coupled:
             raise InstallationIdentityPolicyError("authentication_coupled must be false")
         if self.licensing_coupled:
             raise InstallationIdentityPolicyError("licensing_coupled must be false")
         if self.machine_fingerprint_allowed:
-            raise InstallationIdentityPolicyError(
-                "machine_fingerprint_allowed must be false"
-            )
+            raise InstallationIdentityPolicyError("machine_fingerprint_allowed must be false")
         if self.regenerate_automatically:
-            raise InstallationIdentityPolicyError(
-                "regenerate_automatically must be false"
-            )
+            raise InstallationIdentityPolicyError("regenerate_automatically must be false")
         if self.filename != IDENTITY_FILENAME:
             raise InstallationIdentityPolicyError("unsupported identity filename")
 

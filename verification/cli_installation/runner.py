@@ -64,6 +64,8 @@ def _run(
         env=env,
         check=False,
         text=True,
+        encoding="utf-8",
+        errors="replace",
         capture_output=True,
     )
     return CommandResultView(
@@ -267,9 +269,7 @@ def run_cli_installation_verification(
                 )
                 install_ok = installed.exit_code == 0
                 install_detail = (
-                    f"installed {sdists[-1].name}"
-                    if install_ok
-                    else installed.stderr[-500:]
+                    f"installed {sdists[-1].name}" if install_ok else installed.stderr[-500:]
                 )
                 environment["artifact"] = sdists[-1].name
             else:
@@ -281,9 +281,7 @@ def run_cli_installation_verification(
             )
             install_ok = installed.exit_code == 0
             install_detail = (
-                "installed engine path (non-editable)"
-                if install_ok
-                else installed.stderr[-500:]
+                "installed engine path (non-editable)" if install_ok else installed.stderr[-500:]
             )
             environment["artifact"] = str(root)
         else:
@@ -300,7 +298,9 @@ def run_cli_installation_verification(
         checks.append(
             VerificationCheck(
                 name="no_editable_install",
-                ok=install_ok and installation_method in {
+                ok=install_ok
+                and installation_method
+                in {
                     "pip_wheel",
                     "pip_sdist",
                     "pip_path_non_editable",
@@ -366,9 +366,7 @@ def run_cli_installation_verification(
                 detail=v_detail,
             )
         )
-        checks.append(
-            VerificationCheck(name="codestrata_version_flag", ok=v_ok, detail=v_detail)
-        )
+        checks.append(VerificationCheck(name="codestrata_version_flag", ok=v_ok, detail=v_detail))
         if v_ok:
             # "CodeStrata 0.1.0"
             parts = version_result.stdout.strip().split()
@@ -469,9 +467,7 @@ def run_cli_installation_verification(
         )
         checks.append(VerificationCheck(name="codestrata_init", ok=i_ok, detail=i_detail))
 
-        art_ok, art_detail, art_evidence = validate_init_artifacts(
-            workspace, contract=active
-        )
+        art_ok, art_detail, art_evidence = validate_init_artifacts(workspace, contract=active)
         art_evidence["files"] = list_workspace_files(workspace)
         art_evidence["writable"] = config_is_user_writable(workspace / "codestrata.toml")
         checks.append(
@@ -530,9 +526,7 @@ def run_cli_installation_verification(
                 detail=d_detail,
             )
         )
-        checks.append(
-            VerificationCheck(name="codestrata_doctor", ok=d_ok, detail=d_detail)
-        )
+        checks.append(VerificationCheck(name="codestrata_doctor", ok=d_ok, detail=d_detail))
 
         # Invalid workspace: point --config at a path whose parent is a file
         blocker = workspace / "not-a-directory"

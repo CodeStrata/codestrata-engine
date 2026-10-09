@@ -168,9 +168,7 @@ def build_success_result(
         provider_id=provider_id,
         capability=capability,
         status=ProviderExecutionStatus.SUCCESS,
-        content=AIProviderResultContent(
-            text=extracted.text, structured_payload=structured_payload
-        ),
+        content=AIProviderResultContent(text=extracted.text, structured_payload=structured_payload),
         usage=mapped_usage.usage,
         limitations=limitations,
     )

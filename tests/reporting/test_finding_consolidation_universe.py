@@ -15,7 +15,8 @@ from codestrata.domain.recommendations.enums import (
     RecommendationPriority,
 )
 from codestrata.domain.recommendations.models import RecommendationAction
-from codestrata.models import AnalysisResult, Finding as Phase1Finding, Recommendation, Repository
+from codestrata.models import AnalysisResult, Repository
+from codestrata.models import Finding as Phase1Finding
 from codestrata.models.enums import (
     FindingCategory as Phase1FindingCategory,
 )

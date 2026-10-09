@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-from codestrata.domain.evidence.language.identifiers import stable_evidence_id
-from codestrata.domain.rules.enums import RuleEvidenceKind
-from codestrata.domain.rules.evidence import RuleEvidence
-from codestrata.domain.rules.results import RuleMatch
 from codestrata.application.traceability.evidence_confidence import (
     apply_parent_confidence_bounds,
     derive_evidence_confidence_for_rule_evidence,
 )
+from codestrata.domain.evidence.language.identifiers import stable_evidence_id
+from codestrata.domain.rules.enums import RuleEvidenceKind
+from codestrata.domain.rules.evidence import RuleEvidence
+from codestrata.domain.rules.results import RuleMatch
 from codestrata.domain.traceability import (
     EvidenceKind,
     EvidenceLocation,
@@ -156,11 +156,7 @@ def evidence_refs_from_rule_match(
             source_count,
         )
 
-    mode = (
-        EvidenceProductionMode.AGGREGATED
-        if source_count > 1
-        else EvidenceProductionMode.DIRECT
-    )
+    mode = EvidenceProductionMode.AGGREGATED if source_count > 1 else EvidenceProductionMode.DIRECT
     for item in match.evidence:
         # Multi-evidence dependency conflicts stay direct per-item with parents.
         item_mode = mode
@@ -349,7 +345,7 @@ def _map_measurement(attrs: dict[str, str]) -> EvidenceMeasurement | None:
             return None
 
     try:
-        number = int(value_text)
+        number: int | float = int(value_text)
     except ValueError:
         try:
             number = float(value_text)
@@ -440,7 +436,9 @@ def _map_graph(item: RuleEvidence) -> GraphReference | None:
 
 
 def _parent_ids(attrs: dict[str, str], *, evidence_id: str | None = None) -> tuple[str, ...]:
-    raw = (attrs.get("participating_evidence_ids") or attrs.get("parent_evidence_ids") or "").strip()
+    raw = (
+        attrs.get("participating_evidence_ids") or attrs.get("parent_evidence_ids") or ""
+    ).strip()
     if not raw:
         return ()
     parts = [part.strip() for part in raw.split(",") if part.strip()]

@@ -110,8 +110,8 @@ class ModernizationRoadmapEngine:
                 limitations=limitations,
             )
 
-        groups: dict[tuple[RoadmapPhaseName, str], list[RoadmapSourceRecommendation]] = (
-            defaultdict(list)
+        groups: dict[tuple[RoadmapPhaseName, str], list[RoadmapSourceRecommendation]] = defaultdict(
+            list
         )
         for rec in ordered_recs:
             phase = map_phase(rec.category)
@@ -213,9 +213,7 @@ class ModernizationRoadmapEngine:
             or ()
         )
         findings = list(
-            _findings_from_phase3(rule_evaluation)
-            or _findings_from_phase1(analysis_result)
-            or ()
+            _findings_from_phase3(rule_evaluation) or _findings_from_phase1(analysis_result) or ()
         )
         return self.generate(recommendations=recommendations, findings=findings)
 
@@ -265,11 +263,7 @@ class ModernizationRoadmapEngine:
         confidence = (
             RoadmapConfidence.HIGH
             if finding_ids and all(item.related_finding_ids for item in recommendations)
-            else (
-                RoadmapConfidence.MEDIUM
-                if finding_ids
-                else RoadmapConfidence.LOW
-            )
+            else (RoadmapConfidence.MEDIUM if finding_ids else RoadmapConfidence.LOW)
         )
         return RoadmapInitiative(
             initiative_id=build_initiative_id(

@@ -65,9 +65,7 @@ def build_hotspot_id(
     """Stable hotspot identity from path + source unit + role."""
 
     payload = (
-        f"{path.strip().replace(chr(92), '/')}|"
-        f"{source_unit.strip()}|"
-        f"{source_role.strip().lower()}"
+        f"{path.strip().replace(chr(92), '/')}|{source_unit.strip()}|{source_role.strip().lower()}"
     )
     digest = hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]
     return f"td-hotspot:{digest}"

@@ -137,9 +137,7 @@ def _build_fact(
         fact_kind=fact_kind,
         detail=detail,
         command_projection=(
-            redact_command_projection(command_projection)
-            if command_projection
-            else None
+            redact_command_projection(command_projection) if command_projection else None
         ),
         framework=framework,
         provenance=_provenance(path, configuration_fingerprint=configuration_fingerprint),
@@ -339,9 +337,7 @@ def _collect_package_json(
 
     scripts = data.get("scripts")
     if isinstance(scripts, dict):
-        for script_name, command in sorted(
-            scripts.items(), key=lambda item: str(item[0])
-        ):
+        for script_name, command in sorted(scripts.items(), key=lambda item: str(item[0])):
             name = str(script_name)
             if name != "test" and not name.startswith("test:"):
                 continue
@@ -454,7 +450,6 @@ def _collect_csproj(
     return frameworks, builds
 
 
-
 def _collect_composer_json(
     path: str,
     text: str,
@@ -516,9 +511,13 @@ def _collect_composer_json(
     scripts = data.get("scripts")
     if isinstance(scripts, dict):
         for script_name, command in sorted(scripts.items()):
-            cmd = command if isinstance(command, str) else " ".join(
-                str(item) for item in command
-            ) if isinstance(command, list) else None
+            cmd = (
+                command
+                if isinstance(command, str)
+                else " ".join(str(item) for item in command)
+                if isinstance(command, list)
+                else None
+            )
             if cmd is None:
                 continue
             lower = cmd.lower()
@@ -533,13 +532,14 @@ def _collect_composer_json(
                         framework=(
                             TestFrameworkFamily.PHPUNIT
                             if "phpunit" in lower
-                            else TestFrameworkFamily.PEST if "pest" in lower else None
+                            else TestFrameworkFamily.PEST
+                            if "pest" in lower
+                            else None
                         ),
                         configuration_fingerprint=configuration_fingerprint,
                     )
                 )
     return frameworks, builds
-
 
 
 def collect_build_and_framework_facts(
@@ -558,9 +558,7 @@ def collect_build_and_framework_facts(
         if source is None:
             continue
         if source is TestBuildSourceType.MAVEN:
-            fw, bd = _collect_pom(
-                path, text, configuration_fingerprint=configuration_fingerprint
-            )
+            fw, bd = _collect_pom(path, text, configuration_fingerprint=configuration_fingerprint)
         elif source is TestBuildSourceType.GRADLE:
             fw, bd = _collect_gradle(
                 path, text, configuration_fingerprint=configuration_fingerprint

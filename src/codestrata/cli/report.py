@@ -31,9 +31,11 @@ report_app = typer.Typer(
     help=(
         "Report helpers for assess HTML/JSON outputs.\n\n"
         "Examples:\n"
-        "  codestrata report validate .codestrata-artifacts/assessments/<repo>/current/assessment.json\n"
+        "  codestrata report validate "
+        ".codestrata-artifacts/assessments/<repo>/current/assessment.json\n"
         "  codestrata open\n"
-        "  codestrata report open --path .codestrata-artifacts/assessments/<repo>/current/assessment.html\n\n"
+        "  codestrata report open --path "
+        ".codestrata-artifacts/assessments/<repo>/current/assessment.html\n\n"
         "Validate assessment.json schema/references where applicable, "
         "and open the customer HTML report.\n\n"
         f"Troubleshooting: {DOCS_TROUBLESHOOTING}"
@@ -225,29 +227,20 @@ def report_publish_command(
         str | None,
         typer.Option(
             "--type",
-            help=(
-                "assessment (default, inferred from current Assessment) or eir "
-                "(portfolio Engineering Intelligence)."
-            ),
+            help="Deprecated. Hosted assessment/EIR publish is removed from Community.",
         ),
     ] = None,
     repository_id: Annotated[
         str | None,
-        typer.Option(
-            "--repository-id",
-            help="Logical repository id (default: latest current assessment folder).",
-        ),
+        typer.Option("--repository-id", help="Deprecated. Not used."),
     ] = None,
     portfolio_id: Annotated[
         str | None,
-        typer.Option(
-            "--portfolio-id",
-            help="Logical portfolio id for EIR publish (default: release-validation).",
-        ),
+        typer.Option("--portfolio-id", help="Deprecated. Portfolio publish is removed."),
     ] = None,
     artifacts_root: Annotated[
         Path,
-        typer.Option("--artifacts-root", help="Local .codestrata-artifacts root."),
+        typer.Option("--artifacts-root", help="Local .codestrata-artifacts root (unused)."),
     ] = Path(".codestrata-artifacts"),
     confirm: Annotated[
         bool,
@@ -270,196 +263,42 @@ def report_publish_command(
         ),
     ] = False,
 ) -> None:
-    """Publish the local CURRENT Assessment Report to a branded public URL.
+    """Deprecated: Community Engine does not upload reports.
 
-    Interactive (recommended)::
+    Interactive confirmation still runs (``Publish report?``); hosted upload is refused.
+
+    Interactive::
 
         codestrata report publish
 
     Non-interactive / CI::
 
         codestrata report publish --confirm-public-publish
-        codestrata report publish --confirm-public-publish --acknowledge-private-repository
-
-    Publishing is an explicit public action and is separate from telemetry consent.
-    Local reports always remain available. Publishing never runs automatically after assess.
     """
 
-    from codestrata.community_cloud.report_publishing import (
-        PRIVATE_REPO_WARNING,
-        PUBLIC_PUBLISH_WARNING,
-        ReportPublishError,
-        publish_local_assessment,
-        publish_local_eir,
-        user_facing_publish_error,
-    )
+    from codestrata.community_cloud.report_publishing import PUBLIC_PUBLISH_WARNING
+    from codestrata.integration.community_runtime import COMMUNITY_CLOUD_PUBLISH_REMOVED
 
+    _ = (report_type, repository_id, portfolio_id, artifacts_root, acknowledge_private)
     interactive = (
         os.environ.get("CODESTRATA_FORCE_INTERACTIVE", "").strip().lower()
         in {"1", "true", "yes", "on"}
-    ) or (
-        not is_machine_mode() and sys.stdin.isatty() and sys.stdout.isatty()
-    )
-    kind = (report_type or "").strip().lower() or None
-
-    # Infer assessment vs EIR when --type omitted.
-    if kind is None:
-        assess_hits = sorted(
-            (artifacts_root / "assessments").glob("*/current/assessment.html"),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        ) if (artifacts_root / "assessments").is_dir() else []
-        eir_hits = sorted(
-            (artifacts_root / "intelligence").glob(
-                "*/current/engineering-intelligence-report.html"
-            ),
-            key=lambda p: p.stat().st_mtime,
-            reverse=True,
-        ) if (artifacts_root / "intelligence").is_dir() else []
-        if assess_hits and eir_hits:
-            error(
-                "Both Assessment and EIR current reports exist. "
-                "Pass --type assessment or --type eir."
-            )
-            raise typer.Exit(code=2)
-        if eir_hits and not assess_hits:
-            kind = "eir"
-        else:
-            kind = "assessment"
-
-    confirmed = confirm
-    private_ack = acknowledge_private
-    logical_id = ""
-    local_html = ""
-
-    try:
-        if kind in {"assessment", "assess"}:
-            root = artifacts_root / "assessments"
-            if repository_id:
-                current = root / repository_id / "current"
-                rid = repository_id
-            else:
-                currents = sorted(
-                    root.glob("*/current/assessment.html"),
-                    key=lambda p: p.stat().st_mtime,
-                    reverse=True,
-                )
-                if not currents:
-                    raise ReportPublishError(
-                        "No current report found. Run `codestrata assess --repo .` first."
-                    )
-                current = currents[0].parent
-                rid = currents[0].parent.parent.name
-            logical_id = rid
-            local_html = str(current / "assessment.html")
-            is_private = rid.startswith("local-")
-
-            if interactive and not confirmed:
-                typer.echo(PUBLIC_PUBLISH_WARNING)
-                if is_private:
-                    typer.echo(PRIVATE_REPO_WARNING)
-                if not typer.confirm("Publish report?", default=False):
-                    info("Publish cancelled. Local report remains unchanged.")
-                    raise typer.Exit(code=0)
-                confirmed = True
-                private_ack = True if is_private else private_ack
-            else:
-                if not confirmed:
-                    error(
-                        "Non-interactive publish requires --confirm-public-publish. "
-                        "Local report remains unchanged."
-                    )
-                    tip("Interactive: codestrata report publish")
-                    raise typer.Exit(code=2)
-                if is_private and not private_ack:
-                    error(PRIVATE_REPO_WARNING)
-                    tip(
-                        "Re-run with --confirm-public-publish "
-                        "--acknowledge-private-repository"
-                    )
-                    raise typer.Exit(code=2)
-
-            result = publish_local_assessment(
-                current_dir=current,
-                logical_repository_id=rid,
-                private_repository_acknowledged=private_ack or not is_private,
-                confirm_public_publish=True,
-            )
-        elif kind in {"eir", "intelligence", "engineering_intelligence"}:
-            pid = (portfolio_id or "release-validation").strip()
-            logical_id = pid
-            current = artifacts_root / "intelligence" / pid / "current"
-            local_html = str(current / "engineering-intelligence-report.html")
-            if interactive and not confirmed:
-                typer.echo(
-                    "This will publish your current Engineering Intelligence Report. "
-                    "Anyone with the resulting link can view it."
-                )
-                if not typer.confirm("Publish report?", default=False):
-                    info("Publish cancelled. Local report remains unchanged.")
-                    raise typer.Exit(code=0)
-                confirmed = True
-            elif not confirmed:
-                error(
-                    "Non-interactive publish requires --confirm-public-publish. "
-                    "Local report remains unchanged."
-                )
-                raise typer.Exit(code=2)
-            result = publish_local_eir(
-                current_dir=current,
-                portfolio_id=pid,
-                confirm_public_publish=True,
-            )
-        else:
-            error("Unsupported --type. Use assessment or eir.")
-            raise typer.Exit(code=2)
-    except ReportPublishError as exc:
-        error(user_facing_publish_error(exc))
-        raise typer.Exit(code=1) from exc
-    except typer.Exit:
-        raise
-    except Exception as exc:  # noqa: BLE001 - failure isolation
-        error(user_facing_publish_error(exc))
-        raise typer.Exit(code=1) from exc
-
-    label = (
-        "Assessment Report published."
-        if kind in {"assessment", "assess"}
-        else "Engineering Intelligence Report published."
-    )
-    success(label)
-    typer.echo("")
-    typer.echo("Public URL:")
-    typer.echo(result.public_url)
-    typer.echo("")
-    if result.local_html_path or local_html:
-        typer.echo("Local report:")
-        typer.echo(result.local_html_path or local_html)
-        typer.echo("")
-    tip("Anyone with the public link can view the published report.")
-    tip(
-        "Cloud keeps current + previous only; older public URLs for the same "
-        "repository/portfolio return 404 after replacement."
-    )
-
-    try:
-        from codestrata.community_cloud.public_report_url_manifest import (
-            record_published_url,
+    ) or (not is_machine_mode() and sys.stdin.isatty() and sys.stdout.isatty())
+    if interactive and not confirm:
+        typer.echo(PUBLIC_PUBLISH_WARNING)
+        if not typer.confirm("Publish report?", default=False):
+            info("Publish cancelled. Local report remains unchanged.")
+            raise typer.Exit(code=0)
+    elif not confirm:
+        error(
+            "Non-interactive publish requires --confirm-public-publish. "
+            "Local report remains unchanged."
         )
-
-        report_kind = (
-            "assessment"
-            if kind in {"assessment", "assess"}
-            else "engineering_intelligence"
-        )
-        record_published_url(
-            report_type=report_kind,  # type: ignore[arg-type]
-            logical_id=str(logical_id).strip(),
-            public_url=result.public_url,
-            source_slice=os.environ.get("CODESTRATA_VALIDATION_SLICE"),
-        )
-    except Exception:  # noqa: BLE001 — never fail publish on evidence write
-        pass
+        tip("Interactive: codestrata report publish")
+        raise typer.Exit(code=2)
+    error(COMMUNITY_CLOUD_PUBLISH_REMOVED)
+    tip("Open a local report with: codestrata open")
+    raise typer.Exit(code=2)
 
 
 __all__ = [

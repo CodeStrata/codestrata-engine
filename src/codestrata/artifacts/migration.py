@@ -54,13 +54,19 @@ def migrate_legacy_report_tree(
     ensure_artifact_tree(base)
     assessments_root = artifact_root(base) / ASSESSMENTS_DIRNAME
 
-    for repo_dir in sorted(path for path in source.iterdir() if path.is_dir() and not path.is_symlink()):
+    for repo_dir in sorted(
+        path for path in source.iterdir() if path.is_dir() and not path.is_symlink()
+    ):
         if repo_dir.name == "verification":
             # Handled by validation migration.
             continue
-        for run_dir in sorted(path for path in repo_dir.iterdir() if path.is_dir() and not path.is_symlink()):
+        for run_dir in sorted(
+            path for path in repo_dir.iterdir() if path.is_dir() and not path.is_symlink()
+        ):
             if not (run_dir / LEGACY_HTML).is_file():
-                result.skipped.append(str(run_dir.relative_to(base)) if _is_relative(run_dir, base) else str(run_dir))
+                result.skipped.append(
+                    str(run_dir.relative_to(base)) if _is_relative(run_dir, base) else str(run_dir)
+                )
                 continue
             run_id = f"{sanitize_repository_slug(repo_dir.name)}-{run_dir.name}"
             dest = assessments_root / run_id
@@ -89,7 +95,9 @@ def migrate_legacy_verification_tree(
         return result
     ensure_artifact_tree(base)
     dest_root = artifact_root(base) / VALIDATION_DIRNAME / VALIDATION_SUITES_DIRNAME
-    for suite_dir in sorted(path for path in source.iterdir() if path.is_dir() and not path.is_symlink()):
+    for suite_dir in sorted(
+        path for path in source.iterdir() if path.is_dir() and not path.is_symlink()
+    ):
         dest = dest_root / suite_dir.name
         try:
             if dest.exists():
@@ -152,9 +160,9 @@ def _migrate_one_run(
 
     # Manifest (lightweight). Prefer summary hints from legacy report.json when present.
     summary = None
-    scores: dict = {}
-    findings_summary: dict = {}
-    git_metadata: dict = {}
+    scores: dict[str, object] = {}
+    findings_summary: dict[str, object] = {}
+    git_metadata: dict[str, object] = {}
     legacy_json = source / LEGACY_JSON
     if legacy_json.is_file():
         try:

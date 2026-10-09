@@ -37,9 +37,7 @@ from codestrata.telemetry.analytics.repository_aggregate_validation import (
 
 
 def _id() -> AnonymousInstallationIdentity:
-    return AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    return AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
 
 
 def _input(**kwargs):  # type: ignore[no-untyped-def]
@@ -115,9 +113,7 @@ def test_no_transport(tmp_path: Path) -> None:
 def test_validate_rejects_privacy_required() -> None:
     from dataclasses import replace
 
-    event = collect_repository_aggregate_analytics(
-        identity=_id(), aggregate_input=_input()
-    )
+    event = collect_repository_aggregate_analytics(identity=_id(), aggregate_input=_input())
     bad = replace(event, privacy_projection_applied=False)
     with pytest.raises(AnalyticsError) as exc:
         validate_repository_aggregate_analytics_event(bad)

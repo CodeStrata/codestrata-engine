@@ -66,6 +66,7 @@ def test_expected_modules_are_present() -> None:
         "configuration.py",
         "diagnostics.py",
         "error_mapping.py",
+        "explanation_call.py",
         "factory.py",
         "legacy_bridge.py",
         "request_mapping.py",
@@ -96,8 +97,7 @@ def test_internal_codestrata_imports_stay_inside_the_allowed_set() -> None:
         hits = {
             name
             for name in _imported_module_names(path)
-            if name.startswith("codestrata.")
-            and not name.startswith(_ALLOWED_CODESTRATA_PREFIXES)
+            if name.startswith("codestrata.") and not name.startswith(_ALLOWED_CODESTRATA_PREFIXES)
         }
         if hits:
             offenders[path.name] = hits
@@ -109,8 +109,7 @@ def test_only_the_client_module_imports_the_openai_sdk() -> None:
         path.name
         for path in _modules()
         if any(
-            name == "openai" or name.startswith("openai.")
-            for name in _imported_module_names(path)
+            name == "openai" or name.startswith("openai.") for name in _imported_module_names(path)
         )
     }
 
@@ -118,9 +117,7 @@ def test_only_the_client_module_imports_the_openai_sdk() -> None:
 
 
 def test_only_the_client_module_imports_os() -> None:
-    importers = {
-        path.name for path in _modules() if "os" in _imported_module_names(path)
-    }
+    importers = {path.name for path in _modules() if "os" in _imported_module_names(path)}
 
     assert importers == {_CREDENTIAL_BOUNDARY_MODULE}
 
@@ -167,18 +164,14 @@ def test_no_module_performs_network_or_subprocess_work() -> None:
 
 
 def test_no_module_sleeps() -> None:
-    offenders = {
-        path.name for path in _modules() if "time.sleep" in _attribute_accesses(path)
-    }
+    offenders = {path.name for path in _modules() if "time.sleep" in _attribute_accesses(path)}
 
     assert offenders == set()
 
 
 def test_no_openrouter_reference_anywhere_in_the_adapter() -> None:
     offenders = {
-        path.name
-        for path in _modules()
-        if "openrouter" in path.read_text(encoding="utf-8").lower()
+        path.name for path in _modules() if "openrouter" in path.read_text(encoding="utf-8").lower()
     }
 
     assert offenders == set()

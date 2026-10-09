@@ -130,5 +130,5 @@ Status never inspects credentials or endpoints.
 - [telemetry-event-catalog.md](telemetry-event-catalog.md)
 - [telemetry-status.md](telemetry-status.md)
 - [telemetry-runtime.md](telemetry-runtime.md)
-- Epic 9 completion: [`../../verification/privacy_first_telemetry_completion/README.md`](../../verification/privacy_first_telemetry_completion/README.md)
+- Epic 9 completion: `verification/privacy_first_telemetry_completion/README.md` (not included in this export)
 - [../PRIVACY.md](../PRIVACY.md)

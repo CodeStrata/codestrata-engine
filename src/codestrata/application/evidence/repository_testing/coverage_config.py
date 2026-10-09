@@ -111,9 +111,7 @@ def collect_coverage_facts(
                 fact_type=fact_type,
                 tool=tool if tool is not TestFrameworkFamily.UNKNOWN else None,
                 detail=detail,
-                provenance=_provenance(
-                    path, configuration_fingerprint=configuration_fingerprint
-                ),
+                provenance=_provenance(path, configuration_fingerprint=configuration_fingerprint),
             )
         )
     by_id = {item.evidence_id: item for item in results}

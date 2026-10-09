@@ -57,9 +57,7 @@ def _finding(
         severity=FindingSeverity.HIGH,
         category=category,
         subject_keys=(rule_id, path, symbol),
-        evidence=(
-            FindingEvidence(evidence_type="config", source_id=symbol, path=path),
-        ),
+        evidence=(FindingEvidence(evidence_type="config", source_id=symbol, path=path),),
         evidence_refs=refs,
         primary_evidence_id=evidence_id,
         metadata=metadata
@@ -220,9 +218,7 @@ def test_tls_hostname_same_path_correlates() -> None:
         path="config/ssl.yml",
         symbol="hostname",
         metadata={
-            "subject_keys": (
-                "security.hostname-verification-disabled,config/ssl.yml,hostname"
-            ),
+            "subject_keys": ("security.hostname-verification-disabled,config/ssl.yml,hostname"),
         },
     )
     result = correlate_findings((a, b))

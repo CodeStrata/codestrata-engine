@@ -24,8 +24,7 @@ def test_status_model_defaults() -> None:
     assert status.privacy_filter_required is True
     assert status.status_side_effect_free is True
     assert (
-        status.legacy_compatibility_state
-        == LegacyCompatibilityState.SEPARATE_NOT_INSPECTED.value
+        status.legacy_compatibility_state == LegacyCompatibilityState.SEPARATE_NOT_INSPECTED.value
     )
     assert status.legacy_preference_authorizes_runtime is False
     assert status.catalog_available is True

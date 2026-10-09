@@ -11,7 +11,7 @@ counts, and raw correlation counts never enter the score.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
+from typing import Any, Protocol, runtime_checkable
 
 from codestrata.application.recommendations.priority_policies import (
     SEVERITY_POINTS,
@@ -26,10 +26,10 @@ from codestrata.domain.recommendations.priority import (
     BAND_IMMEDIATE_MIN,
     BAND_MEDIUM_MIN,
     PRIORITY_SCORE_MAX,
+    PriorityCalibrationStatus,
     RecommendationPriorityAssessment,
     RecommendationPriorityBasis,
     RecommendationPriorityComponents,
-    PriorityCalibrationStatus,
     clamp_score,
     priority_for_score,
     score_for_priority,
@@ -39,6 +39,12 @@ from codestrata.domain.recommendations.recommendation_confidence import (
 )
 from codestrata.domain.traceability import EvidenceCompleteness
 from codestrata.domain.traceability.validators import normalize_limitations
+
+
+@runtime_checkable
+class _HasLevel(Protocol):
+    level: object
+
 
 _SEVERITY_RANK = {
     FindingSeverity.INFORMATIONAL: 0,
@@ -135,8 +141,7 @@ def calibrate_recommendation_priority(
     if (
         resolved.allows_immediate
         and resolved.allows_direct_security_exposure
-        and highest_severity
-        in {FindingSeverity.CRITICAL, FindingSeverity.HIGH}
+        and highest_severity in {FindingSeverity.CRITICAL, FindingSeverity.HIGH}
         and score < BAND_IMMEDIATE_MIN
     ):
         score = BAND_IMMEDIATE_MIN
@@ -170,9 +175,10 @@ def calibrate_recommendation_priority(
 
     # Evidence completeness cap (partial/legacy).
     completeness = getattr(recommendation, "evidence_completeness", None)
-    completeness_value = (
-        completeness.value if hasattr(completeness, "value") else str(completeness or "")
-    ).lower()
+    if completeness is not None and hasattr(completeness, "value"):
+        completeness_value = str(completeness.value).lower()
+    else:
+        completeness_value = str(completeness or "").lower()
     if completeness_value in {
         EvidenceCompleteness.PARTIAL.value,
         EvidenceCompleteness.LEGACY.value,
@@ -202,8 +208,7 @@ def calibrate_recommendation_priority(
             basis.append(RecommendationPriorityBasis.PRODUCTION_CONTEXT)
 
     if any(
-        "static" in str(item).lower()
-        for item in (getattr(recommendation, "limitations", ()) or ())
+        "static" in str(item).lower() for item in (getattr(recommendation, "limitations", ()) or ())
     ):
         basis.append(RecommendationPriorityBasis.STATIC_ONLY_LIMITATION)
 
@@ -380,7 +385,7 @@ def _finding_confidence_level(finding: Any) -> FindingConfidenceLevel:
     confidence = getattr(finding, "finding_confidence", None)
     if confidence is None and isinstance(finding, Mapping):
         confidence = finding.get("finding_confidence")
-    if hasattr(confidence, "level"):
+    if isinstance(confidence, _HasLevel):
         level = confidence.level
         if isinstance(level, FindingConfidenceLevel):
             return level
@@ -402,7 +407,7 @@ def _recommendation_confidence_level(
     confidence = getattr(recommendation, "recommendation_confidence", None)
     if confidence is None and isinstance(recommendation, Mapping):
         confidence = recommendation.get("recommendation_confidence")
-    if hasattr(confidence, "level"):
+    if isinstance(confidence, _HasLevel):
         level = confidence.level
         if isinstance(level, RecommendationConfidenceLevel):
             return level

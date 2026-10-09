@@ -28,11 +28,7 @@ def apply_activation_plan(
     active_overrides = overrides or ExplicitActivationOverrides()
     if plan.mode == AssessmentActivationMode.CUSTOM:
         return settings.model_copy(
-            update={
-                "assessment": settings.assessment.model_copy(
-                    update={"activation": plan.mode}
-                )
-            }
+            update={"assessment": settings.assessment.model_copy(update={"activation": plan.mode})}
         )
 
     payload = settings.model_dump(mode="python")
@@ -41,9 +37,7 @@ def apply_activation_plan(
             continue
         _set_pack_enabled(payload, record.pack_id, record.enabled)
 
-    needs_rules_master = any(
-        item.enabled and item.pack_id != PackId.ROADMAP for item in plan.packs
-    )
+    needs_rules_master = any(item.enabled and item.pack_id != PackId.ROADMAP for item in plan.packs)
     if active_overrides.rules_master_enabled is None and needs_rules_master:
         payload.setdefault("rules", {})["enabled"] = True
 

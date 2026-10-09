@@ -310,7 +310,7 @@ def test_complete_report_rendering(tmp_path: Path) -> None:
     assert "Example Org" in html
     assert "Internal use only" in html
     for section in (
-        "Leadership Verdict",
+        "Current-code baseline",
         "Assessment Overview",
         "Technology Inventory",
         "Assessment Results",
@@ -339,9 +339,10 @@ def test_minimal_valid_report(tmp_path: Path) -> None:
     assert "Engineering Assessment" in html
     assert "CodeStrata" in html
     assert "sample-app" in html
-    assert "Leadership Verdict" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
     assert "Assessment Overview" in html
-    assert "Should I care?" in html
+    assert "Should I care?" not in html
 
 
 def test_deterministic_report_without_ai(tmp_path: Path) -> None:
@@ -351,7 +352,8 @@ def test_deterministic_report_without_ai(tmp_path: Path) -> None:
         generated_at_utc=datetime(2026, 7, 21, 15, 30, tzinfo=UTC),
     )
     html = ModernizationHTMLReportRenderer().render(report_input)
-    assert "Leadership Verdict" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
     assert "Assessment Overview" in html
     assert 'id="ai-enrichment"' not in html
     assert "Priority Actions" in html
@@ -427,12 +429,13 @@ def test_execution_metadata(tmp_path: Path) -> None:
 def test_methodology_toc_print_css_and_csp(tmp_path: Path) -> None:
     html = ModernizationHTMLReportRenderer().render(_report_input(tmp_path))
     assert 'id="engineering-intelligence-summary"' in html
-    assert 'id="leadership-verdict"' in html
+    assert 'id="attention-first"' in html
+    assert 'id="leadership-verdict"' not in html
     assert 'id="metadata"' in html
     assert "@media print" in html
     assert "Content-Security-Policy" in html
     assert "default-src 'none'" in html
-    assert "script-src 'none'" in html
+    assert "script-src 'sha256-" in html
 
 
 def test_analysis_coverage_section_disabled_static_analysis(tmp_path: Path) -> None:
@@ -516,7 +519,9 @@ def test_html_escaping_and_injection_prevention(tmp_path: Path) -> None:
             confidentiality_notice="<svg onload=alert(1)>",
         )
     )
-    assert "<script>" not in html
+    assert html.count("<script>") == 1
+    assert "window.print" in html
+    assert "<script>org</script>" not in html
     assert "&lt;script&gt;" in html
     assert "<svg onload=" not in html
     assert "&lt;svg onload=" in html
@@ -616,7 +621,8 @@ def test_file_writing(tmp_path: Path) -> None:
 def test_no_external_assets_or_scripts(tmp_path: Path) -> None:
     html = ModernizationHTMLReportRenderer().render(_report_input(tmp_path))
     lowered = html.lower()
-    assert "<script" not in lowered
+    assert "<script src" not in lowered
+    assert lowered.count("<script") == 1
     assert "onclick=" not in lowered
     assert "onerror=" not in lowered
     # Favicon is the only <link>; must be embedded data URI (Slice 20.13A).
@@ -641,3 +647,11 @@ def test_frozen_input_contract(tmp_path: Path) -> None:
             generated_at_utc=datetime(2026, 7, 21, 15, 30, tzinfo=UTC),
             unexpected=True,  # type: ignore[call-arg]
         )
+
+
+def test_trend_html_is_offline_and_has_no_cdn() -> None:
+    from codestrata.reporting.engineering_health.trend_report import _TREND_CSS
+
+    assert "https://" not in _TREND_CSS
+    assert "cdn." not in _TREND_CSS
+    assert "@import" not in _TREND_CSS

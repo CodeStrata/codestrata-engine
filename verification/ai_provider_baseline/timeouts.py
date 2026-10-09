@@ -35,7 +35,8 @@ def check_default_timeout_is_60_seconds(_source_root: Path) -> CheckResult:
 
 
 def check_provider_constructor_signatures_use_default(_source_root: Path) -> CheckResult:
-    """Constructors take optional timeout_seconds; unset values resolve to DEFAULT_TIMEOUT_SECONDS."""
+    """Constructors take optional timeout_seconds; unset values resolve to
+    DEFAULT_TIMEOUT_SECONDS."""
 
     import inspect
 

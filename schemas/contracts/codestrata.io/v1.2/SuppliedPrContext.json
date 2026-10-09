@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/SuppliedPrContext.json",
+  "title": "CodeStrata Engine Supplied PR Context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "provenance", "context_digest", "revision_agreement", "enters_canonical_computation"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.supplied-pr-context.v1" },
+    "schema_version": { "type": "string" },
+    "title": { "type": ["string", "null"], "maxLength": 256 },
+    "description": { "type": ["string", "null"], "maxLength": 4096 },
+    "base": { "type": ["string", "null"] },
+    "head": { "type": ["string", "null"] },
+    "labels": { "type": "array", "maxItems": 16 },
+    "linked_references": { "type": "array", "maxItems": 16 },
+    "provenance": { "type": "string", "enum": ["local_cli", "local_file", "local_fixture"] },
+    "supplied_path": { "type": ["string", "null"] },
+    "context_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "revision_agreement": { "type": "string", "enum": ["agrees", "conflict", "not_applicable"] },
+    "conflict_reason": { "type": ["string", "null"] },
+    "narrative_only": { "type": "boolean" },
+    "enters_canonical_computation": { "type": "boolean", "const": false }
+  }
+}

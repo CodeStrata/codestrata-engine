@@ -152,16 +152,11 @@ class RuleConfidence(BaseModel):
                 RuleConfidenceBasis.LEGACY_RULE,
             }.intersection(self.basis):
                 raise ValueError("PARTIAL_EXTRACTION and LEGACY_RULE cannot be HIGH")
-        if (
-            self.calibration_status
-            is RuleConfidenceCalibrationStatus.VALIDATION_SUPPORTED
-        ):
+        if self.calibration_status is RuleConfidenceCalibrationStatus.VALIDATION_SUPPORTED:
             if self.validation_support is None:
                 raise ValueError("VALIDATION_SUPPORTED requires validation_support")
             if self.validation_support.true_positives < 1:
-                raise ValueError(
-                    "VALIDATION_SUPPORTED requires at least one true positive"
-                )
+                raise ValueError("VALIDATION_SUPPORTED requires at least one true positive")
         if self.validation_support is not None and not self.validation_support.limitations:
             raise ValueError("validation_support requires explicit limitations")
         return self
@@ -171,4 +166,7 @@ def rule_confidence_to_json(rule_confidence: RuleConfidence) -> dict[str, Any]:
     """Return a deterministic JSON-compatible report projection."""
 
     payload = rule_confidence.model_dump(mode="json")
-    return json.loads(json.dumps(payload, sort_keys=True))
+    loaded = json.loads(json.dumps(payload, sort_keys=True))
+    if not isinstance(loaded, dict):
+        raise TypeError("JSON projection must be an object")
+    return loaded

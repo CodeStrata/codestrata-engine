@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
-from codestrata.application.rules.testing.rules import (
-    CoverageWithoutCiInvocationRule,
-    DeclaredWithoutObservationRule,
-    DisabledOrSkippedMarkersRule,
-    UnconfirmedCandidatesRule,
+from codestrata.application.rules.testing.yaml_retained import (
+    YamlCoverageWithoutCiRule,
+    YamlDeclaredWithoutObservationRule,
+    YamlDisabledOrSkippedRule,
+    YamlUnconfirmedCandidatesRule,
 )
 from codestrata.domain.rules.contracts import SharedRule
 from codestrata.domain.rules.enums import RuleCategory
@@ -44,9 +44,7 @@ class TestingRulePack:
     )
     default_enabled: bool = False
     requires_enterprise_context: bool = False
-    documentation_reference: str = (
-        "docs/analysis-intelligence/shared-rule-platform.md"
-    )
+    documentation_reference: str = "docs/analysis-intelligence/shared-rule-platform.md"
     configuration_requirements: tuple[str, ...] = (
         "rules.enabled=true",
         "rules.testing.enabled=true",
@@ -69,9 +67,7 @@ class TestingRulePack:
             "default_enabled": self.default_enabled,
             "requires_enterprise_context": self.requires_enterprise_context,
             "configuration_requirements": list(self.configuration_requirements),
-            "enterprise_context_requirements": list(
-                self.enterprise_context_requirements
-            ),
+            "enterprise_context_requirements": list(self.enterprise_context_requirements),
             "documentation_reference": self.documentation_reference,
         }
 
@@ -81,10 +77,10 @@ def testing_rules(
     enabled_rule_ids: frozenset[str] | None = None,
 ) -> tuple[SharedRule, ...]:
     candidates: list[tuple[str, SharedRule]] = [
-        (RULE_DISABLED_OR_SKIPPED, DisabledOrSkippedMarkersRule()),
-        (RULE_UNCONFIRMED_CANDIDATES, UnconfirmedCandidatesRule()),
-        (RULE_DECLARED_WITHOUT_OBSERVATION, DeclaredWithoutObservationRule()),
-        (RULE_COVERAGE_WITHOUT_CI_INVOCATION, CoverageWithoutCiInvocationRule()),
+        (RULE_DISABLED_OR_SKIPPED, YamlDisabledOrSkippedRule()),
+        (RULE_UNCONFIRMED_CANDIDATES, YamlUnconfirmedCandidatesRule()),
+        (RULE_DECLARED_WITHOUT_OBSERVATION, YamlDeclaredWithoutObservationRule()),
+        (RULE_COVERAGE_WITHOUT_CI_INVOCATION, YamlCoverageWithoutCiRule()),
     ]
     if enabled_rule_ids is None:
         return tuple(rule for _, rule in candidates)

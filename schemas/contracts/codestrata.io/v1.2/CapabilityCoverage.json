@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/CapabilityCoverage.json",
+  "title": "CodeStrata Engine Capability Coverage and Freshness companion",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "capability_id",
+    "capability_version",
+    "scope",
+    "applicability",
+    "execution_state"
+  ],
+  "properties": {
+    "schema_name": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "capability_id": { "type": "string" },
+    "capability_version": { "type": "string" },
+    "scope": { "type": "string" },
+    "applicability": { "type": "string" },
+    "execution_state": { "type": "string" },
+    "evaluated_count": { "type": ["integer", "null"] },
+    "eligible_count": { "type": ["integer", "null"] },
+    "unknown_count": { "type": "integer" },
+    "error_count": { "type": "integer" },
+    "excluded_count": { "type": "integer" },
+    "coverage_ratio": { "type": ["string", "null"] },
+    "coverage_reason": { "type": ["string", "null"] },
+    "evidence_ids": { "type": "array" },
+    "limitations": { "type": "array" }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/EngineeringHotspot.json",
+  "title": "CodeStrata Engine M22 Engineering Hotspot",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "record_id",
+    "subject_id",
+    "input_state_digest",
+    "list_kind",
+    "history_profile_id",
+    "history_window",
+    "contributors",
+    "evidence_ids",
+    "priority_explanation",
+    "opaque_score"
+  ],
+  "properties": {
+    "schema_name": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "record_id": { "type": "string" },
+    "subject_id": { "type": "string" },
+    "input_state_digest": { "type": "string" },
+    "list_kind": {
+      "type": "string",
+      "enum": ["complete_comparable", "partial_or_unknown"]
+    },
+    "ranking_value": { "type": ["string", "null"] },
+    "history_profile_id": { "type": "string" },
+    "history_window": { "type": "string" },
+    "contributors": { "type": "array", "minItems": 2 },
+    "active_finding_ids": { "type": "array" },
+    "evidence_ids": { "type": "array" },
+    "priority_explanation": { "type": "string" },
+    "opaque_score": { "type": "boolean", "const": false }
+  }
+}

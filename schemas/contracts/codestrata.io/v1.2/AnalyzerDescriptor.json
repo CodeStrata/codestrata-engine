@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/AnalyzerDescriptor.json",
+  "title": "CodeStrata Engine AnalyzerDescriptor",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "descriptor_id",
+    "family",
+    "reads",
+    "emits",
+    "applicability",
+    "depth",
+    "schemas",
+    "budgets",
+    "network",
+    "coverage",
+    "failures",
+    "no_opaque_score"
+  ],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.analyzer-descriptor.v1" },
+    "schema_version": { "type": "string" },
+    "descriptor_id": { "type": "string" },
+    "family": { "type": "string" },
+    "reads": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "emits": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "applicability": { "type": "string" },
+    "depth": { "type": "array", "minItems": 1 },
+    "schemas": { "type": "array", "minItems": 1 },
+    "budgets": { "type": "object", "additionalProperties": false },
+    "network": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "silent_online_fallback", "notes"],
+      "properties": {
+        "mode": { "type": "string", "enum": ["offline", "forbidden"] },
+        "silent_online_fallback": { "type": "boolean", "const": false },
+        "notes": { "type": "string" }
+      }
+    },
+    "coverage": { "type": "object" },
+    "failures": { "type": "array", "minItems": 1 },
+    "no_opaque_score": { "type": "boolean", "const": true }
+  }
+}

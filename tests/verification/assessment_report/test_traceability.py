@@ -5,7 +5,6 @@ from __future__ import annotations
 from verification.assessment_report.credibility import find_unsupported_claims
 from verification.assessment_report.determinism import normalize_html
 from verification.assessment_report.scenarios import check_negative_scenarios
-from verification.assessment_report.traceability import check_traceability
 
 
 def test_negative_scenarios_pass() -> None:

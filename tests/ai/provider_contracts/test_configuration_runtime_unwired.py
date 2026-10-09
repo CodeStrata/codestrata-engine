@@ -89,11 +89,7 @@ def test_no_product_path_file_imports_configuration_modules() -> None:
         if not path.is_file():
             continue
         imported = _imported_module_names(path)
-        hits = {
-            name
-            for name in imported
-            if name.startswith("codestrata.ai.provider_contracts")
-        }
+        hits = {name for name in imported if name.startswith("codestrata.ai.provider_contracts")}
         if hits:
             offenders[relative] = hits
     assert offenders == {}, f"product path files import provider_contracts: {offenders}"

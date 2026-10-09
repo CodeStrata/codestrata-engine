@@ -8,8 +8,7 @@ from typing import Any
 COMMUNITY_TELEMETRY_STATUS_POLICY_ID = "community-telemetry-status-policy"
 COMMUNITY_TELEMETRY_STATUS_POLICY_VERSION = "1.0"
 COMMUNITY_TELEMETRY_STATUS_POLICY_URN = (
-    f"{COMMUNITY_TELEMETRY_STATUS_POLICY_ID}:"
-    f"{COMMUNITY_TELEMETRY_STATUS_POLICY_VERSION}"
+    f"{COMMUNITY_TELEMETRY_STATUS_POLICY_ID}:{COMMUNITY_TELEMETRY_STATUS_POLICY_VERSION}"
 )
 
 PRIVACY_FIRST_TELEMETRY_STATUS_SCHEMA_NAME = "privacy-first-telemetry-status"
@@ -121,9 +120,7 @@ class CommunityTelemetryStatusPolicy:
             "default_runtime_decision": self.default_runtime_decision,
             "inspect_legacy_filesystem": self.inspect_legacy_filesystem,
             "installation_identity_used": self.installation_identity_used,
-            "legacy_compatibility_state_available": (
-                self.legacy_compatibility_state_available
-            ),
+            "legacy_compatibility_state_available": (self.legacy_compatibility_state_available),
             "limitations": list(self.limitations),
             "policy_id": self.policy_id,
             "policy_token": self.policy_token,

@@ -56,18 +56,14 @@ def build_architecture_intelligence(
     if report is None:
         return None
 
-    arch_findings = tuple(
-        item for item in findings if _is_architecture_finding(item)
-    )
+    arch_findings = tuple(item for item in findings if _is_architecture_finding(item))
     arch_finding_ids = {
         str(getattr(item, "finding_id", "") or "")
         for item in arch_findings
         if str(getattr(item, "finding_id", "") or "").strip()
     }
     arch_recs = tuple(
-        item
-        for item in recommendations
-        if _is_architecture_recommendation(item, arch_finding_ids)
+        item for item in recommendations if _is_architecture_recommendation(item, arch_finding_ids)
     )
 
     # Prefer canonical customer findings; fall back to report finding summaries.
@@ -158,9 +154,7 @@ def _finding_links(
                     for ref in (getattr(item, "evidence_refs", ()) or ())
                     if getattr(ref, "evidence_id", None)
                 ),
-                recommendation_ids=tuple(
-                    getattr(item, "driven_recommendation_ids", ()) or ()
-                ),
+                recommendation_ids=tuple(getattr(item, "driven_recommendation_ids", ()) or ()),
                 affected_scope=_safe_scope(getattr(item, "affected_nodes", ()) or ()),
             )
             for item in findings
@@ -395,14 +389,7 @@ def _graph_evidence(
             reference_kind = getattr(ref, "graph_reference_kind", None)
             graph_kind = getattr(ref, "graph_kind", None)
             graph_ref_id = getattr(ref, "graph_ref_id", None)
-            if not (
-                graph_kind
-                or graph_ref_id
-                or node_ids
-                or edge_ids
-                or relationship
-                or cycle_id
-            ):
+            if not (graph_kind or graph_ref_id or node_ids or edge_ids or relationship or cycle_id):
                 continue
             identity_parts = []
             if node_ids:
@@ -476,16 +463,10 @@ def _measurements(
             measurement_value = getattr(ref, "measurement_value", None)
             if not name and measurement_value is None:
                 continue
-            observed = (
-                str(measurement_value)
-                if measurement_value is not None
-                else "unavailable"
-            )
+            observed = str(measurement_value) if measurement_value is not None else "unavailable"
             operator = (getattr(ref, "threshold_operator", None) or "").strip() or None
             threshold_value = getattr(ref, "threshold_value", None)
-            threshold = (
-                str(threshold_value) if threshold_value is not None else None
-            )
+            threshold = str(threshold_value) if threshold_value is not None else None
             scope = getattr(ref, "measurement_scope", None)
             key = (name.lower() or "measurement", observed, finding_id)
             if key in seen:
@@ -544,9 +525,7 @@ def _limitations(
     if report.status in {"disabled", "not_requested", "not_applicable", "failed"}:
         notes.append("Architecture analysis did not produce a complete assessment.")
     if not finding_links:
-        notes.append(
-            "No architecture findings were produced within the assessed scope."
-        )
+        notes.append("No architecture findings were produced within the assessed scope.")
     if not graph_rows and not (report.metadata.get("graph_fingerprint") or "").strip():
         notes.append("Graph evidence was unavailable for this assessment.")
     # Deduplicate, preserve order
@@ -578,11 +557,7 @@ def _confidence(
         None,
     )
     classification = next(
-        (
-            area
-            for area in report.coverage_summary
-            if area.area_id == "classification_coverage"
-        ),
+        (area for area in report.coverage_summary if area.area_id == "classification_coverage"),
         None,
     )
     if extraction is not None and extraction.ratio is not None and extraction.ratio < 0.75:

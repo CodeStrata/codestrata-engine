@@ -76,6 +76,9 @@ class DependencyHealthAnalyzer:
             if not dependency.unmanaged_version:
                 continue
 
+            if dependency.version is not None and dependency.version.strip():
+                continue
+
             description = (
                 f"{dependency.name} in "
                 f"{dependency.manifest_path} does not declare "
@@ -239,7 +242,10 @@ class DependencyHealthAnalyzer:
             if dependency.ecosystem not in related_ecosystems and dependency.ecosystem != ecosystem:
                 continue
 
-            if dependency.dynamic_version or dependency.unmanaged_version:
+            if dependency.dynamic_version or (
+                dependency.unmanaged_version
+                and not (dependency.version and dependency.version.strip())
+            ):
                 return True
 
         return False

@@ -10,9 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-COMMUNITY_TELEMETRY_SESSION_CONSENT_POLICY_ID = (
-    "community-telemetry-session-consent-policy"
-)
+COMMUNITY_TELEMETRY_SESSION_CONSENT_POLICY_ID = "community-telemetry-session-consent-policy"
 COMMUNITY_TELEMETRY_SESSION_CONSENT_POLICY_VERSION = "2.0"
 COMMUNITY_TELEMETRY_SESSION_CONSENT_POLICY_URN = (
     f"{COMMUNITY_TELEMETRY_SESSION_CONSENT_POLICY_ID}:"
@@ -75,9 +73,7 @@ class CommunityTelemetrySessionConsentPolicy:
         if not self.prior_consent_reuse_allowed:
             raise SessionConsentPolicyError("prior_consent_reuse_allowed must be true")
         if self.installation_identity_required:
-            raise SessionConsentPolicyError(
-                "installation_identity_required must be false"
-            )
+            raise SessionConsentPolicyError("installation_identity_required must be false")
         if self.consent_implies_transport:
             raise SessionConsentPolicyError("consent_implies_transport must be false")
         if self.review_status != _REVIEW_STATUS:

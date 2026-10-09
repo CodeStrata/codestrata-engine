@@ -238,6 +238,65 @@ def test_detects_single_application_structure(
     assert "ARCH007" in _rule_ids(repository)
 
 
+def test_frontend_folders_are_presentation_not_api(
+    tmp_path: Path,
+) -> None:
+    """Angular, React, Vue, and Blazor UI folders are a presentation layer."""
+
+    repository = _repository(
+        tmp_path,
+        [
+            "src/app/components/user.component.ts",
+            "src/app/pages/home.page.ts",
+            "src/app/services/user.service.ts",
+            "src/app/store/user.state.ts",
+            "src/components/Hello.vue",
+            "src/hooks/useUser.ts",
+            "src/routes/index.tsx",
+            "Components/Pages/Home.razor",
+        ],
+    )
+
+    result = ArchitectureAnalyzer().analyze(repository=repository, technologies=[])
+    rule_ids = {item.rule_id for item in result.findings}
+    architecture = result.facts.architecture
+
+    assert architecture is not None
+    assert architecture.has_presentation_layer is True
+    assert architecture.has_service_layer is True
+    assert architecture.has_state_layer is True
+    assert architecture.has_api_layer is False
+    assert "ARCH008" in rule_ids
+    assert "ARCH002" not in rule_ids
+    assert "presentation" in (result.facts.structure.architecture_layers or [])
+    assert "state" in (result.facts.structure.architecture_layers or [])
+    finding = next(item for item in result.findings if item.rule_id == "ARCH001")
+    assert finding.metadata["complete_layered_architecture"] is False
+
+
+def test_model_api_folder_is_not_an_api_layer(tmp_path: Path) -> None:
+    """A models/api package is domain data, and spec files are not presentation."""
+
+    repository = _repository(
+        tmp_path,
+        [
+            "src/app/models/api/ClientPermissionsApi.ts",
+            "src/app/components/api-table.component.ts",
+            "src/app/components/api-table.component.spec.ts",
+            "src/app/api/users.controller.ts",
+        ],
+    )
+
+    result = ArchitectureAnalyzer().analyze(repository=repository, technologies=[])
+    api = next(item for item in result.findings if item.rule_id == "ARCH002")
+    presentation = next(item for item in result.findings if item.rule_id == "ARCH008")
+
+    assert "src/app/models/api/ClientPermissionsApi.ts" not in api.metadata["sample_paths"]
+    assert api.metadata["file_count"] == 1
+    assert presentation.metadata["file_count"] == 1
+    assert presentation.metadata["sample_paths"] == ["src/app/components/api-table.component.ts"]
+
+
 def test_does_not_infer_architecture_from_unrelated_files(
     tmp_path: Path,
 ) -> None:

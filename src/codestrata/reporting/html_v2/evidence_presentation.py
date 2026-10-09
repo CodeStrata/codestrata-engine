@@ -12,7 +12,12 @@ from typing import Any
 
 from codestrata.reporters.html_rendering import escape_and_wrap, escape_html
 from codestrata.reporting.html_v2.anchors import evidence_anchor
-from codestrata.reporting.html_v2.labels import completeness_label, limitation_label
+from codestrata.reporting.html_v2.labels import (
+    completeness_label as completeness_label,
+)
+from codestrata.reporting.html_v2.labels import (
+    limitation_label,
+)
 from codestrata.reporting.html_v2.models import EvidenceRefView
 
 # Document-scoped set of evidence anchors already emitted with an HTML id.
@@ -74,17 +79,14 @@ def _render_one(ref: EvidenceRefView, *, primary: bool, emit_anchor: bool = True
         rows.append(f"<p><em>Location</em> {location}</p>")
     if ref.symbolic_reference:
         rows.append(
-            f"<p><em>Subject</em> "
-            f"<code>{escape_and_wrap(ref.symbolic_reference)}</code></p>"
+            f"<p><em>Subject</em> <code>{escape_and_wrap(ref.symbolic_reference)}</code></p>"
         )
     measurement = _measurement_block(ref)
     if measurement:
         rows.append(measurement)
     if ref.snippet_text:
         rows.append(
-            '<blockquote class="evidence-snippet">'
-            f"{escape_html(ref.snippet_text)}"
-            "</blockquote>"
+            f'<blockquote class="evidence-snippet">{escape_html(ref.snippet_text)}</blockquote>'
         )
     if ref.graph_kind or ref.graph_ref_id:
         bits = []
@@ -96,9 +98,7 @@ def _render_one(ref: EvidenceRefView, *, primary: bool, emit_anchor: bool = True
     if ref.kind:
         rows.append(f"<p><em>Kind</em> {escape_html(ref.kind.replace('_', ' '))}</p>")
     if ref.production_mode:
-        rows.append(
-            f"<p><em>Mode</em> {escape_html(ref.production_mode.replace('_', ' '))}</p>"
-        )
+        rows.append(f"<p><em>Mode</em> {escape_html(ref.production_mode.replace('_', ' '))}</p>")
     if ref.evidence_confidence_level:
         rows.append(
             "<p><em>Evidence confidence</em> "
@@ -114,18 +114,12 @@ def _render_one(ref: EvidenceRefView, *, primary: bool, emit_anchor: bool = True
                 f"<ul>{lim}</ul></div>"
             )
     if ref.limitations:
-        lim = "".join(
-            f"<li>{escape_html(limitation_label(item))}</li>" for item in ref.limitations
-        )
+        lim = "".join(f"<li>{escape_html(limitation_label(item))}</li>" for item in ref.limitations)
         rows.append(f'<div class="limitations"><em>Evidence limitations</em><ul>{lim}</ul></div>')
     body = "\n".join(rows) or '<p class="muted">No additional evidence details.</p>'
     id_attr = f' id="{escape_html(anchor)}"' if emit_anchor else ""
     data_attr = f' data-evidence-id="{escape_html(anchor)}"'
-    return (
-        f'<article class="evidence-card"{id_attr}{data_attr}>\n'
-        f"{body}\n"
-        "</article>"
-    )
+    return f'<article class="evidence-card"{id_attr}{data_attr}>\n{body}\n</article>'
 
 
 def _location_line(ref: EvidenceRefView) -> str:
@@ -157,9 +151,7 @@ def _measurement_block(ref: EvidenceRefView) -> str:
         parts.append(escape_html(name))
     if ref.threshold_operator and ref.threshold_value is not None:
         op = ref.threshold_operator.replace("_", " ")
-        parts.append(
-            f"Threshold: {escape_html(op)} {escape_html(str(ref.threshold_value))}"
-        )
+        parts.append(f"Threshold: {escape_html(op)} {escape_html(str(ref.threshold_value))}")
     elif ref.threshold_value is not None:
         parts.append(f"Threshold: {escape_html(str(ref.threshold_value))}")
     if ref.comparison_result:
@@ -195,7 +187,9 @@ def evidence_ref_view_from_domain(ref: Any) -> EvidenceRefView:
             getattr(location, "symbolic_reference", None) if location is not None else None
         ),
         snippet_text=getattr(snippet, "text", None) if snippet is not None else None,
-        measurement_name=getattr(measurement, "metric_name", None) if measurement is not None else None,
+        measurement_name=getattr(measurement, "metric_name", None)
+        if measurement is not None
+        else None,
         measurement_value=(
             getattr(measurement, "measured_value", None) if measurement is not None else None
         ),
@@ -211,7 +205,9 @@ def evidence_ref_view_from_domain(ref: Any) -> EvidenceRefView:
             if measurement is not None
             else None
         ),
-        threshold_value=getattr(measurement, "threshold", None) if measurement is not None else None,
+        threshold_value=getattr(measurement, "threshold", None)
+        if measurement is not None
+        else None,
         comparison_result=(
             str(
                 getattr(

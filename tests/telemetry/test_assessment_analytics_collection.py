@@ -10,21 +10,19 @@ from codestrata.telemetry.analytics.assessment_analytics import (
     classify_duration_bucket_ms,
     collect_assessment_analytics,
 )
+from codestrata.telemetry.analytics.assessment_analytics_projection import (
+    project_assessment_analytics_to_analytics_event,
+)
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 from codestrata.telemetry.analytics.events import AnalyticsCategory
 from codestrata.telemetry.analytics.installation_identity import (
     AnonymousInstallationIdentity,
     new_anonymous_installation_identity,
 )
-from codestrata.telemetry.analytics.assessment_analytics_projection import (
-    project_assessment_analytics_to_analytics_event,
-)
 
 
 def _identity() -> AnonymousInstallationIdentity:
-    return AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    return AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
 
 
 @pytest.mark.parametrize(

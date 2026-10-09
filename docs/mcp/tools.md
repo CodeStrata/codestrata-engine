@@ -41,6 +41,59 @@ owned by later Platform epics, not these tools.
 Optional AI uses **Engine AI provider credentials** in `codestrata.toml` /
 environment — never `CODESTRATA_PLATFORM_API_KEY`.
 
+### Bounded local artifact evidence queries (E12.1)
+
+CodeStrata provides a pure, zero-database local evidence MCP server (`create_artifact_mcp_server` / `build_artifact_mcp_server`) serving deterministic inspection directly from file artifacts (such as `report.json`, `assessment.json`, `metrics.json`, `manifest.json`, and run directory trees).
+
+| Category | Tools | Inputs | Purpose |
+| -------- | ----- | ------ | ------- |
+| **Repository** | `list_repositories`, `get_repository` | `local_root`, `limit`, `offset`, `repository_id` | Repository identity, source location, and creation timestamps |
+| **Snapshot** | `list_snapshots`, `get_snapshot` | `local_root`, `repository_id`, `snapshot_id`, pagination | Commit / snapshot provenance, branches, file counts |
+| **Component** | `list_components`, `get_component` | `local_root`, `run_id`, `component_type`, `component_id` | Architecture modules, libraries, services, dependency counts |
+| **Finding** | `list_findings`, `get_finding` | `local_root`, `run_id`, `severity`, `category`, `finding_id` | Detected issues, rules, messages, location, evidence references |
+| **Metric** | `list_metrics`, `get_metric` | `local_root`, `run_id`, `category`, `metric_id` | Quality, complexity, security, and debt measurements |
+| **Dependency** | `list_dependencies`, `get_dependencies` | `local_root`, `run_id`, `source_component_id`, `target_component_id` | Intra-component relationships, dependency weights |
+| **Change** | `list_changes`, `get_change_summary` | `local_root`, `run_id`, `change_type`, pagination | Blast radius, boundaries crossed, diff statistics |
+| **Evidence** | `list_evidence`, `get_evidence` | `local_root`, `run_id`, `evidence_kind`, `evidence_id` | AST, source, and rule execution snippets and lines |
+| **Lineage** | `list_lineage`, `get_lineage` | `local_root`, `repository_id`, `run_id` | Assessment run provenance, git commit, ruleset versions |
+
+#### Governance and Safety
+- **Zero Database Connection:** Pure file reader; zero connection to SQLite, Postgres, or external databases.
+- **Read-Only / No Consent Required:** Queries read only existing local output artifacts; no collection consent is required.
+- **Root Scoping & Traversal Rejection:** Queries require an explicit `local_root`. Path traversal (`..`), system directory access, and root escaping are rejected with security errors.
+- **Schema Validation:** Artifacts must match recognized CodeStrata schema versions (e.g. `1.0`, `1.2`, `codestrata-artifact-manifest:1.0.0`).
+- **Bounded Pagination:** Bounded with minimum limit 1 and maximum query budget of 500 records per call. Character budgeting enforces truncation indicators without emitting invalid JSON.
+- **Forbidden Operations:** Assessment execution (`run_assessment`), rule activation (`evaluate_rule`), shell execution, hosted telemetry, portfolio cross-repo queries, GraphRAG/answering tools, and the optional explanation tool are strictly prohibited on this server.
+
+### Optional local/BYO explanation (E12.2)
+
+`create_local_explanation_mcp_server` registers one tool, `explain_local_evidence`. It is not registered on the artifact evidence server or by the default assessment MCP registrar.
+
+The tool reuses the existing OpenAI adapter. The optional OpenAI SDK is imported only inside that adapter, and only after a call sets both `enabled=true` and `prompt_evidence_egress_enabled=true`. Product telemetry does not authorize that egress.
+
+| Input | Behavior |
+| ----- | -------- |
+| `enabled=false` (default) | Returns `ai_disabled`. No provider call. |
+| `prompt_evidence_egress_enabled=false` | Returns `egress_not_enabled` even when product telemetry is on. |
+| Both flags true | Sends permitted evidence IDs only. The artifact cites those IDs plus provider `openai` and the requested model. |
+| Provider or network failure | Returns an explanation error. Assessment status and canonical digest are echoed unchanged. |
+| Source text containing tool directives | The text is not forwarded and no tool is executed. |
+
+`local_root` reads evidence IDs through the E12.1 artifact reader. IDs outside that set are rejected. More than 32 evidence IDs is an explanation budget error. The explanation artifact is not part of canonical computation.
+
+### AI-on/off and local MCP equivalence (E12.3)
+
+The same pinned assessment is run through four modes: AI disabled, provider success, provider timeout, and source-instruction injection. Findings, metric values, severity, coverage, and verdicts stay semantically identical. Only the separate explanation export changes.
+
+| Mode | Canonical body | Explanation export |
+| ---- | -------------- | ------------------ |
+| Disabled | Unchanged. No provider call. | `ai_disabled`. Limitations and missing-citation fields are present. |
+| Provider success | Unchanged. | Artifact cites permitted evidence IDs only. Unpermitted citations, limitations, and rejected score claims are listed. |
+| Timeout | Unchanged. | Explanation error. No artifact. |
+| Injection | Unchanged. No tool execution. | Missing citations and source-instruction limitations are visible. Score, severity, coverage, and verdict claims are rejected. |
+
+The artifact evidence server returns that canonical evidence without constructing an AI provider. `explain_local_evidence` stays on the separate explanation server. An `ai_explanation` object, an `explanation.json` sidecar, or a model field named `health_score` does not become a metric, a severity, a coverage ratio, or a verdict. A missing coverage ratio stays null.
+
 ## Result bounding
 
 When `max_result_characters` is exceeded, complete lower-priority collections are
@@ -52,3 +105,4 @@ record exclusions.
 - [overview.md](overview.md) — principles and boundary
 - [setup.md](setup.md) — enable and serve
 - [client-examples.md](client-examples.md)
+

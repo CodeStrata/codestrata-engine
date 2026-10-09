@@ -77,9 +77,7 @@ def _limitation(
     importance: str = "contextual",
 ) -> SecurityLimitation:
     return SecurityLimitation(
-        limitation_id=build_limitation_id(
-            category=category.value, summary=summary
-        ),
+        limitation_id=build_limitation_id(category=category.value, summary=summary),
         category=category,
         summary=summary,
         affected_capability=affected_capability,
@@ -126,10 +124,7 @@ def _inventory_limitations(*, pack_enabled: bool) -> tuple[SecurityLimitation, .
         ),
         _limitation(
             category=SecurityLimitationCategory.NO_EXTERNAL_VULNERABILITY_METADATA,
-            summary=(
-                "No external vulnerability metadata, CVE, or package registry "
-                "queries."
-            ),
+            summary=("No external vulnerability metadata, CVE, or package registry queries."),
             affected_capability="vulnerability_metadata",
         ),
         _limitation(
@@ -214,9 +209,7 @@ def _coverage(
                 else SecurityCoverageMaturity.LOW
             ),
             limitations=(
-                ()
-                if evidence_available
-                else ("repository_sensitive_evidence_unavailable",)
+                () if evidence_available else ("repository_sensitive_evidence_unavailable",)
             ),
         ),
         SecurityCoverageArea(
@@ -238,9 +231,7 @@ def _coverage(
             limitations=("production_primary_views",),
         ),
     ]
-    return SecurityCoverageSummary(
-        areas=tuple(sorted(areas, key=lambda item: item.area_id))
-    )
+    return SecurityCoverageSummary(areas=tuple(sorted(areas, key=lambda item: item.area_id)))
 
 
 def _lifecycle_traceability(
@@ -292,9 +283,7 @@ def _lifecycle_traceability(
                 target_id=area,
             )
         )
-    return SecurityTraceabilityIndex(
-        edges=tuple(sorted(edges, key=lambda item: item.edge_id))
-    )
+    return SecurityTraceabilityIndex(edges=tuple(sorted(edges, key=lambda item: item.edge_id)))
 
 
 def _resolve_status(
@@ -427,9 +416,7 @@ class SecurityAssessmentAssembler:
             evidence_pipeline=(
                 "repository_sensitive" if evidence is not None else "not_configured"
             ),
-            evidence_fingerprint=(
-                evidence.evidence_fingerprint if evidence is not None else ""
-            ),
+            evidence_fingerprint=(evidence.evidence_fingerprint if evidence is not None else ""),
         )
 
     def assemble_not_requested(
@@ -556,8 +543,7 @@ class SecurityAssessmentAssembler:
         rules_not_matched: int = 0,
         rules_not_applicable: int = 0,
         diagnostics: Sequence[str] = (),
-        repository_sensitive_evidence: AggregatedRepositorySensitiveEvidence
-        | None = None,
+        repository_sensitive_evidence: AggregatedRepositorySensitiveEvidence | None = None,
         rule_execution_facts: Sequence[SecurityRuleExecutionFact] = (),
     ) -> SecurityAssessmentSection:
         """Assemble inventory and optional synthesis from in-memory facts."""
@@ -575,13 +561,9 @@ class SecurityAssessmentAssembler:
                 configuration_payload=configuration_payload,
             )
 
-        all_refs = (
-            build_finding_references(findings) if include_findings else ()
-        )
+        all_refs = build_finding_references(findings) if include_findings else ()
         production_refs = tuple(
-            item
-            for item in all_refs
-            if item.source_role is SecuritySourceRole.PRODUCTION
+            item for item in all_refs if item.source_role is SecuritySourceRole.PRODUCTION
         )
         primary_finding_ids = tuple(item.finding_id for item in production_refs)
         all_finding_ids = tuple(item.finding_id for item in all_refs)
@@ -624,13 +606,9 @@ class SecurityAssessmentAssembler:
         )
 
         planned = (
-            security_rules_planned
-            if security_rules_planned is not None
-            else len(HYGIENE_RULE_IDS)
+            security_rules_planned if security_rules_planned is not None else len(HYGIENE_RULE_IDS)
         )
-        limitations = (
-            _inventory_limitations(pack_enabled=True) if include_limitations else ()
-        )
+        limitations = _inventory_limitations(pack_enabled=True) if include_limitations else ()
         fingerprint = build_configuration_fingerprint(
             configuration_payload
             or (
@@ -645,9 +623,7 @@ class SecurityAssessmentAssembler:
         )
         failed = count_failed_rules(execution_facts)
         by_rule = findings_by_rule_counts(all_refs)
-        executed_count = rules_executed or sum(
-            1 for item in execution_facts if item.executed
-        )
+        executed_count = rules_executed or sum(1 for item in execution_facts if item.executed)
 
         synthesis = SecuritySynthesisResult()
         synthesis_diagnostics: tuple[str, ...] = ()
@@ -670,9 +646,7 @@ class SecurityAssessmentAssembler:
             synthesis = SecuritySynthesisResult(
                 status=SecuritySynthesisStatus.FAILED,
                 synthesis_version=SYNTHESIS_VERSION,
-                diagnostics=(
-                    f"synthesis_failed:{type(error).__name__}",
-                ),
+                diagnostics=(f"synthesis_failed:{type(error).__name__}",),
             )
             synthesis_diagnostics = synthesis.diagnostics
 
@@ -680,9 +654,8 @@ class SecurityAssessmentAssembler:
             SecurityExecutionSummary(
                 security_rules_planned=planned,
                 rules_executed=executed_count,
-                rules_matched=rules_matched or sum(
-                    1 for item in execution_facts if item.evaluation_status == "matched"
-                ),
+                rules_matched=rules_matched
+                or sum(1 for item in execution_facts if item.evaluation_status == "matched"),
                 rules_not_matched=rules_not_matched,
                 rules_not_applicable=rules_not_applicable,
                 rules_failed=failed,
@@ -741,9 +714,7 @@ class SecurityAssessmentAssembler:
                 synthesis_edges.append(
                     SecurityTraceabilityEdge(
                         edge_id=build_trace_edge_id(
-                            relation=(
-                                SecurityTraceabilityRelation.SECTION_TO_CONCLUSION.value
-                            ),
+                            relation=(SecurityTraceabilityRelation.SECTION_TO_CONCLUSION.value),
                             source_id=SECTION_ID,
                             target_id=conclusion_id,
                         ),
@@ -756,9 +727,7 @@ class SecurityAssessmentAssembler:
                 synthesis_edges.append(
                     SecurityTraceabilityEdge(
                         edge_id=build_trace_edge_id(
-                            relation=(
-                                SecurityTraceabilityRelation.SECTION_TO_RECOMMENDATION.value
-                            ),
+                            relation=(SecurityTraceabilityRelation.SECTION_TO_RECOMMENDATION.value),
                             source_id=SECTION_ID,
                             target_id=recommendation_id,
                         ),
@@ -770,8 +739,7 @@ class SecurityAssessmentAssembler:
         merged_edges = tuple(
             sorted(
                 {
-                    edge.edge_id: edge
-                    for edge in (*base_traceability.edges, *synthesis_edges)
+                    edge.edge_id: edge for edge in (*base_traceability.edges, *synthesis_edges)
                 }.values(),
                 key=lambda item: item.edge_id,
             )
@@ -784,15 +752,10 @@ class SecurityAssessmentAssembler:
                     *synthesis_diagnostics,
                     *(
                         (f"evidence_status:{evidence.status.value}",)
-                        if evidence.status
-                        is RepositorySensitiveParseStatus.PARTIALLY_SUCCEEDED
+                        if evidence.status is RepositorySensitiveParseStatus.PARTIALLY_SUCCEEDED
                         else ()
                     ),
-                    *(
-                        (f"rules_failed:{failed}",)
-                        if failed
-                        else ()
-                    ),
+                    *((f"rules_failed:{failed}",) if failed else ()),
                 }
             )
         )
@@ -805,8 +768,7 @@ class SecurityAssessmentAssembler:
             security_pack_id=PACK_ID,
             security_pack_version=PACK_VERSION,
             evidence_pipeline=evidence_pipeline,
-            evidence_fingerprint=evidence_fingerprint
-            or evidence.evidence_fingerprint,
+            evidence_fingerprint=evidence_fingerprint or evidence.evidence_fingerprint,
             configuration_fingerprint=fingerprint,
             execution_summary=execution,
             evidence_summary=evidence_summary,
@@ -842,8 +804,7 @@ class SecurityAssessmentAssembler:
                 "production_primary": "finding_ids_and_finding_summaries",
                 "all_findings": "all_finding_ids_and_all_finding_summaries",
                 "hotspot_ordering": (
-                    "presentation_only:production_count,total_count,"
-                    "highest_severity,path"
+                    "presentation_only:production_count,total_count,highest_severity,path"
                 ),
             },
         )

@@ -21,12 +21,12 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
 from codestrata.domain.rules.models import RuleContext, RuleResult
+from codestrata.domain.rules.results import RuleMatch
 from codestrata.domain.rules.rule_confidence import (
     RuleConfidenceBasis,
     RuleConfidenceCalibrationStatus,
     RuleConfidenceLevel,
 )
-from codestrata.domain.rules.results import RuleMatch
 from codestrata.reporting.customer_universe import CustomerFinding, customer_finding_json
 
 
@@ -102,18 +102,14 @@ def test_rule_metadata_requires_inherent_confidence() -> None:
 def test_security_match_and_finding_preserve_both_confidence_meanings() -> None:
     match = _sample_security_match()
     assert match.confidence is MatchEvidenceConfidence.CERTAIN
-    assert match.rule_confidence == confidence_for_rule(
-        "security.private-key-material"
-    )
+    assert match.rule_confidence == confidence_for_rule("security.private-key-material")
 
     finding = RuleFindingMapper().map_match(match, category=RuleCategory.SECURITY)
     assert finding.metadata["confidence"] == "certain"
     assert finding.metadata["rule_confidence"]["level"] == "high"
     assert finding.metadata["rule_confidence_level"] == "high"
     assert finding.metadata["rule_confidence_basis"] == "exact_signature"
-    assert "inspected repository content" in finding.metadata[
-        "rule_confidence_limitations"
-    ]
+    assert "inspected repository content" in finding.metadata["rule_confidence_limitations"]
     assert finding.metadata["rule_confidence_calibration_status"] == "defined"
     assert finding.finding_confidence.level.value in {
         "high",
@@ -149,10 +145,7 @@ def test_legacy_adapter_uses_unavailable_rule_confidence() -> None:
     confidence = LegacyRuleAdapter(_LegacyRule()).metadata.confidence
     assert confidence.level is RuleConfidenceLevel.UNAVAILABLE
     assert confidence.basis == (RuleConfidenceBasis.LEGACY_RULE,)
-    assert (
-        confidence.calibration_status
-        is RuleConfidenceCalibrationStatus.UNAVAILABLE
-    )
+    assert confidence.calibration_status is RuleConfidenceCalibrationStatus.UNAVAILABLE
 
 
 def test_match_evidence_confidence_rename_preserves_values() -> None:

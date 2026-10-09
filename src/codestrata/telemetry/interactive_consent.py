@@ -12,7 +12,6 @@ from pathlib import Path
 from typing import TextIO
 
 from codestrata.telemetry.consent import (
-    TelemetrySessionConsent,
     allow_session_consent_from_interactive_prompt,
     default_session_consent,
     deny_session_consent_from_interactive_prompt,

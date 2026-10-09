@@ -41,7 +41,8 @@ PACKAGE_DOTTED_NAME = "codestrata.ai.provider_adapters.openai"
 PACKAGE_RELATIVE_PATH = "ai/provider_adapters/openai"
 ADAPTERS_ROOT_RELATIVE_PATH = "ai/provider_adapters"
 
-# The 12 modules Slice 11.6 adds under ai/provider_adapters/openai/.
+# Slice 11.6 added 12 modules. E12.2 adds explanation_call.py for the one
+# retained local explanation request.
 EXPECTED_MODULES: tuple[str, ...] = (
     "__init__.py",
     "adapter.py",
@@ -50,6 +51,7 @@ EXPECTED_MODULES: tuple[str, ...] = (
     "configuration.py",
     "diagnostics.py",
     "error_mapping.py",
+    "explanation_call.py",
     "factory.py",
     "legacy_bridge.py",
     "request_mapping.py",

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import argparse
-import sys
 from pathlib import Path
 
 from verification.curated_repository_validation.contract import TIER_ORDER
@@ -62,7 +61,10 @@ def main(argv: list[str] | None = None) -> int:
             run_determinism=not args.skip_determinism,
         )
         print(f"SV.10 curated repository validation: {report.overall_verdict}")
-        print(f"executed={report.executed_repository_count} passed={report.passed_count} failed={report.failed_count}")
+        print(
+            f"executed={report.executed_repository_count} "
+            f"passed={report.passed_count} failed={report.failed_count}"
+        )
         out = args.output_dir or Path("reports/verification/sv10")
         print(f"report: {out / 'curated-repository-validation.json'}")
         return 0 if report.overall_verdict in {"PASS", "PASS_WITH_LIMITATIONS"} else 1
@@ -73,8 +75,8 @@ def main(argv: list[str] | None = None) -> int:
         cleanup_venv,
         install_codestrata_cli,
     )
-    from verification.curated_repository_validation.summary import build_final_report
     from verification.curated_repository_validation.catalog import load_catalog_document
+    from verification.curated_repository_validation.summary import build_final_report
 
     engine = (args.engine_root or engine_root_from_package()).resolve()
     out = (args.output_dir or (engine / "reports" / "verification" / "sv10")).resolve()

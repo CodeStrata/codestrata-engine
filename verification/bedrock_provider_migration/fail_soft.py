@@ -88,9 +88,7 @@ def check_the_legacy_messages_are_rebuilt_verbatim() -> CheckResult:
     mismatches: list[str] = []
     for code, expected in cases.items():
         message = str(
-            legacy_bridge.legacy_error_for(
-                error_mapping.build_error(code), legacy_detail="detail"
-            )
+            legacy_bridge.legacy_error_for(error_mapping.build_error(code), legacy_detail="detail")
         )
         if message != expected:
             mismatches.append(code)

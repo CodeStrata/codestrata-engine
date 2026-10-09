@@ -39,12 +39,7 @@ def check_api_key_env_default_is_unchanged() -> CheckResult:
     default_from_settings = OpenAISettings().api_key_env
     default_from_adapter = adapter_configuration.DEFAULT_API_KEY_ENV_NAME
     resolved = adapter_configuration.resolve_api_key_env_name(None)
-    ok = (
-        default_from_settings
-        == default_from_adapter
-        == resolved
-        == OPENAI_API_KEY_ENV_DEFAULT
-    )
+    ok = default_from_settings == default_from_adapter == resolved == OPENAI_API_KEY_ENV_DEFAULT
     return CheckResult(
         name="openai_api_key_environment_variable_default_is_unchanged",
         category="configuration",
@@ -82,9 +77,7 @@ def check_base_url_is_optional_and_normalized() -> CheckResult:
 def check_default_timeout_is_unchanged() -> CheckResult:
     runtime = adapter_configuration.build_runtime_configuration()
     ok = (
-        runtime.client_inputs.timeout_seconds
-        == DEFAULT_TIMEOUT_SECONDS
-        == EXPECTED_TIMEOUT_SECONDS
+        runtime.client_inputs.timeout_seconds == DEFAULT_TIMEOUT_SECONDS == EXPECTED_TIMEOUT_SECONDS
     )
     return CheckResult(
         name="default_provider_request_timeout_is_still_sixty_seconds",
@@ -154,9 +147,7 @@ def check_api_key_presence_is_not_resolved_by_configuration() -> CheckResult:
 
 
 def check_adapter_configuration_is_reachable_for_diagnostics() -> CheckResult:
-    adapter = build_openai_provider(
-        openai_settings=OpenAISettings(api_key_env=_SYNTHETIC_KEY_VAR)
-    )
+    adapter = build_openai_provider(openai_settings=OpenAISettings(api_key_env=_SYNTHETIC_KEY_VAR))
     return CheckResult(
         name="adapter_exposes_its_resolved_configuration_for_diagnostics",
         category="configuration",

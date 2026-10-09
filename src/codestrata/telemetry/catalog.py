@@ -6,6 +6,8 @@ Side-effect-free: no preferences, identity, env, network, or filesystem writes.
 
 from __future__ import annotations
 
+from enum import Enum
+
 from codestrata.telemetry.catalog_metadata import (
     CHANGE_POLICY,
     CROSS_FIELD_RULES,
@@ -49,7 +51,7 @@ from codestrata.telemetry.runtime_policy import (
     default_runtime_policy,
 )
 
-_ENUM_TYPES: dict[str, type] = {
+_ENUM_TYPES: dict[str, type[Enum]] = {
     "event_type": RuntimeEventType,
     "os_family": OsFamily,
     "arch_family": ArchFamily,
@@ -144,8 +146,7 @@ def _build_enums() -> tuple[TelemetryCatalogEnum, ...]:
                 unknown_value_behavior="rejected",
                 aliases=(),
                 notes=(
-                    "Duration buckets are named categories only; exact duration "
-                    "is not retained."
+                    "Duration buckets are named categories only; exact duration is not retained."
                     if name == "duration_bucket"
                     else ""
                 ),
@@ -165,7 +166,11 @@ def _build_fields() -> tuple[TelemetryCatalogField, ...]:
                 requiredness=str(meta["requiredness"]),
                 omitted_when_unavailable=bool(meta["omitted_when_unavailable"]),
                 enum_ref=meta["enum_ref"] if meta["enum_ref"] is None else str(meta["enum_ref"]),
-                max_length=meta["max_length"] if meta["max_length"] is None else int(meta["max_length"]),  # type: ignore[arg-type]
+                max_length=(
+                    None
+                    if meta["max_length"] is None
+                    else int(str(meta["max_length"]))
+                ),
                 privacy_classification=str(meta["privacy"]),
                 source=str(meta["source"]),
                 normalization=str(meta["normalization"]),

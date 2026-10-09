@@ -23,17 +23,42 @@ ENGINE_ROOT = REPO_ROOT / "engine"
 SAMPLE_JS = REPO_ROOT / "test-fixtures" / "sample-js-app"
 
 
-def _settings(**overrides: object) -> CodestrataSettings:
+def _settings(*, knowledge_dir: Path | None = None, **overrides: object) -> CodestrataSettings:
+    """Settings for onboarding tests.
+
+    Assessments always take a repository knowledge lock (3600s on Windows).
+    Point the store at a per-test directory so a leftover
+    ``engine/.codestrata/knowledge`` lock cannot stall the suite.
+    """
     payload: dict[str, object] = {
         "repository": {
             "path": str(SAMPLE_JS),
         },
         "workspace": {"directory": ".codestrata-workspace", "clean_before_clone": True},
+        "knowledge": {
+            "enabled": False,
+            "directory": str(knowledge_dir or Path(".codestrata-test-knowledge")),
+        },
         "static_analysis": {"enabled": False},
         "ai": {"bedrock": {}},
     }
     payload.update(overrides)
     return CodestrataSettings.model_validate(payload)
+
+
+def _assess_toml(*, repo: Path, knowledge_dir: Path, extra: str = "") -> str:
+    return f"""
+[repository]
+path = "{repo.as_posix()}"
+
+[knowledge]
+enabled = false
+directory = "{knowledge_dir.as_posix()}"
+
+[static_analysis]
+enabled = false
+{extra}
+"""
 
 
 def test_resolve_assessment_repository_prefers_cli() -> None:
@@ -100,7 +125,7 @@ def test_config_driven_javascript_assessment(tmp_path: Path) -> None:
         repo=None,
         output_directory=output,
         mode=AssessmentMode.DETERMINISTIC,
-        settings=_settings(),
+        settings=_settings(knowledge_dir=tmp_path / "knowledge"),
         static_analysis_enabled=False,
     )
     assert result.html_report_path.is_file()
@@ -240,7 +265,7 @@ def test_config_driven_javascript_assessment_with_fake_ai(tmp_path: Path) -> Non
         output_directory=output,
         mode=AssessmentMode.AI_ENHANCED,
         model_id="fake-model",
-        settings=_settings(),
+        settings=_settings(knowledge_dir=tmp_path / "knowledge"),
         provider=provider,
         static_analysis_enabled=False,
     )
@@ -267,7 +292,7 @@ def test_config_driven_javascript_zero_ai_calls_deterministic(tmp_path: Path) ->
         repo=None,
         output_directory=tmp_path / "reports",
         mode=AssessmentMode.DETERMINISTIC,
-        settings=_settings(),
+        settings=_settings(knowledge_dir=tmp_path / "knowledge"),
         provider=ForbiddenProvider(),
         static_analysis_enabled=False,
     )
@@ -327,13 +352,7 @@ def test_shipped_codestrata_toml_uses_sample_js_not_petclinic() -> None:
 def test_cli_assess_config_path_without_repo(tmp_path: Path) -> None:
     config = tmp_path / "codestrata.toml"
     config.write_text(
-        f"""
-[repository]
-path = "{SAMPLE_JS.as_posix()}"
-
-[static_analysis]
-enabled = false
-""",
+        _assess_toml(repo=SAMPLE_JS, knowledge_dir=tmp_path / "knowledge"),
         encoding="utf-8",
     )
     output = tmp_path / "out"
@@ -368,13 +387,7 @@ def test_cli_repo_overrides_config(tmp_path: Path) -> None:
 
     config = tmp_path / "codestrata.toml"
     config.write_text(
-        f"""
-[repository]
-path = "{SAMPLE_JS.as_posix()}"
-
-[static_analysis]
-enabled = false
-""",
+        _assess_toml(repo=SAMPLE_JS, knowledge_dir=tmp_path / "knowledge"),
         encoding="utf-8",
     )
     output = tmp_path / "out"
@@ -398,9 +411,13 @@ enabled = false
 def test_cli_missing_repository_errors_clearly(tmp_path: Path) -> None:
     config = tmp_path / "codestrata.toml"
     config.write_text(
-        """
+        f"""
 [repository]
 url = "https://github.com/example/placeholder.git"
+
+[knowledge]
+enabled = false
+directory = "{(tmp_path / "knowledge").as_posix()}"
 
 [static_analysis]
 enabled = false

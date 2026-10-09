@@ -21,11 +21,8 @@ from codestrata.telemetry.catalog_write import (
 )
 from codestrata.telemetry.service import reset_telemetry_singletons
 
-
 ENGINE_DOCS = Path(__file__).resolve().parents[2] / "docs"
-TELEMETRY_ROOT = (
-    Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
-)
+TELEMETRY_ROOT = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
 
 
 def test_committed_artifacts_match_builder() -> None:
@@ -116,7 +113,14 @@ def test_no_catalog_or_send_cli_commands() -> None:
 
 
 def test_no_platform_imports_in_catalog_modules() -> None:
-    forbidden = ("codestrata_platform", "codestrata_platform.community_cloud","community_cloud_api", "boto3", "fastapi", "data_lake")
+    forbidden = (
+        "codestrata_platform",
+        "codestrata_platform.community_cloud",
+        "community_cloud_api",
+        "boto3",
+        "fastapi",
+        "data_lake",
+    )
     for path in TELEMETRY_ROOT.glob("catalog*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

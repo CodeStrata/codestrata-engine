@@ -247,9 +247,7 @@ def test_build_ai_readiness_intelligence_groups_and_excludes_others() -> None:
     assert intel.signal_groups
     group_ids = {group.group_id for group in intel.signal_groups}
     assert (
-        "api_boundaries" in group_ids
-        or "ai_integrations" in group_ids
-        or "tool_mcp" in group_ids
+        "api_boundaries" in group_ids or "ai_integrations" in group_ids or "tool_mcp" in group_ids
     )
     for group in intel.signal_groups:
         assert group.signals

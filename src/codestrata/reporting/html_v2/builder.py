@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Mapping
+from typing import Any, cast
 
 from codestrata import __version__ as ENGINE_VERSION
 from codestrata.domain.ai_enrichment import AiEnrichmentResult
@@ -13,10 +15,15 @@ from codestrata.domain.recommendations import RecommendationResult
 from codestrata.models import AnalysisResult
 from codestrata.models import Finding as Phase1Finding
 from codestrata.models import Recommendation as Phase1Recommendation
+from codestrata.reporting.ai_readiness.intelligence import (
+    build_ai_readiness_intelligence,
+)
 from codestrata.reporting.ai_status import (
     ai_execution_status_label,
     assessment_mode_display_label,
 )
+from codestrata.reporting.architecture import build_architecture_intelligence
+from codestrata.reporting.cloud.intelligence import build_cloud_intelligence
 from codestrata.reporting.contract.constants import REPORT_HTML_VERSION
 from codestrata.reporting.contract.identifiers import (
     build_finding_id_map,
@@ -36,17 +43,36 @@ from codestrata.reporting.customer_universe import (
     resolve_customer_findings,
     resolve_customer_recommendations,
 )
+from codestrata.reporting.dependency.intelligence import build_dependency_intelligence
+from codestrata.reporting.engineering_health.architecture_map import (
+    load_repository_graph,
+    project_architecture_map,
+)
+from codestrata.reporting.engineering_health.baseline import (
+    overlay_subjects_from_hotspots,
+    overlay_subjects_from_ownership,
+    project_attention_summary,
+    project_cochange_section,
+    project_coverage_trust,
+    project_hotspot_section,
+    project_ownership_section,
+)
+from codestrata.reporting.engineering_health.projection import (
+    apply_engineering_health_projection,
+    overlay_headline_evidence_coverage,
+    partition_assessment_heads,
+)
+from codestrata.reporting.engineering_intelligence import build_engineering_intelligence
 from codestrata.reporting.html_v2.assessment_head_grouping import (
     UNCLASSIFIED_LIMITATION,
     build_assessment_head_sections,
 )
 from codestrata.reporting.html_v2.assessment_heads import (
-    ASSESSMENT_RESULT_HEADS,
     ASSESSMENT_RESULTS_ANCHOR,
-    ASSESSMENT_RESULTS_TITLE,
+    ENGINEERING_HEALTH_HEADLINES,
     AssessmentHead,
     assessment_head_anchor,
-    assessment_head_title,
+    engineering_health_outcome_title,
 )
 from codestrata.reporting.html_v2.evidence_presentation import evidence_ref_view_from_domain
 from codestrata.reporting.html_v2.leadership import (
@@ -87,6 +113,9 @@ from codestrata.reporting.html_v2.models import (
     priority_rank,
     severity_rank,
 )
+from codestrata.reporting.modernization.intelligence import (
+    build_modernization_intelligence,
+)
 from codestrata.reporting.modernization_models import (
     AIExecutionStatus,
     AssessmentMode,
@@ -95,16 +124,6 @@ from codestrata.reporting.modernization_models import (
     ReportArtifactInput,
 )
 from codestrata.reporting.modernization_view import repository_identifier, sanitize_display_path
-from codestrata.reporting.ai_readiness.intelligence import (
-    build_ai_readiness_intelligence,
-)
-from codestrata.reporting.architecture import build_architecture_intelligence
-from codestrata.reporting.cloud.intelligence import build_cloud_intelligence
-from codestrata.reporting.dependency.intelligence import build_dependency_intelligence
-from codestrata.reporting.engineering_intelligence import build_engineering_intelligence
-from codestrata.reporting.modernization.intelligence import (
-    build_modernization_intelligence,
-)
 from codestrata.reporting.security.intelligence import build_security_intelligence
 from codestrata.reporting.technical_debt.intelligence import (
     build_technical_debt_intelligence,
@@ -244,15 +263,11 @@ def build_customer_report_document(
         priority_action_to_recommendation_view(
             action,
             related_finding_titles=tuple(
-                customer_title(finding_by_id[fid].title)
-                if fid in finding_by_id
-                else fid
+                customer_title(finding_by_id[fid].title) if fid in finding_by_id else fid
                 for fid in action.supporting_finding_ids
             ),
             supporting_recommendation_titles=tuple(
-                recommendation_by_id[rid].title
-                if rid in recommendation_by_id
-                else rid
+                recommendation_by_id[rid].title if rid in recommendation_by_id else rid
                 for rid in action.supporting_recommendation_ids
             ),
         )
@@ -266,9 +281,7 @@ def build_customer_report_document(
     evidence_index = _collect_evidence_index(findings)
     assessment_summary = assessment_summary.model_copy(
         update={
-            "recommendations_count": min(len(priority_actions), 8)
-            if priority_actions
-            else 0,
+            "recommendations_count": min(len(priority_actions), 8) if priority_actions else 0,
             "summary_text": _assessment_summary_text(
                 findings_count=len(findings),
                 recommendations_count=len(priority_actions),
@@ -293,9 +306,7 @@ def build_customer_report_document(
         EngineeringRiskThemeView(theme=theme, items=items) for theme, items in risk_themes
     )
     risk_titles = frozenset(
-        item.rsplit(" (", 1)[0]
-        for _theme, items in risk_themes
-        for item in items
+        item.rsplit(" (", 1)[0] for _theme, items in risk_themes for item in items
     )
     modernization_opportunities = build_modernization_opportunities(
         findings=findings,
@@ -322,21 +333,20 @@ def build_customer_report_document(
     roadmap_report = leadership_roadmap or report_input.roadmap_report
     assessed_packs = assessment_scope.assessed_packs if assessment_scope else ()
     not_assessed_packs = assessment_scope.not_assessed_packs if assessment_scope else ()
-    head_rows, unclassified_findings, unclassified_recommendations = (
-        build_assessment_head_sections(
-            findings=findings,
-            recommendations=recommendations,
-            priority_actions=priority_actions,
-            technologies_present=bool(technologies) or technology_inventory.fact_count > 0,
-            architecture_present=report_input.architecture_report is not None,
-            technical_debt_present=report_input.technical_debt_report is not None,
-            dependency_present=report_input.dependency_report is not None,
-            security_present=report_input.security_report is not None,
-            cloud_present=report_input.cloud_report is not None,
-            ai_readiness_present=report_input.ai_readiness_report is not None,
-            assessed_packs=assessed_packs,
-            not_assessed_packs=not_assessed_packs,
-        )
+    head_rows, unclassified_findings, unclassified_recommendations = build_assessment_head_sections(
+        findings=findings,
+        recommendations=recommendations,
+        priority_actions=priority_actions,
+        technologies_present=bool(technologies) or technology_inventory.fact_count > 0,
+        architecture_present=report_input.architecture_report is not None,
+        technical_debt_present=report_input.technical_debt_report is not None,
+        dependency_present=report_input.dependency_report is not None,
+        security_present=report_input.security_report is not None,
+        cloud_present=report_input.cloud_report is not None,
+        ai_readiness_present=report_input.ai_readiness_report is not None,
+        testing_present=report_input.testing_report is not None,
+        assessed_packs=assessed_packs,
+        not_assessed_packs=not_assessed_packs,
     )
     architecture_intelligence = build_architecture_intelligence(
         report_input.architecture_report,
@@ -382,9 +392,12 @@ def build_customer_report_document(
                         _enrich_dependency_intelligence_head(
                             _enrich_technical_debt_intelligence_head(
                                 _enrich_architecture_intelligence_head(
-                                    _enrich_technology_inventory_head(
-                                        AssessmentHeadSectionView(**row),
-                                        technology_inventory,
+                                    _enrich_quality_intelligence_head(
+                                        _enrich_technology_inventory_head(
+                                            AssessmentHeadSectionView(**row),
+                                            technology_inventory,
+                                        ),
+                                        report_input.testing_report,
                                     ),
                                     architecture_intelligence,
                                 ),
@@ -409,6 +422,56 @@ def build_customer_report_document(
         technologies_present=bool(technologies) or technology_inventory.fact_count > 0,
         assessed_packs=assessed_packs,
         not_assessed_packs=not_assessed_packs,
+    )
+    analysis_metadata = getattr(analysis, "metadata", None)
+    assessment_heads = overlay_headline_evidence_coverage(
+        assessment_heads,
+        metadata=analysis_metadata if isinstance(analysis_metadata, Mapping) else None,
+        architecture_report=report_input.architecture_report,
+    )
+    assessment_heads = apply_engineering_health_projection(assessment_heads)
+    headline_outcomes, supporting_heads, appendix_heads = partition_assessment_heads(
+        assessment_heads
+    )
+    analysis_metadata = getattr(analysis, "metadata", None)
+    metadata_map = analysis_metadata if isinstance(analysis_metadata, dict) else {}
+    hotspot_section = project_hotspot_section(metadata_map)
+    ownership_section = project_ownership_section(metadata_map)
+    cochange_section = project_cochange_section(metadata_map)
+    coverage_trust = project_coverage_trust(
+        metadata_map,
+        engine_version=ENGINE_VERSION,
+        report_version=REPORT_HTML_VERSION,
+    )
+    finding_subjects: dict[str, list[str]] = {}
+    evidence_subjects: dict[str, list[str]] = {}
+    for finding in findings:
+        finding_id = str(finding.finding_id)
+        for node_id in finding.affected_nodes:
+            finding_subjects.setdefault(str(node_id), []).append(finding_id)
+        for ev in finding.evidence:
+            if ev.path:
+                finding_subjects.setdefault(str(ev.path), []).append(finding_id)
+            if ev.node_id:
+                finding_subjects.setdefault(str(ev.node_id), []).append(finding_id)
+        for ev_ref in finding.evidence_refs:
+            evidence_id = str(ev_ref.evidence_id)
+            if ev_ref.path:
+                evidence_subjects.setdefault(str(ev_ref.path), []).append(evidence_id)
+            for node_id in ev_ref.graph_node_ids:
+                evidence_subjects.setdefault(str(node_id), []).append(evidence_id)
+    architecture_map = project_architecture_map(
+        load_repository_graph(metadata_map),
+        hotspot_subjects=overlay_subjects_from_hotspots(hotspot_section),
+        ownership_subjects=overlay_subjects_from_ownership(ownership_section),
+        finding_subjects={key: tuple(values) for key, values in finding_subjects.items()},
+        evidence_subjects={key: tuple(values) for key, values in evidence_subjects.items()},
+    )
+    attention_summary = project_attention_summary(
+        headline_outcomes=headline_outcomes,
+        leadership_verdict=leadership_verdict,
+        key_takeaways=key_takeaways,
+        priority_action_ids=tuple(item.recommendation_id for item in priority_actions),
     )
     engineering_intelligence = build_engineering_intelligence(
         assessment_heads=assessment_heads,
@@ -459,9 +522,18 @@ def build_customer_report_document(
         modernization_opportunities=modernization_opportunities,
         assessment_scope=assessment_scope,
         assessment_heads=assessment_heads,
+        headline_outcomes=headline_outcomes,
+        supporting_heads=supporting_heads,
+        appendix_heads=appendix_heads,
         unclassified_findings=unclassified_findings,
         unclassified_recommendations=unclassified_recommendations,
         unclassified_limitation=UNCLASSIFIED_LIMITATION,
+        attention_summary=attention_summary,
+        architecture_map=architecture_map,
+        engineering_hotspots=hotspot_section,
+        ownership_concentration=ownership_section,
+        temporal_cochange=cochange_section,
+        coverage_trust=coverage_trust,
         outline=(),  # filled below once presence is known
     )
     outline = _build_outline(document)
@@ -475,48 +547,44 @@ def build_html_report_view_model(report_input: ModernizationReportInput) -> Cust
 
 
 def _build_outline(document: CustomerReportDocument) -> tuple[ReportOutlineEntry, ...]:
-    """Stable TOC entries for the Epic 3 assessment-head report hierarchy.
+    """R2 baseline TOC: attention, four outcomes, map, M22–M26, actions, trust."""
 
-    Entries are presence-driven: an outline entry is emitted only when the
-    renderer emits the matching section, so contents links never resolve to a
-    missing anchor.
-    """
-
-    entries: list[ReportOutlineEntry] = []
-    if (document.leadership_verdict or "").strip():
-        entries.append(
-            ReportOutlineEntry(section_id="leadership-verdict", title="Leadership Verdict")
-        )
-    entries.append(
-        ReportOutlineEntry(section_id="executive-summary", title="Executive Summary")
-    )
-    entries.extend([
-        ReportOutlineEntry(
-            section_id=assessment_head_anchor(AssessmentHead.ENGINEERING_INTELLIGENCE),
-            title=assessment_head_title(AssessmentHead.ENGINEERING_INTELLIGENCE),
-        ),
-        ReportOutlineEntry(section_id="key-takeaways", title="Key Takeaways"),
-        ReportOutlineEntry(section_id="priority-actions", title="Priority Actions"),
-        ReportOutlineEntry(section_id="engineering-risks", title="Engineering Risks"),
+    entries: list[ReportOutlineEntry] = [
+        ReportOutlineEntry(section_id="attention-first", title="What deserves attention now"),
         ReportOutlineEntry(
             section_id=ASSESSMENT_RESULTS_ANCHOR,
-            title=ASSESSMENT_RESULTS_TITLE,
+            title="Current outcomes",
         ),
-    ])
-    rendered_heads = {section.head for section in document.assessment_heads}
+    ]
+    rendered_heads = {section.head for section in document.headline_outcomes}
+    if not rendered_heads:
+        rendered_heads = {section.head for section in document.assessment_heads}
     head_anchors = {
         section.head: (section.anchor or assessment_head_anchor(section.head))
-        for section in document.assessment_heads
+        for section in (*document.headline_outcomes, *document.assessment_heads)
     }
-    for head in ASSESSMENT_RESULT_HEADS:
+    for head in ENGINEERING_HEALTH_HEADLINES:
         if head.value not in rendered_heads:
             continue
         entries.append(
             ReportOutlineEntry(
                 section_id=head_anchors.get(head.value) or assessment_head_anchor(head),
-                title=assessment_head_title(head),
+                title=engineering_health_outcome_title(head),
             )
         )
+    entries.extend(
+        [
+            ReportOutlineEntry(section_id="architecture-map", title="Architecture Map"),
+            ReportOutlineEntry(section_id="engineering-hotspots", title="Engineering Hotspots"),
+            ReportOutlineEntry(
+                section_id="ownership-concentration",
+                title="Ownership concentration",
+            ),
+            ReportOutlineEntry(section_id="temporal-co-change", title="Temporal co-change"),
+            ReportOutlineEntry(section_id="priority-actions", title="Priority Actions"),
+            ReportOutlineEntry(section_id="coverage-and-trust", title="Coverage & Trust"),
+        ]
+    )
     if document.roadmap_report is not None:
         entries.append(
             ReportOutlineEntry(
@@ -531,9 +599,7 @@ def _build_outline(document: CustomerReportDocument) -> tuple[ReportOutlineEntry
                 title="Optional AI Enhancements",
             )
         )
-    entries.append(
-        ReportOutlineEntry(section_id="technical-appendix", title="Technical Appendix")
-    )
+    entries.append(ReportOutlineEntry(section_id="technical-appendix", title="Technical Appendix"))
     return tuple(entries)
 
 
@@ -713,9 +779,7 @@ def _customer_finding_view(
     labels = correlation_labels or {}
     related_ids = tuple(item.correlated_finding_ids)
     related_titles = tuple(titles.get(fid, fid) for fid in related_ids)
-    related_labels = tuple(
-        labels.get(fid, "Related repository condition") for fid in related_ids
-    )
+    related_labels = tuple(labels.get(fid, "Related repository condition") for fid in related_ids)
     base_kwargs = {
         "evidence_refs": tuple(sanitized_refs),
         "primary_evidence_id": item.primary_evidence_id,
@@ -753,7 +817,17 @@ def _customer_finding_view(
             for row in item.evidence
             if isinstance(row, dict)
         ),
-        **base_kwargs,
+        evidence_refs=tuple(sanitized_refs),
+        primary_evidence_id=item.primary_evidence_id,
+        synthesized_from_evidence_ids=tuple(item.synthesized_from_evidence_ids),
+        evidence_completeness=item.evidence_completeness or "legacy",
+        limitations=tuple(item.limitations),
+        finding_confidence_level=_finding_confidence_level(item),
+        rule_confidence_level=_rule_confidence_level(item),
+        correlated_finding_ids=related_ids,
+        correlated_finding_titles=related_titles,
+        correlation_relationship_labels=related_labels,
+        severity_basis_labels=_severity_basis_labels(item),
     )
 
 
@@ -795,6 +869,7 @@ def _customer_recommendation_view(
         "effort": item.effort,
         "risk": item.risk,
         "dependencies": tuple(item.dependencies),
+        "priority": item.priority,
         "priority_score": item.priority_score,
         "presentation_bucket": item.presentation_bucket,
     }
@@ -831,7 +906,19 @@ def _customer_recommendation_view(
             for row in item.evidence
             if isinstance(row, dict)
         ),
-        **trace_kwargs,
+        related_finding_ids=finding_ids,
+        related_finding_titles=related_titles,
+        primary_finding_id=primary,
+        recommendation_type=item.recommendation_type or "legacy",
+        evidence_completeness=item.evidence_completeness or "legacy",
+        limitations=limitations,
+        recommendation_confidence_level=_recommendation_confidence_level(item),
+        priority_basis_labels=_priority_basis_labels(item),
+        effort=item.effort,
+        risk=item.risk,
+        dependencies=tuple(item.dependencies),
+        priority_score=item.priority_score,
+        presentation_bucket=item.presentation_bucket,
     )
 
 
@@ -932,9 +1019,7 @@ def _phase3_finding_view(finding: Phase3Finding) -> FindingView:
             for item in finding.evidence
         ),
         finding_confidence_level=finding.finding_confidence.level.value,
-        rule_confidence_level=(
-            str(finding.metadata.get("rule_confidence_level") or "") or None
-        ),
+        rule_confidence_level=(str(finding.metadata.get("rule_confidence_level") or "") or None),
     )
 
 
@@ -1005,9 +1090,7 @@ def _phase1_recommendation_view(
         rationale=_safe_text(item.rationale or item.description),
         priority=str(getattr(item.priority, "value", item.priority)),
         category=str(getattr(item.category, "value", item.category)),
-        related_finding_ids=remap_related_finding_ids(
-            item.related_finding_ids, id_map
-        ),
+        related_finding_ids=remap_related_finding_ids(item.related_finding_ids, id_map),
         affected_nodes=(),
         actions=tuple(
             RecommendationActionView(
@@ -1110,7 +1193,7 @@ def _technology_items(analysis: AnalysisResult) -> tuple[TechnologyItemView, ...
 
 def _enrich_technology_inventory_head(
     section: AssessmentHeadSectionView,
-    inventory,
+    inventory: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Slice 3.2 inventory status/limitations; confidence is canonical."""
 
@@ -1127,9 +1210,7 @@ def _enrich_technology_inventory_head(
         "legacy_inventory": "legacy_assessment",
     }
     status = status_map.get(inventory.status, section.status)
-    limitations = tuple(
-        dict.fromkeys((*section.limitations, *inventory.limitations))
-    )
+    limitations = tuple(dict.fromkeys((*section.limitations, *inventory.limitations)))
     updated = section.model_copy(
         update={
             "status": status,
@@ -1149,10 +1230,13 @@ def _enrich_technology_inventory_head(
         "not_available": "unavailable",
         "legacy_assessment": "legacy",
     }.get(status, "unavailable")
-    return apply_canonical_head_confidence(
-        updated,
-        coverage_state=coverage,
-        inventory_confidence=getattr(inventory, "confidence", None),
+    return cast(
+        AssessmentHeadSectionView,
+        apply_canonical_head_confidence(
+            updated,
+            coverage_state=coverage,
+            inventory_confidence=getattr(inventory, "confidence", None),
+        ),
     )
 
 
@@ -1169,7 +1253,7 @@ _PACK_STATUS_MAP = {
 
 def _finalize_pack_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
     *,
     placeholder: str | None,
 ) -> AssessmentHeadSectionView:
@@ -1201,16 +1285,61 @@ def _finalize_pack_head(
         "failed": "unavailable",
         "not_requested": "unavailable",
     }.get(str(intelligence.status), None)
-    return apply_canonical_head_confidence(
-        updated,
-        pack_assessment_status=str(intelligence.status),
-        coverage_state=coverage,
+    return cast(
+        AssessmentHeadSectionView,
+        apply_canonical_head_confidence(
+            updated,
+            pack_assessment_status=str(intelligence.status),
+            coverage_state=coverage,
+        ),
     )
+
+
+def _enrich_quality_intelligence_head(
+    section: AssessmentHeadSectionView,
+    testing_report: Any,
+) -> AssessmentHeadSectionView:
+    """Project existing testing/quality evidence onto the Quality headline."""
+
+    if testing_report is None:
+        return section
+    if section.head != AssessmentHead.QUALITY_INTELLIGENCE.value:
+        return section
+    limitations = []
+    for item in getattr(testing_report, "limitations", ()) or ():
+        summary = getattr(item, "summary", None)
+        text = str(summary if summary is not None else item).strip()
+        if text:
+            limitations.append(text)
+    finding_count = 0
+    inventory = getattr(testing_report, "inventory_summary", None)
+    if inventory is not None:
+        finding_count = int(getattr(inventory, "finding_count", 0) or 0)
+    recommendation_count = int(getattr(testing_report, "recommendations_total", 0) or 0)
+    intelligence = type(
+        "_QualityPackView",
+        (),
+        {
+            "status": str(getattr(testing_report, "status", "") or ""),
+            "status_label": str(getattr(testing_report, "status_label", "") or ""),
+            "limitations": tuple(limitations),
+            "finding_count": finding_count,
+            "recommendation_count": recommendation_count,
+        },
+    )()
+    placeholder = None
+    if intelligence.status in {"disabled", "not_requested"}:
+        placeholder = "Quality analysis was not enabled for this assessment."
+    elif intelligence.status in {"not_applicable", "failed"}:
+        placeholder = "Quality assessment is not available for this repository."
+    elif finding_count == 0 and intelligence.status == "insufficient_evidence":
+        placeholder = "Quality coverage was partial; conclusions could not be established safely."
+    return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_architecture_intelligence_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Slice 3.3 Architecture Intelligence status/limitations; confidence is canonical."""
 
@@ -1224,13 +1353,15 @@ def _enrich_architecture_intelligence_head(
     elif intelligence.status in {"not_applicable", "failed"}:
         placeholder = "Architecture assessment is not available for this repository."
     elif intelligence.finding_count == 0 and intelligence.status == "insufficient_evidence":
-        placeholder = "Architecture coverage was partial; conclusions could not be established safely."
+        placeholder = (
+            "Architecture coverage was partial; conclusions could not be established safely."
+        )
     return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_technical_debt_intelligence_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Technical Debt status/limitations; confidence is canonical."""
 
@@ -1245,15 +1376,14 @@ def _enrich_technical_debt_intelligence_head(
         placeholder = "Technical debt assessment is not available for this repository."
     elif intelligence.finding_count == 0 and intelligence.status == "insufficient_evidence":
         placeholder = (
-            "Technical debt coverage was partial; conclusions could not be "
-            "established safely."
+            "Technical debt coverage was partial; conclusions could not be established safely."
         )
     return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_dependency_intelligence_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Dependency status/limitations; confidence is canonical."""
 
@@ -1268,15 +1398,14 @@ def _enrich_dependency_intelligence_head(
         placeholder = "Dependency assessment is not available for this repository."
     elif intelligence.finding_count == 0 and intelligence.status == "insufficient_evidence":
         placeholder = (
-            "Dependency coverage was partial; conclusions could not be "
-            "established safely."
+            "Dependency coverage was partial; conclusions could not be established safely."
         )
     return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_security_intelligence_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Security status/limitations; confidence is canonical."""
 
@@ -1290,16 +1419,13 @@ def _enrich_security_intelligence_head(
     elif intelligence.status in {"not_applicable", "failed"}:
         placeholder = "Security assessment is not available for this repository."
     elif intelligence.finding_count == 0 and intelligence.status == "insufficient_evidence":
-        placeholder = (
-            "Security coverage was partial; conclusions could not be "
-            "established safely."
-        )
+        placeholder = "Security coverage was partial; conclusions could not be established safely."
     return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_cloud_readiness_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Cloud Readiness status/limitations; confidence is canonical."""
 
@@ -1313,16 +1439,13 @@ def _enrich_cloud_readiness_head(
     elif intelligence.status in {"not_applicable", "failed"}:
         placeholder = "Cloud assessment is not available for this repository."
     elif intelligence.finding_count == 0 and intelligence.status == "insufficient_evidence":
-        placeholder = (
-            "Cloud coverage was partial; conclusions could not be "
-            "established safely."
-        )
+        placeholder = "Cloud coverage was partial; conclusions could not be established safely."
     return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_ai_readiness_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay AI Readiness status/limitations; confidence is canonical."""
 
@@ -1337,15 +1460,14 @@ def _enrich_ai_readiness_head(
         placeholder = "AI readiness assessment is not available for this repository."
     elif intelligence.finding_count == 0 and intelligence.status == "insufficient_evidence":
         placeholder = (
-            "AI readiness coverage was partial; conclusions could not be "
-            "established safely."
+            "AI readiness coverage was partial; conclusions could not be established safely."
         )
     return _finalize_pack_head(section, intelligence, placeholder=placeholder)
 
 
 def _enrich_modernization_assessment_head(
     section: AssessmentHeadSectionView,
-    intelligence,
+    intelligence: Any,
 ) -> AssessmentHeadSectionView:
     """Overlay Modernization status/limitations; confidence recomputed later."""
 
@@ -1354,9 +1476,7 @@ def _enrich_modernization_assessment_head(
     if section.head != AssessmentHead.MODERNIZATION_ASSESSMENT.value:
         return section
     retained = tuple(
-        note
-        for note in section.limitations
-        if "scheduled for a later release" not in note.lower()
+        note for note in section.limitations if "scheduled for a later release" not in note.lower()
     )
     limitations = tuple(dict.fromkeys((*retained, *intelligence.limitations)))
     placeholder = None
@@ -1413,10 +1533,10 @@ def _apply_modernization_head_confidence(
 def _attach_assessment_coverage(
     sections: tuple[AssessmentHeadSectionView, ...],
     *,
-    report_input,
+    report_input: Any,
     technologies_present: bool,
-    assessed_packs,
-    not_assessed_packs,
+    assessed_packs: Any,
+    not_assessed_packs: Any,
 ) -> tuple[AssessmentHeadSectionView, ...]:
     """Attach canonical AssessmentCoverage and refresh head confidence from it."""
 
@@ -1431,11 +1551,12 @@ def _attach_assessment_coverage(
         AssessmentCoverage,
     )
 
-    def _dump(section) -> dict | None:
+    def _dump(section: Any) -> dict[str, Any] | None:
         if section is None:
             return None
         if hasattr(section, "model_dump"):
-            return section.model_dump(mode="json")
+            dumped = section.model_dump(mode="json")
+            return dumped if isinstance(dumped, dict) else None
         if isinstance(section, dict):
             return section
         return None
@@ -1472,14 +1593,16 @@ def _attach_assessment_coverage(
                     if section.status == "not_enabled"
                     else "failed"
                     if section.status == "not_available"
-                    else "succeeded"
-                    if section.status == "assessed"
-                    else "partially_succeeded"
-                    if section.status == "partially_assessed"
+                    else "insufficient_evidence"
+                    if section.status in {"assessed", "partially_assessed", "legacy_assessment"}
                     else None
                 ),
             )
-            payload = coverage.model_dump(mode="json") if isinstance(coverage, AssessmentCoverage) else None
+            payload = (
+                coverage.model_dump(mode="json")
+                if isinstance(coverage, AssessmentCoverage)
+                else None
+            )
         updated = section.model_copy(update={"assessment_coverage": payload})
         out.append(
             apply_canonical_head_confidence(
@@ -1489,7 +1612,6 @@ def _attach_assessment_coverage(
         )
     # Re-bound modernization after contributor confidence refresh.
     return _apply_modernization_head_confidence(tuple(out))
-
 
 
 def _count_sorted(

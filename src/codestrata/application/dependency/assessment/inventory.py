@@ -125,9 +125,7 @@ def enrich_finding_reference(finding: Finding) -> DependencyFindingReference:
             ids.append(item.source_id)
     evidence_ids = tuple(sorted(set(ids)))
     scope = tuple(item.path for item in finding.evidence if item.path) or tuple(
-        part.strip()
-        for part in finding.metadata.get("subject_keys", "").split(",")
-        if part.strip()
+        part.strip() for part in finding.metadata.get("subject_keys", "").split(",") if part.strip()
     )
     return DependencyFindingReference(
         finding_id=finding.id,
@@ -168,9 +166,7 @@ def _role_finding_inventory(
         finding_count=len(subset),
         unique_manifest_count=len({item.path for item in subset if item.path}),
         rule_counts=dict(sorted(Counter(item.rule_id for item in subset).items())),
-        severity_counts=dict(
-            sorted(Counter(item.severity for item in subset).items())
-        ),
+        severity_counts=dict(sorted(Counter(item.severity for item in subset).items())),
     )
 
 
@@ -199,22 +195,12 @@ def _role_declaration_inventory(
         source_role=role,
         declaration_count=len(subset),
         active_declaration_count=sum(1 for item in subset if is_active_declaration(item)),
-        dependency_management_count=sum(
-            1 for item in subset if is_management_declaration(item)
-        ),
+        dependency_management_count=sum(1 for item in subset if is_management_declaration(item)),
         plugin_count=sum(1 for item in subset if is_plugin_declaration(item)),
-        test_or_development_count=sum(
-            1 for item in subset if is_test_or_development(item)
-        ),
-        local_or_editable_count=sum(
-            1 for item in subset if item.is_local_path or item.is_editable
-        ),
-        kind_counts=dict(
-            sorted(Counter(item.declaration_kind.value for item in subset).items())
-        ),
-        ecosystem_counts=dict(
-            sorted(Counter(item.ecosystem.value for item in subset).items())
-        ),
+        test_or_development_count=sum(1 for item in subset if is_test_or_development(item)),
+        local_or_editable_count=sum(1 for item in subset if item.is_local_path or item.is_editable),
+        kind_counts=dict(sorted(Counter(item.declaration_kind.value for item in subset).items())),
+        ecosystem_counts=dict(sorted(Counter(item.ecosystem.value for item in subset).items())),
     )
 
 
@@ -223,13 +209,9 @@ def build_declaration_inventory(
 ) -> DependencyDeclarationInventory:
     declarations = evidence.declarations if evidence is not None else ()
     return DependencyDeclarationInventory(
-        production=_role_declaration_inventory(
-            DependencySourceRole.PRODUCTION, declarations
-        ),
+        production=_role_declaration_inventory(DependencySourceRole.PRODUCTION, declarations),
         test=_role_declaration_inventory(DependencySourceRole.TEST, declarations),
-        unknown=_role_declaration_inventory(
-            DependencySourceRole.UNKNOWN, declarations
-        ),
+        unknown=_role_declaration_inventory(DependencySourceRole.UNKNOWN, declarations),
         total_declaration_count=len(declarations),
     )
 
@@ -241,8 +223,7 @@ def build_evidence_summary(
         return DependencyEvidenceSummary()
     declarations = evidence.declarations
     role_counts = Counter(
-        map_source_role(item.classification, path=item.source.path).value
-        for item in declarations
+        map_source_role(item.classification, path=item.source.path).value for item in declarations
     )
     unsupported_resolution = sum(
         1
@@ -253,17 +234,13 @@ def build_evidence_summary(
     unsupported_messages: set[str] = set()
     for manifest in evidence.manifests:
         for item in (*manifest.unsupported_constructs, *manifest.diagnostics):
-            if (
-                "unsupported_version_resolution" in item
-                or "version_resolution_unsupported" in item
-            ):
+            if "unsupported_version_resolution" in item or "version_resolution_unsupported" in item:
                 unsupported_messages.add(item)
     unsupported_resolution += len(unsupported_messages)
     proven = sum(
         1
         for item in declarations
-        if item.version_resolution_status
-        is DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
+        if item.version_resolution_status is DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
     )
     return DependencyEvidenceSummary(
         schema_version=evidence.schema_version or DEPENDENCY_EVIDENCE_SCHEMA_VERSION,
@@ -286,22 +263,16 @@ def build_evidence_summary(
         local_or_editable_count=sum(
             1 for item in declarations if item.is_local_path or item.is_editable
         ),
-        production_declaration_count=role_counts.get(
-            DependencySourceRole.PRODUCTION.value, 0
-        ),
+        production_declaration_count=role_counts.get(DependencySourceRole.PRODUCTION.value, 0),
         test_declaration_count=role_counts.get(DependencySourceRole.TEST.value, 0),
-        unknown_declaration_count=role_counts.get(
-            DependencySourceRole.UNKNOWN.value, 0
-        ),
+        unknown_declaration_count=role_counts.get(DependencySourceRole.UNKNOWN.value, 0),
     )
 
 
 def _manifest_kind_counts(
     declarations: Sequence[DependencyDeclarationEvidence],
 ) -> dict[str, int]:
-    return dict(
-        sorted(Counter(item.declaration_kind.value for item in declarations).items())
-    )
+    return dict(sorted(Counter(item.declaration_kind.value for item in declarations).items()))
 
 
 def build_manifest_inventory(
@@ -335,8 +306,7 @@ def build_manifest_inventory(
         proven = sum(
             1
             for item in decls
-            if item.version_resolution_status
-            is DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
+            if item.version_resolution_status is DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
         )
         diagnostics = tuple(
             sorted(
@@ -359,23 +329,17 @@ def build_manifest_inventory(
                 parse_status=manifest.parse_status.value,
                 evidence_id=manifest.evidence_id,
                 declaration_count=len(decls),
-                active_declaration_count=sum(
-                    1 for item in decls if is_active_declaration(item)
-                ),
+                active_declaration_count=sum(1 for item in decls if is_active_declaration(item)),
                 dependency_management_count=sum(
                     1 for item in decls if is_management_declaration(item)
                 ),
                 plugin_count=sum(1 for item in decls if is_plugin_declaration(item)),
-                test_or_development_count=sum(
-                    1 for item in decls if is_test_or_development(item)
-                ),
+                test_or_development_count=sum(1 for item in decls if is_test_or_development(item)),
                 kind_counts=_manifest_kind_counts(decls),
                 unsupported_construct_count=len(manifest.unsupported_constructs),
                 proven_unresolved_count=proven,
                 unsupported_resolution_count=unsupported_resolution,
-                hygiene_finding_ids=tuple(
-                    sorted({item.finding_id for item in findings})
-                ),
+                hygiene_finding_ids=tuple(sorted({item.finding_id for item in findings})),
                 diagnostic_references=diagnostics,
             )
         )
@@ -427,9 +391,7 @@ def build_aggregation_inventory(
         by_resolution[item.version_resolution_status.value] += 1
     return DependencyAggregationInventory(
         by_ecosystem=_buckets_from_counter(by_ecosystem, prefix="ecosystem"),
-        by_manifest_type=_buckets_from_counter(
-            by_manifest_type, prefix="manifest_type"
-        ),
+        by_manifest_type=_buckets_from_counter(by_manifest_type, prefix="manifest_type"),
         by_declaration_kind=_buckets_from_counter(by_kind, prefix="kind"),
         by_source_role=_buckets_from_counter(by_role, prefix="source_role"),
         by_version_resolution_status=_buckets_from_counter(
@@ -470,19 +432,11 @@ def build_hotspot_inventory(
     for entry in manifest_inventory.entries:
         findings = findings_by_path.get(entry.path, [])
         identities = tuple(
-            sorted(
-                {
-                    item.normalized_identity
-                    for item in findings
-                    if item.normalized_identity
-                }
-            )
+            sorted({item.normalized_identity for item in findings if item.normalized_identity})
         )
         hotspots.append(
             DependencyHotspot(
-                hotspot_id=build_hotspot_id(
-                    path=entry.path, source_role=entry.source_role.value
-                ),
+                hotspot_id=build_hotspot_id(path=entry.path, source_role=entry.source_role.value),
                 manifest_inventory_id=entry.manifest_inventory_id,
                 path=entry.path,
                 source_role=entry.source_role,
@@ -505,18 +459,10 @@ def build_hotspot_inventory(
     ordered = tuple(sorted(hotspots, key=_hotspot_sort_key))
     return DependencyHotspotInventory(
         production=tuple(
-            item
-            for item in ordered
-            if item.source_role is DependencySourceRole.PRODUCTION
+            item for item in ordered if item.source_role is DependencySourceRole.PRODUCTION
         ),
-        test=tuple(
-            item for item in ordered if item.source_role is DependencySourceRole.TEST
-        ),
-        unknown=tuple(
-            item
-            for item in ordered
-            if item.source_role is DependencySourceRole.UNKNOWN
-        ),
+        test=tuple(item for item in ordered if item.source_role is DependencySourceRole.TEST),
+        unknown=tuple(item for item in ordered if item.source_role is DependencySourceRole.UNKNOWN),
     )
 
 
@@ -528,9 +474,7 @@ def _diagnostic_id(*, code: str, path: str, message: str) -> str:
 
 def _classify_diagnostic_code(text: str) -> str:
     lowered = text.lower()
-    if "unsupported_version_resolution" in lowered or (
-        "version_resolution_unsupported" in lowered
-    ):
+    if "unsupported_version_resolution" in lowered or ("version_resolution_unsupported" in lowered):
         return "unsupported_gradle_resolution"
     if ":dynamic:" in lowered:
         return "unsupported_dynamic_gradle"
@@ -604,17 +548,11 @@ def build_diagnostics_summary(
     return DependencyDiagnosticsSummary(
         records=ordered,
         production_count=sum(
-            1
-            for item in ordered
-            if item.source_role is DependencySourceRole.PRODUCTION
+            1 for item in ordered if item.source_role is DependencySourceRole.PRODUCTION
         ),
-        test_count=sum(
-            1 for item in ordered if item.source_role is DependencySourceRole.TEST
-        ),
+        test_count=sum(1 for item in ordered if item.source_role is DependencySourceRole.TEST),
         unknown_count=sum(
-            1
-            for item in ordered
-            if item.source_role is DependencySourceRole.UNKNOWN
+            1 for item in ordered if item.source_role is DependencySourceRole.UNKNOWN
         ),
     )
 
@@ -648,8 +586,7 @@ def production_manifests_usable(
     production = [
         item
         for item in evidence.manifests
-        if map_source_role(item.classification, path=item.path)
-        is DependencySourceRole.PRODUCTION
+        if map_source_role(item.classification, path=item.path) is DependencySourceRole.PRODUCTION
     ]
     if not production:
         # No production manifests — usable only if any supported manifests exist

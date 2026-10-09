@@ -57,9 +57,7 @@ _STANDARD: tuple[tuple[RepositorySensitiveLimitationCategory, str], ...] = (
 def standard_limitations() -> tuple[RepositorySensitiveLimitation, ...]:
     return tuple(
         RepositorySensitiveLimitation(
-            limitation_id=make_limitation_id(
-                category=category.value, summary=summary
-            ),
+            limitation_id=make_limitation_id(category=category.value, summary=summary),
             category=category,
             summary=summary,
         )

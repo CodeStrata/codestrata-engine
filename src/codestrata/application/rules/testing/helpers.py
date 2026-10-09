@@ -22,8 +22,8 @@ from codestrata.domain.evidence.repository_testing.models import (
 )
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -31,8 +31,8 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
-from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.testing.ids import (
     PACK_ID,
     PACK_VERSION,
@@ -117,9 +117,7 @@ _FRAMEWORK_LANGUAGES: dict[TestFrameworkFamily, frozenset[str]] = {
     TestFrameworkFamily.MSTEST: frozenset({"csharp", "fsharp", "vb"}),
 }
 
-_JUNIT_FAMILY = frozenset(
-    {TestFrameworkFamily.JUNIT, TestFrameworkFamily.JUNIT_JUPITER}
-)
+_JUNIT_FAMILY = frozenset({TestFrameworkFamily.JUNIT, TestFrameworkFamily.JUNIT_JUPITER})
 
 _RECOMMENDATIONS: dict[str, str] = {
     RULE_DISABLED_OR_SKIPPED: (
@@ -210,9 +208,7 @@ def make_metadata(
         ),
         tags=("testing", PACK_ID, "hygiene", "dimension:testing"),
         remediation_summary=remediation,
-        documentation_reference=(
-            "docs/analysis-intelligence/shared-rule-platform.md"
-        ),
+        documentation_reference=("docs/analysis-intelligence/shared-rule-platform.md"),
         enabled_by_default=True,
         experimental=False,
         requires_enterprise_context=False,
@@ -226,8 +222,7 @@ def make_metadata(
 def recommendation_for(rule_id: str) -> str:
     return _RECOMMENDATIONS.get(
         rule_id,
-        "Review the repository-testing evidence fact and remediate the "
-        "hygiene condition.",
+        "Review the repository-testing evidence fact and remediate the hygiene condition.",
     )
 
 
@@ -383,9 +378,7 @@ def framework_family_key(framework: TestFrameworkFamily) -> str:
     return framework.value
 
 
-def frameworks_equivalent(
-    left: TestFrameworkFamily, right: TestFrameworkFamily
-) -> bool:
+def frameworks_equivalent(left: TestFrameworkFamily, right: TestFrameworkFamily) -> bool:
     return framework_family_key(left) == framework_family_key(right)
 
 
@@ -421,10 +414,7 @@ def is_considered_candidate(item: TestFileCandidateEvidence) -> bool:
 
 
 def is_unconfirmed_candidate(item: TestFileCandidateEvidence) -> bool:
-    return (
-        item.confirmation_level
-        is not EvidenceConfirmationLevel.STRUCTURALLY_CONFIRMED
-    )
+    return item.confirmation_level is not EvidenceConfirmationLevel.STRUCTURALLY_CONFIRMED
 
 
 def is_declared_test_framework(item: FrameworkFactEvidence) -> bool:

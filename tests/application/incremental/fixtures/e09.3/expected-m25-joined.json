@@ -1,0 +1,14 @@
+{
+  "m25_file_alpha_id": "repo:demo:file:alpha.txt",
+  "m25_file_beta_id": "repo:demo:file:beta.txt",
+  "repository_largest_share_serialized": "0.777778",
+  "repository_contributors_to_50pct": 1,
+  "repository_attributable_lines": 9,
+  "organizational_bus_factor": false,
+  "productivity_claim": false,
+  "notes_required": [
+    "not_organizational_bus_factor",
+    "not_productivity_or_blame",
+    "change_concentration_observation_only"
+  ]
+}

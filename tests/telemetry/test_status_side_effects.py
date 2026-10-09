@@ -17,9 +17,7 @@ from codestrata.telemetry.service import (
 from codestrata.telemetry.status import build_privacy_first_telemetry_status
 
 
-def test_A_B_C_D_E_status_reports_persisted_preference(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_A_B_C_D_E_status_reports_persisted_preference(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     (home / "telemetry.json").write_text(
@@ -38,11 +36,7 @@ def test_A_B_C_D_E_status_reports_persisted_preference(
     )
     (home / "queue").mkdir()
     (home / "queue" / "event.json").write_text("{}", encoding="utf-8")
-    before = {
-        str(p.relative_to(home)): p.read_bytes()
-        for p in home.rglob("*")
-        if p.is_file()
-    }
+    before = {str(p.relative_to(home)): p.read_bytes() for p in home.rglob("*") if p.is_file()}
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
     monkeypatch.setenv(
         "CODESTRATA_TELEMETRY_ENDPOINT",
@@ -53,9 +47,7 @@ def test_A_B_C_D_E_status_reports_persisted_preference(
     with patch("codestrata.telemetry.service.get_legacy_telemetry_service") as legacy:
         with patch("codestrata.telemetry.transport.send_payload") as send:
             with patch("codestrata.telemetry.identity.read_installation_id") as read_id:
-                with patch(
-                    "codestrata.telemetry.identity.ensure_installation_id"
-                ) as ensure_id:
+                with patch("codestrata.telemetry.identity.ensure_installation_id") as ensure_id:
                     runner = CliRunner()
                     result = runner.invoke(app, ["telemetry", "status"])
                     legacy.assert_not_called()
@@ -73,17 +65,11 @@ def test_A_B_C_D_E_status_reports_persisted_preference(
     assert "enabled by default: yes" not in out.lower()
     assert "queue_depth" not in out
     assert "endpoint_configured" not in out
-    after = {
-        str(p.relative_to(home)): p.read_bytes()
-        for p in home.rglob("*")
-        if p.is_file()
-    }
+    after = {str(p.relative_to(home)): p.read_bytes() for p in home.rglob("*") if p.is_file()}
     assert after == before
 
 
-def test_P_Q_malformed_preference_is_treated_as_undecided(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_P_Q_malformed_preference_is_treated_as_undecided(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     (home / "telemetry.json").write_text("{not-json", encoding="utf-8")
@@ -118,9 +104,7 @@ def test_H_I_J_no_prompt_no_stdin_no_transmit(tmp_path: Path, monkeypatch) -> No
     assert "Allow privacy-safe" not in result.stdout
 
 
-def test_R_S_status_does_not_consume_prompt_guard(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_R_S_status_does_not_consume_prompt_guard(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -139,7 +123,7 @@ def test_R_S_status_does_not_consume_prompt_guard(
     assert telemetry.runtime.session.decision_source.value == "persisted_preference"
     prompt = get_last_interactive_prompt_result()
     assert prompt is not None
-    assert getattr(prompt, "prompted") is False
+    assert prompt.prompted is False
 
 
 def test_status_factory_does_not_accept_home() -> None:

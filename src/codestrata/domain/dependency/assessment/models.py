@@ -586,12 +586,8 @@ class DependencyAssessmentSection(BaseModel):
     execution_summary: DependencyExecutionSummary = Field(
         default_factory=DependencyExecutionSummary
     )
-    coverage: DependencyCoverageSummary = Field(
-        default_factory=DependencyCoverageSummary
-    )
-    evidence_summary: DependencyEvidenceSummary = Field(
-        default_factory=DependencyEvidenceSummary
-    )
+    coverage: DependencyCoverageSummary = Field(default_factory=DependencyCoverageSummary)
+    evidence_summary: DependencyEvidenceSummary = Field(default_factory=DependencyEvidenceSummary)
     declaration_inventory: DependencyDeclarationInventory = Field(
         default_factory=DependencyDeclarationInventory
     )
@@ -617,9 +613,7 @@ class DependencyAssessmentSection(BaseModel):
     all_finding_ids: tuple[str, ...] = ()
     all_finding_summaries: tuple[DependencyFindingReference, ...] = ()
     # Phase 4.4.5 synthesis (additive).
-    synthesis: DependencySynthesisResult = Field(
-        default_factory=DependencySynthesisResult
-    )
+    synthesis: DependencySynthesisResult = Field(default_factory=DependencySynthesisResult)
     themes: tuple[DependencyTheme, ...] = ()
     theme_ids: tuple[str, ...] = ()
     concentration_facts: tuple[DependencyConcentrationFact, ...] = ()
@@ -629,9 +623,7 @@ class DependencyAssessmentSection(BaseModel):
     recommendation_ids: tuple[str, ...] = ()
     limitations: tuple[DependencyLimitation, ...] = ()
     diagnostics: tuple[str, ...] = ()
-    traceability: DependencyTraceabilityIndex = Field(
-        default_factory=DependencyTraceabilityIndex
-    )
+    traceability: DependencyTraceabilityIndex = Field(default_factory=DependencyTraceabilityIndex)
     enterprise_context_used: bool = False
     business_impact: str = "unknown"
     metadata: dict[str, str] = Field(default_factory=dict)

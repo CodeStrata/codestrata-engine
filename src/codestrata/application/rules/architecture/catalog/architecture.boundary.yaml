@@ -1,0 +1,60 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: architecture.boundary
+  version: 1.0.0
+  title: API modules must not directly import internal modules
+  category: architecture
+  owner: codestrata
+applies_to:
+  languages:
+    - java
+    - python
+    - javascript
+    - typescript
+    - php
+    - csharp
+  facts:
+    - module.declaration
+    - graph.imports
+select:
+  source: repository_graph
+  nodes:
+    all:
+      - type: module
+condition:
+  operator: crosses_boundary
+  fact: api
+  value: internal
+  edge_types:
+    - imports
+  traversal: direct
+  max_depth: 1
+  dependency_view: resolved
+finding:
+  default_severity: high
+  message_template: A direct import crosses the declared API internal boundary
+  bindings:
+    - name: dependency_path
+      type: string
+      evidence: dependency_path
+  documentation_url: https://docs.codestrata.ai/rules/architecture/boundary
+metric:
+  name: boundary_violation_count
+  operation: count
+evidence_include:
+  - source_location
+  - dependency_path
+parameter_schema:
+  - name: constraint_id
+    value_type: string
+    default: "forbid:api->internal"
+  - name: source_pattern
+    value_type: string
+    default: api
+  - name: target_pattern
+    value_type: string
+    default: internal
+  - name: allowed_directions
+    value_type: string
+    default: "api>api,api>public"

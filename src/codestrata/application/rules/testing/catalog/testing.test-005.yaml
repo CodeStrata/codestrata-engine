@@ -1,0 +1,35 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: testing.test-005
+  version: 1.0.0
+  title: Coverage configuration lacks CI invocation evidence
+  category: testing
+  owner: codestrata
+  measurement: M21
+  tags: [testing, coverage, ci]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_testing.coverage]
+select:
+  source: repository_testing
+  coverage:
+    all:
+      - configured_without_ci_invocation: true
+condition:
+  operator: testing.test-005
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Coverage is configured without statically observed CI invocation
+        evidence. A missing coverage report is not 0% code coverage.
+      bindings: {}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: testing_coverage_without_ci_invocation_count
+    operation: count
+parameters:
+  coverage_percent: false

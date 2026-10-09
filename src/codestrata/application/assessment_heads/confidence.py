@@ -21,7 +21,6 @@ from codestrata.domain.assessment_heads.assessment_head_confidence import (
 )
 from codestrata.domain.findings.finding_confidence import FindingConfidenceLevel
 
-
 _FINDING_LEVELS = {
     "high": FindingConfidenceLevel.HIGH,
     "moderate": FindingConfidenceLevel.MODERATE,
@@ -91,9 +90,11 @@ def derive_assessment_head_confidence(
     levels = _normalize_finding_levels(finding_confidence_levels)
     limit_set = {str(item).strip() for item in limitations if str(item).strip()}
     counts = _count_levels(levels)
-    weakest = min(levels, key=lambda item: assessment_head_confidence_level_rank(
-        _FINDING_TO_HEAD[item]
-    )) if levels else None
+    weakest = (
+        min(levels, key=lambda item: assessment_head_confidence_level_rank(_FINDING_TO_HEAD[item]))
+        if levels
+        else None
+    )
 
     components = AssessmentHeadConfidenceComponents(
         finding_count=len(levels),
@@ -101,13 +102,14 @@ def derive_assessment_head_confidence(
         moderate_finding_count=counts[FindingConfidenceLevel.MODERATE],
         limited_finding_count=counts[FindingConfidenceLevel.LIMITED],
         unavailable_finding_count=counts[FindingConfidenceLevel.UNAVAILABLE],
-        weakest_material_finding_confidence=(
-            weakest.value if weakest is not None else None
-        ),
+        weakest_material_finding_confidence=(weakest.value if weakest is not None else None),
         coverage_state=coverage,
         evidence_completeness=_aggregate_completeness(evidence_completeness_values),
         assessment_status=status or None,
-        activated=bool(activated) if activated is not None else status not in {
+        activated=bool(activated)
+        if activated is not None
+        else status
+        not in {
             "not_enabled",
             "not_available",
             "",
@@ -268,14 +270,9 @@ def derive_assessment_head_confidence(
     if FindingConfidenceLevel.UNAVAILABLE in unique_finding_levels:
         bases.append(AssessmentHeadConfidenceBasis.LEGACY_FINDINGS)
         caps.append(AssessmentHeadConfidenceLevel.LIMITED)
-        out_limits.append(
-            "One or more material findings have Unavailable Finding Confidence."
-        )
+        out_limits.append("One or more material findings have Unavailable Finding Confidence.")
         # Deferred EvidenceRef packs often land here — stay honest.
-        if any(
-            "deferred" in item.lower() or "legacy" in item.lower()
-            for item in limit_set
-        ):
+        if any("deferred" in item.lower() or "legacy" in item.lower() for item in limit_set):
             caps.append(AssessmentHeadConfidenceLevel.UNAVAILABLE)
 
     level = min_assessment_head_confidence_level(tuple(caps))
@@ -291,10 +288,14 @@ def derive_assessment_head_confidence(
         level = AssessmentHeadConfidenceLevel.LIMITED
 
     status_flag = AssessmentHeadConfidenceDerivationStatus.DERIVED
-    if level in {
-        AssessmentHeadConfidenceLevel.LIMITED,
-        AssessmentHeadConfidenceLevel.UNAVAILABLE,
-    } or coverage != "complete":
+    if (
+        level
+        in {
+            AssessmentHeadConfidenceLevel.LIMITED,
+            AssessmentHeadConfidenceLevel.UNAVAILABLE,
+        }
+        or coverage != "complete"
+    ):
         status_flag = (
             AssessmentHeadConfidenceDerivationStatus.UNAVAILABLE
             if level is AssessmentHeadConfidenceLevel.UNAVAILABLE
@@ -350,12 +351,10 @@ def apply_canonical_head_confidence(
         head_id=str(getattr(section, "head", "")),
         assessment_status=str(getattr(section, "status", "") or ""),
         finding_confidence_levels=tuple(
-            getattr(item, "finding_confidence_level", None) or "unavailable"
-            for item in findings
+            getattr(item, "finding_confidence_level", None) or "unavailable" for item in findings
         ),
         evidence_completeness_values=tuple(
-            getattr(item, "evidence_completeness", "") or ""
-            for item in findings
+            getattr(item, "evidence_completeness", "") or "" for item in findings
         ),
         limitations=tuple(getattr(section, "limitations", ()) or ()),
         activated=bool(getattr(section, "pack_content_available", False)),
@@ -370,9 +369,7 @@ def apply_canonical_head_confidence(
     updates: dict[str, Any] = {
         "confidence": confidence,
         "confidence_label": confidence_label,
-        "assessment_head_confidence": assessment_head_confidence_to_json(
-            head_confidence
-        ),
+        "assessment_head_confidence": assessment_head_confidence_to_json(head_confidence),
     }
     if coverage_payload is not None and not isinstance(coverage_payload, dict):
         updates["assessment_coverage"] = assessment_coverage_to_json(coverage_payload)
@@ -391,9 +388,7 @@ def _synthesize_head_confidence(
 ) -> AssessmentHeadConfidence:
     bases = [AssessmentHeadConfidenceBasis.SYNTHESIZED_HEAD]
     out_limits = list(sorted(limitations))
-    out_limits.append(
-        "Modernization Assessment confidence cannot exceed contributing heads."
-    )
+    out_limits.append("Modernization Assessment confidence cannot exceed contributing heads.")
     contributors = [
         AssessmentHeadConfidenceLevel(item.strip().lower())
         for item in contributing_head_levels
@@ -461,10 +456,15 @@ def _inventory_confidence(
             ),
             component_summary=components,
         )
-    if coverage == "partial" or status == "partially_assessed" or token in {
-        "limited",
-        "low",
-    }:
+    if (
+        coverage == "partial"
+        or status == "partially_assessed"
+        or token
+        in {
+            "limited",
+            "low",
+        }
+    ):
         bases.append(AssessmentHeadConfidenceBasis.PARTIAL_ASSESSMENT_COVERAGE)
         bases.append(AssessmentHeadConfidenceBasis.NO_FINDINGS_WITH_PARTIAL_COVERAGE)
         return AssessmentHeadConfidence(
@@ -585,11 +585,7 @@ def _normalize_coverage(
 
 
 def _aggregate_completeness(values: Sequence[str]) -> str | None:
-    normalized = [
-        str(item or "").strip().lower()
-        for item in values
-        if str(item or "").strip()
-    ]
+    normalized = [str(item or "").strip().lower() for item in values if str(item or "").strip()]
     if not normalized:
         return None
     if all(item == "complete" for item in normalized):

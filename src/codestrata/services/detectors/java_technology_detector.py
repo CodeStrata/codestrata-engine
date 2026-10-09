@@ -135,9 +135,7 @@ class JavaTechnologyDetector:
                 )
             )
 
-            gradle_content = "\n".join(
-                self._read_file(repository, path) for path in gradle_paths
-            )
+            gradle_content = "\n".join(self._read_file(repository, path) for path in gradle_paths)
 
             if "spring-boot" in gradle_content and not spring_boot_seen:
                 spring_version = None

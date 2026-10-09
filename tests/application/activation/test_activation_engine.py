@@ -231,9 +231,7 @@ def test_explicit_toml_override_wins(tmp_path: Path) -> None:
         languages=["Java"],
         source_file_count=20,
         layers=["api"],
-        manifests=[
-            DependencyManifest(path="pom.xml", ecosystem="maven", manifest_type="pom")
-        ],
+        manifests=[DependencyManifest(path="pom.xml", ecosystem="maven", manifest_type="pom")],
     )
     plan = build_activation_plan(
         analysis,
@@ -261,9 +259,7 @@ def test_activation_plan_is_deterministic() -> None:
         source_file_count=30,
         layers=["domain", "api"],
         frameworks=["Spring Boot"],
-        manifests=[
-            DependencyManifest(path="pom.xml", ecosystem="maven", manifest_type="pom")
-        ],
+        manifests=[DependencyManifest(path="pom.xml", ecosystem="maven", manifest_type="pom")],
         cloud=CloudReadinessFacts(has_docker=True),
     )
     first = build_activation_plan(analysis, mode=AssessmentActivationMode.DEFAULT)

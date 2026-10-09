@@ -66,9 +66,7 @@ def test_independent_from_legacy_installation_id_file(tmp_path: Path) -> None:
     record, created, _ = ensure_anonymous_installation_identity(home=home)
     assert created is True
     assert record.installation_id != "11111111-1111-4111-8111-111111111111"
-    assert legacy.read_text(encoding="utf-8").strip() == (
-        "11111111-1111-4111-8111-111111111111"
-    )
+    assert legacy.read_text(encoding="utf-8").strip() == ("11111111-1111-4111-8111-111111111111")
 
 
 def test_independent_from_telemetry_preferences(tmp_path: Path) -> None:

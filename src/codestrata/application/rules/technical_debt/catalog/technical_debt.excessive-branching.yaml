@@ -1,0 +1,38 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: technical_debt.excessive-branching
+  version: 1.0.0
+  title: Excessive branching
+  category: technical_debt
+  owner: codestrata
+  measurement: M16
+  tags: [technical_debt, complexity, branching]
+applies_to:
+  languages: [java, python, php, csharp, javascript, typescript]
+  requires:
+    facts: [complexity.callable]
+select:
+  source: complexity
+  callables:
+    all:
+      - branch_point_count_gt: 10
+condition:
+  operator: technical_debt.excessive-branching
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Callable '{{qualified_signature}}' has branch_point_count={{value}}
+        which exceeds threshold {{threshold}}.
+      bindings:
+        qualified_signature: {type: string, evidence: qualified_signature}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+    documentation_url: docs/analysis-intelligence/technical-debt/complexity-rules.md
+  metric:
+    name: technical_debt_excessive_branching_count
+    operation: count
+parameters:
+  max_branch_points: {type: integer, default: 10, exclusive_min: true}

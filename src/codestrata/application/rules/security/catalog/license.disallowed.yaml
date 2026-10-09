@@ -1,0 +1,55 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: license.disallowed
+  version: 1.0.0
+  title: Disallowed package license
+  category: security
+  owner: codestrata
+  measurement: M14
+  tags: [security, supply-chain, license]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [supply_chain.license_metadata]
+select:
+  source: supply_chain
+  licenses:
+    all:
+      - decision: disallowed
+condition:
+  operator: license.disallowed
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Package '{{package_name}}' '{{resolved_version}}' declares license
+        '{{expression}}' from '{{license_source}}'. Configured policy
+        '{{policy_version}}' marks this expression disallowed. This is a
+        configured allow/deny result, not a legal compliance verdict.
+      bindings:
+        package_name: {type: string, evidence: package_name}
+        resolved_version: {type: string, evidence: resolved_version}
+        expression: {type: string, evidence: expression}
+        license_source: {type: string, evidence: license_source}
+        policy_version: {type: string, evidence: policy_version}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: license_disallowed_count
+    operation: count
+evidence:
+  include:
+    - package_name
+    - resolved_version
+    - expression
+    - license_source
+    - configured_decision_rule
+parameters:
+  absent_policy:
+    behavior: metadata_only
+    legal_compliance_verdict: false
+  unknown:
+    missing_metadata: unknown
+    conflicting_metadata: unknown
+    unsupported_expression: unknown

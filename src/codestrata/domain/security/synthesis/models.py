@@ -196,9 +196,7 @@ class SecurityRecommendation(BaseModel):
     hotspot_ids: tuple[str, ...] = ()
     diagnostic_ids: tuple[str, ...] = ()
     conditional: bool = True
-    audience: SecurityConclusionAudience = (
-        SecurityConclusionAudience.PRODUCTION_HEALTH
-    )
+    audience: SecurityConclusionAudience = SecurityConclusionAudience.PRODUCTION_HEALTH
     effort_band: str = "unknown"
     business_impact: str = "unknown"
     provenance: str = "security_synthesis"
@@ -281,6 +279,4 @@ class SecuritySynthesisResult(BaseModel):
     @field_validator("synthesis_version", mode="before")
     @classmethod
     def normalize_version(cls, value: object) -> str:
-        return (
-            optional_nonblank(str(value), label="synthesis_version") or SYNTHESIS_VERSION
-        )
+        return optional_nonblank(str(value), label="synthesis_version") or SYNTHESIS_VERSION

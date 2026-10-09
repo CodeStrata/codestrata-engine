@@ -1,0 +1,12 @@
+schema_version: 1
+story: E16.3
+package_revision: ENGINE-2026-09-15-R1
+pypi_project: codestrata
+candidate_semver: "0.2.2"
+rollback_semver: "0.2.1"
+rollback_wheel_sha256: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+# Fill from release-owner approval record after E16.2 publish (not freeze rehearsal bytes).
+candidate_wheel_sha256: ""
+observation_business_days: 3
+release_support_owner: C
+platform_webapp_owners_after_smoke: A/B

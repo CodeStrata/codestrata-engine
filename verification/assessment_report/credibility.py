@@ -57,7 +57,7 @@ def check_credibility(run: AssessmentRunArtifacts) -> list[CheckResult]:
     )
 
     # Leadership / EIS regions — still covered by full HTML scan
-    for metric in VALIDATION_METRIC_LEAKS:
+    for _metric in VALIDATION_METRIC_LEAKS:
         # Avoid false positives on the word "recall" in prose carefully —
         # only fail on structured validation metric markers.
         pass
@@ -120,7 +120,11 @@ def check_credibility(run: AssessmentRunArtifacts) -> list[CheckResult]:
                 if match and "REDACTED" in match.group(0):
                     continue
             privacy_hits.append(code)
-    for needle, code in (("/Users/", "abs_users"), ("/home/", "abs_home"), ("/var/folders/", "abs_tmp")):
+    for needle, code in (
+        ("/Users/", "abs_users"),
+        ("/home/", "abs_home"),
+        ("/var/folders/", "abs_tmp"),
+    ):
         if needle in blob:
             privacy_hits.append(code)
     checks.append(

@@ -162,10 +162,7 @@ def check_an_injected_client_bypasses_aws_config() -> CheckResult:
             and len(injected.calls) == 1
             and result.status is ProviderExecutionStatus.SUCCESS
         ),
-        detail=(
-            f"client_factory_calls={len(factory.calls)} "
-            f"converse_calls={len(injected.calls)}"
-        ),
+        detail=(f"client_factory_calls={len(factory.calls)} converse_calls={len(injected.calls)}"),
     )
 
 

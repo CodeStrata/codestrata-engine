@@ -56,8 +56,8 @@ from codestrata.domain.rules.context import (
     RuleExecutionPolicy,
 )
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleResultStatus,
     RuleSeverity,
 )
@@ -313,10 +313,7 @@ def test_unresolved_gradle_interpolation_is_diagnostic_not_finding() -> None:
     result = UnresolvedVersionRule().evaluate(_context(evidence))
     assert result.status is RuleResultStatus.NOT_MATCHED
     assert manifest.diagnostics
-    assert any(
-        "unsupported_version_resolution" in item
-        for item in manifest.unsupported_constructs
-    )
+    assert any("unsupported_version_resolution" in item for item in manifest.unsupported_constructs)
 
 
 def test_parent_bom_uncertainty_does_not_match_unresolved_version() -> None:
@@ -356,6 +353,7 @@ def test_generic_unavailable_without_proven_status_does_not_match() -> None:
     )
     result = UnresolvedVersionRule().evaluate(_context(_evidence((item,))))
     assert result.status is RuleResultStatus.NOT_MATCHED
+
 
 def test_mutable_version_bounded_syntax() -> None:
     assert is_mutable_version("1.0.0-SNAPSHOT")
@@ -550,9 +548,7 @@ def test_conflicting_exact_versions_same_context_only() -> None:
 def test_duplicate_declaration_group() -> None:
     a = _decl(evidence_id="ev:d1", identity="com.example:dup", raw_version="1.0.0", line=1)
     b = _decl(evidence_id="ev:d2", identity="com.example:dup", raw_version="1.0.0", line=2)
-    different = _decl(
-        evidence_id="ev:d3", identity="com.example:dup", raw_version="2.0.0", line=3
-    )
+    different = _decl(evidence_id="ev:d3", identity="com.example:dup", raw_version="2.0.0", line=3)
     result = DuplicateDeclarationRule().evaluate(_context(_evidence((a, b, different))))
     assert result.status is RuleResultStatus.MATCHED
     assert len(result.matches) == 1
@@ -577,12 +573,8 @@ def test_source_role_preserved_and_no_absolute_paths() -> None:
 
 
 def test_finding_mapper_category_and_deterministic_ids() -> None:
-    conflict_a = _decl(
-        evidence_id="ev:f1", identity="com.example:lib", raw_version="1.0.0", line=1
-    )
-    conflict_b = _decl(
-        evidence_id="ev:f2", identity="com.example:lib", raw_version="2.0.0", line=2
-    )
+    conflict_a = _decl(evidence_id="ev:f1", identity="com.example:lib", raw_version="1.0.0", line=1)
+    conflict_b = _decl(evidence_id="ev:f2", identity="com.example:lib", raw_version="2.0.0", line=2)
     evidence = _evidence((conflict_a, conflict_b))
     context = _context(evidence)
     registry = RuleRegistry()

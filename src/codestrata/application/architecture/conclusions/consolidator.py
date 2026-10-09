@@ -20,9 +20,7 @@ def consolidate_recommendations(
     groups: list[ConsolidatedRecommendation] = []
     for conclusion in sorted(conclusions, key=lambda item: item.conclusion_id):
         source_findings = [
-            by_id[finding_id]
-            for finding_id in conclusion.source_finding_ids
-            if finding_id in by_id
+            by_id[finding_id] for finding_id in conclusion.source_finding_ids if finding_id in by_id
         ]
         remediations = []
         source_rec_ids: list[str] = []

@@ -34,9 +34,7 @@ def test_executor_makes_exactly_one_converse_call() -> None:
 def test_executor_does_not_retry_throttling_under_default_policy() -> None:
     client = fakes.Client(fakes.client_error("ThrottlingException"))
     delays: list[float] = []
-    executor = build_bedrock_executor(
-        build_bedrock_provider(client=client), sleeper=delays.append
-    )
+    executor = build_bedrock_executor(build_bedrock_provider(client=client), sleeper=delays.append)
     result = executor.execute(fakes.provider_request())
     assert len(client.calls) == 1
     assert result.attempts == 1

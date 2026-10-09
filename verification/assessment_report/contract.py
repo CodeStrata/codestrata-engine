@@ -14,15 +14,17 @@ REQUIRED_ARTIFACTS: tuple[str, ...] = (
     "report.html",
 )
 
+# R2 baseline reading order. Legacy leadership, executive-summary, and
+# key-takeaways ids are not part of this hierarchy.
 EXPECTED_SECTION_ORDER: tuple[tuple[str, str], ...] = (
-    ("leadership-verdict", "Leadership Verdict"),
-    ("executive-summary", "Executive Summary"),
-    ("engineering-intelligence-summary", "Assessment Overview"),
-    ("key-takeaways", "Key Takeaways"),
+    ("attention-first", "What deserves attention now"),
+    ("assessment-results", "Current outcomes"),
+    ("architecture-map", "Architecture Map"),
+    ("engineering-hotspots", "Engineering Hotspots"),
+    ("ownership-concentration", "Ownership concentration"),
+    ("temporal-co-change", "Temporal co-change"),
     ("priority-actions", "Priority Actions"),
-    ("engineering-risks", "Engineering Risks"),
-    ("assessment-results", "Assessment Results"),
-    ("phased-modernization-plan", "Roadmap"),
+    ("coverage-and-trust", "Coverage & Trust"),
     ("technical-appendix", "Technical Appendix"),
 )
 

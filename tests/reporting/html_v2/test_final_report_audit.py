@@ -35,7 +35,10 @@ from codestrata.models import (
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 from codestrata.reporting.html_v2 import HtmlReportRenderer, build_html_report_view_model
 from codestrata.reporting.html_v2.assessment_heads import (
+    APPENDIX_ASSESSMENT_HEADS,
     ASSESSMENT_RESULT_HEADS,
+    ENGINEERING_HEALTH_HEADLINES,
+    SUPPORTING_ASSESSMENT_HEADS,
     AssessmentHead,
     assessment_head_anchor,
 )
@@ -57,7 +60,7 @@ _SOFT_CLAIM_FRAGMENTS = (
     "well designed",
     "well structured",
     "modernization ready",
-    "engineering health",
+    "health score",
 )
 
 
@@ -113,9 +116,7 @@ def _recommendation(
         supporting_finding_ids=(finding.id,),
         primary_finding_id=finding.id,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
-        actions=(
-            RecommendationAction(order=1, title="Act", description="Act"),
-        ),
+        actions=(RecommendationAction(order=1, title="Act", description="Act"),),
         subject_keys=("repo",),
     )
 
@@ -228,16 +229,12 @@ def test_findings_and_recommendations_group_exclusively(tmp_path: Path) -> None:
         for item in head.recommendations:
             assert item.recommendation_id not in seen_recs
             seen_recs.add(item.recommendation_id)
-    unclassified_recs = {
-        item.recommendation_id for item in document.unclassified_recommendations
-    }
+    unclassified_recs = {item.recommendation_id for item in document.unclassified_recommendations}
     assert seen_recs.isdisjoint(unclassified_recs)
 
     # Security entities stay under Security Intelligence.
     security = next(
-        h
-        for h in document.assessment_heads
-        if h.head == AssessmentHead.SECURITY_INTELLIGENCE.value
+        h for h in document.assessment_heads if h.head == AssessmentHead.SECURITY_INTELLIGENCE.value
     )
     assert any("credential" in f.title.lower() for f in security.findings)
     dependency = next(
@@ -291,9 +288,7 @@ def test_no_duplicate_html_ids_and_hrefs_resolve(tmp_path: Path) -> None:
 
 
 def test_ccl_once_per_assessment_head(tmp_path: Path) -> None:
-    html = HtmlReportRenderer().render(
-        build_html_report_view_model(_mixed_report(tmp_path))
-    )
+    html = HtmlReportRenderer().render(build_html_report_view_model(_mixed_report(tmp_path)))
     anchors = [assessment_head_anchor(head) for head in ASSESSMENT_RESULT_HEADS]
     for index, anchor in enumerate(anchors):
         start = html.find(f'id="{anchor}"')
@@ -309,41 +304,42 @@ def test_ccl_once_per_assessment_head(tmp_path: Path) -> None:
             if pos >= 0:
                 end = min(end, pos)
         chunk = html[start:end]
-        assert (
-            chunk.count('data-canonical="coverage-confidence-limitations"') == 1
-        ), f"{anchor} expected exactly one CCL block"
+        assert chunk.count('data-canonical="coverage-confidence-limitations"') == 1, (
+            f"{anchor} expected exactly one CCL block"
+        )
 
 
 def test_section_and_toc_ordering(tmp_path: Path) -> None:
     document = build_html_report_view_model(_mixed_report(tmp_path))
     ordered = [entry.section_id for entry in document.outline]
     expected_prefix = [
-        "leadership-verdict",
-        "executive-summary",
-        "engineering-intelligence-summary",
-        "key-takeaways",
-        "priority-actions",
-        "engineering-risks",
+        "attention-first",
         "assessment-results",
     ]
     assert ordered[: len(expected_prefix)] == expected_prefix
-    for head in ASSESSMENT_RESULT_HEADS:
+    for head in ENGINEERING_HEALTH_HEADLINES:
         assert assessment_head_anchor(head) in ordered
-    assert ordered.index("modernization-assessment") < ordered.index(
-        "technical-appendix"
-    ) or "phased-modernization-plan" in ordered
+    for head in (*SUPPORTING_ASSESSMENT_HEADS, *APPENDIX_ASSESSMENT_HEADS):
+        assert assessment_head_anchor(head) not in ordered
+    assert "quality-intelligence" in ordered
+    assert "architecture-map" in ordered
+    assert ordered.index("architecture-map") < ordered.index("engineering-hotspots")
+    assert ordered.index("engineering-hotspots") < ordered.index("priority-actions")
+    assert ordered.index("priority-actions") < ordered.index("coverage-and-trust")
+    assert ordered.index("technical-debt-intelligence") < ordered.index("technical-appendix")
 
     html = HtmlReportRenderer().render(document)
     positions = {
         key: html.find(f'id="{key}"')
         for key in (
-            "leadership-verdict",
-            "executive-summary",
-            "engineering-intelligence-summary",
-            "key-takeaways",
-            "priority-actions",
-            "engineering-risks",
+            "attention-first",
             "assessment-results",
+            "architecture-map",
+            "engineering-hotspots",
+            "ownership-concentration",
+            "temporal-co-change",
+            "priority-actions",
+            "coverage-and-trust",
             "technical-appendix",
         )
     }
@@ -353,9 +349,7 @@ def test_section_and_toc_ordering(tmp_path: Path) -> None:
 
 
 def test_unsupported_conclusions_absent(tmp_path: Path) -> None:
-    html = HtmlReportRenderer().render(
-        build_html_report_view_model(_mixed_report(tmp_path))
-    )
+    html = HtmlReportRenderer().render(build_html_report_view_model(_mixed_report(tmp_path)))
     lowered = html.lower()
     sanitized = (
         lowered.replace("does not establish", "")
@@ -375,13 +369,12 @@ def test_unsupported_conclusions_absent(tmp_path: Path) -> None:
 
 
 def test_html_csp_print_schema(tmp_path: Path) -> None:
-    html = HtmlReportRenderer().render(
-        build_html_report_view_model(_mixed_report(tmp_path))
-    )
+    html = HtmlReportRenderer().render(build_html_report_view_model(_mixed_report(tmp_path)))
     assert html.lstrip().startswith("<!DOCTYPE html>")
     assert f'content="{CONTENT_SECURITY_POLICY}"' in html
-    assert "script-src 'none'" in html
-    assert "<script" not in html
+    assert "script-src 'sha256-" in html
+    assert "<script src" not in html
+    assert html.lower().count("<script") == 1
     assert html.lower().count("<link ") == 1
     assert 'rel="icon"' in html
     assert "data:image/png;base64," in html
@@ -395,8 +388,9 @@ def test_priority_actions_and_roadmap_not_duplicated_in_heads(tmp_path: Path) ->
     # Full Priority Action cards live under #priority-actions; heads may link only.
     pa_section_start = html.find('id="priority-actions"')
     assessment_start = html.find('id="assessment-results"')
-    assert 0 <= pa_section_start < assessment_start
-    heads_chunk = html[assessment_start : html.find('id="technical-appendix"')]
+    appendix_start = html.find('id="technical-appendix"')
+    assert 0 <= assessment_start < pa_section_start < appendix_start
+    heads_chunk = html[assessment_start:pa_section_start]
     assert "Why this action" not in heads_chunk
     assert heads_chunk.count('class="item-card recommendation"') == 0 or True
     # Roadmap initiative ids only in roadmap section when present.

@@ -60,12 +60,8 @@ _STATUS_SUMMARIES = {
         "Architecture assessment produced useful results with one or more partial "
         "failures or limitations."
     ),
-    ArchitectureAssessmentStatus.FAILED: (
-        "Architecture assessment could not be assembled safely."
-    ),
-    ArchitectureAssessmentStatus.NOT_REQUESTED: (
-        "Architecture assessment was not requested."
-    ),
+    ArchitectureAssessmentStatus.FAILED: ("Architecture assessment could not be assembled safely."),
+    ArchitectureAssessmentStatus.NOT_REQUESTED: ("Architecture assessment was not requested."),
 }
 
 _COVERAGE_LABELS = {
@@ -103,15 +99,9 @@ class ArchitectureReportAdapter:
         coverage = section.coverage.areas if include_coverage else ()
         limitations = section.limitations if include_limitations else ()
 
-        conclusion_views = tuple(
-            _conclusion_view(item) for item in conclusions
-        )
-        finding_views = tuple(
-            _finding_view(item) for item in findings
-        )
-        recommendation_views = tuple(
-            _recommendation_view(item, conclusions) for item in groups
-        )
+        conclusion_views = tuple(_conclusion_view(item) for item in conclusions)
+        finding_views = tuple(_finding_view(item) for item in findings)
+        recommendation_views = tuple(_recommendation_view(item, conclusions) for item in groups)
         coverage_views = tuple(_coverage_view(item) for item in coverage)
         limitation_views = tuple(_limitation_view(item) for item in limitations)
         metrics = (
@@ -119,11 +109,7 @@ class ArchitectureReportAdapter:
             if include_metrics
             else ()
         )
-        strengths = (
-            tuple(item.title for item in section.strengths)
-            if include_strengths
-            else ()
-        )
+        strengths = tuple(item.title for item in section.strengths) if include_strengths else ()
         traceability = (
             _traceability(section)
             if include_traceability
@@ -190,10 +176,7 @@ def _executive_summary(
             "non-architecture report content remains available."
         )
     if section.status is ArchitectureAssessmentStatus.NOT_APPLICABLE:
-        return (
-            "No supported architecture evidence was available for this repository "
-            "assessment."
-        )
+        return "No supported architecture evidence was available for this repository assessment."
 
     finding_count = len(section.finding_ids)
     conclusion_count = len(conclusions)
@@ -201,8 +184,7 @@ def _executive_summary(
     coverage_note = _coverage_note(section)
     conclusions_note = (
         f" These were consolidated into {conclusion_count} architecture conclusion"
-        f"{'s' if conclusion_count != 1 else ''}"
-        + (f": {themes}." if themes else ".")
+        f"{'s' if conclusion_count != 1 else ''}" + (f": {themes}." if themes else ".")
         if conclusion_count
         else (
             " Architecture conclusions were not generated for this assessment; "
@@ -249,19 +231,13 @@ def _coverage_note(section: ArchitectureAssessmentSection) -> str:
         None,
     )
     classification = next(
-        (
-            area
-            for area in section.coverage.areas
-            if area.area_id == "classification_coverage"
-        ),
+        (area for area in section.coverage.areas if area.area_id == "classification_coverage"),
         None,
     )
     parts: list[str] = []
     if extraction is not None and extraction.ratio is not None:
         if extraction.ratio >= 0.999:
-            parts.append(
-                "Extraction coverage was complete for the analyzed source set"
-            )
+            parts.append("Extraction coverage was complete for the analyzed source set")
         else:
             parts.append(
                 f"Extraction coverage was {extraction.ratio:.0%} for the analyzed source set"
@@ -272,9 +248,7 @@ def _coverage_note(section: ArchitectureAssessmentSection) -> str:
                 f"architectural classification coverage was partial ({classification.ratio:.1%})"
             )
         else:
-            parts.append(
-                f"architectural classification coverage was {classification.ratio:.0%}"
-            )
+            parts.append(f"architectural classification coverage was {classification.ratio:.0%}")
     if not parts:
         return "Coverage details are included in the architecture section."
     if len(parts) == 1:
@@ -294,11 +268,7 @@ def _metrics(
         None,
     )
     classification = next(
-        (
-            area
-            for area in section.coverage.areas
-            if area.area_id == "classification_coverage"
-        ),
+        (area for area in section.coverage.areas if area.area_id == "classification_coverage"),
         None,
     )
     return (

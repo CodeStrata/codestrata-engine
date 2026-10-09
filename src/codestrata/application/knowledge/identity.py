@@ -63,9 +63,7 @@ def build_local_canonical_key(repository_id: str) -> str:
 def normalize_github_url_alias(parsed: ParsedGitHubUrl) -> str:
     """Stable credential-free HTTPS alias for GitHub repositories."""
 
-    return (
-        f"https://github.com/{parsed.owner.lower()}/{parsed.repository.lower()}.git"
-    )
+    return f"https://github.com/{parsed.owner.lower()}/{parsed.repository.lower()}.git"
 
 
 def normalize_local_path_alias(path: Path) -> str:
@@ -74,9 +72,7 @@ def normalize_local_path_alias(path: Path) -> str:
     try:
         resolved = path.expanduser().resolve(strict=False)
     except OSError as error:
-        raise RepositoryIdentityError(
-            f"Unable to normalize local path: {path}"
-        ) from error
+        raise RepositoryIdentityError(f"Unable to normalize local path: {path}") from error
     return str(resolved)
 
 
@@ -193,9 +189,7 @@ def _require_safe_source_location(value: str) -> str:
                 "source_location must not include query strings or fragments"
             )
         if parsed.username or parsed.password:
-            raise RepositoryIdentityError(
-                "source_location must not include embedded credentials"
-            )
+            raise RepositoryIdentityError("source_location must not include embedded credentials")
     return safe
 
 

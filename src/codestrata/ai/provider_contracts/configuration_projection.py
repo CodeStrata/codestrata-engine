@@ -60,9 +60,7 @@ def _build_credential_requirements(
                 credential_kind="api_key",
                 required=True,
                 source_category=SourceCategory.ENVIRONMENT,
-                availability_status=(
-                    "present" if input_data.openai_api_key_present else "absent"
-                ),
+                availability_status=("present" if input_data.openai_api_key_present else "absent"),
             ),
         )
 
@@ -110,6 +108,7 @@ def project_configuration(input_data: LegacyConfigurationInput) -> AIProviderCon
         file_model_id=input_data.file_model_id,
     )
 
+    adapter_configuration: object
     if provider_id is ProviderId.OPENAI:
         adapter_configuration = build_openai_adapter_configuration(
             api_key_env_name=input_data.openai_api_key_env_name,

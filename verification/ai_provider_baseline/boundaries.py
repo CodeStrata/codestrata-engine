@@ -70,7 +70,7 @@ def check_no_openrouter_references(source_root: Path) -> CheckResult:
         target = source_root / relative
         paths = [target] if target.is_file() else sorted(target.rglob("*.py"))
         for path in paths:
-            rel = str(path.relative_to(source_root))
+            rel = path.relative_to(source_root).as_posix()
             if _allowed_openrouter_path(rel):
                 continue
             text = path.read_text(encoding="utf-8", errors="ignore")
@@ -94,7 +94,7 @@ def check_no_new_common_provider_interface(source_root: Path) -> CheckResult:
     for path in sorted(ai_dir.rglob("*.py")):
         text = path.read_text(encoding="utf-8", errors="ignore")
         if any(name in text for name in forbidden_class_names):
-            hits.append(str(path.relative_to(source_root)))
+            hits.append(path.relative_to(source_root).as_posix())
     ok = not hits
     return CheckResult(
         name="no_new_common_provider_interface_introduced",

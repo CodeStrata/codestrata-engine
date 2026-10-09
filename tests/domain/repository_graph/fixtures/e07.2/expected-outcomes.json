@@ -1,0 +1,156 @@
+{
+  "m06": {
+    "file_component_ratio": {
+      "numerator": 1,
+      "denominator": 2,
+      "serialized": "0.500000",
+      "max_fan_out": 1
+    }
+  },
+  "m07": {
+    "api_internal": {
+      "count": 1,
+      "identity": "api->internal",
+      "path": "src/api/mod.py",
+      "yaml": "fail"
+    },
+    "api_public": {
+      "count": 0,
+      "status": "value",
+      "yaml": "pass"
+    },
+    "unresolved": {
+      "status": "unknown",
+      "yaml": "unknown"
+    },
+    "no_pattern": {
+      "status": "not_applicable",
+      "yaml": "not_applicable"
+    },
+    "persistence": {
+      "count": 0,
+      "status": "value",
+      "yaml": "pass"
+    },
+    "parallel": {
+      "count": 1
+    },
+    "two_paths": {
+      "members": ["api/a->internal/x", "api/b->internal/y"],
+      "paths": {
+        "api/a->internal/x": "src/api/a.py",
+        "api/b->internal/y": "src/api/b.py"
+      }
+    },
+    "selector_rebinding": {
+      "status": "error",
+      "reason": "selector_rebinding"
+    }
+  },
+  "m08": {
+    "share_60": {
+      "status": "value",
+      "numerator": 60,
+      "denominator": 100,
+      "serialized": "0.600000",
+      "yaml": "pass"
+    },
+    "share_61": {
+      "status": "value",
+      "numerator": 61,
+      "denominator": 100,
+      "serialized": "0.610000",
+      "yaml": "fail",
+      "witness_path": "src/component-a.py"
+    },
+    "single": {
+      "status": "not_applicable",
+      "yaml": "not_applicable"
+    },
+    "unmapped": {
+      "status": "unknown",
+      "numerator": 30,
+      "denominator": 60,
+      "serialized": "0.500000",
+      "yaml": "unknown"
+    },
+    "unreadable": {
+      "status": "unknown",
+      "numerator": 60,
+      "denominator": 100,
+      "serialized": "0.600000",
+      "yaml": "unknown"
+    },
+    "generated": {
+      "status": "value",
+      "numerator": 61,
+      "denominator": 100,
+      "serialized": "0.610000",
+      "generated_excluded": 1,
+      "yaml": "fail"
+    }
+  },
+  "m09": {
+    "singleton": {
+      "numerator": 0,
+      "denominator": 1,
+      "serialized": "0.000000",
+      "status": "value"
+    },
+    "self_loop": {
+      "numerator": 0,
+      "denominator": 1,
+      "serialized": "0.000000",
+      "status": "value"
+    },
+    "two_node": {
+      "numerator": 1,
+      "denominator": 1,
+      "serialized": "1.000000",
+      "status": "value"
+    },
+    "parallel": {
+      "numerator": 1,
+      "denominator": 1,
+      "status": "value"
+    },
+    "partial_universe": {
+      "status": "unknown",
+      "numerator": 1,
+      "lower_bound": 1,
+      "reason": "partial_universe"
+    },
+    "diamond": {
+      "reached": ["b", "c", "d"],
+      "status": "value",
+      "serialized": "3",
+      "cutoff": false
+    },
+    "cycle": {
+      "reached": ["b"],
+      "status": "value",
+      "cutoff": false
+    },
+    "disconnected": {
+      "reached": ["b"],
+      "absent": "c"
+    },
+    "cutoff": {
+      "reached": ["b"],
+      "cutoff": true,
+      "status": "unknown",
+      "lower_bound": 1,
+      "reason": "traversal_bound_truncated"
+    },
+    "declared_direct": {
+      "dependency_view": "declared",
+      "traversal": "direct",
+      "reached": ["b"]
+    },
+    "resolved_transitive": {
+      "dependency_view": "resolved",
+      "traversal": "transitive",
+      "reached": ["c"]
+    }
+  }
+}

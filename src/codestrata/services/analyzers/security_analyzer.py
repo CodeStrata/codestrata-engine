@@ -495,10 +495,7 @@ class SecurityAnalyzer:
         # Preserve critical production private-key / known-secret severity.
         if decision.context.value == "production" and severity is Severity.CRITICAL:
             adjusted = Severity.CRITICAL
-        description = (
-            f"{title} in {relative_path}: {evidence}"
-            f"{contextual_summary_suffix(decision)}"
-        )
+        description = f"{title} in {relative_path}: {evidence}{contextual_summary_suffix(decision)}"
 
         return Finding(
             rule_id=rule_id,

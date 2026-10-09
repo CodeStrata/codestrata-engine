@@ -75,15 +75,11 @@ def register_extensions_command(app: typer.Typer) -> None:
             return
 
         typer.echo(f"Extension API: {EXTENSION_API_VERSION}")
-        typer.echo(
-            "Reserved analyzer namespaces: " + ", ".join(RESERVED_EXTENSION_NAMESPACES)
-        )
+        typer.echo("Reserved analyzer namespaces: " + ", ".join(RESERVED_EXTENSION_NAMESPACES))
         typer.echo("")
         for item in items:
             version = f" api={item.api_version}" if item.api_version else ""
-            typer.echo(
-                f"[{item.status}] {item.kind}/{item.extension_id}{version}: {item.detail}"
-            )
+            typer.echo(f"[{item.status}] {item.kind}/{item.extension_id}{version}: {item.detail}")
 
     app.add_typer(extensions_app, name="extensions", rich_help_panel="Advanced")
 

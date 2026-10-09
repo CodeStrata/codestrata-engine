@@ -76,9 +76,7 @@ def collect_fixture_facts(
                 role=TestFileRole.TEST_FIXTURE,
                 discovery_bases=tuple(dict.fromkeys(discovery)),
                 size_bytes=sizes.get(path),
-                provenance=_provenance(
-                    path, configuration_fingerprint=configuration_fingerprint
-                ),
+                provenance=_provenance(path, configuration_fingerprint=configuration_fingerprint),
                 metadata={"kind": kind},
             )
         )

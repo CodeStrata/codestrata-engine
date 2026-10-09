@@ -1,0 +1,41 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: dependency.mutable-version
+  version: 1.0.0
+  title: Mutable dependency version
+  category: dependency
+  owner: codestrata
+  measurement: M12
+  tags: [dependency, hygiene, mutable]
+applies_to:
+  languages: [java, python, php, csharp]
+  requires:
+    facts: [dependency.declarations]
+select:
+  source: dependency
+  declarations:
+    all:
+      - mutable_version: true
+condition:
+  operator: dependency.mutable_version
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Dependency '{{identity}}' in '{{path}}' declares mutable version
+        '{{expression}}', which may select changing artifacts.
+      bindings:
+        identity: {type: string, evidence: normalized_identity}
+        path: {type: string, evidence: path}
+        expression: {type: string, evidence: mutable_expression}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: mutable_version_finding_count
+    operation: count
+evidence:
+  include:
+    - declaration_path
+    - mutable_expression
+parameters: {}

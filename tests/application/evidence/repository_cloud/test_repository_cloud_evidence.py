@@ -130,9 +130,7 @@ def test_no_cloud_artifacts_succeeds_empty() -> None:
 def test_false_positive_service_py_not_kubernetes() -> None:
     assert classify_cloud_candidate("src/service.py") is None
     assert classify_cloud_candidate("app/Service.java") is None
-    assert classify_cloud_candidate(
-        "services/registration-service.yaml"
-    ) is None
+    assert classify_cloud_candidate("services/registration-service.yaml") is None
     hit = classify_cloud_candidate("k8s/deployment.yaml")
     assert hit is not None
     assert hit.orchestration_kind is CloudOrchestrationKind.KUBERNETES

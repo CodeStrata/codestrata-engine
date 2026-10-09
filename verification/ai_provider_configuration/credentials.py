@@ -60,10 +60,9 @@ def check_bedrock_profile_adds_an_optional_profile_credential() -> CheckResult:
     with_profile = project_configuration(
         LegacyConfigurationInput(provider="bedrock", bedrock_profile_configured=True)
     )
-    ok = (
-        "aws_profile" not in {i.credential_kind for i in without_profile.credential_requirements}
-        and "aws_profile" in {i.credential_kind for i in with_profile.credential_requirements}
-    )
+    ok = "aws_profile" not in {
+        i.credential_kind for i in without_profile.credential_requirements
+    } and "aws_profile" in {i.credential_kind for i in with_profile.credential_requirements}
     return CheckResult(
         name="bedrock_profile_configured_adds_an_optional_aws_profile_credential_requirement",
         category="credentials",

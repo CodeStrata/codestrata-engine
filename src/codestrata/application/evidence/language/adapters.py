@@ -159,9 +159,7 @@ def bundle_from_raw_facts(
             )
         )
 
-    type_only = sum(
-        1 for dep in dependencies if dep.semantics is DependencySemantics.TYPE_ONLY
-    )
+    type_only = sum(1 for dep in dependencies if dep.semantics is DependencySemantics.TYPE_ONLY)
     classified = sum(
         1
         for unit in source_units

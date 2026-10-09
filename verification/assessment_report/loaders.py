@@ -108,15 +108,15 @@ def report_findings(report: dict[str, Any]) -> list[dict[str, Any]]:
 
 def report_recommendations(report: dict[str, Any]) -> list[dict[str, Any]]:
     assessment = assessment_of(report)
-    items = assessment.get("deterministic_recommendations") or assessment.get("recommendations") or []
+    items = (
+        assessment.get("deterministic_recommendations") or assessment.get("recommendations") or []
+    )
     return [item for item in items if isinstance(item, dict)]
 
 
 def report_priority_actions(report: dict[str, Any]) -> list[dict[str, Any]]:
     assessment = assessment_of(report)
-    return [
-        item for item in (assessment.get("priority_actions") or []) if isinstance(item, dict)
-    ]
+    return [item for item in (assessment.get("priority_actions") or []) if isinstance(item, dict)]
 
 
 def report_evidence(report: dict[str, Any]) -> list[dict[str, Any]]:

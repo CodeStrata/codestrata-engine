@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
-from typing import Any
 
 from codestrata.application.traceability.merge import merge_finding_traceability
 from codestrata.domain.findings.consolidation import (
@@ -68,9 +67,7 @@ def consolidate_findings(
             merged, group_limits = _merge_exact_group(group)
         except TraceabilityValidationError as exc:
             # Fail closed: keep members separate with limitation.
-            limitations.append(
-                f"exact duplicate identity contradiction for {finding_id}: {exc}"
-            )
+            limitations.append(f"exact duplicate identity contradiction for {finding_id}: {exc}")
             for item in sorted(group, key=lambda f: f.id):
                 id_merged.append(item)
                 original_to_canonical[item.id] = item.id
@@ -89,9 +86,7 @@ def consolidate_findings(
                 merged_evidence_ids=tuple(
                     sorted({ref.evidence_id for ref in merged.evidence_refs})
                 ),
-                member_severities=tuple(
-                    sorted({item.severity.value for item in group})
-                ),
+                member_severities=tuple(sorted({item.severity.value for item in group})),
                 limitations=group_limits,
             )
         )
@@ -138,16 +133,12 @@ def consolidate_findings(
                 merged_evidence_ids=tuple(
                     sorted({ref.evidence_id for ref in merged.evidence_refs})
                 ),
-                member_severities=tuple(
-                    sorted({item.severity.value for item in group})
-                ),
+                member_severities=tuple(sorted({item.severity.value for item in group})),
                 limitations=group_limits,
             )
         )
 
-    ordered = tuple(
-        sorted(canonical, key=lambda item: (item.rule_id, item.id, item.title))
-    )
+    ordered = tuple(sorted(canonical, key=lambda item: (item.rule_id, item.id, item.title)))
     # Ensure every original ID maps somewhere.
     for item in items:
         original_to_canonical.setdefault(item.id, item.id)
@@ -163,9 +154,7 @@ def consolidate_findings(
     )
     return FindingConsolidationResult(
         findings=ordered,
-        duplicate_groups=tuple(
-            sorted(groups, key=lambda item: item.canonical_finding_id)
-        ),
+        duplicate_groups=tuple(sorted(groups, key=lambda item: item.canonical_finding_id)),
         original_to_canonical=dict(sorted(original_to_canonical.items())),
         diagnostics=diagnostics,
         limitations=tuple(normalize_limitations(limitations)),
@@ -179,7 +168,7 @@ def consolidate_rule_evaluation(
 
     result = consolidate_findings(evaluation.findings)
     updated = RuleEvaluationResult.from_findings(
-        findings=result.findings,  # type: ignore[arg-type]
+        findings=result.findings,
         rules_evaluated=evaluation.rules_evaluated,
         rules_skipped=evaluation.rules_skipped,
     )
@@ -193,9 +182,7 @@ def remap_finding_ids(
     """Map member Finding IDs to canonical IDs and dedupe."""
 
     remapped = [
-        original_to_canonical.get(str(item), str(item))
-        for item in finding_ids
-        if str(item).strip()
+        original_to_canonical.get(str(item), str(item)) for item in finding_ids if str(item).strip()
     ]
     return sorted_unique_ids(remapped, label="finding_id")
 
@@ -257,8 +244,7 @@ def _merge_equivalent_group(
         shared = [
             item
             for item in group
-            if mapped_shared_rule_id(item.rule_id) is None
-            and str(item.id).startswith("finding:")
+            if mapped_shared_rule_id(item.rule_id) is None and str(item.id).startswith("finding:")
         ]
         preferred = sorted(shared or list(group), key=lambda item: item.id)[0]
     else:
@@ -274,9 +260,7 @@ def _merge_equivalent_group(
             continue
         if other.rule_id != merged.rule_id and kind is FindingDuplicateKind.LEGACY_OVERLAP:
             # Keep Shared Rule identity; still union evidence from legacy member.
-            other_as_shared = other.model_copy(
-                update={"rule_id": merged.rule_id, "id": other.id}
-            )
+            other_as_shared = other.model_copy(update={"rule_id": merged.rule_id, "id": other.id})
             _assert_compatible_location(merged, other_as_shared)
             merged = _merge_pair(merged, other_as_shared, limits=limits, allow_id_alias=True)
             continue
@@ -374,12 +358,12 @@ def _assert_compatible_identity(left: Finding, right: Finding) -> None:
     right_scope = (right.metadata or {}).get("measurement_scope_ref")
     if left_scope and right_scope and str(left_scope) != str(right_scope):
         raise TraceabilityValidationError("contradictory measurement_scope_ref")
-    left_graph = (left.metadata or {}).get("graph_edge_id") or (
-        left.metadata or {}
-    ).get("graph_cycle_id")
-    right_graph = (right.metadata or {}).get("graph_edge_id") or (
-        right.metadata or {}
-    ).get("graph_cycle_id")
+    left_graph = (left.metadata or {}).get("graph_edge_id") or (left.metadata or {}).get(
+        "graph_cycle_id"
+    )
+    right_graph = (right.metadata or {}).get("graph_edge_id") or (right.metadata or {}).get(
+        "graph_cycle_id"
+    )
     if left_graph and right_graph and str(left_graph) != str(right_graph):
         raise TraceabilityValidationError("contradictory graph identity")
 
@@ -398,21 +382,34 @@ def _location_fingerprint(finding: Finding) -> set[str]:
     for item in finding.evidence:
         if item.path:
             paths.add(item.path.replace("\\", "/").strip().lower())
-    for item in finding.evidence_refs:
-        loc = getattr(item, "safe_location", None)
+    for ref in finding.evidence_refs:
+        loc = getattr(ref, "safe_location", None)
         if loc:
             paths.add(str(loc).replace("\\", "/").strip().lower())
     subjects = str((finding.metadata or {}).get("subject_keys") or "")
     for part in subjects.split(","):
         token = part.strip().lower()
-        if "/" in token or token.endswith((".py", ".ts", ".js", ".java", ".cs", ".php", ".json", ".yml", ".yaml", ".env", ".toml", ".xml")):
+        if "/" in token or token.endswith(
+            (
+                ".py",
+                ".ts",
+                ".js",
+                ".java",
+                ".cs",
+                ".php",
+                ".json",
+                ".yml",
+                ".yaml",
+                ".env",
+                ".toml",
+                ".xml",
+            )
+        ):
             paths.add(token)
     return paths
 
 
-def _resolve_severity(
-    left: Finding, right: Finding
-) -> tuple[FindingSeverity, list[str]]:
+def _resolve_severity(left: Finding, right: Finding) -> tuple[FindingSeverity, list[str]]:
     if left.severity is right.severity:
         return left.severity, []
     # Same-rule identical subjects: provisional highest until Slice 5.13
@@ -445,4 +442,8 @@ def _union_finding_evidence(
         # Prefer non-empty excerpt.
         if not existing.excerpt and item.excerpt:
             by_key[key] = item
-    return tuple(sorted(by_key.values(), key=lambda item: (item.evidence_type, item.source_id, item.path or "")))
+    return tuple(
+        sorted(
+            by_key.values(), key=lambda item: (item.evidence_type, item.source_id, item.path or "")
+        )
+    )

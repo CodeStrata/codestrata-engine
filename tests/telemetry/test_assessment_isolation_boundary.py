@@ -25,9 +25,7 @@ def test_lifecycle_contract_stable() -> None:
     assert lifecycle_event_names(success=False)[1] == "operation_failed"
 
 
-def test_non_interactive_ci_no_prompt_no_home_files(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_non_interactive_ci_no_prompt_no_home_files(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))

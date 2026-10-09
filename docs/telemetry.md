@@ -43,9 +43,9 @@ pseudonymous where an installation id is used, minimal, versioned, and
 > [telemetry-session-consent.md](telemetry-session-consent.md), and
 > [telemetry-interactive-consent.md](telemetry-interactive-consent.md).
 > **Slice 9.14** cross-client verification (Engine ↔ VS Code principles, independent
-> schemas): [`../../verification/privacy_first_telemetry/README.md`](../../verification/privacy_first_telemetry/README.md).
+> schemas): `verification/privacy_first_telemetry/README.md` (not included in this export).
 > **Slice 9.15** Epic 9 completion:
-> [`../../verification/privacy_first_telemetry_completion/README.md`](../../verification/privacy_first_telemetry_completion/README.md).
+> `verification/privacy_first_telemetry_completion/README.md` (not included in this export).
 > **Epic 9 is complete** for v0.2.0: privacy-first runtimes exist; default telemetry
 > remains disabled until durable consent.
 > **Epic 10 Slice 10.1** defines the anonymous analytics **contract only**
@@ -69,9 +69,9 @@ pseudonymous where an installation id is used, minimal, versioned, and
 > no transmission or analytics persistence.
 > — language/rule aggregates only; unwired; no transmission.
 > **Slice 10.8** verifies Epic 10 privacy guarantees
-> ([`../../verification/anonymous_analytics_privacy/README.md`](../../verification/anonymous_analytics_privacy/README.md)).
+> `verification/anonymous_analytics_privacy/README.md` (not included in this export).
 > **Slice 10.9** verifies Epic 10 completion
-> ([`../../verification/anonymous_analytics_completion/README.md`](../../verification/anonymous_analytics_completion/README.md)) —
+> `verification/anonymous_analytics_completion/README.md` (not included in this export) —
 > contracts-only; production analytics collection remains **not operational**.
 > This page also describes the Phase 14.3 `TelemetryService` / CLI preference commands
 > historical surface. `codestrata telemetry show`

@@ -1,0 +1,34 @@
+api_version: codestrata.io/ruleset/v1
+kind: RuleSet
+metadata:
+  id: codestrata.dependency.core
+  version: 1.0.0
+  title: Dependency Intelligence Core
+  owner: codestrata
+extends: []
+selectors: {}
+rules:
+  dependency.unresolved-version:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  dependency.mutable-version:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  dependency.unbounded-requirement:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  dependency.conflicting-exact-versions:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  dependency.duplicate-declaration:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+deferred_rule_ids:
+  - dependency.outdated-version
+  - dependency.unused-declaration
+  - dependency.transitive-conflict

@@ -175,7 +175,9 @@ def _architecture_evidence(facts: object, languages: tuple[str, ...]) -> tuple[s
     if architecture is not None:
         for flag in (
             "has_api_layer",
+            "has_presentation_layer",
             "has_service_layer",
+            "has_state_layer",
             "has_persistence_layer",
             "has_domain_layer",
             "is_multi_application",

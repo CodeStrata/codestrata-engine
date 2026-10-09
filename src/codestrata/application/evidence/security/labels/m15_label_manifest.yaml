@@ -1,0 +1,316 @@
+api_version: codestrata.io/validation/v1
+kind: LabelManifest
+metadata:
+  id: security.flagship.e06.3
+  version: 1.0.0
+  frozen_before_tuning: true
+  measurement: M15
+  owner: codestrata
+proposed_thresholds:
+  precision: 0.95
+  recall: 0.90
+  min_positives: 20
+  min_negatives: 20
+  zero_denominator: undefined
+review:
+  primary: Sangram Gaikwad
+  independent: Abhinav
+  no_cherry_picked_exclusions: true
+  ratify_note: >-
+    Team ratifies proposed precision/recall targets before tuning.
+    Holdout labels are hidden from tuning and scored separately.
+    Independent agreement is recorded outside this author-owned manifest.
+groups:
+  - id: security.secrets
+    measurement: M10
+    rules: [security.private-key-material, security.credential-literal]
+  - id: security.configuration
+    measurement: M11
+    rules: [security.tls-verification-disabled, security.debug-enabled]
+  - id: security.known_vulnerability
+    measurement: M13
+    rules: [security.known_vulnerability]
+  - id: security.license
+    measurement: M14
+    rules: [license.disallowed]
+  - id: dependency.hygiene
+    measurement: M12
+    rules:
+      - dependency.unresolved-version
+      - dependency.mutable-version
+      - dependency.conflicting-exact-versions
+cases:
+  - {id: secrets-pos-001, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: PRIVATE KEY, path: keys/pkcs8.pem, text: MIIEvQpkcs8alpha}
+  - {id: secrets-pos-002, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: RSA PRIVATE KEY, path: keys/rsa.pem, text: MIIEowrsa001body}
+  - {id: secrets-pos-003, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: EC PRIVATE KEY, path: keys/ec.pem, text: MHKecpriv002body}
+  - {id: secrets-pos-004, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: DSA PRIVATE KEY, path: keys/dsa.pem, text: MIIEowdsa003body}
+  - {id: secrets-pos-005, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: OPENSSH PRIVATE KEY, path: keys/id_ed25519, text: b3BlbnNzaC04body}
+  - {id: secrets-pos-006, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: ENCRYPTED PRIVATE KEY, path: keys/enc.pem, text: MIIFLQenc005body}
+  - {id: secrets-pos-007, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: PGP PRIVATE KEY BLOCK, path: keys/secring.pem, text: lQIGPGP006body}
+  - {id: secrets-pos-008, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: PuTTY-User-Key-File-2, path: keys/user.key, text: AAAAB3NzaC007body}
+  - {id: secrets-pos-009, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: PRIVATE KEY, path: deploy/service.pem, text: MIIEvQsvc008canary}
+  - {id: secrets-pos-010, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: RSA PRIVATE KEY, path: certs/leaf.key, text: MIIEowleaf009body}
+  - {id: secrets-pos-011, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: EC PRIVATE KEY, path: tls/ecdsa.key, text: MHKecdsa010body}
+  - {id: secrets-pos-012, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: published, fixture: planted_pem, header: OPENSSH PRIVATE KEY, path: .ssh/id_rsa, text: b3BlbnNzaC011body}
+  - {id: secrets-cred-pos-001, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: app.properties, text: db.password=planted-db-password-alpha}
+  - {id: secrets-cred-pos-002, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: config/secrets.properties, text: API_TOKEN=planted-api-token-bravo}
+  - {id: secrets-cred-pos-003, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: settings.properties, text: aws_secret_access_key=planted-aws-secret-charlie}
+  - {id: secrets-cred-pos-004, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: application.properties, text: client_secret=planted-oauth-client-delta}
+  - {id: secrets-cred-pos-005, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: local.properties, text: access_key=planted-access-key-echo}
+  - {id: secrets-cred-pos-006, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: creds.properties, text: jdbc.password=planted-jdbc-password-foxtrot}
+  - {id: secrets-cred-pos-007, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: service.properties, text: api_key=planted-service-api-key-golf}
+  - {id: secrets-cred-pos-008, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: auth.properties, text: secret_key=planted-hmac-secret-hotel}
+  - {id: secrets-cred-pos-009, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: smtp.properties, text: smtp.password=planted-smtp-password-india}
+  - {id: secrets-cred-pos-010, group: security.secrets, rule_id: security.credential-literal, expected: positive, split: published, fixture: planted_credential, path: ci.properties, text: deploy_token=planted-deploy-token-juliet}
+  - {id: secrets-neg-001, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: PUBLIC KEY, path: keys/public.pem, text: MIIBIjANBgkqhkiG9w0BAQEF}
+  - {id: secrets-neg-002, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: RSA PUBLIC KEY, path: keys/rsa-pub.pem, text: MIIBCgKCAQEArsapub002}
+  - {id: secrets-neg-003, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: EC PUBLIC KEY, path: keys/ec-pub.pem, text: MHKecpub003body}
+  - {id: secrets-neg-004, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: DSA PUBLIC KEY, path: keys/dsa-pub.pem, text: MIIBCgdsapub004}
+  - {id: secrets-neg-005, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: CERTIFICATE, path: certs/site.crt, text: MIIB0DCCAT2gAwIBAgIUsite}
+  - {id: secrets-neg-006, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: PUBLIC KEY, path: tls/server.pub, text: MIIBIjANBgkqhkiG9w0server}
+  - {id: secrets-neg-007, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: CERTIFICATE, path: certs/leaf.crt, text: MIIB0DCCAT2gAwIBAgIUleaf}
+  - {id: secrets-neg-008, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: RSA PUBLIC KEY, path: deploy/rsa.pub, text: MIIBCgKCAQEAdeploy008}
+  - {id: secrets-neg-009, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: PUBLIC KEY, path: ssh/id_rsa.pub.pem, text: MIIBIjANBgkqhkiG9w0ssh}
+  - {id: secrets-neg-010, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: CERTIFICATE, path: ca/root.crt, text: MIIB0DCCAT2gAwIBAgIUroot}
+  - {id: secrets-neg-011, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: EC PUBLIC KEY, path: tls/ecdsa.pub, text: MHKecdsaPub011}
+  - {id: secrets-neg-012, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: published, fixture: public_lookalike, header: PUBLIC KEY, path: keys/another.pem, text: MIIBIjANBgkqhkiG9w0more}
+  - {id: secrets-ph-neg-001, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/db.properties, text: db.password=changeme}
+  - {id: secrets-ph-neg-002, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/api.properties, text: api_token=your_api_key}
+  - {id: secrets-ph-neg-003, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/oauth.properties, text: client_secret=replace_me}
+  - {id: secrets-ph-neg-004, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/app.properties, text: app.secret=example}
+  - {id: secrets-ph-neg-005, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/dummy.properties, text: login.password=dummy}
+  - {id: secrets-ph-neg-006, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/access.env, text: access_key=xxx}
+  - {id: secrets-ph-neg-007, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/todo.properties, text: api_key=todo}
+  - {id: secrets-ph-neg-008, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/sample.properties, text: secret_key=not_a_real_secret}
+  - {id: secrets-ph-neg-009, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/cred.properties, text: service.credential=password}
+  - {id: secrets-ph-neg-010, group: security.secrets, rule_id: security.credential-literal, expected: negative, split: published, fixture: placeholder_credential, path: placeholders/token.properties, text: deploy_token=your-token-here}
+  - {id: config-pos-001, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/verify-ssl.properties, text: verify_ssl=false}
+  - {id: config-pos-002, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/ssl-verify.properties, text: ssl_verify=false}
+  - {id: config-pos-003, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/tls-verify.properties, text: tls_verify=false}
+  - {id: config-pos-004, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/verify-tls.properties, text: verify_tls=false}
+  - {id: config-pos-005, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/trust-all.properties, text: trust_all=true}
+  - {id: config-pos-006, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/insecure.properties, text: insecure=true}
+  - {id: config-pos-007, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/ssl-insecure.properties, text: ssl_insecure=true}
+  - {id: config-pos-008, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/tls-insecure.properties, text: tls_insecure=true}
+  - {id: config-pos-009, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/verify-ssl-zero.properties, text: verify_ssl=no}
+  - {id: config-pos-010, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/ssl-verify-no.properties, text: ssl_verify=no}
+  - {id: config-pos-011, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: cfg/tls-verify-off.properties, text: tls_verify=off}
+  - {id: config-pos-012, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: published, fixture: tls_disabled, path: deploy/client.properties, text: verify_tls=false}
+  - {id: config-debug-pos-001, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: app/debug.properties, text: debug=true}
+  - {id: config-debug-pos-002, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: app/spring.properties, text: app.debug=true}
+  - {id: config-debug-pos-003, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: app/server.properties, text: server.debug=yes}
+  - {id: config-debug-pos-004, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: app/feature.properties, text: feature.debug=on}
+  - {id: config-debug-pos-005, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: app/one.properties, text: debug=yes}
+  - {id: config-debug-pos-006, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: prod/debug-enabled.properties, text: debug.enabled=true}
+  - {id: config-debug-pos-007, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: prod/web.properties, text: web.debug=true}
+  - {id: config-debug-pos-008, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: prod/api.properties, text: api.debug=yes}
+  - {id: config-debug-pos-009, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: prod/admin.properties, text: admin.debug=on}
+  - {id: config-debug-pos-010, group: security.configuration, rule_id: security.debug-enabled, expected: positive, split: published, fixture: debug_enabled, path: prod/legacy.properties, text: debug.mode=true}
+  - {id: config-neg-001, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/verify-ssl-on.properties, text: verify_ssl=true}
+  - {id: config-neg-002, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/ssl-verify-on.properties, text: ssl_verify=true}
+  - {id: config-neg-003, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/tls-verify-on.properties, text: tls_verify=true}
+  - {id: config-neg-004, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/verify-tls-on.properties, text: verify_tls=true}
+  - {id: config-neg-005, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/trust-all-off.properties, text: trust_all=false}
+  - {id: config-neg-006, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/insecure-off.properties, text: insecure=false}
+  - {id: config-neg-007, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/ssl-insecure-off.properties, text: ssl_insecure=false}
+  - {id: config-neg-008, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/tls-insecure-off.properties, text: tls_insecure=false}
+  - {id: config-neg-009, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/verify-ssl-one.properties, text: verify_ssl=on}
+  - {id: config-neg-010, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/ssl-verify-yes.properties, text: ssl_verify=yes}
+  - {id: config-neg-011, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: cfg/tls-verify-onword.properties, text: tls_verify=on}
+  - {id: config-neg-012, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: published, fixture: tls_enabled, path: deploy/secure-client.properties, text: verify_tls=true}
+  - {id: config-debug-neg-001, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: app/debug-off.properties, text: debug=false}
+  - {id: config-debug-neg-002, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: app/spring-off.properties, text: app.debug=false}
+  - {id: config-debug-neg-003, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: app/server-off.properties, text: server.debug=no}
+  - {id: config-debug-neg-004, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: app/feature-off.properties, text: feature.debug=off}
+  - {id: config-debug-neg-005, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: app/zero.properties, text: debug=off}
+  - {id: config-debug-neg-006, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: prod/debug-disabled.properties, text: debug.enabled=false}
+  - {id: config-debug-neg-007, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: prod/web-off.properties, text: web.debug=false}
+  - {id: config-debug-neg-008, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: prod/api-off.properties, text: api.debug=no}
+  - {id: config-debug-neg-009, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: prod/admin-off.properties, text: admin.debug=off}
+  - {id: config-debug-neg-010, group: security.configuration, rule_id: security.debug-enabled, expected: negative, split: published, fixture: debug_disabled, path: prod/legacy-off.properties, text: debug.mode=false}
+  - {id: hygiene-unres-pos-001, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: com.example:core, raw_version: "${missing.version}"}
+  - {id: hygiene-unres-pos-002, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: com.example:lib-api, raw_version: "${lib.version}"}
+  - {id: hygiene-unres-pos-003, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: org.sample:dep, raw_version: "${dep.ver}"}
+  - {id: hygiene-unres-pos-004, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: org.sample:artifact, raw_version: "${artifact.version}"}
+  - {id: hygiene-unres-pos-005, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: io.demo:commons, raw_version: "${commons.version}"}
+  - {id: hygiene-unres-pos-006, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: io.demo:plugin, raw_version: "${plugin.version}"}
+  - {id: hygiene-unres-pos-007, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: com.acme:bom, raw_version: "${bom.version}"}
+  - {id: hygiene-unres-pos-008, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: positive, split: published, fixture: unresolved_property, identity: com.acme:ref, raw_version: "${unresolved.ref}"}
+  - {id: hygiene-mut-pos-001, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: com.example:snap-a, raw_version: 1.0.0-SNAPSHOT}
+  - {id: hygiene-mut-pos-002, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: com.example:snap-b, raw_version: 2.1.0-SNAPSHOT}
+  - {id: hygiene-mut-pos-003, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: org.sample:latest, raw_version: LATEST}
+  - {id: hygiene-mut-pos-004, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: org.sample:release-token, raw_version: latest.release}
+  - {id: hygiene-mut-pos-005, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: io.demo:rel, raw_version: release}
+  - {id: hygiene-mut-pos-006, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: io.demo:plus, raw_version: 1.+}
+  - {id: hygiene-mut-pos-007, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: com.acme:plus-minor, raw_version: 2.3.+}
+  - {id: hygiene-mut-pos-008, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: published, fixture: snapshot_version, identity: com.acme:dev-branch, raw_version: dev-main}
+  - {id: hygiene-conf-pos-001, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: positive, split: published, fixture: exact_conflict, identity: com.example:conflict-a, raw_version: 1.0.0, other_version: 2.0.0}
+  - {id: hygiene-conf-pos-002, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: positive, split: published, fixture: exact_conflict, identity: com.example:conflict-b, raw_version: 3.1.0, other_version: 3.2.0}
+  - {id: hygiene-conf-pos-003, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: positive, split: published, fixture: exact_conflict, identity: org.sample:conflict-c, raw_version: 0.9.0, other_version: 1.0.0}
+  - {id: hygiene-conf-pos-004, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: positive, split: published, fixture: exact_conflict, identity: io.demo:conflict-d, raw_version: 4.4.4, other_version: 5.0.0}
+  - {id: hygiene-conf-pos-005, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: positive, split: published, fixture: exact_conflict, identity: com.acme:conflict-e, raw_version: 10.0.0, other_version: 10.1.0}
+  - {id: hygiene-conf-pos-006, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: positive, split: published, fixture: exact_conflict, identity: com.acme:conflict-f, raw_version: 8.8.8, other_version: 9.9.9}
+  - {id: hygiene-unres-neg-001, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: com.example:core, raw_version: "${core.version}", resolved: 1.2.3}
+  - {id: hygiene-unres-neg-002, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: com.example:lib-api, raw_version: "${api.version}", resolved: 2.0.0}
+  - {id: hygiene-unres-neg-003, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: org.sample:dep, raw_version: "${dep.version}", resolved: 3.1.4}
+  - {id: hygiene-unres-neg-004, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: org.sample:artifact, raw_version: "${art.version}", resolved: 4.5.6}
+  - {id: hygiene-unres-neg-005, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: io.demo:commons, raw_version: "${commons.ver}", resolved: 10.0.1}
+  - {id: hygiene-unres-neg-006, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: io.demo:plugin, raw_version: "${plugin.ver}", resolved: 0.9.0}
+  - {id: hygiene-unres-neg-007, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: com.acme:bom, raw_version: "${bom.ver}", resolved: 8.8.8}
+  - {id: hygiene-unres-neg-008, group: dependency.hygiene, rule_id: dependency.unresolved-version, expected: negative, split: published, fixture: resolved_property, identity: com.acme:ref, raw_version: "${ref.ver}", resolved: 2024.1.0}
+  - {id: hygiene-mut-neg-001, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: com.example:pin-a, raw_version: 1.2.3}
+  - {id: hygiene-mut-neg-002, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: com.example:pin-b, raw_version: 2.0.0}
+  - {id: hygiene-mut-neg-003, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: org.sample:pin-c, raw_version: 3.1.4}
+  - {id: hygiene-mut-neg-004, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: org.sample:pin-d, raw_version: 4.5.6}
+  - {id: hygiene-mut-neg-005, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: io.demo:pin-e, raw_version: 10.0.1}
+  - {id: hygiene-mut-neg-006, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: io.demo:pin-f, raw_version: 0.9.0}
+  - {id: hygiene-mut-neg-007, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: com.acme:pin-g, raw_version: 8.8.8}
+  - {id: hygiene-mut-neg-008, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: published, fixture: pinned_version, identity: com.acme:pin-h, raw_version: 2024.1.0}
+  - {id: hygiene-conf-neg-001, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: negative, split: published, fixture: aligned_versions, identity: com.example:align-a, raw_version: 1.0.0, other_version: 1.0.0}
+  - {id: hygiene-conf-neg-002, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: negative, split: published, fixture: aligned_versions, identity: com.example:align-b, raw_version: 3.1.0, other_version: 3.1.0}
+  - {id: hygiene-conf-neg-003, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: negative, split: published, fixture: aligned_versions, identity: org.sample:align-c, raw_version: 0.9.0, other_version: 0.9.0}
+  - {id: hygiene-conf-neg-004, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: negative, split: published, fixture: aligned_versions, identity: io.demo:align-d, raw_version: 4.4.4, other_version: 4.4.4}
+  - {id: hygiene-conf-neg-005, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: negative, split: published, fixture: aligned_versions, identity: com.acme:align-e, raw_version: 10.0.0, other_version: 10.0.0}
+  - {id: hygiene-conf-neg-006, group: dependency.hygiene, rule_id: dependency.conflicting-exact-versions, expected: negative, split: published, fixture: aligned_versions, identity: com.acme:align-f, raw_version: 8.8.8, other_version: 8.8.8}
+  - {id: secrets-holdout-pos-001, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: holdout, fixture: holdout_rsa_private_key, header: RSA PRIVATE KEY, path: holdout/rsa-a.key, text: MIIEowholdoutRsaA}
+  - {id: secrets-holdout-pos-002, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: holdout, fixture: holdout_rsa_private_key, header: EC PRIVATE KEY, path: holdout/ec-b.key, text: MHKholdoutEcB}
+  - {id: secrets-holdout-pos-003, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: holdout, fixture: holdout_rsa_private_key, header: OPENSSH PRIVATE KEY, path: holdout/id_ed25519, text: b3BlbnNzaCholdoutC}
+  - {id: secrets-holdout-pos-004, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: holdout, fixture: holdout_rsa_private_key, header: DSA PRIVATE KEY, path: holdout/dsa-d.key, text: MIIEowholdoutDsaD}
+  - {id: secrets-holdout-pos-005, group: security.secrets, rule_id: security.private-key-material, expected: positive, split: holdout, fixture: holdout_rsa_private_key, header: ENCRYPTED PRIVATE KEY, path: holdout/enc-e.pem, text: MIIFLholdoutEncE}
+  - {id: secrets-holdout-neg-001, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: holdout, fixture: holdout_public_certificate, header: CERTIFICATE, path: holdout/cert-a.crt, text: MIIB0holdoutCertA}
+  - {id: secrets-holdout-neg-002, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: holdout, fixture: holdout_public_certificate, header: PUBLIC KEY, path: holdout/pub-b.pem, text: MIIBIjholdoutPubB}
+  - {id: secrets-holdout-neg-003, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: holdout, fixture: holdout_public_certificate, header: RSA PUBLIC KEY, path: holdout/rsa-pub-c.pem, text: MIIBCgholdoutRsaC}
+  - {id: secrets-holdout-neg-004, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: holdout, fixture: holdout_public_certificate, header: CERTIFICATE, path: holdout/cert-d.crt, text: MIIB0holdoutCertD}
+  - {id: secrets-holdout-neg-005, group: security.secrets, rule_id: security.private-key-material, expected: negative, split: holdout, fixture: holdout_public_certificate, header: EC PUBLIC KEY, path: holdout/ec-pub-e.pem, text: MHKholdoutEcPubE}
+  - {id: config-holdout-pos-001, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: holdout, fixture: holdout_insecure_skip_verify, path: holdout/tls-a.properties, text: verify_ssl=false}
+  - {id: config-holdout-pos-002, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: holdout, fixture: holdout_insecure_skip_verify, path: holdout/tls-b.properties, text: ssl_verify=false}
+  - {id: config-holdout-pos-003, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: holdout, fixture: holdout_insecure_skip_verify, path: holdout/tls-c.properties, text: trust_all=true}
+  - {id: config-holdout-pos-004, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: holdout, fixture: holdout_insecure_skip_verify, path: holdout/tls-d.properties, text: insecure=true}
+  - {id: config-holdout-pos-005, group: security.configuration, rule_id: security.tls-verification-disabled, expected: positive, split: holdout, fixture: holdout_insecure_skip_verify, path: holdout/tls-e.properties, text: tls_insecure=true}
+  - {id: config-holdout-neg-001, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: holdout, fixture: holdout_tls_required, path: holdout/secure-a.properties, text: verify_ssl=true}
+  - {id: config-holdout-neg-002, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: holdout, fixture: holdout_tls_required, path: holdout/secure-b.properties, text: ssl_verify=true}
+  - {id: config-holdout-neg-003, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: holdout, fixture: holdout_tls_required, path: holdout/secure-c.properties, text: trust_all=false}
+  - {id: config-holdout-neg-004, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: holdout, fixture: holdout_tls_required, path: holdout/secure-d.properties, text: insecure=false}
+  - {id: config-holdout-neg-005, group: security.configuration, rule_id: security.tls-verification-disabled, expected: negative, split: holdout, fixture: holdout_tls_required, path: holdout/secure-e.properties, text: tls_insecure=false}
+  - {id: hygiene-holdout-pos-001, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: holdout, fixture: holdout_latest_release, identity: holdout:lib-latest, raw_version: LATEST}
+  - {id: hygiene-holdout-pos-002, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: holdout, fixture: holdout_latest_release, identity: holdout:lib-rel, raw_version: latest.release}
+  - {id: hygiene-holdout-pos-003, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: holdout, fixture: holdout_latest_release, identity: holdout:lib-snap, raw_version: 9.0.0-SNAPSHOT}
+  - {id: hygiene-holdout-pos-004, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: holdout, fixture: holdout_latest_release, identity: holdout:lib-plus, raw_version: 1.+}
+  - {id: hygiene-holdout-pos-005, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: positive, split: holdout, fixture: holdout_latest_release, identity: holdout:lib-release, raw_version: release}
+  - {id: hygiene-holdout-neg-001, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: holdout, fixture: holdout_exact_pin, identity: holdout:pin-a, raw_version: 2.1.0}
+  - {id: hygiene-holdout-neg-002, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: holdout, fixture: holdout_exact_pin, identity: holdout:pin-b, raw_version: 3.4.5}
+  - {id: hygiene-holdout-neg-003, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: holdout, fixture: holdout_exact_pin, identity: holdout:pin-c, raw_version: 6.6.6}
+  - {id: hygiene-holdout-neg-004, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: holdout, fixture: holdout_exact_pin, identity: holdout:pin-d, raw_version: 7.0.1}
+  - {id: hygiene-holdout-neg-005, group: dependency.hygiene, rule_id: dependency.mutable-version, expected: negative, split: holdout, fixture: holdout_exact_pin, identity: holdout:pin-e, raw_version: 11.2.0}
+  - {id: vuln-pos-001, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "1.0.0", introduced: "0", fixed: "2.0.0"}
+  - {id: vuln-pos-002, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "1.2.3", introduced: "1.2.3", fixed: "1.2.4"}
+  - {id: vuln-pos-003, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "1.9.9", introduced: "1.0.0", fixed: "2.0.0"}
+  - {id: vuln-pos-004, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "4.5.6", listed: "4.5.6"}
+  - {id: vuln-pos-005, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "0.0.1", introduced: "0", fixed: "0.0.2"}
+  - {id: vuln-pos-006, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "10.0.0", introduced: "9.0.0", fixed: "11.0.0"}
+  - {id: vuln-pos-007, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "2.1.0-rc.1", introduced: "2.1.0-rc.1", fixed: "2.1.0"}
+  - {id: vuln-pos-008, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "3.0.0", introduced: "0", last_affected: "3.0.0"}
+  - {id: vuln-pos-009, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "7.8.9", introduced: "7.0.0", fixed: "8.0.0"}
+  - {id: vuln-pos-010, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "0.9.0", introduced: "0.1.0", fixed: "1.0.0"}
+  - {id: vuln-pos-011, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "12.0.1", introduced: "12.0.0", fixed: "12.0.2"}
+  - {id: vuln-pos-012, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "8.8.8", introduced: "8.0.0", limit: "9.0.0"}
+  - {id: vuln-pos-013, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "6.0.0-alpha.2", introduced: "6.0.0-alpha.1", fixed: "6.0.0-beta.1"}
+  - {id: vuln-pos-014, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "15.2.0", introduced: "15.0.0", fixed: "15.3.0"}
+  - {id: vuln-pos-015, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "0.10.1", introduced: "0.10.0", fixed: "0.11.0"}
+  - {id: vuln-pos-016, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "20.0.0", introduced: "19.0.0", fixed: "21.0.0"}
+  - {id: vuln-pos-017, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "1.4.0", introduced: "1.4.0", fixed: "1.5.0"}
+  - {id: vuln-pos-018, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "9.9.1", introduced: "9.9.0", fixed: "9.9.2"}
+  - {id: vuln-pos-019, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "4.0.0", introduced: "3.0.0", fixed: "5.0.0"}
+  - {id: vuln-pos-020, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "100.0.0", introduced: "99.0.0", fixed: "101.0.0"}
+  - {id: vuln-pos-021, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "2.2.2", listed: "2.2.2"}
+  - {id: vuln-pos-022, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: published, fixture: vuln_case, version: "5.5.5", introduced: "5.0.0", fixed: "6.0.0"}
+  - {id: vuln-neg-001, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "2.0.0", introduced: "0", fixed: "2.0.0"}
+  - {id: vuln-neg-002, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "3.0.0", introduced: "0", fixed: "2.0.0"}
+  - {id: vuln-neg-003, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "1.0.0", introduced: "0", fixed: "2.0.0", withdrawn: true}
+  - {id: vuln-neg-004, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "1.0.0-rc.1", introduced: "0", fixed: "2.0.0"}
+  - {id: vuln-neg-005, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "0.5.0", introduced: "1.0.0", fixed: "2.0.0"}
+  - {id: vuln-neg-006, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "9.0.0", introduced: "0", fixed: "9.0.0"}
+  - {id: vuln-neg-007, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "1.0.1", listed: "1.0.0"}
+  - {id: vuln-neg-008, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "5.0.0", introduced: "0", last_affected: "4.0.0"}
+  - {id: vuln-neg-009, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "11.0.0", introduced: "9.0.0", limit: "11.0.0"}
+  - {id: vuln-neg-010, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "2.0.0-rc.1", introduced: "1.0.0", fixed: "2.0.0"}
+  - {id: vuln-neg-011, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "4.0.0", introduced: "0", fixed: "4.0.0"}
+  - {id: vuln-neg-012, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "6.0.0", introduced: "0", last_affected: "5.9.0"}
+  - {id: vuln-neg-013, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "8.0.0", introduced: "8.0.1", fixed: "9.0.0"}
+  - {id: vuln-neg-014, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "0.1.0", introduced: "0", fixed: "1.0.0", withdrawn: true}
+  - {id: vuln-neg-015, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "1.2.3-alpha", introduced: "1.0.0", fixed: "2.0.0"}
+  - {id: vuln-neg-016, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "50.0.0", introduced: "0", fixed: "49.0.0"}
+  - {id: vuln-neg-017, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "3.1.0", listed: "3.0.0"}
+  - {id: vuln-neg-018, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "0.0.1", introduced: "0.0.2", fixed: "0.0.3"}
+  - {id: vuln-neg-019, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "10.0.0", introduced: "0", limit: "10.0.0"}
+  - {id: vuln-neg-020, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "2.1.0", introduced: "2.1.0-rc.1", fixed: "2.1.0"}
+  - {id: vuln-neg-021, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "7.0.0", introduced: "7.0.1", fixed: "8.0.0"}
+  - {id: vuln-neg-022, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: published, fixture: vuln_case, version: "12.0.0", introduced: "0", fixed: "11.0.0"}
+  - {id: vuln-hold-pos-001, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: holdout, fixture: vuln_holdout, version: "4.1.0", introduced: "4.0.0", fixed: "4.2.0"}
+  - {id: vuln-hold-pos-002, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: holdout, fixture: vuln_holdout, version: "13.0.0-beta.1", introduced: "13.0.0-alpha.1", fixed: "13.0.0-beta.2"}
+  - {id: vuln-hold-pos-003, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: holdout, fixture: vuln_holdout, version: "8.1.4", listed: "8.1.4"}
+  - {id: vuln-hold-pos-004, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: holdout, fixture: vuln_holdout, version: "0.3.0", introduced: "0.2.0", last_affected: "0.3.0"}
+  - {id: vuln-hold-pos-005, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: positive, split: holdout, fixture: vuln_holdout, version: "30.1.0", introduced: "30.0.0", limit: "31.0.0"}
+  - {id: vuln-hold-neg-001, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: holdout, fixture: vuln_holdout, version: "4.2.0", introduced: "4.0.0", fixed: "4.2.0"}
+  - {id: vuln-hold-neg-002, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: holdout, fixture: vuln_holdout, version: "13.0.0-beta.1", introduced: "0", fixed: "20.0.0"}
+  - {id: vuln-hold-neg-003, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: holdout, fixture: vuln_holdout, version: "8.1.5", listed: "8.1.4"}
+  - {id: vuln-hold-neg-004, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: holdout, fixture: vuln_holdout, version: "4.1.0", introduced: "4.0.0", fixed: "5.0.0", withdrawn: true}
+  - {id: vuln-hold-neg-005, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: negative, split: holdout, fixture: vuln_holdout, version: "0.4.0", introduced: "0.2.0", last_affected: "0.3.0"}
+  - {id: lic-pos-001, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-3.0-only}
+  - {id: lic-pos-002, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-2.0-only}
+  - {id: lic-pos-003, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: AGPL-3.0-only}
+  - {id: lic-pos-004, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-2.1-only}
+  - {id: lic-pos-005, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-3.0-only}
+  - {id: lic-pos-006, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-3.0-or-later}
+  - {id: lic-pos-007, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-2.0-or-later}
+  - {id: lic-pos-008, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: AGPL-3.0-or-later}
+  - {id: lic-pos-009, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-2.1-or-later}
+  - {id: lic-pos-010, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-3.0-or-later}
+  - {id: lic-pos-011, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-3.0-only AND MIT}
+  - {id: lic-pos-012, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-2.0-only AND Apache-2.0}
+  - {id: lic-pos-013, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: AGPL-3.0-only AND ISC}
+  - {id: lic-pos-014, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-2.1-only AND BSD-3-Clause}
+  - {id: lic-pos-015, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-3.0-only WITH Autoconf-exception-3.0}
+  - {id: lic-pos-016, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-2.0-only WITH Classpath-exception-2.0}
+  - {id: lic-pos-017, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-2.1-only OR GPL-3.0-only}
+  - {id: lic-pos-018, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: AGPL-3.0-or-later AND MIT}
+  - {id: lic-pos-019, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-3.0-or-later AND Apache-2.0}
+  - {id: lic-pos-020, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: LGPL-3.0-or-later AND BSD-2-Clause}
+  - {id: lic-pos-021, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: GPL-2.0-or-later AND ISC}
+  - {id: lic-pos-022, group: security.license, rule_id: license.disallowed, expected: positive, split: published, fixture: spdx_expression, expression: AGPL-3.0-only OR GPL-2.0-only}
+  - {id: lic-neg-001, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: MIT}
+  - {id: lic-neg-002, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: Apache-2.0}
+  - {id: lic-neg-003, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: BSD-2-Clause}
+  - {id: lic-neg-004, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: BSD-3-Clause}
+  - {id: lic-neg-005, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: ISC}
+  - {id: lic-neg-006, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: 0BSD}
+  - {id: lic-neg-007, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: Unlicense}
+  - {id: lic-neg-008, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: CC0-1.0}
+  - {id: lic-neg-009, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: BSL-1.0}
+  - {id: lic-neg-010, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: PSF-2.0}
+  - {id: lic-neg-011, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: Python-2.0}
+  - {id: lic-neg-012, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: Zlib}
+  - {id: lic-neg-013, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: CC-BY-4.0}
+  - {id: lic-neg-014, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: WTFPL}
+  - {id: lic-neg-015, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: MIT OR Apache-2.0}
+  - {id: lic-neg-016, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: MIT OR BSD-3-Clause}
+  - {id: lic-neg-017, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: MIT OR ISC}
+  - {id: lic-neg-018, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: Apache-2.0 OR BSD-2-Clause}
+  - {id: lic-neg-019, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: MIT AND Apache-2.0}
+  - {id: lic-neg-020, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: BSD-3-Clause AND ISC}
+  - {id: lic-neg-021, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: MIT OR 0BSD}
+  - {id: lic-neg-022, group: security.license, rule_id: license.disallowed, expected: negative, split: published, fixture: spdx_expression, expression: Apache-2.0 AND MIT}
+  - {id: lic-hold-pos-001, group: security.license, rule_id: license.disallowed, expected: positive, split: holdout, fixture: spdx_holdout, expression: EPL-1.0}
+  - {id: lic-hold-pos-002, group: security.license, rule_id: license.disallowed, expected: positive, split: holdout, fixture: spdx_holdout, expression: EPL-2.0}
+  - {id: lic-hold-pos-003, group: security.license, rule_id: license.disallowed, expected: positive, split: holdout, fixture: spdx_holdout, expression: EUPL-1.2}
+  - {id: lic-hold-pos-004, group: security.license, rule_id: license.disallowed, expected: positive, split: holdout, fixture: spdx_holdout, expression: CDDL-1.0}
+  - {id: lic-hold-pos-005, group: security.license, rule_id: license.disallowed, expected: positive, split: holdout, fixture: spdx_holdout, expression: MPL-2.0}
+  - {id: lic-hold-neg-001, group: security.license, rule_id: license.disallowed, expected: negative, split: holdout, fixture: spdx_holdout, expression: Artistic-2.0}
+  - {id: lic-hold-neg-002, group: security.license, rule_id: license.disallowed, expected: negative, split: holdout, fixture: spdx_holdout, expression: MIT WITH LLVM-exception}
+  - {id: lic-hold-neg-003, group: security.license, rule_id: license.disallowed, expected: negative, split: holdout, fixture: spdx_holdout, expression: Apache-2.0 OR ISC}
+  - {id: lic-hold-neg-004, group: security.license, rule_id: license.disallowed, expected: negative, split: holdout, fixture: spdx_holdout, expression: BSD-2-Clause OR Zlib}
+  - {id: lic-hold-neg-005, group: security.license, rule_id: license.disallowed, expected: negative, split: holdout, fixture: spdx_holdout, expression: 0BSD OR Unlicense}
+unsupported:
+  - {id: secrets-unsup-encoded, group: security.secrets, rule_id: security.private-key-material, expected: unsupported, split: published, fixture: encoded_pem, supported: false}
+  - {id: license-unsup-malformed, group: security.license, rule_id: license.disallowed, expected: unsupported, split: published, fixture: malformed_license, supported: false}
+  - {id: vuln-unsup-stale, group: security.known_vulnerability, rule_id: security.known_vulnerability, expected: unsupported, split: published, fixture: stale_feed, supported: false}

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import json
-
 import pytest
 from pydantic import ValidationError
 
@@ -45,7 +43,6 @@ from codestrata.domain.traceability import (
     EvidenceConfidenceLevel,
     EvidenceKind,
     EvidenceLocation,
-    EvidenceProductionMode,
     EvidenceRef,
     TraceabilityValidationError,
 )
@@ -263,14 +260,17 @@ def test_mapper_and_customer_json_preserve_finding_confidence() -> None:
         FindingConfidenceLevel.LIMITED,
     }
     assert finding.metadata["confidence"] == "certain"
-    assert finding.id == Finding.create(
-        rule_id=finding.rule_id,
-        title=finding.title,
-        description=finding.description,
-        severity=finding.severity,
-        category=finding.category,
-        subject_keys=("config/key.pem",),
-    ).id
+    assert (
+        finding.id
+        == Finding.create(
+            rule_id=finding.rule_id,
+            title=finding.title,
+            description=finding.description,
+            severity=finding.severity,
+            category=finding.category,
+            subject_keys=("config/key.pem",),
+        ).id
+    )
 
     customer = CustomerFinding(
         id=finding.id,
@@ -339,9 +339,7 @@ def test_merge_recomputes_and_rejects_contradictory_rule_confidence() -> None:
             "metadata": {
                 **right.metadata,
                 "rule_confidence_level": "moderate",
-                "rule_confidence": _rule(RuleConfidenceLevel.MODERATE).model_dump(
-                    mode="json"
-                ),
+                "rule_confidence": _rule(RuleConfidenceLevel.MODERATE).model_dump(mode="json"),
             }
         }
     )

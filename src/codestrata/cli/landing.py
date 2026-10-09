@@ -490,9 +490,7 @@ def render_landing(
         welcome = (
             "Welcome to CodeStrata Community Edition." if width >= 42 else "Welcome to CodeStrata."
         )
-        blocks.append(
-            _center_styled(welcome, palette.brand_statement, width, enabled=use_color)
-        )
+        blocks.append(_center_styled(welcome, palette.brand_statement, width, enabled=use_color))
         blocks.append(Text(""))
 
     blocks.extend(

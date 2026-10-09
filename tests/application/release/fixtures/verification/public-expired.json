@@ -1,0 +1,70 @@
+{
+  "artifact_bytes": "Y29kZXN0cmF0YS1lbmdpbmUtcHVibGljLWFydGlmYWN0LXYxLjAuMAo=",
+  "bundle": {
+    "mediaType": "application/vnd.dev.sigstore.bundle.v0.3+json",
+    "messageSignature": {
+      "messageDigest": {
+        "algorithm": "SHA2_256",
+        "digest": "Fko9qrTlhhvv62iybMXA5f++GAF3FRWvQeLZtzoXik0="
+      },
+      "signature": "MEUCIF2zqIBGrkexvmWqCIFH1yEaOabPBqGUTRVeYNqNtvMrAiEAp70CXWdUK+gllODGz46Er3Hk+xsEkHW7X3+SKLmMk98="
+    },
+    "verificationMaterial": {
+      "certificate": {
+        "rawBytes": "MIICEzCCAbmgAwIBAgIUAo2CNwPAJndj7GdMwsb3g0JC80wwCgYIKoZIzj0EAwIwITEfMB0GA1UEAwwWQ29kZVN0cmF0YSBUZXN0IEZ1bGNpbzAeFw0yNjAxMDEwMDAwMDBaFw0yNjA2MDEwMDAwMDBaMCExHzAdBgNVBAMMFmNvZGVzdHJhdGEtcmVsZWFzZS1ib3QwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAAS+5tV8uDeaSncGi9dgN9QAIxT9TmKJqmZFXQ+cCmmCGlhgGs8WYzgWe5LR5JRve8DlPpnl44iLm4trpnyv4r5Ao4HOMIHLMGkGA1UdEQRiMGCGXmh0dHBzOi8vZ2l0aHViLmNvbS9Db2RlU3RyYXRhL2NvZGVzdHJhdGEtZW5naW5lLy5naXRodWIvd29ya2Zsb3dzL3JlbGVhc2UueW1sQHJlZnMvdGFncy92MC4yLjEwOQYKKwYBBAGDvzABAQQraHR0cHM6Ly90b2tlbi5hY3Rpb25zLmdpdGh1YnVzZXJjb250ZW50LmNvbTATBgNVHSUEDDAKBggrBgEFBQcDAzAOBgNVHQ8BAf8EBAMCB4AwCgYIKoZIzj0EAwIDSAAwRQIgb9IZv6pgkAwgZDQcLG8rPkXtcw4XoyDMN6PrCsSVqCcCIQDsYJxZshGBKvM91mNXT0+GcM24PWRzRxpxqeHMvKlsSg=="
+      },
+      "tlogEntries": [
+        {
+          "canonicalizedBody": "eyJhcGlWZXJzaW9uIjoiMC4wLjEiLCJraW5kIjoiaGFzaGVkcmVrb3JkIiwic3BlYyI6eyJkYXRhIjp7Imhhc2giOnsiYWxnb3JpdGhtIjoic2hhMjU2IiwidmFsdWUiOiIxNjRhM2RhYWI0ZTU4NjFiZWZlYjY4YjI2Y2M1YzBlNWZmYmUxODAxNzcxNTE1YWY0MWUyZDliNzNhMTc4YTRkIn19LCJzaWduYXR1cmUiOnsiY29udGVudCI6Ik1FVUNJRjJ6cUlCR3JrZXh2bVdxQ0lGSDF5RWFPYWJQQnFHVVRSVmVZTnFOdHZNckFpRUFwNzBDWFdkVUsrZ2xsT0RHejQ2RXIzSGsreHNFa0hXN1gzK1NLTG1Nazk4PSIsInB1YmxpY0tleSI6eyJmb3JtYXQiOiJ4NTA5In19fX0=",
+          "inclusionPromise": {
+            "signedEntryTimestamp": "MEYCIQDN921FufMvG9BvUptaqtVbm2ddXzkpnNbVWb7ZxN5VLgIhAM99Xr2HoWf6atnKI+mT+oxVJA6Dagj303nM1vvEv5Tv"
+          },
+          "integratedTime": "2026-09-21T00:00:00Z",
+          "logIndex": "1"
+        }
+      ]
+    }
+  },
+  "evaluation_time": "2026-09-21T00:00:00Z",
+  "package": {
+    "body": {
+      "compatibility": {
+        "capability_version": "1.0.0",
+        "dsl_version": "codestrata.io/rules/v1",
+        "engine_schema_major": 1,
+        "serialization_profile": "codestrata.canonical-json.v1"
+      },
+      "effective_ruleset_digest": "fb33d17b8db0d5c99171f4bba3f9150ac6d8fc13c04bb14ed055a0722ca4cca3",
+      "execution_purpose": "production",
+      "package_id": "codestrata.engineering-standard.pkg",
+      "package_version": "1.0.0",
+      "payload_digests": [
+        {
+          "digest": "164a3daab4e5861befeb68b26cc5c0e5ffbe1801771515af41e2d9b73a178a4d",
+          "name": "artifact"
+        },
+        {
+          "digest": "fb33d17b8db0d5c99171f4bba3f9150ac6d8fc13c04bb14ed055a0722ca4cca3",
+          "name": "effective_ruleset"
+        }
+      ],
+      "preview_cannot_authorize_production": true,
+      "schema_name": "codestrata.signed-package-manifest.v1",
+      "schema_version": "1.0.0",
+      "validity_not_after": "2027-09-15T00:00:00Z",
+      "validity_not_before": null
+    },
+    "body_digest": "09129ec8cf2527af5fa1d426be8e04fff291d7fb5642ca36bd7673e187da70e2",
+    "operational": {
+      "signature": null,
+      "signed_at": null
+    },
+    "schema_name": "codestrata.signed-package-manifest.v1",
+    "schema_version": "1.0.0"
+  },
+  "profile_id": "codestrata.release.sigstore-public.v1",
+  "rekor_public_pem": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEL8jVpTTsb1bgAGVMy/9Q8kMStm+Q\n6mjYmZLXoDWfw951OjA0IPD5KXYGlsPF8ogXoehMMM9Pda5hYFOvjgZoNw==\n-----END PUBLIC KEY-----\n",
+  "requested_purpose": "production",
+  "signer_role": "public_distribution",
+  "trust_root_pem": "-----BEGIN CERTIFICATE-----\nMIIBRjCB7aADAgECAgEBMAoGCCqGSM49BAMCMCExHzAdBgNVBAMMFkNvZGVTdHJh\ndGEgVGVzdCBGdWxjaW8wHhcNMjYwMTAxMDAwMDAwWhcNMjcwOTE1MDAwMDAwWjAh\nMR8wHQYDVQQDDBZDb2RlU3RyYXRhIFRlc3QgRnVsY2lvMFkwEwYHKoZIzj0CAQYI\nKoZIzj0DAQcDQgAEHO1duj173AC7EChMPURiRowT5mskmac9MhXkeCS1OZ4dejdv\nDdmNxT/S51WoiZyVZuaN8ZdI8cT0aC24vKPSGaMWMBQwEgYDVR0TAQH/BAgwBgEB\n/wIBADAKBggqhkjOPQQDAgNIADBFAiAWICf/EJmW6RqeS+Mw5ulbgX2ef4eot1vm\nIcCCueZHuAIhALMb6drNdM5cBWCf5DuisELr0L7Q9Sv7sOaFE8SLxZzP\n-----END CERTIFICATE-----\n"
+}

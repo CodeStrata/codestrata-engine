@@ -36,6 +36,10 @@ def test_enum_vocabularies() -> None:
         RepositoryRelationshipType.CONTAINS,
         RepositoryRelationshipType.DECLARES,
         RepositoryRelationshipType.DEPENDS_ON,
+        RepositoryRelationshipType.IMPORTS,
+        RepositoryRelationshipType.IMPLEMENTS,
+        RepositoryRelationshipType.EXPOSES_API,
+        RepositoryRelationshipType.USES_DEPENDENCY,
         RepositoryRelationshipType.CALLS,
     }
     assert RepositoryFileKind.SOURCE == "source"

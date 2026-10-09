@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from codestrata.telemetry.decisions import TelemetryDecision
+from codestrata.telemetry.errors import TelemetryRuntimeError
 from codestrata.telemetry.events import RuntimeEventType, RuntimeTelemetryEvent
 from codestrata.telemetry.infrastructure.capture_transport import CaptureTelemetryTransport
 from codestrata.telemetry.infrastructure.unavailable_transport import (
@@ -18,9 +19,7 @@ from codestrata.telemetry.runtime import TelemetryRuntime, default_runtime
 from codestrata.telemetry.session import new_disabled_session
 from codestrata.telemetry.transport import TelemetryTransportResultKind
 
-ENGINE_TELEMETRY = (
-    Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
-)
+ENGINE_TELEMETRY = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
 
 
 def test_A_runtime_defaults_disabled() -> None:
@@ -34,9 +33,7 @@ def test_B_default_session_does_not_transmit() -> None:
     # Even if a capture transport is attached, disabled decision must drop.
     session = new_disabled_session(transport=capture)
     runtime = TelemetryRuntime(session)
-    runtime.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.APPLICATION_STARTED)
-    )
+    runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.APPLICATION_STARTED))
     assert capture.captured == []
     assert runtime.session.counters.transmission_attempts == 0
 
@@ -50,18 +47,14 @@ def test_S_unavailable_transport_never_returns_sent() -> None:
 
 
 def test_T_capture_not_implicit_default() -> None:
-    assert isinstance(
-        new_disabled_session().transport, UnavailableTelemetryTransport
-    )
+    assert isinstance(new_disabled_session().transport, UnavailableTelemetryTransport)
     assert not isinstance(new_disabled_session().transport, CaptureTelemetryTransport)
 
 
 def test_U_preview_does_not_transmit() -> None:
     capture = CaptureTelemetryTransport()
     runtime = TelemetryRuntime(new_disabled_session(transport=capture))
-    preview = runtime.preview(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-    )
+    preview = runtime.preview(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert preview is not None
     assert preview.transmission == "none"
     assert capture.captured == []
@@ -110,6 +103,7 @@ def test_Y_cli_surface_preview_exists_flags_only_on_assess() -> None:
         ):
             assert needle not in text, f"unexpected flag option registration in {path}"
 
+
 def test_Z_preview_ordering_stable() -> None:
     event = RuntimeTelemetryEvent(
         event_type=RuntimeEventType.FEATURE_COMPLETED,
@@ -123,7 +117,7 @@ def test_Z_preview_ordering_stable() -> None:
 
 
 def test_reject_exact_tokens_field_name() -> None:
-    with pytest.raises(Exception):
+    with pytest.raises(TelemetryRuntimeError):
         project_from_mapping(
             {
                 "event_type": "application_started",

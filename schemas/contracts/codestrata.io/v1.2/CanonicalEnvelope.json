@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/CanonicalEnvelope.json",
+  "title": "CodeStrata Engine Canonical Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "body", "body_digest", "operational"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.canonical-envelope.v1" },
+    "schema_version": { "type": "string" },
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_name",
+        "schema_version",
+        "repository_subject_id",
+        "source_revision",
+        "working_state_digest",
+        "descriptor_ids",
+        "outcome_driver_manifest_digest",
+        "facts",
+        "evidence",
+        "graph",
+        "findings",
+        "hotspots",
+        "ownership",
+        "coverage",
+        "freshness",
+        "comparison"
+      ],
+      "properties": {
+        "schema_name": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "repository_subject_id": { "type": "string" },
+        "source_revision": { "type": "string" },
+        "working_state_digest": { "type": "string" },
+        "evaluation_time": { "type": ["string", "null"] },
+        "descriptor_ids": { "type": "array" },
+        "outcome_driver_manifest_digest": { "type": "string" },
+        "facts": { "type": "array" },
+        "evidence": { "type": "array" },
+        "graph": { "type": "object" },
+        "findings": { "type": "array" },
+        "hotspots": { "type": "array" },
+        "ownership": { "type": "array" },
+        "change_summary": { "type": ["object", "null"] },
+        "coverage": { "type": "array" },
+        "freshness": { "type": "array" },
+        "comparison": { "type": "object" },
+        "limitations": { "type": "array" },
+        "health_score": { "type": "null" }
+      }
+    },
+    "body_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "operational": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "run_id": { "type": ["string", "null"] },
+        "generated_at": { "type": ["string", "null"] },
+        "duration_ms": { "type": ["number", "null"] },
+        "signature": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

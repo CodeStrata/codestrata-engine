@@ -6,8 +6,8 @@ from codestrata.telemetry.assessment_metadata.diagnostics import (
     AssessmentMetadataEmissionDiagnostics,
 )
 from codestrata.telemetry.assessment_metadata.emitter import (
-    emit_assessment_metadata_safely,
     emission_authorized,
+    emit_assessment_metadata_safely,
     project_only,
 )
 from codestrata.telemetry.assessment_metadata.models import (

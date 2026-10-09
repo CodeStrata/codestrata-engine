@@ -9,6 +9,7 @@ Slice 17.15: assessment runs stage under
 from __future__ import annotations
 
 import logging
+import os
 import re
 import shutil
 from collections.abc import Callable
@@ -48,8 +49,33 @@ LEGACY_JSON_BASENAME = "report.json"
 DEFAULT_ASSESS_OUTPUT_DIRECTORY = Path(f"{ARTIFACT_ROOT_NAME}/{ASSESSMENTS_DIRNAME}")
 
 
+def _git_discovery_env() -> dict[str, str]:
+    """Environment for origin discovery when this directory has no Git config file.
+
+    An explicit ``GIT_CEILING_DIRECTORIES`` value is forwarded. Global Git config
+    is not consulted. This stays local to reporting so report paths do not import
+    the scanner.
+    """
+
+    env = {
+        "PATH": os.environ.get("PATH", ""),
+        "GIT_TERMINAL_PROMPT": "0",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_SYSTEM": "/dev/null",
+    }
+    ceiling = os.environ.get("GIT_CEILING_DIRECTORIES", "").strip()
+    if ceiling:
+        env["GIT_CEILING_DIRECTORIES"] = ceiling
+    return env
+
+
 def _git_origin_url(path: Path | str | None) -> str | None:
-    """Best-effort read of ``remote.origin.url`` for GitHub identity resolution."""
+    """Best-effort read of ``remote.origin.url`` for GitHub identity resolution.
+
+    A directory with its own ``.git/config`` uses that file. A subdirectory or
+    linked worktree asks Git, which keeps that repository's origin. An explicit
+    ceiling stops the walk before an unrelated parent repository.
+    """
 
     if path is None:
         return None
@@ -67,12 +93,7 @@ def _git_origin_url(path: Path | str | None) -> str | None:
                 capture_output=True,
                 text=True,
                 timeout=15,
-                env={
-                    "PATH": __import__("os").environ.get("PATH", ""),
-                    "GIT_TERMINAL_PROMPT": "0",
-                    "GIT_CONFIG_GLOBAL": "/dev/null",
-                    "GIT_CONFIG_SYSTEM": "/dev/null",
-                },
+                env=_git_discovery_env(),
             )
             url = (proc.stdout or "").strip()
             return url or None
@@ -94,6 +115,7 @@ def _git_origin_url(path: Path | str | None) -> str | None:
             url = value.strip()
             return url or None
     return None
+
 
 class ReportRetentionError(RuntimeError):
     """Raised when an older report run cannot be pruned safely."""
@@ -151,7 +173,10 @@ def format_report_run_timestamp(moment: datetime | None = None) -> str:
 def _resolve_output_root(base_directory: Path) -> Path:
     """Map legacy ``reports`` default to the authoritative assessments root."""
 
-    if base_directory == Path(LEGACY_REPORTS_DIRNAME) or base_directory.as_posix() == LEGACY_REPORTS_DIRNAME:
+    if (
+        base_directory == Path(LEGACY_REPORTS_DIRNAME)
+        or base_directory.as_posix() == LEGACY_REPORTS_DIRNAME
+    ):
         return DEFAULT_ASSESS_OUTPUT_DIRECTORY
     return base_directory
 
@@ -462,6 +487,4 @@ def prune_excess_report_runs(
 ) -> list[Path]:
     """Alias for :func:`retain_recent_reports` used by assessment cleanup."""
 
-    return retain_recent_reports(
-        repository_directory, keep=keep, repository_slug=repository_slug
-    )
+    return retain_recent_reports(repository_directory, keep=keep, repository_slug=repository_slug)

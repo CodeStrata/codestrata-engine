@@ -11,7 +11,6 @@ from __future__ import annotations
 
 from collections.abc import Callable
 from pathlib import Path
-from typing import TypeVar
 
 from codestrata.telemetry.assessment_isolation_diagnostics import (
     AssessmentIsolationDiagnostics,
@@ -41,10 +40,8 @@ from codestrata.telemetry.assessment_metadata.source import new_assessment_id
 from codestrata.telemetry.assessment_metadata.transport import AssessmentMetadataTransport
 from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
 
-T = TypeVar("T")
 
-
-def run_assessment_with_telemetry_isolation(
+def run_assessment_with_telemetry_isolation[T](
     primary: Callable[[], T],
     *,
     telemetry: DisabledTelemetryFacade,
@@ -79,9 +76,7 @@ def run_assessment_with_telemetry_isolation(
     failure_category: str | None = None
     # One opaque UUID for this assessment invocation (success and failure share it).
     assessment_id = new_assessment_id()
-    amd_policy = (
-        assessment_metadata_policy or default_assessment_metadata_emission_policy()
-    )
+    amd_policy = assessment_metadata_policy or default_assessment_metadata_emission_policy()
     amd_diag = assessment_metadata_diagnostics or AssessmentMetadataEmissionDiagnostics()
 
     def _attempt_record(ok: bool, *, category: str = "internal_failure") -> None:

@@ -59,8 +59,7 @@ class ReportRendererRegistry:
         key = renderer_id.strip().lower()
         if key not in self._renderers:
             raise KeyError(
-                f"unknown report renderer {key!r}; "
-                f"registered: {sorted(self._renderers)}"
+                f"unknown report renderer {key!r}; registered: {sorted(self._renderers)}"
             )
         return self._renderers[key]
 

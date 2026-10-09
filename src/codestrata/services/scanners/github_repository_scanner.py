@@ -84,9 +84,7 @@ class GitHubRepositoryScanner:
                 if self._clean_before_clone:
                     shutil.rmtree(clone_directory)
                 else:
-                    raise FileExistsError(
-                        f"Repository workspace already exists: {clone_directory}"
-                    )
+                    raise FileExistsError(f"Repository workspace already exists: {clone_directory}")
             logger.info(
                 "Cloning GitHub repository %s/%s via %s into %s",
                 parsed.owner,

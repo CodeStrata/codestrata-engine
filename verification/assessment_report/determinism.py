@@ -10,7 +10,6 @@ from verification.assessment_report.loaders import AssessmentRunArtifacts
 from verification.assessment_report.models import CheckResult
 from verification.repository_assessment.normalization import compare_normalized
 
-
 _TIMESTAMP_RE = re.compile(
     r"\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?\b"
 )
@@ -71,8 +70,7 @@ def check_determinism(
             name="determinism:html_normalized",
             ok=html_same,
             detail=(
-                f"left={html_fingerprint(left.html)[:12]} "
-                f"right={html_fingerprint(right.html)[:12]}"
+                f"left={html_fingerprint(left.html)[:12]} right={html_fingerprint(right.html)[:12]}"
             ),
             category="determinism",
         ),

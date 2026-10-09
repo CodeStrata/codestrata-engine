@@ -96,9 +96,7 @@ def build_chat_completion_kwargs(request: AIProviderRequest) -> dict[str, Any]:
     options = request.execution_options
     kwargs: dict[str, Any] = {
         "model": model,
-        "messages": build_chat_messages(
-            payload, response_expectation=request.response_expectation
-        ),
+        "messages": build_chat_messages(payload, response_expectation=request.response_expectation),
     }
     if options.temperature is not None:
         kwargs["temperature"] = options.temperature

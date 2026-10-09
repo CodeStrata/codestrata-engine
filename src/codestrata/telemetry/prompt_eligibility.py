@@ -47,9 +47,7 @@ _REASON_MAP: dict[str, PromptEligibilityReason] = {
     TelemetrySuppressionReason.STDIN_NOT_INTERACTIVE.value: (
         PromptEligibilityReason.STDIN_NOT_INTERACTIVE
     ),
-    TelemetrySuppressionReason.STDIN_UNAVAILABLE.value: (
-        PromptEligibilityReason.STDIN_UNAVAILABLE
-    ),
+    TelemetrySuppressionReason.STDIN_UNAVAILABLE.value: (PromptEligibilityReason.STDIN_UNAVAILABLE),
     TelemetrySuppressionReason.PIPED_INPUT.value: PromptEligibilityReason.PIPED_INPUT,
     TelemetrySuppressionReason.CI_DETECTED.value: PromptEligibilityReason.CI_DETECTED,
     TelemetrySuppressionReason.AUTOMATION_DETECTED.value: (
@@ -59,27 +57,19 @@ _REASON_MAP: dict[str, PromptEligibilityReason] = {
         PromptEligibilityReason.MACHINE_READABLE_OUTPUT
     ),
     TelemetrySuppressionReason.QUIET_MODE.value: PromptEligibilityReason.QUIET_MODE,
-    TelemetrySuppressionReason.COMMAND_EXCLUDED.value: (
-        PromptEligibilityReason.COMMAND_EXCLUDED
-    ),
+    TelemetrySuppressionReason.COMMAND_EXCLUDED.value: (PromptEligibilityReason.COMMAND_EXCLUDED),
     TelemetrySuppressionReason.COMMAND_NOT_ELIGIBLE.value: (
         PromptEligibilityReason.COMMAND_NOT_ELIGIBLE
     ),
-    TelemetrySuppressionReason.SHELL_COMPLETION.value: (
-        PromptEligibilityReason.SHELL_COMPLETION
-    ),
-    TelemetrySuppressionReason.HELP_OR_VERSION.value: (
-        PromptEligibilityReason.HELP_OR_VERSION
-    ),
+    TelemetrySuppressionReason.SHELL_COMPLETION.value: (PromptEligibilityReason.SHELL_COMPLETION),
+    TelemetrySuppressionReason.HELP_OR_VERSION.value: (PromptEligibilityReason.HELP_OR_VERSION),
     TelemetrySuppressionReason.EXPLICIT_DECISION_PRESENT.value: (
         PromptEligibilityReason.DECISION_ALREADY_EXPLICIT
     ),
     TelemetrySuppressionReason.PROMPT_ALREADY_ATTEMPTED.value: (
         PromptEligibilityReason.PROMPT_ALREADY_ATTEMPTED
     ),
-    TelemetrySuppressionReason.PROMPT_DISABLED.value: (
-        PromptEligibilityReason.PROMPT_DISABLED
-    ),
+    TelemetrySuppressionReason.PROMPT_DISABLED.value: (PromptEligibilityReason.PROMPT_DISABLED),
     TelemetrySuppressionReason.OUTPUT_NOT_INTERACTIVE.value: (
         PromptEligibilityReason.OUTPUT_NOT_INTERACTIVE
     ),
@@ -141,9 +131,7 @@ def evaluate_prompt_eligibility(
             reason=PromptEligibilityReason.ELIGIBLE,
             non_interactive=decision,
         )
-    reason = _REASON_MAP.get(
-        decision.suppression_reason, PromptEligibilityReason.PROMPT_DISABLED
-    )
+    reason = _REASON_MAP.get(decision.suppression_reason, PromptEligibilityReason.PROMPT_DISABLED)
     if reason in {
         PromptEligibilityReason.QUIET_MODE,
         PromptEligibilityReason.MACHINE_READABLE_OUTPUT,

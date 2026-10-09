@@ -1,0 +1,42 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: dependency.duplicate-declaration
+  version: 1.0.0
+  title: Duplicate dependency declaration
+  category: dependency
+  owner: codestrata
+  measurement: M12
+  tags: [dependency, hygiene, duplicate]
+applies_to:
+  languages: [java, python, php, csharp]
+  requires:
+    facts: [dependency.declarations]
+select:
+  source: dependency
+  declarations:
+    all:
+      - duplicate_declaration: true
+condition:
+  operator: dependency.duplicate_declaration
+emit:
+  finding:
+    default_severity: low
+    message:
+      template: >-
+        Package '{{identity}}' version '{{version}}' is declared {{count}} times
+        equivalently in '{{path}}'.
+      bindings:
+        identity: {type: string, evidence: normalized_identity}
+        version: {type: string, evidence: version}
+        count: {type: string, evidence: duplicate_count}
+        path: {type: string, evidence: path}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: duplicate_declaration_finding_count
+    operation: count
+evidence:
+  include:
+    - declaration_path
+    - duplicate_count
+parameters: {}

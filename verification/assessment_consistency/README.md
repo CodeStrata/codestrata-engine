@@ -59,15 +59,24 @@ engineering, Finding-count ranking, language ecosystem quality claims.
 
 ## Engineering Intelligence input readiness
 
-`engineering_intelligence_input_ready` means, for each repository:
+This Engine command checks the Engine-owned input shape for each repository:
 
 - assessment schema 1.2 + identity + coverage/confidence maps
 - no embedded source bodies in customer fields
-- **Platform** `validate_report_document` accepts the Engine customer-safe
-  report projection (same production ingestion safety authority)
+- the Engine customer-safe report projection can be built
 
-SV.11 does not approximate Platform secret detectors. It invokes the real
-Platform validation adapter from the monorepo.
+It does not call Platform `validate_report_document` and does not record that
+check as PASS. The command prints `platform_ingestion_safety: not_evaluated`.
+
+Platform ingestion safety is a separate private check:
+
+```bash
+cd platform
+PYTHONPATH=src:. python -m verification.assessment_ingestion
+```
+
+That command imports the installed Platform package. It does not put a sibling
+checkout on `sys.path`.
 
 ## Dataset disclaimer
 

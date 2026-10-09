@@ -11,12 +11,8 @@ def build_outliers(bundles: list[RepositoryBundle]) -> list[OutlierRecord]:
     outliers: list[OutlierRecord] = []
     finding_counts = {b.repository_id: len(b.findings) for b in bundles}
     rec_counts = {b.repository_id: len(b.recommendations) for b in bundles}
-    pa_counts = {
-        b.repository_id: len(b.assessment.get("priority_actions") or []) for b in bundles
-    }
-    tech_counts = {
-        b.repository_id: len(b.assessment.get("technologies") or []) for b in bundles
-    }
+    pa_counts = {b.repository_id: len(b.assessment.get("priority_actions") or []) for b in bundles}
+    tech_counts = {b.repository_id: len(b.assessment.get("technologies") or []) for b in bundles}
 
     # Unique activation/coverage states not seen elsewhere are informational.
     cov_status_by_repo: dict[str, Counter[str]] = {}

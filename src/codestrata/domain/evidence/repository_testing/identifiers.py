@@ -9,9 +9,7 @@ from codestrata.domain.evidence.language.identifiers import stable_evidence_id
 REPOSITORY_TESTING_EVIDENCE_SCHEMA_NAME = "repository-testing-evidence"
 REPOSITORY_TESTING_EVIDENCE_SCHEMA_VERSION = "1.0.0"
 REPOSITORY_TESTING_EVIDENCE_ARTIFACT_FILENAME = "repository-testing-evidence.json"
-REPOSITORY_TESTING_EVIDENCE_ARTIFACT_SCHEMA_ID = (
-    "codestrata.repository_testing_evidence"
-)
+REPOSITORY_TESTING_EVIDENCE_ARTIFACT_SCHEMA_ID = "codestrata.repository_testing_evidence"
 
 PROVIDER_ID = "repository_testing.discovery"
 PROVIDER_VERSION = "1.0.0"
@@ -29,45 +27,27 @@ def make_framework_evidence_id(*, framework: str, path: str, basis: str) -> str:
 
 
 def make_type_evidence_id(*, test_type: str, path: str, basis: str) -> str:
-    return (
-        "test-type:"
-        f"{stable_evidence_id('repository_testing.type', test_type, path, basis)[3:]}"
-    )
+    return f"test-type:{stable_evidence_id('repository_testing.type', test_type, path, basis)[3:]}"
 
 
 def make_config_evidence_id(*, path: str, kind: str, detail: str) -> str:
-    return (
-        "test-config:"
-        f"{stable_evidence_id('repository_testing.config', path, kind, detail)[3:]}"
-    )
+    return f"test-config:{stable_evidence_id('repository_testing.config', path, kind, detail)[3:]}"
 
 
 def make_marker_evidence_id(*, path: str, marker: str, line: str) -> str:
-    return (
-        "test-marker:"
-        f"{stable_evidence_id('repository_testing.marker', path, marker, line)[3:]}"
-    )
+    return f"test-marker:{stable_evidence_id('repository_testing.marker', path, marker, line)[3:]}"
 
 
 def make_fixture_evidence_id(*, path: str, kind: str) -> str:
-    return (
-        "test-fixture:"
-        f"{stable_evidence_id('repository_testing.fixture', path, kind)[3:]}"
-    )
+    return f"test-fixture:{stable_evidence_id('repository_testing.fixture', path, kind)[3:]}"
 
 
 def make_coverage_evidence_id(*, path: str, kind: str) -> str:
-    return (
-        "test-coverage:"
-        f"{stable_evidence_id('repository_testing.coverage', path, kind)[3:]}"
-    )
+    return f"test-coverage:{stable_evidence_id('repository_testing.coverage', path, kind)[3:]}"
 
 
 def make_ci_evidence_id(*, path: str, job: str, tool: str) -> str:
-    return (
-        "test-ci:"
-        f"{stable_evidence_id('repository_testing.ci', path, job, tool)[3:]}"
-    )
+    return f"test-ci:{stable_evidence_id('repository_testing.ci', path, job, tool)[3:]}"
 
 
 def make_diagnostic_id(*, code: str, path: str, detail: str) -> str:

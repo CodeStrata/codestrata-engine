@@ -31,12 +31,8 @@ def _operator_home_patterns() -> list[re.Pattern[str]]:
         patterns.append(re.compile(re.escape(home)))
     user = getpass.getuser() or os.environ.get("USER") or os.environ.get("USERNAME") or ""
     if user:
-        patterns.append(
-            re.compile(rf"(?<![A-Za-z0-9_])/Users/{re.escape(user)}/")
-        )
-        patterns.append(
-            re.compile(rf"(?<![A-Za-z0-9_])/home/{re.escape(user)}/")
-        )
+        patterns.append(re.compile(rf"(?<![A-Za-z0-9_])/Users/{re.escape(user)}/"))
+        patterns.append(re.compile(rf"(?<![A-Za-z0-9_])/home/{re.escape(user)}/"))
     return patterns
 
 

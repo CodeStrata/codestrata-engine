@@ -110,13 +110,11 @@ def test_identifiers_are_deterministic_and_non_random() -> None:
     )
     assert left == right
     assert left.startswith("test-assessment:")
-    assert build_limitation_id(category="x", summary="y").startswith(
-        "test-limitation:"
-    )
+    assert build_limitation_id(category="x", summary="y").startswith("test-limitation:")
     assert build_diagnostic_id(code="a", message="b").startswith("test-diagnostic:")
-    assert build_trace_edge_id(
-        relation="section_to_pack", source_id="a", target_id="b"
-    ).startswith("test-trace:")
+    assert build_trace_edge_id(relation="section_to_pack", source_id="a", target_id="b").startswith(
+        "test-trace:"
+    )
     assert "uuid" not in left
     assert "/Users/" not in left
 

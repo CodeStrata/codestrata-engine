@@ -19,7 +19,11 @@ def check_schemas(
     report_versions = {str(b.report.get("report_version")) for b in bundles}
 
     if versions != {ASSESSMENT_SCHEMA_VERSION}:
-        bad = [b.repository_id for b in bundles if str(b.report.get("schema_version")) != ASSESSMENT_SCHEMA_VERSION]
+        bad = [
+            b.repository_id
+            for b in bundles
+            if str(b.report.get("schema_version")) != ASSESSMENT_SCHEMA_VERSION
+        ]
         checks.append(
             CheckResult(
                 name="schema_version_uniform",
@@ -52,7 +56,8 @@ def check_schemas(
     checks.append(
         CheckResult(
             name="report_version_uniform",
-            ok=report_versions == {ASSESSMENT_SCHEMA_VERSION} or report_versions <= {ASSESSMENT_SCHEMA_VERSION, "None"},
+            ok=report_versions == {ASSESSMENT_SCHEMA_VERSION}
+            or report_versions <= {ASSESSMENT_SCHEMA_VERSION, "None"},
             detail=f"report_version set={sorted(report_versions)}",
         )
     )

@@ -25,7 +25,7 @@ class RecommendationEngine:
         if providers is not None:
             loaded = tuple(providers)
         else:
-            loaded = tuple(builtin_recommendation_providers())  # type: ignore[arg-type]
+            loaded = tuple(builtin_recommendation_providers())
         self._providers: tuple[RecommendationProvider, ...] = tuple(
             sorted(loaded, key=lambda provider: provider.id())
         )
@@ -73,11 +73,9 @@ class RecommendationEngine:
                             recommendation,
                             findings=context.findings,
                         )
-                        recommendations_by_id[recommendation.id] = (
-                            apply_recommendation_priority(
-                                with_confidence,
-                                findings=context.findings,
-                            )
+                        recommendations_by_id[recommendation.id] = apply_recommendation_priority(
+                            with_confidence,
+                            findings=context.findings,
                         )
                         recommendation_order.append(recommendation.id)
                         continue

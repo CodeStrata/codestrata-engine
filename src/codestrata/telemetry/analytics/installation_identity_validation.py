@@ -26,9 +26,7 @@ from codestrata.telemetry.analytics.installation_identity_policy import (
     default_installation_identity_policy,
 )
 
-_ALLOWED_KEYS = frozenset(
-    {"installation_id", "policy_version", "schema_id", "schema_version"}
-)
+_ALLOWED_KEYS = frozenset({"installation_id", "policy_version", "schema_id", "schema_version"})
 
 
 def parse_identity_mapping(payload: dict[str, Any]) -> AnonymousInstallationIdentity:

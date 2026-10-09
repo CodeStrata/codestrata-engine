@@ -94,9 +94,7 @@ class OpenRouterDoctorIntegrationVerificationReport:
             "checks": [c.to_dict() for c in self.checks],
             "credential_status": self.status_fields.get("credentials", "not_run"),
             "defects": defects,
-            "dependency_boundary_status": self.status_fields.get(
-                "dependency_boundary", "not_run"
-            ),
+            "dependency_boundary_status": self.status_fields.get("dependency_boundary", "not_run"),
             "dependency_status": self.status_fields.get("dependency", "not_run"),
             "deterministic_status": self.status_fields.get("determinism", "not_run"),
             "doctor_exit_status": self.status_fields.get("doctor_exit", "not_run"),
@@ -105,12 +103,8 @@ class OpenRouterDoctorIntegrationVerificationReport:
             "epic": self.epic,
             "fail_soft_status": self.status_fields.get("fail_soft", "not_run"),
             "failed_checks": self.check_counts.get("failed", 0),
-            "integration_failure_status": self.status_fields.get(
-                "integration_failure", "not_run"
-            ),
-            "integration_success_status": self.status_fields.get(
-                "integration_success", "not_run"
-            ),
+            "integration_failure_status": self.status_fields.get("integration_failure", "not_run"),
+            "integration_success_status": self.status_fields.get("integration_success", "not_run"),
             "limitations": list(self.limitations),
             "model_status": self.status_fields.get("model", "not_run"),
             "negative_scenarios": [s.to_dict() for s in self.negative_scenarios],
@@ -118,13 +112,9 @@ class OpenRouterDoctorIntegrationVerificationReport:
             "openai_regression_status": self.status_fields.get("openai_regression", "not_run"),
             "optional_header_status": self.status_fields.get("optional_header", "not_run"),
             "privacy_status": self.status_fields.get("privacy", "not_run"),
-            "provider_selection_status": self.status_fields.get(
-                "provider_selection", "not_run"
-            ),
+            "provider_selection_status": self.status_fields.get("provider_selection", "not_run"),
             "readiness_status": self.status_fields.get("readiness", "not_run"),
-            "reporting_boundary_status": self.status_fields.get(
-                "reporting_boundary", "not_run"
-            ),
+            "reporting_boundary_status": self.status_fields.get("reporting_boundary", "not_run"),
             "schema_name": self.schema_name,
             "schema_version": self.schema_version,
             "slice_id": self.slice_id,
@@ -138,7 +128,9 @@ class OpenRouterDoctorIntegrationVerificationReport:
 
     def write_json(self, path: Path) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         return path
 
     def write_markdown(self, path: Path) -> Path:

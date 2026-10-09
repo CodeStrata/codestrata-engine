@@ -48,9 +48,7 @@ def register_execution_tools(
 
         def _run() -> dict[str, Any]:
             repo = require_nonblank(repository, label="repository")
-            mode = (
-                AssessmentMode.AI_ENHANCED if with_ai else AssessmentMode.DETERMINISTIC
-            )
+            mode = AssessmentMode.AI_ENHANCED if with_ai else AssessmentMode.DETERMINISTIC
             resolved_config = (
                 Path(require_nonblank(config_path, label="config_path"))
                 if config_path is not None
@@ -69,9 +67,7 @@ def register_execution_tools(
             )
 
             ai_status = (
-                "succeeded"
-                if result.ai_executed
-                else ("requested" if with_ai else "not_requested")
+                "succeeded" if result.ai_executed else ("requested" if with_ai else "not_requested")
             )
             if with_ai and not result.ai_executed:
                 ai_status = "failed_or_skipped"
@@ -87,8 +83,7 @@ def register_execution_tools(
                 )
             if result.knowledge_repository_id:
                 follow_ups.append(
-                    "get_latest_assessment("
-                    f"repository_identifier={result.knowledge_repository_id})"
+                    f"get_latest_assessment(repository_identifier={result.knowledge_repository_id})"
                 )
 
             branch_value = optional_filter(branch, label="branch")
@@ -98,9 +93,7 @@ def register_execution_tools(
                 summary = queries.get_assessment_run(result.knowledge_run_id)
                 branch_value = summary.branch or branch_value
                 revision_type = (
-                    None
-                    if summary.revision_type is None
-                    else summary.revision_type.value
+                    None if summary.revision_type is None else summary.revision_type.value
                 )
                 revision_id = summary.revision_id
 

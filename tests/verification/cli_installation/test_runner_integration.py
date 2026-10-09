@@ -6,7 +6,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from verification.cli_installation.runner import run_cli_installation_verification
 
 ENGINE = Path(__file__).resolve().parents[3]

@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import ast
 import io
-import json
 import logging
 from pathlib import Path
-from unittest.mock import patch
 
 from codestrata.ai.provider_adapters.openai import diagnostics as openai_diagnostics
 from codestrata.ai.provider_adapters.openai.factory import (
@@ -28,9 +26,6 @@ from verification.ai_provider_privacy_boundaries.contract import (
     NEGATIVE_SCENARIO_COUNT_MIN,
 )
 from verification.ai_provider_privacy_boundaries.fixtures import (
-    BedrockClient,
-    OpenAIStyleClient,
-    OpenAIStyleResponse,
     SYNTHETIC_MODEL_OPENAI,
     SYNTHETIC_MODEL_OPENROUTER,
     SYNTHETIC_OPENAI_KEY,
@@ -38,8 +33,10 @@ from verification.ai_provider_privacy_boundaries.fixtures import (
     SYNTHETIC_PROMPT,
     SYNTHETIC_REQUEST_ID,
     SYNTHETIC_RESPONSE,
+    BedrockClient,
+    OpenAIStyleClient,
+    OpenAIStyleResponse,
     canonical_json,
-    leaked_markers,
     openai_settings_secret,
     openrouter_settings_secret,
     provider_request,
@@ -104,9 +101,7 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
 
     # D. prompt in diagnostics
     result = adapter.execute(provider_request(model_id=SYNTHETIC_MODEL_OPENAI))
-    result_blob = canonical_json(
-        openai_diagnostics.diagnostic_view_of_provider_result(result)
-    )
+    result_blob = canonical_json(openai_diagnostics.diagnostic_view_of_provider_result(result))
     add(
         "D",
         "prompt in diagnostics",
@@ -310,8 +305,7 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         "provider diagnostics enter report",
         "assessment models expose api_key/request_id/doctor readiness fields",
         any(
-            token in field_names
-            for token in ("api_key", "request_id", "doctor_ready", "base_url")
+            token in field_names for token in ("api_key", "request_id", "doctor_ready", "base_url")
         ),
     )
 
@@ -392,7 +386,8 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
     # Z. verification report leaks — deferred to privacy scan; also pin default unchanged
     add(
         "Z",
-        "verification report leaks secrets, content, models, endpoints, identities, errors, or paths",
+        "verification report leaks secrets, content, models, endpoints, "
+        "identities, errors, or paths",
         "default provider changed away from bedrock or AiSettings drifted",
         AiSettings().provider != DEFAULT_PROVIDER,
         detail=f"provider={AiSettings().provider}; report scanned after assembly",
@@ -455,8 +450,7 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         "AD",
         "bedrock profile/region values in diagnostics",
         "literal profile/region values appear in bedrock diagnostics",
-        "synth-privacy-1112-profile" in bedrock_diag
-        or "synth-privacy-1112-region" in bedrock_diag,
+        "synth-privacy-1112-profile" in bedrock_diag or "synth-privacy-1112-region" in bedrock_diag,
     )
 
     assert len(scenarios) >= NEGATIVE_SCENARIO_COUNT_MIN

@@ -158,7 +158,10 @@ def test_symlink_handling_does_not_escape_repository_root(tmp_path: Path) -> Non
     repo = tmp_path / "repo"
     repo.mkdir()
     _touch(repo / "app.py")
-    (repo / "escape").symlink_to(outside, target_is_directory=True)
+    try:
+        (repo / "escape").symlink_to(outside, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
     files = LocalRepositoryScanner().scan(repo).files
     assert files == ["app.py"]
 
@@ -169,7 +172,10 @@ def test_no_infinite_traversal_loops(tmp_path: Path) -> None:
     _touch(repo / "a.py")
     nested = repo / "loop"
     nested.mkdir()
-    (nested / "back").symlink_to(repo, target_is_directory=True)
+    try:
+        (nested / "back").symlink_to(repo, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
     files = LocalRepositoryScanner().scan(repo).files
     assert files == ["a.py"]
 

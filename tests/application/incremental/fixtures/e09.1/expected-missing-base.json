@@ -1,0 +1,9 @@
+{
+  "path": "src/app.py",
+  "status": "modified",
+  "added_lines": 1,
+  "deleted_lines": 0,
+  "binary": false,
+  "full_comparison": false,
+  "limitations": ["unresolvable_patch_base", "no_fabricated_full_comparison"]
+}

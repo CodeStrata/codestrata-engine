@@ -7,7 +7,7 @@ from pathlib import Path
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.cli.assess import run_assessment
 from codestrata.config import CodestrataSettings
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from codestrata.reporting import AssessmentMode
 
 

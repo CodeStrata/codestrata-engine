@@ -1,0 +1,36 @@
+{
+  "scenario": "all_five_families",
+  "description": "Compares all five analyzer families without Platform imports, DB, or hidden baseline selection, preserving qualifying changes and denominators.",
+  "families": {
+    "inventory": {
+      "base_technologies": ["Python", "FastAPI"],
+      "candidate_technologies": ["Python", "FastAPI", "Docker"],
+      "expected_fact_change": "facts.technologies"
+    },
+    "architecture": {
+      "base_nodes": ["A", "B", "C"],
+      "candidate_nodes": ["A", "B", "C", "D"],
+      "crossed_boundary_pairs": [["service_layer", "data_layer"]],
+      "expected_added_nodes": ["D"]
+    },
+    "security": {
+      "base_findings": ["cve::old-cve::lib"],
+      "candidate_findings": [],
+      "expected_lifecycle": "resolved",
+      "expected_cause": "source"
+    },
+    "quality": {
+      "base_complexity": 25,
+      "candidate_complexity": 18,
+      "expected_delta": -7,
+      "direction": "lower_is_better",
+      "qualifying": true
+    },
+    "git": {
+      "changed_files": ["src/service.py"],
+      "churn": 45,
+      "centrality": 0.85,
+      "expected_concern_class": "high_churn_high_centrality"
+    }
+  }
+}

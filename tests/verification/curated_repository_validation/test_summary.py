@@ -8,7 +8,10 @@ from pathlib import Path
 from verification.curated_repository_validation.models import RepositoryValidationResult
 from verification.curated_repository_validation.records import write_repository_record
 from verification.curated_repository_validation.source_integrity import verify_source_integrity
-from verification.curated_repository_validation.summary import build_final_report, build_tier_summary
+from verification.curated_repository_validation.summary import (
+    build_final_report,
+    build_tier_summary,
+)
 from verification.repository_assessment.workspace import capture_inventory
 
 

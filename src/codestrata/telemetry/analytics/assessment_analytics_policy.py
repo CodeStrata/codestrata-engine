@@ -13,22 +13,18 @@ from codestrata.telemetry.analytics.policy import (
 COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_ID = "community-assessment-analytics-policy"
 COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_VERSION = "1.0"
 COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_URN = (
-    f"{COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_ID}:"
-    f"{COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_VERSION}"
+    f"{COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_ID}:{COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_VERSION}"
 )
 
 COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_ID = "community-assessment-analytics-schema"
 COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_VERSION = "1.0"
 COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_URN = (
-    f"{COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_ID}:"
-    f"{COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_VERSION}"
+    f"{COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_ID}:{COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_VERSION}"
 )
 
 DEFAULT_MAX_ENABLED_HEADS = 9
 
-_REVIEW_STATUS = (
-    "local_construction_only_no_transmission_no_analytics_persistence_unwired"
-)
+_REVIEW_STATUS = "local_construction_only_no_transmission_no_analytics_persistence_unwired"
 
 _LIMITATIONS: tuple[str, ...] = (
     "assessment_category_only",
@@ -102,25 +98,15 @@ class CommunityAssessmentAnalyticsPolicy:
 
     def validate(self) -> None:
         if self.policy_id != COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_ID:
-            raise AssessmentAnalyticsPolicyError(
-                "unsupported assessment analytics policy id"
-            )
+            raise AssessmentAnalyticsPolicyError("unsupported assessment analytics policy id")
         if self.policy_version != COMMUNITY_ASSESSMENT_ANALYTICS_POLICY_VERSION:
-            raise AssessmentAnalyticsPolicyError(
-                "unsupported assessment analytics policy version"
-            )
+            raise AssessmentAnalyticsPolicyError("unsupported assessment analytics policy version")
         if self.schema_id != COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_ID:
-            raise AssessmentAnalyticsPolicyError(
-                "unsupported assessment analytics schema id"
-            )
+            raise AssessmentAnalyticsPolicyError("unsupported assessment analytics schema id")
         if self.schema_version != COMMUNITY_ASSESSMENT_ANALYTICS_SCHEMA_VERSION:
-            raise AssessmentAnalyticsPolicyError(
-                "unsupported assessment analytics schema version"
-            )
+            raise AssessmentAnalyticsPolicyError("unsupported assessment analytics schema version")
         if self.review_status != _REVIEW_STATUS:
-            raise AssessmentAnalyticsPolicyError(
-                "unsupported assessment analytics review_status"
-            )
+            raise AssessmentAnalyticsPolicyError("unsupported assessment analytics review_status")
         if not self.local_collection_allowed:
             raise AssessmentAnalyticsPolicyError("local_collection_allowed must be true")
         if self.persistence_enabled:
@@ -130,31 +116,21 @@ class CommunityAssessmentAnalyticsPolicy:
         if not self.installation_id_required:
             raise AssessmentAnalyticsPolicyError("installation_id_required must be true")
         if not self.installation_id_only_identifier:
-            raise AssessmentAnalyticsPolicyError(
-                "installation_id_only_identifier must be true"
-            )
+            raise AssessmentAnalyticsPolicyError("installation_id_only_identifier must be true")
         if not self.requires_prior_privacy_projection:
-            raise AssessmentAnalyticsPolicyError(
-                "requires_prior_privacy_projection must be true"
-            )
+            raise AssessmentAnalyticsPolicyError("requires_prior_privacy_projection must be true")
         if not self.category_assessment_only:
             raise AssessmentAnalyticsPolicyError("category_assessment_only must be true")
         if not self.command_category_assess_only:
-            raise AssessmentAnalyticsPolicyError(
-                "command_category_assess_only must be true"
-            )
+            raise AssessmentAnalyticsPolicyError("command_category_assess_only must be true")
         if not self.coarse_duration_buckets_only:
-            raise AssessmentAnalyticsPolicyError(
-                "coarse_duration_buckets_only must be true"
-            )
+            raise AssessmentAnalyticsPolicyError("coarse_duration_buckets_only must be true")
         if not self.exact_duration_forbidden:
             raise AssessmentAnalyticsPolicyError("exact_duration_forbidden must be true")
         if self.max_enabled_heads <= 0 or self.max_enabled_heads > DEFAULT_MAX_ENABLED_HEADS:
             raise AssessmentAnalyticsPolicyError("max_enabled_heads out of range")
         if not self.fail_silent_optional_integration:
-            raise AssessmentAnalyticsPolicyError(
-                "fail_silent_optional_integration must be true"
-            )
+            raise AssessmentAnalyticsPolicyError("fail_silent_optional_integration must be true")
 
     def to_stable_dict(self) -> dict[str, Any]:
         return {
@@ -165,12 +141,8 @@ class CommunityAssessmentAnalyticsPolicy:
             "command_category_assess_only": self.command_category_assess_only,
             "exact_duration_forbidden": self.exact_duration_forbidden,
             "fail_silent_optional_integration": self.fail_silent_optional_integration,
-            "failure_category_forbidden_on_success": (
-                self.failure_category_forbidden_on_success
-            ),
-            "failure_category_required_on_failure": (
-                self.failure_category_required_on_failure
-            ),
+            "failure_category_forbidden_on_success": (self.failure_category_forbidden_on_success),
+            "failure_category_required_on_failure": (self.failure_category_required_on_failure),
             "installation_id_only_identifier": self.installation_id_only_identifier,
             "installation_id_required": self.installation_id_required,
             "limitations": list(self.limitations),

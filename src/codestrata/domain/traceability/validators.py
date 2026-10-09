@@ -86,13 +86,8 @@ def sorted_unique_ids(
 
     items = as_tuple(values)
     if len(items) > max_items:
-        raise TraceabilityValidationError(
-            f"{label} collection exceeds {max_items} items"
-        )
-    cleaned = {
-        require_nonblank(str(item), label=label)
-        for item in items
-    }
+        raise TraceabilityValidationError(f"{label} collection exceeds {max_items} items")
+    cleaned = {require_nonblank(str(item), label=label) for item in items}
     return tuple(sorted(cleaned))
 
 
@@ -101,9 +96,7 @@ def normalize_limitations(values: object) -> tuple[str, ...]:
 
     items = as_tuple(values)
     if len(items) > MAX_LIMITATIONS:
-        raise TraceabilityValidationError(
-            f"limitations exceed {MAX_LIMITATIONS} items"
-        )
+        raise TraceabilityValidationError(f"limitations exceed {MAX_LIMITATIONS} items")
     cleaned: set[str] = set()
     for item in items:
         text = require_nonblank(str(item), label="limitation")
@@ -132,9 +125,7 @@ def assert_no_self_parent(
     parent_evidence_ids: Sequence[str],
 ) -> None:
     if evidence_id in parent_evidence_ids:
-        raise TraceabilityValidationError(
-            "EvidenceRef must not list itself in parent_evidence_ids"
-        )
+        raise TraceabilityValidationError("EvidenceRef must not list itself in parent_evidence_ids")
 
 
 def merge_unique_sorted(

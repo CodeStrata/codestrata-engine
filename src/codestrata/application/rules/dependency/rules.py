@@ -23,6 +23,11 @@ from codestrata.application.rules.dependency.helpers import (
     match,
     version_text,
 )
+from codestrata.application.rules.dependency.yaml_rule import (
+    render_template,
+    yaml_metadata,
+    yaml_title_and_template,
+)
 from codestrata.domain.dependency.ids import (
     RULE_CONFLICTING_EXACT_VERSIONS,
     RULE_DUPLICATE_DECLARATION,
@@ -38,7 +43,7 @@ from codestrata.domain.evidence.dependency.enums import (
 from codestrata.domain.evidence.dependency.models import DependencyDeclarationEvidence
 from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
-from codestrata.domain.rules.enums import MatchEvidenceConfidence, RuleSeverity, RuleSkipReason
+from codestrata.domain.rules.enums import MatchEvidenceConfidence, RuleSkipReason
 from codestrata.domain.rules.metadata import RuleMetadata
 from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 
@@ -89,21 +94,13 @@ class UnresolvedVersionRule:
 
     @property
     def metadata(self) -> RuleMetadata:
-        return make_metadata(
-            rule_id=RULE_UNRESOLVED_VERSION,
-            title="Unresolved dependency version",
-            description=(
-                "Detects dependency declarations whose requested version expression "
-                "is proven unresolved after inspecting a supported local resolution "
-                "contract (for example Maven pom.xml properties). Expressions whose "
-                "resolution mechanism was not inspected (for example Gradle property "
-                "interpolation) produce evidence diagnostics only."
-            ),
+        return yaml_metadata(
+            RULE_UNRESOLVED_VERSION,
+            make_metadata=make_metadata,
             remediation=(
                 "Define or replace the unresolved local version expression with a "
                 "concrete, locally resolvable value."
             ),
-            severity=RuleSeverity.MEDIUM,
         )
 
     def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
@@ -119,14 +116,13 @@ class UnresolvedVersionRule:
         matches: list[RuleMatch] = []
         seen_subjects: set[tuple[str, ...]] = set()
         for item in evidence.declarations:
-            managed = managed_identities_for_manifest(
-                evidence.declarations, path=item.source.path
-            )
+            managed = managed_identities_for_manifest(evidence.declarations, path=item.source.path)
             if is_versionless_managed(item, managed_identities=managed):
                 continue
             if not has_proven_unresolved_version(item):
                 continue
             expression = item.raw_version or ""
+            title, template, severity = yaml_title_and_template(RULE_UNRESOLVED_VERSION)
             subject_keys: tuple[str, ...] = (
                 RULE_UNRESOLVED_VERSION,
                 item.normalized_identity,
@@ -140,14 +136,16 @@ class UnresolvedVersionRule:
             matches.append(
                 match(
                     rule_id=RULE_UNRESOLVED_VERSION,
-                    title="Unresolved dependency version",
-                    summary=(
-                        f"Dependency '{item.normalized_identity}' in "
-                        f"'{item.source.path}' references version expression "
-                        f"'{expression}' that is proven unresolved under the "
-                        "supported local resolution contract."
+                    title=title,
+                    summary=render_template(
+                        template,
+                        {
+                            "identity": item.normalized_identity,
+                            "path": item.source.path,
+                            "expression": expression,
+                        },
                     ),
-                    severity=RuleSeverity.MEDIUM,
+                    severity=severity,
                     confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_declaration(
@@ -159,9 +157,7 @@ class UnresolvedVersionRule:
                             ),
                             extra_attributes={
                                 "unresolved_expression": expression,
-                                "version_resolution_status": (
-                                    item.version_resolution_status.value
-                                ),
+                                "version_resolution_status": (item.version_resolution_status.value),
                             },
                         ),
                     ),
@@ -176,18 +172,10 @@ class MutableVersionRule:
 
     @property
     def metadata(self) -> RuleMetadata:
-        return make_metadata(
-            rule_id=RULE_MUTABLE_VERSION,
-            title="Mutable dependency version",
-            description=(
-                "Detects explicitly mutable version declarations using a bounded "
-                "syntax set (SNAPSHOT, latest, latest.release, RELEASE, +, 1.+). "
-                "Ordinary version ranges are not classified as mutable."
-            ),
-            remediation=(
-                "Replace the mutable version expression with an exact pinned version."
-            ),
-            severity=RuleSeverity.MEDIUM,
+        return yaml_metadata(
+            RULE_MUTABLE_VERSION,
+            make_metadata=make_metadata,
+            remediation=("Replace the mutable version expression with an exact pinned version."),
         )
 
     def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
@@ -210,6 +198,7 @@ class MutableVersionRule:
             if not is_mutable_version(candidate) and not is_mutable_version(raw):
                 continue
             expression = raw or candidate
+            title, template, severity = yaml_title_and_template(RULE_MUTABLE_VERSION)
             subject_keys = (
                 RULE_MUTABLE_VERSION,
                 item.normalized_identity,
@@ -220,13 +209,16 @@ class MutableVersionRule:
             matches.append(
                 match(
                     rule_id=RULE_MUTABLE_VERSION,
-                    title="Mutable dependency version",
-                    summary=(
-                        f"Dependency '{item.normalized_identity}' in "
-                        f"'{item.source.path}' declares mutable version "
-                        f"'{expression}', which may select changing artifacts."
+                    title=title,
+                    summary=render_template(
+                        template,
+                        {
+                            "identity": item.normalized_identity,
+                            "path": item.source.path,
+                            "expression": expression,
+                        },
                     ),
-                    severity=RuleSeverity.MEDIUM,
+                    severity=severity,
                     confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_declaration(
@@ -249,20 +241,13 @@ class UnboundedRequirementRule:
 
     @property
     def metadata(self) -> RuleMetadata:
-        return make_metadata(
-            rule_id=RULE_UNBOUNDED_REQUIREMENT,
-            title="Unbounded requirement",
-            description=(
-                "Detects supported registry-style dependency declarations that "
-                "contain no version constraint (Python) or an explicit wildcard "
-                "constraint (Composer '*', NuGet '*'/floating). Local, editable, "
-                "URL, and VCS references are excluded."
-            ),
+        return yaml_metadata(
+            RULE_UNBOUNDED_REQUIREMENT,
+            make_metadata=make_metadata,
             remediation=(
                 "Add an explicit version specifier so the selected version is "
                 "constrained by the manifest."
             ),
-            severity=RuleSeverity.MEDIUM,
         )
 
     def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
@@ -319,6 +304,9 @@ class UnboundedRequirementRule:
                 continue
             extras = ",".join(item.extras)
             marker = item.environment_marker or ""
+            extras_note = f" extras=[{extras}]" if extras else ""
+            marker_note = f" (marker: {marker})" if marker else ""
+            title, template, severity = yaml_title_and_template(RULE_UNBOUNDED_REQUIREMENT)
             subject_keys = tuple(
                 part
                 for part in (
@@ -332,18 +320,21 @@ class UnboundedRequirementRule:
                 )
                 if part
             )
-            marker_note = f" (marker: {marker})" if marker else ""
-            extras_note = f" extras=[{extras}]" if extras else ""
             matches.append(
                 match(
                     rule_id=RULE_UNBOUNDED_REQUIREMENT,
-                    title="Unbounded requirement",
-                    summary=(
-                        f"{ecosystem_label} '{item.normalized_identity}'{extras_note} "
-                        f"in '{item.source.path}'{marker_note} does not constrain "
-                        "the selected version."
+                    title=title,
+                    summary=render_template(
+                        template,
+                        {
+                            "ecosystem_label": ecosystem_label,
+                            "identity": item.normalized_identity,
+                            "extras_note": extras_note,
+                            "path": item.source.path,
+                            "marker_note": marker_note,
+                        },
                     ),
-                    severity=RuleSeverity.MEDIUM,
+                    severity=severity,
                     confidence=MatchEvidenceConfidence.HIGH,
                     evidence=(
                         evidence_declaration(
@@ -362,19 +353,10 @@ class ConflictingExactVersionsRule:
 
     @property
     def metadata(self) -> RuleMetadata:
-        return make_metadata(
-            rule_id=RULE_CONFLICTING_EXACT_VERSIONS,
-            title="Conflicting exact dependency versions",
-            description=(
-                "Detects the same normalized package identity declared with "
-                "different exact versions in a proven overlapping resolution "
-                "context (same manifest, kind/configuration, profile/group, "
-                "marker, and source role)."
-            ),
-            remediation=(
-                "Align conflicting exact versions in the same resolution context."
-            ),
-            severity=RuleSeverity.HIGH,
+        return yaml_metadata(
+            RULE_CONFLICTING_EXACT_VERSIONS,
+            make_metadata=make_metadata,
+            remediation=("Align conflicting exact versions in the same resolution context."),
         )
 
     def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
@@ -387,9 +369,7 @@ class ConflictingExactVersionsRule:
                 reason=RuleSkipReason.OTHER,
                 message="Dependency evidence unavailable",
             )
-        groups: dict[tuple[str, ...], list[DependencyDeclarationEvidence]] = defaultdict(
-            list
-        )
+        groups: dict[tuple[str, ...], list[DependencyDeclarationEvidence]] = defaultdict(list)
         for item in evidence.declarations:
             if item.is_dependency_management:
                 continue
@@ -426,19 +406,22 @@ class ConflictingExactVersionsRule:
             )
             version_list = ", ".join(versions)
             locations = ", ".join(
-                f"{item.source.path}:{item.source.line_start or '?'}"
-                for item in ordered
+                f"{item.source.path}:{item.source.line_start or '?'}" for item in ordered
             )
+            title, template, severity = yaml_title_and_template(RULE_CONFLICTING_EXACT_VERSIONS)
             matches.append(
                 match(
                     rule_id=RULE_CONFLICTING_EXACT_VERSIONS,
-                    title="Conflicting exact dependency versions",
-                    summary=(
-                        f"Package '{identity}' is declared with conflicting exact "
-                        f"versions [{version_list}] in the same resolution context "
-                        f"({locations})."
+                    title=title,
+                    summary=render_template(
+                        template,
+                        {
+                            "identity": identity,
+                            "version_list": version_list,
+                            "locations": locations,
+                        },
                     ),
-                    severity=RuleSeverity.HIGH,
+                    severity=severity,
                     confidence=MatchEvidenceConfidence.HIGH,
                     evidence=tuple(
                         evidence_declaration(
@@ -465,17 +448,10 @@ class DuplicateDeclarationRule:
 
     @property
     def metadata(self) -> RuleMetadata:
-        return make_metadata(
-            rule_id=RULE_DUPLICATE_DECLARATION,
-            title="Duplicate dependency declaration",
-            description=(
-                "Detects equivalent repeated dependency declarations within the "
-                "same manifest and declaration context."
-            ),
-            remediation=(
-                "Remove or consolidate the redundant equivalent declaration."
-            ),
-            severity=RuleSeverity.LOW,
+        return yaml_metadata(
+            RULE_DUPLICATE_DECLARATION,
+            make_metadata=make_metadata,
+            remediation=("Remove or consolidate the redundant equivalent declaration."),
         )
 
     def evaluate_applicability(self, context: RuleExecutionContext) -> RuleApplicability:
@@ -488,9 +464,7 @@ class DuplicateDeclarationRule:
                 reason=RuleSkipReason.OTHER,
                 message="Dependency evidence unavailable",
             )
-        groups: dict[tuple[str, ...], list[DependencyDeclarationEvidence]] = defaultdict(
-            list
-        )
+        groups: dict[tuple[str, ...], list[DependencyDeclarationEvidence]] = defaultdict(list)
         for item in evidence.declarations:
             groups[duplicate_equivalence_key(item)].append(item)
 
@@ -505,6 +479,7 @@ class DuplicateDeclarationRule:
             evidence_ids = tuple(item.evidence_id for item in ordered)
             identity = ordered[0].normalized_identity
             version = version_text(ordered[0]) or "(none)"
+            title, template, severity = yaml_title_and_template(RULE_DUPLICATE_DECLARATION)
             subject_keys: tuple[str, ...] = (
                 RULE_DUPLICATE_DECLARATION,
                 identity,
@@ -515,13 +490,17 @@ class DuplicateDeclarationRule:
             matches.append(
                 match(
                     rule_id=RULE_DUPLICATE_DECLARATION,
-                    title="Duplicate dependency declaration",
-                    summary=(
-                        f"Package '{identity}' version '{version}' is declared "
-                        f"{len(ordered)} times equivalently in "
-                        f"'{ordered[0].source.path}'."
+                    title=title,
+                    summary=render_template(
+                        template,
+                        {
+                            "identity": identity,
+                            "version": version,
+                            "count": str(len(ordered)),
+                            "path": ordered[0].source.path,
+                        },
                     ),
-                    severity=RuleSeverity.LOW,
+                    severity=severity,
                     confidence=MatchEvidenceConfidence.HIGH,
                     evidence=tuple(
                         evidence_declaration(

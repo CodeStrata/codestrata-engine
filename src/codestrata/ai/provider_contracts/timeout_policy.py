@@ -82,6 +82,7 @@ DEFAULT_TIMEOUT_POLICY = TimeoutPolicy()
 
 __all__ = [
     "DEFAULT_TIMEOUT_POLICY",
+    "MAX_TIMEOUT_SECONDS",
     "TimeoutPolicy",
     "TimeoutScope",
 ]

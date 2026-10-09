@@ -11,7 +11,7 @@ from codestrata.application.assessment import AssessmentApplicationService
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.cli import app
 from codestrata.config import CodestrataSettings
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store import FileKnowledgeStore
 from codestrata.interfaces.mcp import create_mcp_server
 
 
@@ -32,13 +32,13 @@ def test_run_assessment_mcp_tool(tmp_path: Path) -> None:
     config.write_text(
         f"""
 [repository]
-path = "{repo}"
+path = "{repo.as_posix()}"
 
 [workspace]
 directory = ".codestrata-workspace"
 
 [knowledge]
-directory = "{knowledge_dir}"
+directory = "{knowledge_dir.as_posix()}"
 
 [static_analysis]
 enabled = false
@@ -63,7 +63,7 @@ log_level = "WARNING"
         }
     )
 
-    with SqliteKnowledgeStore(knowledge_dir) as store:
+    with FileKnowledgeStore(knowledge_dir) as store:
         server = create_mcp_server(
             query_service=KnowledgeQueryService(store),
             assessment_service=AssessmentApplicationService(),

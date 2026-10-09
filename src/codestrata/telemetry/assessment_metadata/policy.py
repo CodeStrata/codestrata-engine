@@ -9,9 +9,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-COMMUNITY_ASSESSMENT_METADATA_EMISSION_POLICY_ID = (
-    "community-assessment-metadata-emission-policy"
-)
+COMMUNITY_ASSESSMENT_METADATA_EMISSION_POLICY_ID = "community-assessment-metadata-emission-policy"
 COMMUNITY_ASSESSMENT_METADATA_EMISSION_POLICY_VERSION = "1.0"
 COMMUNITY_ASSESSMENT_METADATA_EMISSION_POLICY_URN = (
     f"{COMMUNITY_ASSESSMENT_METADATA_EMISSION_POLICY_ID}:"
@@ -94,15 +92,11 @@ class CommunityAssessmentMetadataEmissionPolicy:
         }
 
 
-def default_assessment_metadata_emission_policy() -> (
-    CommunityAssessmentMetadataEmissionPolicy
-):
+def default_assessment_metadata_emission_policy() -> CommunityAssessmentMetadataEmissionPolicy:
     return CommunityAssessmentMetadataEmissionPolicy()
 
 
-def authorized_assessment_metadata_emission_policy() -> (
-    CommunityAssessmentMetadataEmissionPolicy
-):
+def authorized_assessment_metadata_emission_policy() -> CommunityAssessmentMetadataEmissionPolicy:
     """Test / future 20.9 helper — never the product default."""
 
     return CommunityAssessmentMetadataEmissionPolicy(emission_enabled=True)

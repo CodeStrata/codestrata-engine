@@ -117,9 +117,7 @@ def reconcile_with_catalog(
     meta = {
         "catalog_id": catalog.get("catalog_id"),
         "catalog_schema_version": catalog.get("schema_version"),
-        "qualified_revisions": {
-            e.repository_id: e.qualified_revision.value for e in entries
-        },
+        "qualified_revisions": {e.repository_id: e.qualified_revision.value for e in entries},
         "language_distribution": dict(sorted(lang.items())),
         "ecosystem_distribution": dict(sorted(eco.items())),
         "tier_distribution": dict(sorted(tier.items())),

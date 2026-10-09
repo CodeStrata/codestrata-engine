@@ -35,9 +35,7 @@ def _rejects(callable_under_test, *, name: str) -> CheckResult:
     try:
         callable_under_test()
     except ProviderContractValidationError as error:
-        return CheckResult(
-            name=name, category="validation", ok=True, detail=f"raised: {error}"
-        )
+        return CheckResult(name=name, category="validation", ok=True, detail=f"raised: {error}")
     return CheckResult(
         name=name,
         category="validation",

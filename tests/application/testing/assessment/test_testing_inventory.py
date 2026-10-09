@@ -277,8 +277,7 @@ def test_inventory_deterministic_byte_identical(tmp_path: Path) -> None:
     )
     write_testing_assessment_artifact(left, tmp_path / "a")
     write_testing_assessment_artifact(right, tmp_path / "b")
-    assert resolve_head_path(
-        tmp_path / "a", legacy_filename="testing-assessment.json"
-    ).read_bytes() == resolve_head_path(
-        tmp_path / "b", legacy_filename="testing-assessment.json"
-    ).read_bytes()
+    assert (
+        resolve_head_path(tmp_path / "a", legacy_filename="testing-assessment.json").read_bytes()
+        == resolve_head_path(tmp_path / "b", legacy_filename="testing-assessment.json").read_bytes()
+    )

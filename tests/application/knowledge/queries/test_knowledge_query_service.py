@@ -27,9 +27,10 @@ from codestrata.application.knowledge.queries import (
 )
 from codestrata.domain.repository.enums import RepositorySourceType
 from codestrata.infrastructure.knowledge_store import (
-    SqliteKnowledgeStore,
+    FileKnowledgeStore,
     create_knowledge_query_service,
 )
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from tests.application.knowledge.queries.conftest_helpers import (
     fingerprint_for,
     make_manifest,
@@ -343,7 +344,7 @@ def test_component_and_dependency_queries(tmp_path: Path) -> None:
 
 def test_factory_composition(tmp_path: Path) -> None:
     knowledge_dir = tmp_path / "knowledge"
-    with SqliteKnowledgeStore(knowledge_dir) as store:
+    with FileKnowledgeStore(knowledge_dir) as store:
         seed_completed_assessment(store, github_url="https://github.com/acme/factory.git")
     service = create_knowledge_query_service(directory=knowledge_dir)
     assert service.list_repositories()

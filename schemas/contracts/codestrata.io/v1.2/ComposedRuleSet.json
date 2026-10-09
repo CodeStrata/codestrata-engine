@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/ComposedRuleSet.json",
+  "title": "CodeStrata Engine Composed RuleSet (E04.1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "composition_digest",
+    "ruleset_id",
+    "ruleset_version",
+    "root_digest",
+    "ordered_composition",
+    "selectors",
+    "rules",
+    "resolver_version",
+    "dsl_version",
+    "capability_version"
+  ],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.composed-ruleset.v1" },
+    "schema_version": { "type": "string" },
+    "composition_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "ruleset_id": { "type": "string" },
+    "ruleset_version": { "type": "string" },
+    "root_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "ordered_composition": { "type": "array" },
+    "selectors": { "type": "array" },
+    "rules": { "type": "array", "minItems": 1 },
+    "resolver_version": { "type": "string" },
+    "dsl_version": { "type": "string" },
+    "capability_version": { "type": "string" }
+  }
+}

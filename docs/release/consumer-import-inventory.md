@@ -1,0 +1,138 @@
+# Outside-Engine consumer imports of `codestrata` (read-only)
+
+E00.2 inventory. Produced by `verification.engine_scope.consumer_imports`
+against checkout `bca0a449` plus this story's Engine-only working tree. The
+scanner reads consumer trees and does not write them. This is not an E01
+compatibility freeze. `vscode-plugin` has no Python `codestrata` imports.
+
+- Import statements: 375
+- Unique modules: 122
+- platform: 217
+- verification (repo root): 157
+- infrastructure: 1
+- vscode-plugin: 0
+
+## Unique modules
+
+- `codestrata`
+- `codestrata.ai.aws_config`
+- `codestrata.ai.providers.common`
+- `codestrata.ai.providers.registry`
+- `codestrata.application.acceptance.targets`
+- `codestrata.application.assessment`
+- `codestrata.application.knowledge.ports`
+- `codestrata.application.knowledge.queries`
+- `codestrata.application.knowledge.queries.models`
+- `codestrata.artifacts.lifecycle`
+- `codestrata.artifacts.repository_identity`
+- `codestrata.cli`
+- `codestrata.community_cloud.report_publishing`
+- `codestrata.config`
+- `codestrata.config.dotenv`
+- `codestrata.config.settings`
+- `codestrata.design_system.tokens`
+- `codestrata.domain.findings`
+- `codestrata.domain.findings.enums`
+- `codestrata.domain.findings.ids`
+- `codestrata.domain.findings.models`
+- `codestrata.domain.graph.validation`
+- `codestrata.domain.quality_metrics.false_negatives`
+- `codestrata.domain.quality_metrics.false_positives`
+- `codestrata.domain.recommendations`
+- `codestrata.domain.recommendations.enums`
+- `codestrata.domain.recommendations.ids`
+- `codestrata.domain.recommendations.models`
+- `codestrata.domain.repository.enums`
+- `codestrata.domain.repository.files`
+- `codestrata.domain.repository.fingerprints`
+- `codestrata.domain.repository.identities`
+- `codestrata.domain.repository.manifests`
+- `codestrata.domain.repository.paths`
+- `codestrata.infrastructure.knowledge_store`
+- `codestrata.integration.commercial.client`
+- `codestrata.integration.commercial.models`
+- `codestrata.interfaces.mcp`
+- `codestrata.interfaces.mcp.context`
+- `codestrata.interfaces.mcp.envelope`
+- `codestrata.interfaces.mcp.errors`
+- `codestrata.interfaces.mcp.mapping`
+- `codestrata.interfaces.mcp.security`
+- `codestrata.interfaces.mcp.tools._common`
+- `codestrata.models`
+- `codestrata.reporting.contract.canonical`
+- `codestrata.reporting.contract.constants`
+- `codestrata.reporting.html_v2`
+- `codestrata.reporting.html_v2.renderer`
+- `codestrata.reporting.modernization_models`
+- `codestrata.reporting.traceability.preservation`
+- `codestrata.security.customer_safe_text`
+- `codestrata.security.database_url`
+- `codestrata.security.redaction`
+- `codestrata.services.artifact_serialization`
+- `codestrata.services.inventory.content_reader`
+- `codestrata.telemetry`
+- `codestrata.telemetry.analytics.ai_analytics`
+- `codestrata.telemetry.analytics.ai_analytics_catalogs`
+- `codestrata.telemetry.analytics.ai_analytics_diagnostics`
+- `codestrata.telemetry.analytics.ai_analytics_input`
+- `codestrata.telemetry.analytics.ai_analytics_mapping`
+- `codestrata.telemetry.analytics.ai_analytics_models`
+- `codestrata.telemetry.analytics.ai_analytics_policy`
+- `codestrata.telemetry.analytics.ai_analytics_projection`
+- `codestrata.telemetry.analytics.ai_analytics_serialization`
+- `codestrata.telemetry.analytics.assessment_analytics`
+- `codestrata.telemetry.analytics.assessment_analytics_diagnostics`
+- `codestrata.telemetry.analytics.assessment_analytics_policy`
+- `codestrata.telemetry.analytics.assessment_analytics_serialization`
+- `codestrata.telemetry.analytics.diagnostics`
+- `codestrata.telemetry.analytics.errors`
+- `codestrata.telemetry.analytics.events`
+- `codestrata.telemetry.analytics.installation_identity`
+- `codestrata.telemetry.analytics.installation_identity_diagnostics`
+- `codestrata.telemetry.analytics.installation_identity_policy`
+- `codestrata.telemetry.analytics.policy`
+- `codestrata.telemetry.analytics.projection`
+- `codestrata.telemetry.analytics.repository_aggregate`
+- `codestrata.telemetry.analytics.repository_aggregate_diagnostics`
+- `codestrata.telemetry.analytics.repository_aggregate_input`
+- `codestrata.telemetry.analytics.repository_aggregate_models`
+- `codestrata.telemetry.analytics.repository_aggregate_policy`
+- `codestrata.telemetry.analytics.runtime_analytics`
+- `codestrata.telemetry.analytics.runtime_analytics_diagnostics`
+- `codestrata.telemetry.analytics.serialization`
+- `codestrata.telemetry.assessment_isolation`
+- `codestrata.telemetry.assessment_isolation_policy`
+- `codestrata.telemetry.assessment_metadata.models`
+- `codestrata.telemetry.assessment_metadata.projector`
+- `codestrata.telemetry.assessment_metadata.source`
+- `codestrata.telemetry.catalog`
+- `codestrata.telemetry.catalog_formatting`
+- `codestrata.telemetry.catalog_metadata`
+- `codestrata.telemetry.catalog_policy`
+- `codestrata.telemetry.catalog_validation`
+- `codestrata.telemetry.catalog_write`
+- `codestrata.telemetry.cli_consent_policy`
+- `codestrata.telemetry.consent`
+- `codestrata.telemetry.consent_policy`
+- `codestrata.telemetry.decisions`
+- `codestrata.telemetry.disabled_service`
+- `codestrata.telemetry.errors`
+- `codestrata.telemetry.events`
+- `codestrata.telemetry.infrastructure.http_transport`
+- `codestrata.telemetry.infrastructure.unavailable_transport`
+- `codestrata.telemetry.non_interactive`
+- `codestrata.telemetry.non_interactive_policy`
+- `codestrata.telemetry.pre_transport_policy`
+- `codestrata.telemetry.preview_builder`
+- `codestrata.telemetry.preview_policy`
+- `codestrata.telemetry.privacy`
+- `codestrata.telemetry.product_transport`
+- `codestrata.telemetry.projection`
+- `codestrata.telemetry.prompt_policy`
+- `codestrata.telemetry.runtime_factory`
+- `codestrata.telemetry.runtime_policy`
+- `codestrata.telemetry.session`
+- `codestrata.telemetry.status_policy`
+- `codestrata.telemetry.transport_errors`
+- `codestrata.telemetry.transport_factory`
+- `codestrata.telemetry.transport_policy`

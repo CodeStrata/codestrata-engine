@@ -1,0 +1,49 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: architecture.invalid-dependency-direction
+  version: 1.0.0
+  title: Declared layer directions must be respected
+  category: architecture
+  owner: codestrata
+applies_to:
+  languages:
+    - java
+    - python
+    - javascript
+    - typescript
+    - php
+    - csharp
+  facts:
+    - metric.direction_violations
+    - graph.imports
+    - graph.depends_on
+select:
+  source: repository_graph
+  nodes:
+    all:
+      - type: module
+condition:
+  operator: threshold
+  fact: metric.direction_violations
+  value: 0
+finding:
+  default_severity: medium
+  message_template: A resolved module edge is outside the declared allowed directions
+  bindings:
+    - name: dependency_path
+      type: string
+      evidence: dependency_path
+  documentation_url: https://docs.codestrata.ai/rules/architecture/invalid-dependency-direction
+metric:
+  name: direction_violation_count
+  operation: count
+evidence_include:
+  - source_location
+  - dependency_path
+parameter_schema:
+  - name: violation_bound
+    value_type: integer
+    minimum: 0
+    maximum: 100000
+    default: 0

@@ -1,0 +1,298 @@
+{
+  "body": {
+    "change_summary": {
+      "affected_component_count": 1,
+      "affected_component_ids": [
+        "repo:example-repo:module:services/orders"
+      ],
+      "affected_test_count": null,
+      "affected_test_ids": [],
+      "boundary_dimension": "layers",
+      "boundary_spread_count": 2,
+      "boundary_spread_member_ids": [
+        "layer:app",
+        "layer:domain"
+      ],
+      "boundary_spread_status": "pass",
+      "changed_component_count": 1,
+      "changed_component_ids": [
+        "repo:example-repo:module:services/orders"
+      ],
+      "changed_file_count": 1,
+      "changed_file_ids": [
+        "repo:example-repo:file:services/orders/Handler.java"
+      ],
+      "crossed_boundary_count": 1,
+      "crossed_boundary_pairs": [
+        "layer:app->layer:domain"
+      ],
+      "crossed_boundary_status": "pass",
+      "cutoff_reason": null,
+      "graph_side": "candidate",
+      "lower_bound": false,
+      "mapping_coverage": "1.000000",
+      "mapping_coverage_status": "pass",
+      "narrative_only_context": true,
+      "schema_name": "codestrata.change-summary.v1",
+      "schema_version": "1.0.0",
+      "unmapped_changed_file_count": 0,
+      "visited_edges": 1,
+      "visited_nodes": 3
+    },
+    "comparison": {
+      "explanation": "Known observations retained; missing context does not invent zeros.",
+      "has_baseline": true,
+      "movement": "insufficient",
+      "reason_code": "partial_coverage"
+    },
+    "coverage": [
+      {
+        "applicability": "applicable",
+        "capability_id": "quality.m22.hotspots",
+        "capability_version": "1.0.0",
+        "coverage_ratio": "0.500000",
+        "coverage_reason": "partial_required_inputs",
+        "eligible_count": 2,
+        "error_count": 0,
+        "evaluated_count": 1,
+        "evidence_ids": [],
+        "excluded_count": 0,
+        "execution_state": "partial",
+        "limitations": [
+          "partial_required_inputs"
+        ],
+        "schema_name": "codestrata.capability-coverage.v1",
+        "schema_version": "1.0.0",
+        "scope": "repository",
+        "unknown_count": 0
+      }
+    ],
+    "descriptor_ids": [
+      "codestrata.analyzer.inventory.v1",
+      "codestrata.analyzer.architecture.v1",
+      "codestrata.analyzer.security.v1",
+      "codestrata.analyzer.quality.v1",
+      "codestrata.analyzer.maintainability.v1"
+    ],
+    "evaluation_time": "2026-09-15T00:00:00Z",
+    "evidence": [
+      {
+        "commit_id": null,
+        "evidence_id": "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669",
+        "extractor_version": "e01.2.example.v1",
+        "feed_record_id": null,
+        "graph_record_id": null,
+        "limitation": null,
+        "relative_path": "services/orders/Handler.java",
+        "schema_name": "codestrata.evidence.v1",
+        "schema_version": "1.0.0",
+        "source_kind": "source",
+        "source_revision": "abcdef1234567890",
+        "span": null,
+        "working_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      },
+      {
+        "commit_id": null,
+        "evidence_id": "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c",
+        "extractor_version": "e01.2.example.v1",
+        "feed_record_id": null,
+        "graph_record_id": null,
+        "limitation": "partial history window",
+        "relative_path": null,
+        "schema_name": "codestrata.evidence.v1",
+        "schema_version": "1.0.0",
+        "source_kind": "git",
+        "source_revision": "abcdef1234567890",
+        "span": null,
+        "working_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+      }
+    ],
+    "facts": [],
+    "findings": [],
+    "freshness": [
+      {
+        "capability_id": "maintainability.m24.churn",
+        "evaluation_time": "2026-09-15T00:00:00Z",
+        "explanation": "Requested window exceeded shallow clone; recency is not checkout age.",
+        "feed_digest": null,
+        "feed_provider": null,
+        "git_head": "abcdef1234567890",
+        "git_window": "180d+latest-1000",
+        "max_age_days": null,
+        "reason_code": "git_history_shallow",
+        "source_digest": null,
+        "source_publication_time": null,
+        "state": "unknown"
+      }
+    ],
+    "graph": {
+      "edges": [
+        {
+          "edge_id": "edge:contains:orders:handler",
+          "kind": "contains",
+          "source_id": "repo:example-repo:module:services/orders",
+          "target_id": "repo:example-repo:file:services/orders/Handler.java"
+        }
+      ],
+      "graph_id": "graph:example-repo:v1",
+      "limitations": [],
+      "nodes": [
+        {
+          "kind": "repository",
+          "node_id": "repo:example-repo",
+          "subject_id": "repo:example-repo"
+        },
+        {
+          "kind": "component",
+          "node_id": "repo:example-repo:module:services/orders",
+          "subject_id": "repo:example-repo:module:services/orders"
+        },
+        {
+          "kind": "file",
+          "node_id": "repo:example-repo:file:services/orders/Handler.java",
+          "subject_id": "repo:example-repo:file:services/orders/Handler.java"
+        }
+      ],
+      "schema_name": "codestrata.graph.v1",
+      "schema_version": "1.0.0"
+    },
+    "health_score": null,
+    "hotspots": [
+      {
+        "active_finding_ids": [],
+        "contributors": [
+          {
+            "coverage_reason": null,
+            "evidence_ids": [
+              "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c",
+              "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+            ],
+            "measurement_id": "M16",
+            "measurement_version": "v1",
+            "name": "complexity",
+            "role": "ranking",
+            "value": "12"
+          },
+          {
+            "coverage_reason": null,
+            "evidence_ids": [
+              "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c",
+              "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+            ],
+            "measurement_id": "M24",
+            "measurement_version": "v1",
+            "name": "churn",
+            "role": "ranking",
+            "value": "40"
+          },
+          {
+            "coverage_reason": null,
+            "evidence_ids": [
+              "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c",
+              "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+            ],
+            "measurement_id": "M09",
+            "measurement_version": "v1",
+            "name": "centrality",
+            "role": "context_only",
+            "value": "0.250000"
+          },
+          {
+            "coverage_reason": "unknown_ownership_mapping",
+            "evidence_ids": [
+              "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c"
+            ],
+            "measurement_id": "M25",
+            "measurement_version": "v1",
+            "name": "ownership",
+            "role": "context_only",
+            "value": null
+          }
+        ],
+        "evidence_ids": [
+          "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c",
+          "evidence:source:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:94e24e6766c8a669"
+        ],
+        "history_profile_id": "m24.history.v1",
+        "history_window": "180d+latest-1000",
+        "input_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+        "list_kind": "complete_comparable",
+        "opaque_score": false,
+        "priority_explanation": "formula_version=M22.v1; ranking=complexity*churn; complexity=12; changed_lines=40; value=480; scope=repo:example-repo:module:services/orders; window=180d+latest-1000; tie_break=subject_id_ascending",
+        "ranking_value": "480",
+        "record_id": "hotspot:repo:example-repo:module:services/orders",
+        "schema_name": "codestrata.engineering-hotspot.v1",
+        "schema_version": "1.0.0",
+        "subject_id": "repo:example-repo:module:services/orders"
+      }
+    ],
+    "limitations": [
+      "partial_git_history"
+    ],
+    "outcome_driver_manifest_digest": "da80d38beace93d8ee1a831d99a26964aee2da9b6e50e62ce05a9618de0515f4",
+    "ownership": [
+      {
+        "denominator": 10,
+        "evidence_ids": [
+          "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c"
+        ],
+        "history_profile_id": "m24.history.v1",
+        "notes": "repository scope; not an average of file ratios",
+        "numerator": 8,
+        "record_id": "own:repo",
+        "schema_name": "codestrata.ownership-concentration.v1",
+        "schema_version": "1.0.0",
+        "scope": "repository",
+        "serialized_ratio": "0.800000",
+        "status": "pass",
+        "subject_id": "repo:example-repo"
+      },
+      {
+        "denominator": 4,
+        "evidence_ids": [
+          "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c"
+        ],
+        "history_profile_id": "m24.history.v1",
+        "notes": "component scope computed independently",
+        "numerator": 3,
+        "record_id": "own:component",
+        "schema_name": "codestrata.ownership-concentration.v1",
+        "schema_version": "1.0.0",
+        "scope": "component",
+        "serialized_ratio": "0.750000",
+        "status": "pass",
+        "subject_id": "repo:example-repo:module:services/orders"
+      },
+      {
+        "denominator": 1,
+        "evidence_ids": [
+          "evidence:git:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef:f976267d4d74f71c"
+        ],
+        "history_profile_id": "m24.history.v1",
+        "notes": "file drill-down is not a file-level hotspot rank",
+        "numerator": 1,
+        "record_id": "own:file",
+        "schema_name": "codestrata.ownership-concentration.v1",
+        "schema_version": "1.0.0",
+        "scope": "file",
+        "serialized_ratio": "1.000000",
+        "status": "pass",
+        "subject_id": "repo:example-repo:file:services/orders/Handler.java"
+      }
+    ],
+    "repository_subject_id": "repo:example-repo",
+    "schema_name": "codestrata.canonical-envelope.v1",
+    "schema_version": "1.0.0",
+    "source_revision": "abcdef1234567890",
+    "working_state_digest": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "body_digest": "7eeb08ae13d062bd15e30dc1cd1cbf7b0b06063bf302f0d5ee827f4249869e5a",
+  "operational": {
+    "duration_ms": null,
+    "generated_at": null,
+    "run_id": "run-example-partial",
+    "signature": null
+  },
+  "schema_name": "codestrata.canonical-envelope.v1",
+  "schema_version": "1.0.0"
+}

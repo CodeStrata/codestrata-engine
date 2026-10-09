@@ -1,0 +1,47 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: architecture.framework-leakage
+  version: 1.0.0
+  title: Domain units must not carry structural framework symbols
+  category: architecture
+  owner: codestrata
+applies_to:
+  languages:
+    - java
+    - python
+    - javascript
+    - typescript
+    - php
+    - csharp
+  facts:
+    - metric.framework_leakage
+    - module.declaration
+select:
+  source: repository_graph
+  nodes:
+    all:
+      - type: module
+condition:
+  operator: threshold
+  fact: metric.framework_leakage
+  value: 0
+finding:
+  default_severity: medium
+  message_template: A domain unit contains a structural framework symbol
+  bindings:
+    - name: framework_symbol
+      type: string
+      evidence: framework_symbol
+  documentation_url: https://docs.codestrata.ai/rules/architecture/framework-leakage
+metric:
+  name: framework_leakage_count
+  operation: count
+evidence_include:
+  - source_location
+parameter_schema:
+  - name: violation_bound
+    value_type: integer
+    minimum: 0
+    maximum: 100000
+    default: 0

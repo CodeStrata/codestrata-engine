@@ -202,9 +202,7 @@ def test_acceptance_run_with_mocked_onboard(tmp_path: Path, monkeypatch) -> None
     rag = SimpleNamespace(
         load_corpus_from_run=lambda _p: object(),
         build_answer_stack=lambda *a, **k: (object(), object(), object(), object()),
-        ask_predefined_questions=lambda *_a, **_k: [
-            {"status": "success", "citations": 1}
-        ],
+        ask_predefined_questions=lambda *_a, **_k: [{"status": "success", "citations": 1}],
         mcp_health_check=lambda *_a, **_k: {"status": "success"},
     )
     monkeypatch.setattr(acceptance_service, "load_acceptance_rag_helpers", lambda: rag)

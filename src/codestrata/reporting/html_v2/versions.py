@@ -16,6 +16,25 @@ _HIGHLIGHT_NAMES = frozenset(
     }
 )
 _MAX_KEY_DEPENDENCIES = 8
+_PREFERRED_NPM_NAMES = frozenset(
+    {
+        "@angular/core",
+        "@angular/common",
+        "react",
+        "react-dom",
+        "vue",
+        "next",
+        "@nestjs/core",
+        "svelte",
+        "express",
+    }
+)
+
+
+def _npm_framework_rank(item: HighlightedVersionInput) -> int:
+    label = item.label
+    name = label.split(": ", 1)[-1].strip().lower() if ": " in label else label.strip().lower()
+    return 0 if name in _PREFERRED_NPM_NAMES else 1
 
 
 def build_highlighted_versions(
@@ -129,6 +148,9 @@ def build_highlighted_versions(
                     detail=scope if isinstance(scope, str) else None,
                 )
             )
+
+    # Framework packages lead the capped table so tooling does not crowd them out.
+    key_deps.sort(key=_npm_framework_rank)
 
     # Deduplicate labels preferring first (stable) entry; keep concept highlights first.
     seen_labels: set[str] = set()

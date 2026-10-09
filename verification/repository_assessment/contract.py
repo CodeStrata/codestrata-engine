@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 REPOSITORY_ASSESSMENT_VERIFICATION_ID = "repository-assessment-verification"
 REPOSITORY_ASSESSMENT_VERIFICATION_VERSION = "1.0.0"

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/EffectiveRuleSet.json",
+  "title": "CodeStrata Engine Effective RuleSet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name", "schema_version", "effective_ruleset_digest", "ruleset_id", "ruleset_version",
+    "ordered_composition", "rules", "resolver_version", "dsl_version", "capability_version",
+    "signed_base_digest", "local_unsigned_config_digest", "input_digest", "config_digest",
+    "execution_purpose", "preview_cannot_authorize_production"
+  ],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.effective-ruleset.v1" },
+    "schema_version": { "type": "string" },
+    "effective_ruleset_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "ruleset_id": { "type": "string" },
+    "ruleset_version": { "type": "string" },
+    "ordered_composition": { "type": "array" },
+    "rules": { "type": "array", "minItems": 1 },
+    "resolver_version": { "type": "string" },
+    "dsl_version": { "type": "string" },
+    "capability_version": { "type": "string" },
+    "signed_base_digest": { "type": "string" },
+    "local_unsigned_config_digest": { "type": "string" },
+    "package_digest": { "type": ["string", "null"] },
+    "feed_digest": { "type": ["string", "null"] },
+    "input_digest": { "type": "string" },
+    "config_digest": { "type": "string" },
+    "execution_purpose": { "type": "string", "enum": ["production", "preview", "candidate_validation"] },
+    "validity_not_before": { "type": ["string", "null"] },
+    "validity_not_after": { "type": ["string", "null"] },
+    "preview_cannot_authorize_production": { "type": "boolean", "const": true }
+  }
+}

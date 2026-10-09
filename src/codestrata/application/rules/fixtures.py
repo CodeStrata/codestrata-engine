@@ -5,8 +5,8 @@ from __future__ import annotations
 from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleSeverity,
     RuleSkipReason,
@@ -14,13 +14,13 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
+from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 from codestrata.domain.rules.rule_confidence import (
     RuleConfidence,
     RuleConfidenceBasis,
     RuleConfidenceCalibrationStatus,
     RuleConfidenceLevel,
 )
-from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 
 
 def _meta(

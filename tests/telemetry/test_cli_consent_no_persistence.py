@@ -20,9 +20,7 @@ from codestrata.telemetry.service import (
 )
 
 
-def test_D_E_F_G_H_allow_bridge_does_not_mutate_preference(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_D_E_F_G_H_allow_bridge_does_not_mutate_preference(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     pref = home / "telemetry.json"
@@ -61,9 +59,7 @@ def test_I_deny_does_not_invoke_transport() -> None:
         telemetry_deny=True,
         transport=capture,
     )
-    facade.runtime.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.APPLICATION_STARTED)
-    )
+    facade.runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.APPLICATION_STARTED))
     assert capture.captured == []
     assert facade.runtime.session.counters.transmission_attempts == 0
 
@@ -96,9 +92,7 @@ def test_allow_undecided_does_not_send(tmp_path: Path) -> None:
         preference_path=tmp_path / "missing.json",
         transport=capture,
     )
-    facade.runtime.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-    )
+    facade.runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert capture.captured == []
 
 
@@ -111,9 +105,7 @@ def test_v2_capture_receives_privacy_safe_only(tmp_path: Path) -> None:
         preference_path=pref,
         transport=capture,
     )
-    facade.runtime.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-    )
+    facade.runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert len(capture.captured) == 1
     payload = capture.captured[0].to_stable_dict()
     assert "repository_name" not in payload
@@ -121,9 +113,7 @@ def test_v2_capture_receives_privacy_safe_only(tmp_path: Path) -> None:
     assert "argv" not in payload
 
 
-def test_W_legacy_enable_authorizes_via_persisted_preference(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_W_legacy_enable_authorizes_via_persisted_preference(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))

@@ -18,7 +18,7 @@ def test_query_package_avoids_sqlite_typer_and_reports() -> None:
 
 def test_query_service_accepts_injected_store(tmp_path: Path) -> None:
     from codestrata.application.knowledge.queries import KnowledgeQueryService
-    from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+    from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 
     with SqliteKnowledgeStore(tmp_path / "knowledge") as store:
         service = KnowledgeQueryService(store)

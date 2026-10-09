@@ -98,9 +98,7 @@ class Recommendation(BaseModel):
     # Epic 5 Slice 5.5 — Recommendation Confidence (not priority; not severity).
     recommendation_confidence: RecommendationConfidence = Field(
         default_factory=lambda: RecommendationConfidence.unavailable(
-            limitations=(
-                "Legacy Recommendation payload omitted recommendation_confidence.",
-            ),
+            limitations=("Legacy Recommendation payload omitted recommendation_confidence.",),
         )
     )
     # Epic 5 Slice 5.14 — calibrated Recommendation priority (not severity).
@@ -157,9 +155,7 @@ class Recommendation(BaseModel):
     def normalize_recommendation_confidence(cls, value: object) -> object:
         if value is None:
             return RecommendationConfidence.unavailable(
-                limitations=(
-                    "Legacy Recommendation payload omitted recommendation_confidence.",
-                ),
+                limitations=("Legacy Recommendation payload omitted recommendation_confidence.",),
             )
         return value
 
@@ -253,15 +249,11 @@ class Recommendation(BaseModel):
 
         if recommendation_type is None:
             recommendation_type = (
-                RecommendationType.FINDING_BACKED
-                if finding_ids
-                else RecommendationType.LEGACY
+                RecommendationType.FINDING_BACKED if finding_ids else RecommendationType.LEGACY
             )
         if evidence_completeness is None:
             evidence_completeness = (
-                EvidenceCompleteness.COMPLETE
-                if finding_ids
-                else EvidenceCompleteness.LEGACY
+                EvidenceCompleteness.COMPLETE if finding_ids else EvidenceCompleteness.LEGACY
             )
         if primary_finding_id is None and finding_ids:
             primary_finding_id = sorted(
@@ -288,9 +280,7 @@ class Recommendation(BaseModel):
             limitations=tuple(limitations),
             recommendation_confidence=recommendation_confidence
             or RecommendationConfidence.unavailable(
-                limitations=(
-                    "Recommendation Confidence pending supporting Finding resolution.",
-                ),
+                limitations=("Recommendation Confidence pending supporting Finding resolution.",),
             ),
             affected_node_ids=tuple(affected_node_ids),
             evidence=tuple(evidence),

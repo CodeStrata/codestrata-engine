@@ -197,7 +197,10 @@ def apply_parent_confidence_bounds(
 
     updated: list[EvidenceRef] = []
     for ref in refs:
-        if not ref.parent_evidence_ids and ref.production_mode is not EvidenceProductionMode.SYNTHESIZED:
+        if (
+            not ref.parent_evidence_ids
+            and ref.production_mode is not EvidenceProductionMode.SYNTHESIZED
+        ):
             updated.append(ref)
             continue
         capped = _cap_by_parents(
@@ -279,13 +282,11 @@ def _family_confidence(
         return _architecture_family(attrs=attrs, limitations=limitations, inputs=inputs)
 
     # Repository packs (testing/cloud/AI/performance) when eventually mapped
-    if any(
-        token in provenance
-        for token in ("testing", "cloud", "ai_readiness", "performance")
-    ) or kind is EvidenceKind.REPOSITORY_FACT:
-        return _repository_signal_family(
-            attrs=attrs, limitations=limitations, inputs=inputs
-        )
+    if (
+        any(token in provenance for token in ("testing", "cloud", "ai_readiness", "performance"))
+        or kind is EvidenceKind.REPOSITORY_FACT
+    ):
+        return _repository_signal_family(attrs=attrs, limitations=limitations, inputs=inputs)
 
     # Language / AST
     if "language" in provenance or rule_kind is RuleEvidenceKind.MODULE:
@@ -751,15 +752,15 @@ def _apply_redaction_adjustment(
     }:
         bases.append(EvidenceConfidenceBasis.REDACTED_OBSERVATION)
         if snippet.redaction_level is SnippetRedactionLevel.FULLY_REDACTED:
-            limitations.append(
-                "Full redaction removes important interpretation context."
-            )
+            limitations.append("Full redaction removes important interpretation context.")
             if level is EvidenceConfidenceLevel.HIGH:
                 level = EvidenceConfidenceLevel.MODERATE
     elif attrs.get("redacted_preview"):
         bases.append(EvidenceConfidenceBasis.REDACTED_OBSERVATION)
-    if level == confidence.level and bases == list(confidence.basis) and limitations == list(
-        confidence.limitations
+    if (
+        level == confidence.level
+        and bases == list(confidence.basis)
+        and limitations == list(confidence.limitations)
     ):
         return confidence
     return _build(

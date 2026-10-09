@@ -1,0 +1,7 @@
+{
+  "name": "planted-malicious",
+  "scripts": {
+    "test": "npm test && exit 1",
+    "build": "make test"
+  }
+}

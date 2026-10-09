@@ -7,7 +7,6 @@ from dataclasses import dataclass
 from codestrata.integration.commercial.client import (
     OfflinePlatformClient,
     PlatformClient,
-    RestPlatformClient,
 )
 
 
@@ -25,30 +24,15 @@ class PlatformClientConfig:
 
 
 def platform_client_from_settings(settings: object) -> PlatformClient:
-    """Build a PlatformClient from ``CodestrataSettings.platform`` (duck-typed)."""
+    """Community composition always returns the offline client.
 
-    platform = getattr(settings, "platform", None)
-    if platform is None or not bool(getattr(platform, "enabled", False)):
-        return OfflinePlatformClient()
+    ``RestPlatformClient`` remains importable as a compatibility projection for
+    outside-Engine hosts. Canonical Community runtime never constructs it, even
+    when ``[platform].enabled`` is true in settings.
+    """
 
-    token = getattr(platform, "auth_token", None)
-    token_env = getattr(platform, "auth_token_env", None)
-    if not token and token_env:
-        import os
-
-        token = os.environ.get(str(token_env)) or None
-
-    artifacts = getattr(platform, "artifacts", None)
-    max_artifact_bytes = int(getattr(artifacts, "max_artifact_bytes", 10_485_760))
-
-    return RestPlatformClient(
-        base_url=str(getattr(platform, "base_url", "http://127.0.0.1:8000")),
-        timeout_seconds=float(getattr(platform, "timeout_seconds", 10.0)),
-        max_retries=int(getattr(platform, "max_retries", 2)),
-        retry_backoff_seconds=float(getattr(platform, "retry_backoff_seconds", 0.5)),
-        auth_token=token,
-        max_artifact_bytes=max_artifact_bytes,
-    )
+    _ = settings
+    return OfflinePlatformClient()
 
 
 def platform_config_from_settings(settings: object) -> PlatformClientConfig:

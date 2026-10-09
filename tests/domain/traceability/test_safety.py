@@ -15,13 +15,7 @@ from codestrata.domain.traceability import (
     to_stable_dict,
 )
 
-_PACKAGE = (
-    Path(__file__).resolve().parents[3]
-    / "src"
-    / "codestrata"
-    / "domain"
-    / "traceability"
-)
+_PACKAGE = Path(__file__).resolve().parents[3] / "src" / "codestrata" / "domain" / "traceability"
 
 _FORBIDDEN_IMPORT_PREFIXES = (
     "codestrata.application",

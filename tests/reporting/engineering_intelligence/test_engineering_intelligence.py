@@ -168,9 +168,7 @@ def test_build_aggregates_heads_and_weakest_confidence() -> None:
     assert intel.confidence == "limited"
     assert intel.confidence_label == "Limited confidence"
     assert any(row.label == "high" and row.count == 1 for row in intel.priority_by_priority)
-    assert any(
-        row.label == "near_term" and row.count == 1 for row in intel.priority_by_horizon
-    )
+    assert any(row.label == "near_term" and row.count == 1 for row in intel.priority_by_horizon)
     joined = " ".join(intel.limitations).lower()
     assert "based only on enabled assessment heads" in joined
     assert "runtime behavior not evaluated" in joined
@@ -189,8 +187,7 @@ def test_soft_claims_scrubbed() -> None:
     )
     assert scrubbed == "safe"
     ok = scrub_soft_engineering_claims(
-        "The assessment summarizes deterministic observations from the enabled "
-        "assessment heads.",
+        "The assessment summarizes deterministic observations from the enabled assessment heads.",
         fallback="safe",
     )
     assert "summarizes deterministic observations" in ok.lower()
@@ -231,9 +228,7 @@ def test_html_engineering_intelligence_summary(tmp_path: Path) -> None:
         supporting_finding_ids=(finding.id,),
         primary_finding_id=finding.id,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
-        actions=(
-            RecommendationAction(order=1, title="Rotate", description="Rotate secret"),
-        ),
+        actions=(RecommendationAction(order=1, title="Rotate", description="Rotate secret"),),
         subject_keys=("repo",),
     )
     analysis = AnalysisResult(
@@ -275,9 +270,7 @@ def test_html_engineering_intelligence_summary(tmp_path: Path) -> None:
 
     assert 'id="executive-summary"' in html
     assert 'id="engineering-intelligence-summary"' in html
-    assert html.find('id="executive-summary"') < html.find(
-        'id="engineering-intelligence-summary"'
-    )
+    assert html.find('id="executive-summary"') < html.find('id="engineering-intelligence-summary"')
     assert "Overall assessment status" in html
     assert "Assessment heads assessed" in html
     assert "High-level engineering observations" in html
@@ -291,8 +284,10 @@ def test_html_engineering_intelligence_summary(tmp_path: Path) -> None:
     assert 'href="#security-intelligence"' in html
 
     # No duplicated recommendation/roadmap detail lists inside EIS.
+    # key-takeaways is not a section in this report, so the bound is the next section.
     eis_start = html.find('id="engineering-intelligence-summary"')
-    eis_end = html.find('id="key-takeaways"')
+    eis_end = html.find('id="engineering-risks"')
+    assert eis_end > eis_start
     eis_body = html[eis_start:eis_end]
     assert "Stabilize → Secure → Modernize → Optimize" not in eis_body
     assert eis_body.count("item-card recommendation") == 0
@@ -306,6 +301,10 @@ def test_html_engineering_intelligence_summary(tmp_path: Path) -> None:
     assert ASSESSMENT_JSON_SCHEMA_VERSION == "1.2"
     _assert_no_forbidden(eis_body)
     ordered = [entry.section_id for entry in document.outline]
-    assert ordered.index("executive-summary") < ordered.index(
-        "engineering-intelligence-summary"
-    )
+    # R2 attention-first is the authoritative leadership section. The legacy
+    # executive-summary id remains nested inside it and is not a TOC peer.
+    assert "attention-first" in ordered
+    assert "executive-summary" not in ordered
+    assert ordered.index("attention-first") < ordered.index("technical-appendix")
+    assert html.find('id="attention-first"') < html.find('id="executive-summary"')
+    assert html.find('id="executive-summary"') < html.find('id="engineering-intelligence-summary"')

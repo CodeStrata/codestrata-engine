@@ -8,7 +8,6 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.inventory import FactClassification, compute_precision_recall
 from validation.models import ExpectedResults, RepositorySourceType, ValidationVerdict
@@ -121,10 +120,8 @@ def test_classify_tp_fp_fn_and_metrics() -> None:
         },
         ai_executed=False,
     )
-    by_name = {item.name: item.classification for item in result.classifications}
     assert any(
-        item.classification is FactClassification.TRUE_POSITIVE
-        and "LICENSE" in item.name
+        item.classification is FactClassification.TRUE_POSITIVE and "LICENSE" in item.name
         for item in result.classifications
     )
     assert any(
@@ -324,20 +321,14 @@ def test_controlled_ai_fixture_no_ai_priority_actions(tmp_path: Path) -> None:
 
 def test_modernization_repeat_run_determinism(tmp_path: Path) -> None:
     fixture = (VALIDATION_ROOT / "fixtures" / "security-hygiene").resolve()
-    first, _ = run_real_assessment(
-        repository_path=fixture, output_directory=tmp_path / "a"
-    )
-    second, _ = run_real_assessment(
-        repository_path=fixture, output_directory=tmp_path / "b"
-    )
+    first, _ = run_real_assessment(repository_path=fixture, output_directory=tmp_path / "a")
+    second, _ = run_real_assessment(repository_path=fixture, output_directory=tmp_path / "b")
     assert sorted(
         item.recommendation_id or "" for item in first.modernization_recommendations
-    ) == sorted(
-        item.recommendation_id or "" for item in second.modernization_recommendations
+    ) == sorted(item.recommendation_id or "" for item in second.modernization_recommendations)
+    assert sorted(item.action_id or "" for item in first.modernization_priority_actions) == sorted(
+        item.action_id or "" for item in second.modernization_priority_actions
     )
-    assert sorted(
-        item.action_id or "" for item in first.modernization_priority_actions
-    ) == sorted(item.action_id or "" for item in second.modernization_priority_actions)
 
 
 def _run_modernization_precision_suite(
@@ -384,9 +375,7 @@ def _run_modernization_precision_suite(
         report, document = load_emitted_assessment(run.artifact_dir)
         findings = (document.get("assessment") or {}).get("findings") or []
         finding_ids = {
-            str(item.get("id"))
-            for item in findings
-            if isinstance(item, dict) and item.get("id")
+            str(item.get("id")) for item in findings if isinstance(item, dict) and item.get("id")
         }
         recs = extract_modernization_recommendations(document)
         # ACTIVE_0_2_0: priority_actions / roadmap are not persisted on disk.

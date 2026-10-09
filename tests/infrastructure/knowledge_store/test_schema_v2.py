@@ -24,8 +24,9 @@ from codestrata.domain.repository import (
     RepositorySourceType,
 )
 from codestrata.domain.repository.enums import HashAlgorithm, RepositoryFileKind
-from codestrata.infrastructure.knowledge_store import CURRENT_SCHEMA_VERSION, SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store import CURRENT_SCHEMA_VERSION
 from codestrata.infrastructure.knowledge_store.defaults import SCHEMA_VERSION_KEY
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 
 
 def _manifest(*, key: str = "demo", digest: str = "a" * 64) -> RepositoryManifest:

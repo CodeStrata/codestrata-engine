@@ -1,0 +1,41 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: dependency.conflicting-exact-versions
+  version: 1.0.0
+  title: Conflicting exact dependency versions
+  category: dependency
+  owner: codestrata
+  measurement: M12
+  tags: [dependency, hygiene, conflict]
+applies_to:
+  languages: [java, python, php, csharp]
+  requires:
+    facts: [dependency.declarations]
+select:
+  source: dependency
+  declarations:
+    all:
+      - conflicting_exact_versions: true
+condition:
+  operator: dependency.conflicting_exact_versions
+emit:
+  finding:
+    default_severity: high
+    message:
+      template: >-
+        Package '{{identity}}' is declared with conflicting exact versions
+        [{{version_list}}] in the same resolution context ({{locations}}).
+      bindings:
+        identity: {type: string, evidence: normalized_identity}
+        version_list: {type: string, evidence: conflict_versions}
+        locations: {type: string, evidence: locations}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: conflicting_exact_version_finding_count
+    operation: count
+evidence:
+  include:
+    - declaration_path
+    - conflict_versions
+parameters: {}

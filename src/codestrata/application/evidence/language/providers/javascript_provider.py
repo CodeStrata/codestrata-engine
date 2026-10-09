@@ -6,6 +6,9 @@ import time
 from typing import Any
 
 from codestrata.application.evidence.language.adapters import bundle_from_raw_facts
+from codestrata.application.evidence.language.providers.depth import (
+    JAVASCRIPT_LANGUAGE_PIN,
+)
 from codestrata.application.rules.architecture.view_builder import collect_raw_package_facts
 from codestrata.domain.evidence.language.capabilities import CapabilityMaturity
 from codestrata.domain.evidence.language.capability_catalog import (
@@ -35,6 +38,7 @@ from codestrata.domain.evidence.language.identifiers import LanguageEvidenceProv
 class JavaScriptLanguageEvidenceProvider:
     PROVIDER_ID = "language.javascript.core"
     PROVIDER_VERSION = "1.0.0"
+    SUPPORTED_DEPTH = JAVASCRIPT_LANGUAGE_PIN
 
     def __init__(self) -> None:
         self._metadata = LanguageEvidenceProviderMetadata(
@@ -47,8 +51,17 @@ class JavaScriptLanguageEvidenceProvider:
                 "are not treated as runtime coupling beyond recorded import edges."
             ),
             supported_languages=("javascript",),
-            supported_file_extensions=(".js", ".jsx", ".ts", ".tsx"),
-            supported_frameworks=("react",),
+            supported_file_extensions=(
+                ".js",
+                ".jsx",
+                ".mjs",
+                ".cjs",
+                ".ts",
+                ".tsx",
+                ".vue",
+                ".svelte",
+            ),
+            supported_frameworks=("angular", "nestjs", "next", "react", "svelte", "vue"),
             capabilities=ProviderCapabilitySet(
                 supported=(
                     EvidenceCapabilityDeclaration(
@@ -78,20 +91,25 @@ class JavaScriptLanguageEvidenceProvider:
                         maturity=CapabilityMaturity.EXPERIMENTAL,
                     ),
                     EvidenceCapabilityDeclaration(
+                        capability_id=CAP_FRAMEWORK_USAGE,
+                        maturity=CapabilityMaturity.PARTIAL,
+                        limitations=(
+                            "Domain-layer decorator and quoted import patterns only, "
+                            "no module graph and no component tree."
+                        ),
+                    ),
+                    EvidenceCapabilityDeclaration(
                         capability_id=CAP_TESTS_PRESENCE,
                         maturity=CapabilityMaturity.PARTIAL,
                     ),
                 ),
                 unsupported=(
                     CAP_SOURCE_SYMBOLS,
-                    CAP_FRAMEWORK_USAGE,
                     CAP_BUILD_MODULES,
                     CAP_BUILD_DEPENDENCIES,
                 ),
             ),
-            documentation_reference=(
-                "docs/analysis-intelligence/evidence-providers/javascript.md"
-            ),
+            documentation_reference=("docs/analysis-intelligence/evidence-providers/javascript.md"),
         )
 
     @property
@@ -102,7 +120,9 @@ class JavaScriptLanguageEvidenceProvider:
         js_paths = [
             path
             for path in context.relative_paths
-            if path.replace("\\", "/").lower().endswith((".js", ".jsx", ".ts", ".tsx"))
+            if path.replace("\\", "/").lower().endswith(
+                (".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".vue", ".svelte")
+            )
         ]
         if not js_paths:
             return ProviderApplicability.not_applicable("no_javascript_source_files")
@@ -118,7 +138,9 @@ class JavaScriptLanguageEvidenceProvider:
         js_paths = [
             path
             for path in context.relative_paths
-            if path.replace("\\", "/").lower().endswith((".js", ".jsx", ".ts", ".tsx"))
+            if path.replace("\\", "/").lower().endswith(
+                (".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".vue", ".svelte")
+            )
         ]
         if not any(path in context.file_texts for path in js_paths):
             return LanguageEvidenceCollectionResult.insufficient_input(

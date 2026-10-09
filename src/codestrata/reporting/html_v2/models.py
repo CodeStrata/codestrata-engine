@@ -22,6 +22,14 @@ from codestrata.reporting.cloud.intelligence_models import CloudIntelligenceSect
 from codestrata.reporting.cloud.models import CloudReportSection
 from codestrata.reporting.dependency.intelligence_models import DependencyIntelligenceSection
 from codestrata.reporting.dependency.models import DependencyReportSection
+from codestrata.reporting.engineering_health.models import (
+    ArchitectureMapView,
+    AttentionSummaryView,
+    CochangeSectionView,
+    CoverageTrustView,
+    HotspotSectionView,
+    OwnershipSectionView,
+)
 from codestrata.reporting.engineering_intelligence.intelligence_models import (
     EngineeringIntelligenceSection,
 )
@@ -539,6 +547,10 @@ class AssessmentHeadSectionView(BaseModel):
     related_priority_action_ids: tuple[str, ...] = ()
     placeholder_message: str | None = None
     pack_content_available: bool = False
+    # R2-P03 presentation projection — not canonical enums.
+    role: str = "supporting"
+    display_label: str = ""
+    outcome_family: str | None = None
 
     @field_validator(
         "limitations",
@@ -603,12 +615,21 @@ class CustomerReportDocument(BaseModel):
     assessment_scope: AssessmentScopeView | None = None
     # Epic 3 Slice 3.1 — assessment-head organization (presentation projections).
     assessment_heads: tuple[AssessmentHeadSectionView, ...] = ()
+    # R2-P03 — four Engineering Health headlines plus demoted supporting/appendix.
+    headline_outcomes: tuple[AssessmentHeadSectionView, ...] = ()
+    supporting_heads: tuple[AssessmentHeadSectionView, ...] = ()
+    appendix_heads: tuple[AssessmentHeadSectionView, ...] = ()
     unclassified_findings: tuple[FindingView, ...] = ()
     unclassified_recommendations: tuple[RecommendationView, ...] = ()
     unclassified_limitation: str = (
-        "Some assessment results could not yet be assigned to a customer-facing "
-        "assessment section."
+        "Some assessment results could not yet be assigned to a customer-facing assessment section."
     )
+    attention_summary: AttentionSummaryView | None = None
+    architecture_map: ArchitectureMapView | None = None
+    engineering_hotspots: HotspotSectionView | None = None
+    ownership_concentration: OwnershipSectionView | None = None
+    temporal_cochange: CochangeSectionView | None = None
+    coverage_trust: CoverageTrustView | None = None
     provenance_note: str = (
         "Findings and Priority Actions reflect repository evidence from this assessment. "
         "Modernization Advisor, when present, is interpretive commentary only."
@@ -627,6 +648,9 @@ class CustomerReportDocument(BaseModel):
         "engineering_risks",
         "modernization_opportunities",
         "assessment_heads",
+        "headline_outcomes",
+        "supporting_heads",
+        "appendix_heads",
         "unclassified_findings",
         "unclassified_recommendations",
         mode="before",

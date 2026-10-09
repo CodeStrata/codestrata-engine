@@ -18,7 +18,12 @@ from verification.cli_installation.environment import (
 from verification.repository_assessment.artifacts import find_latest_run_directory
 from verification.repository_assessment.catalog import load_catalog, select_smoke_repository
 from verification.repository_assessment.clone import clone_qualified_repository
-from verification.repository_assessment.commands import assessment_environ, run_assess, run_doctor, run_init
+from verification.repository_assessment.commands import (
+    assessment_environ,
+    run_assess,
+    run_doctor,
+    run_init,
+)
 from verification.repository_assessment.workspace import (
     assert_outside_codestrata_tree,
     copy_fixture,
@@ -90,7 +95,6 @@ def prepare_assessment_inputs(
     if not (monorepo / "validation" / "repository-catalog" / "catalog.json").is_file():
         monorepo = engine_root
 
-    owned_temp = work_root is None
     artifact_root = (work_root or Path(tempfile.mkdtemp(prefix="cs-sv5-artifacts-"))).resolve()
     runs_root = artifact_root / "runs"
     runs_root.mkdir(parents=True, exist_ok=True)

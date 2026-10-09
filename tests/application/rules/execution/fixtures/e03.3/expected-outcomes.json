@@ -1,0 +1,56 @@
+{
+  "schema": "codestrata.e03.3.expected-outcomes.v1",
+  "notes": "Hand-authored. FAIL is a violation; ERROR is processing/budget failure.",
+  "cases": [
+    {
+      "id": "cycle-violation",
+      "status": "fail",
+      "coverage_state": "complete"
+    },
+    {
+      "id": "cycle-compliant",
+      "status": "pass",
+      "coverage_state": "complete"
+    },
+    {
+      "id": "cycle-incomplete-graph",
+      "status": "unknown",
+      "coverage_state": "unknown"
+    },
+    {
+      "id": "missing-graph",
+      "status": "error",
+      "coverage_state": "error"
+    },
+    {
+      "id": "disabled-cycle",
+      "status": null,
+      "coverage_state": "disabled"
+    },
+    {
+      "id": "suppressed-cycle",
+      "status": "fail",
+      "coverage_state": "suppressed"
+    },
+    {
+      "id": "regex-budget",
+      "status": "error",
+      "coverage_state": "error"
+    },
+    {
+      "id": "graph-node-budget",
+      "status": "error",
+      "coverage_state": "error"
+    },
+    {
+      "id": "equals-missing-fact",
+      "status": "unknown",
+      "coverage_state": "unknown"
+    },
+    {
+      "id": "corrupt-absolute-evidence",
+      "status": "error",
+      "coverage_state": "error"
+    }
+  ]
+}

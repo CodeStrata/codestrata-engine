@@ -28,7 +28,6 @@ from codestrata.domain.assessment_heads.assessment_coverage import (
     assessment_coverage_to_json,
 )
 
-
 # Pack coverage area status → evaluation/support mapping.
 _PACK_STATUS_MAP = {
     "measured": (AreaSupportState.SUPPORTED, AreaEvaluationState.EVALUATED),
@@ -64,11 +63,16 @@ def derive_assessment_coverage(
     """Derive canonical Assessment Coverage for one head."""
 
     status_token = str(pack_status or "").strip().lower()
-    is_activated = bool(activated) if activated is not None else status_token not in {
-        "",
-        *_DISABLED_PACK_STATUSES,
-        *_UNAVAILABLE_PACK_STATUSES,
-    }
+    is_activated = (
+        bool(activated)
+        if activated is not None
+        else status_token
+        not in {
+            "",
+            *_DISABLED_PACK_STATUSES,
+            *_UNAVAILABLE_PACK_STATUSES,
+        }
+    )
     limit_set = {str(item).strip() for item in limitations if str(item).strip()}
     declared = declared_areas_for_head(head_id)
 
@@ -84,9 +88,7 @@ def derive_assessment_coverage(
             areas=_disabled_areas(declared),
             totals=_totals_from_areas(_disabled_areas(declared)),
             metrics=(),
-            limitations=tuple(
-                sorted({*limit_set, "Assessment head was disabled for this run."})
-            ),
+            limitations=tuple(sorted({*limit_set, "Assessment head was disabled for this run."})),
             derivation_status=CoverageDerivationStatus.DERIVED,
         )
 
@@ -180,6 +182,7 @@ def build_assessment_coverage_map(
         "technical_debt_intelligence": "technical_debt",
         "dependency_intelligence": "dependency",
         "security_intelligence": "security",
+        "quality_intelligence": "testing",
         "cloud_readiness": "cloud",
         "ai_readiness": "ai_readiness",
         "testing": "testing",
@@ -211,9 +214,7 @@ def build_assessment_coverage_map(
             activated=enabled,
             pack_section=section if isinstance(section, Mapping) else None,
             contributing_head_coverage=tuple(
-                out[item]
-                for item in contributing_for_modernization
-                if item in out
+                out[item] for item in contributing_for_modernization if item in out
             )
             if head_id == "modernization_assessment"
             else (),
@@ -227,8 +228,7 @@ def build_assessment_coverage_map(
             coverage
             for head_id, coverage in out.items()
             if head_id != "modernization_assessment"
-            and coverage.status
-            not in {CoverageStatus.DISABLED, CoverageStatus.NOT_APPLICABLE}
+            and coverage.status not in {CoverageStatus.DISABLED, CoverageStatus.NOT_APPLICABLE}
         )
         section = packs.get("roadmap")
         out["modernization_assessment"] = derive_assessment_coverage(
@@ -321,7 +321,7 @@ def _pack_section_coverage(
         if declared_area.claim_state is AreaClaimState.NOT_CLAIMED:
             support = AreaSupportState.UNSUPPORTED
             evaluation = AreaEvaluationState.NOT_APPLICABLE
-            area_limits = (
+            area_limits: tuple[str, ...] = (
                 "Area is not claimed by the current assessment methodology.",
             )
             if pack_area:
@@ -369,7 +369,7 @@ def _pack_section_coverage(
                     if declared_area.claim_state is AreaClaimState.PARTIAL
                     else AreaSupportState.SUPPORTED
                 )
-            area_limits: tuple[str, ...] = ()
+            area_limits = ()
             if declared_area.claim_state is AreaClaimState.PARTIAL:
                 area_limits = ("Area is only partially claimed by methodology.",)
             areas.append(
@@ -393,12 +393,13 @@ def _pack_section_coverage(
             status,
             (AreaSupportState.UNAVAILABLE, AreaEvaluationState.UNAVAILABLE),
         )
-        if declared_area.claim_state is AreaClaimState.PARTIAL and support is AreaSupportState.SUPPORTED:
+        if (
+            declared_area.claim_state is AreaClaimState.PARTIAL
+            and support is AreaSupportState.SUPPORTED
+        ):
             support = AreaSupportState.PARTIALLY_SUPPORTED
         area_limits = tuple(
-            str(item).strip()
-            for item in (pack_area.get("limitations") or ())
-            if str(item).strip()
+            str(item).strip() for item in (pack_area.get("limitations") or ()) if str(item).strip()
         )
         if declared_area.claim_state is AreaClaimState.PARTIAL and not area_limits:
             area_limits = ("Area is only partially claimed by methodology.",)
@@ -445,7 +446,13 @@ def _pack_section_coverage(
     out_limits = set(limitations)
     if any(area.claim_state is AreaClaimState.PARTIAL for area in area_tuple):
         out_limits.add("One or more methodology areas are only partially claimed.")
-    if head_id in {"cloud_readiness", "ai_readiness", "testing", "performance"}:
+    if head_id in {
+        "cloud_readiness",
+        "ai_readiness",
+        "testing",
+        "quality_intelligence",
+        "performance",
+    }:
         out_limits.add(
             "Repository observation coverage does not imply live runtime, "
             "organizational, or external service coverage."
@@ -477,9 +484,7 @@ def _inventory_coverage(
     declared: tuple[DeclaredAssessmentArea, ...],
 ) -> AssessmentCoverage:
     status_token = pack_status or (
-        str((pack_section or {}).get("status") or "").strip().lower()
-        if pack_section
-        else ""
+        str((pack_section or {}).get("status") or "").strip().lower() if pack_section else ""
     )
     if status_token in {"inventory_unavailable", "unavailable", "failed"}:
         return AssessmentCoverage.unavailable(
@@ -495,9 +500,7 @@ def _inventory_coverage(
             head_id=head_id,
             pack_id=pack_id,
             activated=activated,
-            limitations=tuple(
-                sorted({*limitations, "Legacy inventory coverage is unavailable."})
-            ),
+            limitations=tuple(sorted({*limitations, "Legacy inventory coverage is unavailable."})),
         )
     partial = status_token in {"partial_inventory", "partial", "partially_succeeded"}
     areas: list[AssessmentAreaCoverage] = []
@@ -524,13 +527,11 @@ def _inventory_coverage(
             if item.claim_state is AreaClaimState.PARTIAL or partial
             else AreaSupportState.SUPPORTED
         )
-        area_limits = ()
+        area_limits: tuple[str, ...] = ()
         if item.claim_state is AreaClaimState.PARTIAL:
             area_limits = ("Inventory area is only partially claimed.",)
         if item.area_id == "version_availability":
-            area_limits = (
-                "Missing version facts do not imply missing technology detection.",
-            )
+            area_limits = ("Missing version facts do not imply missing technology detection.",)
         areas.append(
             AssessmentAreaCoverage(
                 area_id=item.area_id,
@@ -608,8 +609,10 @@ def _modernization_coverage(
     initiative_count = 0
     if isinstance(pack_section, Mapping):
         initiatives = pack_section.get("initiatives") or []
-        initiative_count = len(initiatives) if isinstance(initiatives, list) else int(
-            pack_section.get("initiatives_total") or 0
+        initiative_count = (
+            len(initiatives)
+            if isinstance(initiatives, list)
+            else int(pack_section.get("initiatives_total") or 0)
         )
 
     areas: list[AssessmentAreaCoverage] = []
@@ -720,13 +723,14 @@ def _extract_pack_areas(
     if not isinstance(section, Mapping):
         return {}
     coverage = section.get("coverage") or section.get("coverage_summary") or {}
-    areas = ()
+    areas: object = ()
     if isinstance(coverage, Mapping):
         areas = coverage.get("areas") or ()
     out: dict[str, Mapping[str, Any]] = {}
-    for item in areas:
-        if isinstance(item, Mapping) and item.get("area_id"):
-            out[str(item["area_id"])] = item
+    if isinstance(areas, (list, tuple)):
+        for item in areas:
+            if isinstance(item, Mapping) and item.get("area_id"):
+                out[str(item["area_id"])] = item
     return out
 
 
@@ -734,10 +738,7 @@ def _extract_execution(section: Mapping[str, Any] | None) -> dict[str, int | Non
     if not isinstance(section, Mapping):
         return {"eligible": None, "executed": None, "unavailable": None}
     summary = (
-        section.get("execution_summary")
-        or section.get("execution")
-        or section.get("summary")
-        or {}
+        section.get("execution_summary") or section.get("execution") or section.get("summary") or {}
     )
     if not isinstance(summary, Mapping):
         summary = {}
@@ -847,8 +848,7 @@ def _totals_from_areas(
         1
         for item in areas
         if item.claim_state is AreaClaimState.CLAIMED
-        and item.support_state
-        in {AreaSupportState.SUPPORTED, AreaSupportState.PARTIALLY_SUPPORTED}
+        and item.support_state in {AreaSupportState.SUPPORTED, AreaSupportState.PARTIALLY_SUPPORTED}
     )
     partial_supported = sum(
         1
@@ -856,9 +856,7 @@ def _totals_from_areas(
         if item.claim_state is AreaClaimState.PARTIAL
         or item.support_state is AreaSupportState.PARTIALLY_SUPPORTED
     )
-    unsupported = sum(
-        1 for item in areas if item.support_state is AreaSupportState.UNSUPPORTED
-    )
+    unsupported = sum(1 for item in areas if item.support_state is AreaSupportState.UNSUPPORTED)
     applicable = sum(
         1
         for item in areas
@@ -979,11 +977,7 @@ def _disabled_areas(
             area_id=item.area_id,
             title=item.title,
             claim_state=item.claim_state,
-            support_state=(
-                AreaSupportState.UNSUPPORTED
-                if item.claim_state is AreaClaimState.NOT_CLAIMED
-                else AreaSupportState.SUPPORTED
-            ),
+            support_state=AreaSupportState.SUPPORTED,
             evaluation_state=AreaEvaluationState.DISABLED,
             limitations=("Head disabled.",),
         )

@@ -25,8 +25,10 @@ from verification.openrouter_configuration.models import (
 
 NOTES: tuple[str, ...] = (
     "OpenRouter configuration and authentication are verified with injected mocked clients only.",
-    "AssessAIProviderRegistry registers bedrock, openai, and openrouter (Decision B; explicit-only).",
-    "Optional identification headers via site_url/app_name are implemented; doctor local readiness in 11.11.",
+    "AssessAIProviderRegistry registers bedrock, openai, and openrouter "
+    "(Decision B; explicit-only).",
+    "Optional identification headers via site_url/app_name are implemented; "
+    "doctor local readiness in 11.11.",
     "Bedrock remains the default provider; OpenRouter has no product model default.",
 )
 

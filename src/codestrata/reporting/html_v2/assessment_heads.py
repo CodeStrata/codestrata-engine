@@ -17,34 +17,72 @@ class AssessmentHead(StrEnum):
     TECHNICAL_DEBT_INTELLIGENCE = "technical_debt_intelligence"
     DEPENDENCY_INTELLIGENCE = "dependency_intelligence"
     SECURITY_INTELLIGENCE = "security_intelligence"
+    QUALITY_INTELLIGENCE = "quality_intelligence"
     CLOUD_READINESS = "cloud_readiness"
     AI_READINESS = "ai_readiness"
     MODERNIZATION_ASSESSMENT = "modernization_assessment"
 
 
-# Display order for Assessment Results subsections (excludes Assessment Overview).
-ASSESSMENT_RESULT_HEADS: tuple[AssessmentHead, ...] = (
-    AssessmentHead.TECHNOLOGY_INVENTORY,
+class AssessmentHeadRole:
+    """Presentation role. Not a canonical enum and not an OutcomeFamily."""
+
+    OVERVIEW = "overview"
+    HEADLINE = "headline"
+    SUPPORTING = "supporting"
+    APPENDIX = "appendix"
+
+
+# Public Engineering Health headlines — exactly four, Quality first-class.
+ENGINEERING_HEALTH_HEADLINES: tuple[AssessmentHead, ...] = (
     AssessmentHead.ARCHITECTURE_INTELLIGENCE,
-    AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
-    AssessmentHead.DEPENDENCY_INTELLIGENCE,
     AssessmentHead.SECURITY_INTELLIGENCE,
+    AssessmentHead.QUALITY_INTELLIGENCE,
+    AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE,
+)
+
+# Inventory / Dependencies remain organizational heads, not headline peers.
+# Git is supporting context without a dedicated assessment head.
+SUPPORTING_ASSESSMENT_HEADS: tuple[AssessmentHead, ...] = (
+    AssessmentHead.TECHNOLOGY_INVENTORY,
+    AssessmentHead.DEPENDENCY_INTELLIGENCE,
+)
+
+# Legacy packs stay available as appendix/supporting output only.
+APPENDIX_ASSESSMENT_HEADS: tuple[AssessmentHead, ...] = (
     AssessmentHead.CLOUD_READINESS,
     AssessmentHead.AI_READINESS,
     AssessmentHead.MODERNIZATION_ASSESSMENT,
 )
 
+# Organizational catalog used to group findings (headlines + supporting + appendix).
+ASSESSMENT_RESULT_HEADS: tuple[AssessmentHead, ...] = (
+    *ENGINEERING_HEALTH_HEADLINES,
+    *SUPPORTING_ASSESSMENT_HEADS,
+    *APPENDIX_ASSESSMENT_HEADS,
+)
+
 _TITLES: dict[AssessmentHead, str] = {
-    # Display rename (Slice 19.1): unique cross-head synthesis; schema id unchanged.
+    # Legacy detailed-section headings. P04 owns the HTML redesign; schema ids
+    # stay unchanged. Engineering Health headline names live in
+    # ``_OUTCOME_TITLES``.
     AssessmentHead.ENGINEERING_INTELLIGENCE: "Assessment Overview",
     AssessmentHead.TECHNOLOGY_INVENTORY: "Technology Inventory",
     AssessmentHead.ARCHITECTURE_INTELLIGENCE: "Architecture Intelligence",
     AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE: "Technical Debt Intelligence",
     AssessmentHead.DEPENDENCY_INTELLIGENCE: "Dependency Intelligence",
     AssessmentHead.SECURITY_INTELLIGENCE: "Security Intelligence",
+    AssessmentHead.QUALITY_INTELLIGENCE: "Quality",
     AssessmentHead.CLOUD_READINESS: "Cloud Readiness",
     AssessmentHead.AI_READINESS: "AI Readiness",
     AssessmentHead.MODERNIZATION_ASSESSMENT: "Modernization Assessment",
+}
+
+# R2-P03 view-model / TOC names. Not used as detailed HTML body headings.
+_OUTCOME_TITLES: dict[AssessmentHead, str] = {
+    AssessmentHead.ARCHITECTURE_INTELLIGENCE: "Architecture",
+    AssessmentHead.SECURITY_INTELLIGENCE: "Security",
+    AssessmentHead.QUALITY_INTELLIGENCE: "Quality",
+    AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE: "Maintainability & Technical Debt",
 }
 
 _ANCHORS: dict[AssessmentHead, str] = {
@@ -54,9 +92,25 @@ _ANCHORS: dict[AssessmentHead, str] = {
     AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE: "technical-debt-intelligence",
     AssessmentHead.DEPENDENCY_INTELLIGENCE: "dependency-intelligence",
     AssessmentHead.SECURITY_INTELLIGENCE: "security-intelligence",
+    AssessmentHead.QUALITY_INTELLIGENCE: "quality-intelligence",
     AssessmentHead.CLOUD_READINESS: "cloud-readiness",
     AssessmentHead.AI_READINESS: "ai-readiness",
     AssessmentHead.MODERNIZATION_ASSESSMENT: "modernization-assessment",
+}
+
+_ROLES: dict[AssessmentHead, str] = {
+    AssessmentHead.ENGINEERING_INTELLIGENCE: AssessmentHeadRole.OVERVIEW,
+    **{head: AssessmentHeadRole.HEADLINE for head in ENGINEERING_HEALTH_HEADLINES},
+    **{head: AssessmentHeadRole.SUPPORTING for head in SUPPORTING_ASSESSMENT_HEADS},
+    **{head: AssessmentHeadRole.APPENDIX for head in APPENDIX_ASSESSMENT_HEADS},
+}
+
+# Existing OutcomeFamily values only — presentation mapping, not a new taxonomy.
+_OUTCOME_FAMILY_BY_HEAD: dict[AssessmentHead, str] = {
+    AssessmentHead.ARCHITECTURE_INTELLIGENCE: "architecture",
+    AssessmentHead.SECURITY_INTELLIGENCE: "security",
+    AssessmentHead.QUALITY_INTELLIGENCE: "quality",
+    AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE: "maintainability",
 }
 
 # Parent section wrapping Assessment Results subsections.
@@ -98,6 +152,11 @@ def assessment_head_title(head: AssessmentHead | str) -> str:
     return _TITLES[key]
 
 
+def engineering_health_outcome_title(head: AssessmentHead | str) -> str:
+    key = AssessmentHead(str(head))
+    return _OUTCOME_TITLES.get(key, _TITLES[key])
+
+
 def assessment_head_anchor(head: AssessmentHead | str) -> str:
     key = AssessmentHead(str(head))
     return _ANCHORS[key]
@@ -111,6 +170,16 @@ def assessment_head_order(head: AssessmentHead | str) -> int:
         return ASSESSMENT_RESULT_HEADS.index(key) + 1
     except ValueError:
         return 99
+
+
+def assessment_head_role(head: AssessmentHead | str) -> str:
+    key = AssessmentHead(str(head))
+    return _ROLES.get(key, AssessmentHeadRole.SUPPORTING)
+
+
+def assessment_head_outcome_family(head: AssessmentHead | str) -> str | None:
+    key = AssessmentHead(str(head))
+    return _OUTCOME_FAMILY_BY_HEAD.get(key)
 
 
 def all_assessment_heads() -> tuple[AssessmentHead, ...]:

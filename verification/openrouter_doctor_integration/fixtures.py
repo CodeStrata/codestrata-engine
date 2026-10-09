@@ -31,9 +31,7 @@ SYNTHETIC_INSTRUCTION = "Synthetic instruction text"
 SYNTHETIC_CONTEXT = "Synthetic context payload"
 # Enrichment-shaped so OpenRouterAIModelProvider.invoke returns without
 # recommendation-schema validation (looks_like_enrichment_payload).
-SYNTHETIC_RESPONSE = (
-    '{"executive_summary":{"overview":"synthetic"},"themes":[],"priorities":[]}'
-)
+SYNTHETIC_RESPONSE = '{"executive_summary":{"overview":"synthetic"},"themes":[],"priorities":[]}'
 SYNTHETIC_API_KEY = "synthetic-openrouter-key-value"
 SYNTHETIC_OPENAI_API_KEY = "synthetic-openai-key-value"
 SYNTHETIC_SITE_URL = "https://example.invalid/site"

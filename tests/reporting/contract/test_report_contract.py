@@ -204,11 +204,12 @@ def test_golden_json_and_html(tmp_path: Path) -> None:
     html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
     assert 'id="engineering-intelligence-summary"' in html
     assert "Assessment Overview" in html
-    assert "Should I care?" in html
-    assert "Leadership Verdict" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
+    assert "Should I care?" not in html
     golden_html = GOLDENS / "sample_report.fragments.txt"
     fragments = [
-        'id="leadership-verdict"',
+        'id="attention-first"',
         'id="engineering-intelligence-summary"',
         'id="assessment-results"',
         'id="technology-inventory"',

@@ -33,13 +33,13 @@ from codestrata.artifacts.lifecycle import (
 )
 from codestrata.artifacts.lifecycle_migration import migrate_report_lifecycle
 from codestrata.artifacts.manifest import (
+    ARTIFACT_MANIFEST_BASENAME,
     ASSESSMENT_HTML_BASENAME,
     ASSESSMENT_JSON_BASENAME,
-    ARTIFACT_MANIFEST_BASENAME,
-    build_assessment_manifest,
     build_artifact_index_manifest,
-    write_assessment_manifest,
+    build_assessment_manifest,
     write_artifact_index_manifest,
+    write_assessment_manifest,
 )
 from codestrata.artifacts.migration import (
     LEGACY_REPORTS_DIRECTORY_NAME,

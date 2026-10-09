@@ -40,7 +40,5 @@ def test_policy_rejects_transmission() -> None:
 
 def test_policy_serialization_deterministic() -> None:
     a = assessment_analytics_policy_to_stable_json(default_assessment_analytics_policy())
-    b = assessment_analytics_policy_to_stable_json(
-        CommunityAssessmentAnalyticsPolicy.default()
-    )
+    b = assessment_analytics_policy_to_stable_json(CommunityAssessmentAnalyticsPolicy.default())
     assert a == b

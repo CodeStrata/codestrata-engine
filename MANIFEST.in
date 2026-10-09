@@ -5,4 +5,6 @@ include pyproject.toml
 recursive-include schemas **
 recursive-include examples **
 recursive-include src/codestrata/resources **
+recursive-include src/codestrata/application/rules *.yaml
+recursive-include src/codestrata/application/rules *.yml
 global-exclude *.pyc __pycache__ .DS_Store

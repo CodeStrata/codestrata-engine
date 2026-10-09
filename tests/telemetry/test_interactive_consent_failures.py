@@ -6,8 +6,8 @@ from pathlib import Path
 
 from codestrata.telemetry.decisions import TelemetryDecision, TelemetryDecisionSource
 from codestrata.telemetry.interactive_consent import run_interactive_consent_prompt
-from codestrata.telemetry.runtime import run_with_isolated_telemetry
 from codestrata.telemetry.prompt_runtime_factory import create_interactive_session_telemetry
+from codestrata.telemetry.runtime import run_with_isolated_telemetry
 
 
 def test_eof_denies(tmp_path: Path) -> None:

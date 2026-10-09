@@ -5,9 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
-COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_ID = (
-    "community-telemetry-non-interactive-policy"
-)
+COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_ID = "community-telemetry-non-interactive-policy"
 COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_VERSION = "1.0"
 COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_URN = (
     f"{COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_ID}:"
@@ -72,9 +70,7 @@ class CommunityTelemetryNonInteractivePolicy:
         if self.policy_version != COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_VERSION:
             raise NonInteractivePolicyError("unsupported non-interactive policy version")
         if not self.prompt_suppressed_in_non_interactive:
-            raise NonInteractivePolicyError(
-                "prompt_suppressed_in_non_interactive must be true"
-            )
+            raise NonInteractivePolicyError("prompt_suppressed_in_non_interactive must be true")
         if self.default_decision_when_suppressed != "non_interactive_disabled":
             raise NonInteractivePolicyError(
                 "default_decision_when_suppressed must be non_interactive_disabled"
@@ -82,9 +78,7 @@ class CommunityTelemetryNonInteractivePolicy:
         if self.persistence_allowed:
             raise NonInteractivePolicyError("persistence_allowed must be false")
         if self.installation_identity_required:
-            raise NonInteractivePolicyError(
-                "installation_identity_required must be false"
-            )
+            raise NonInteractivePolicyError("installation_identity_required must be false")
         if self.transmission_allowed:
             raise NonInteractivePolicyError("transmission_allowed must be false")
         if self.review_status != _REVIEW_STATUS:
@@ -124,9 +118,7 @@ class CommunityTelemetryNonInteractivePolicy:
             "policy_id": self.policy_id,
             "policy_token": self.policy_token,
             "policy_version": self.policy_version,
-            "prompt_suppressed_in_non_interactive": (
-                self.prompt_suppressed_in_non_interactive
-            ),
+            "prompt_suppressed_in_non_interactive": (self.prompt_suppressed_in_non_interactive),
             "quiet_mode_suppressed": self.quiet_mode_suppressed,
             "review_status": self.review_status,
             "shell_completion_suppressed": self.shell_completion_suppressed,

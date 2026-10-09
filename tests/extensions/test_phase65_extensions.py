@@ -149,7 +149,7 @@ def test_doctor_extensions_flag(tmp_path: Path) -> None:
     config.write_text(
         f"""
 [repository]
-path = "{tmp_path}"
+path = "{tmp_path.as_posix()}"
 
 [extensions.analyzers]
 enabled = ["com.example.not_installed"]

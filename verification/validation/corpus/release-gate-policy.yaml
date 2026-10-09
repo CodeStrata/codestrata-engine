@@ -1,0 +1,48 @@
+package_revision: ENGINE-2026-09-15-R1
+measurement_id: M33
+story: E15.3
+required_checkpoint_gates:
+- id: G00
+  ledger: G00.md
+- id: G10
+  ledger: G10.md
+- id: G20
+  ledger: G20.md
+- id: G30
+  ledger: G30.md
+- id: G40
+  ledger: G40.md
+required_story_ledgers:
+- E05.3
+- E06.3
+- E07.3
+- E08.3
+- E10.3
+- E11.3
+- E12.3
+- E13.3
+- E14.3
+- E14.4
+- E15.2
+integrated_status_markers:
+- Integrated
+- integrated at
+- merge pull request
+blocked_status_markers:
+- '**BLOCKED**'
+- Not integrated
+- not integrated
+- Ready for review (not integrated)
+out_of_scope_exceptions:
+- id: platform-r05
+  scope: Platform/R05 collector and server capability
+  rationale: Explicitly out of Engine release gate per execution policy; not a waiver for missing Engine behavior.
+  requires_independent_review: true
+remote_tier_env: CODESTRATA_RUN_REMOTE_VALIDATION
+minimum_external_pins: 50
+five_repos_do_not_replace_fifty: true
+m33_proposed_budgets:
+  le_10k_files: 10min/2GiB
+  le_100k_files: 30min/8GiB
+  host: 4vCPU
+  published: false

@@ -1,0 +1,78 @@
+# Executable quality-command list for E00.2. The runner executes these from
+# engine/ and records true exit codes. Do not treat a green root engine-tests
+# job as proof that ruff/mypy/coverage/pip-audit ran.
+schema_version: 1
+id: engine-quality-commands
+version: "1.0.0"
+working_directory: engine
+coverage:
+  source: codestrata
+  branch: true
+  fail_under: 80
+  notes: >
+    Combined coverage floor with branch measurement enabled. This is not a
+    separate 80% branch threshold. Do not narrow measured source to improve
+    the percentage.
+engine_tests_job:
+  name: engine-tests
+  workflow: .github/workflows/ci.yml
+  proves:
+    - pytest-unit
+  does_not_prove:
+    - ruff
+    - mypy
+    - coverage
+    - pip-audit
+  reviewer_checkpoint: required
+  automatic_branch_protection: false
+security_scanner:
+  id: pip-audit
+  module: pip_audit
+  argv: ["python", "-m", "pip_audit", "--progress-spinner", "off"]
+  extra: development
+  version_constraint: ">=2.7,<3.0"
+  inputs: isolated Engine virtualenv site-packages
+  severity_policy: >
+    Any reported vulnerability in Engine runtime dependencies is FAIL.
+    A missing pip-audit install or unavailable advisory feed is BLOCKED,
+    never PASS. Dev-only findings are recorded separately and are not
+    relabeled as clean. This is build-tool dependency auditing, not
+    customer vulnerability-feed selection (E01/E06).
+  feed_required: true
+commands:
+  - id: pip-check
+    argv: ["python", "-m", "pip", "check"]
+    required: true
+    timeout_seconds: 120
+  - id: ruff
+    argv: ["python", "-m", "ruff", "check", "."]
+    required: true
+    timeout_seconds: 300
+  - id: mypy
+    argv: ["python", "-m", "mypy", "--config-file", "pyproject.toml"]
+    required: true
+    timeout_seconds: 600
+  - id: pytest-coverage
+    argv:
+      - python
+      - -m
+      - pytest
+      - tests
+      - --import-mode=importlib
+      - --cov=codestrata
+      - --cov-branch
+      - --cov-report=term-missing
+      - --cov-fail-under=80
+      - -q
+    required: true
+    timeout_seconds: 1800
+  - id: pip-audit
+    argv: ["python", "-m", "pip_audit", "--progress-spinner", "off"]
+    required: true
+    timeout_seconds: 600
+    missing_tool_status: BLOCKED
+baseline_failures:
+  notes: >
+    G00 recorded ruff/mypy/pytest-coverage failures. Those remain FAIL
+    (status BASELINE_FAIL), never PASS. Repair them within Engine scope
+    before G10. A new command that fails is NEW_FAIL, not a baseline credit.

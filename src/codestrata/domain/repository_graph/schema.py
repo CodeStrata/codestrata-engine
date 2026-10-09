@@ -40,9 +40,38 @@ _ALLOWED_ENDPOINTS: dict[
         {
             (RepositoryNodeType.REPOSITORY, RepositoryNodeType.DEPENDENCY),
             (RepositoryNodeType.MODULE, RepositoryNodeType.DEPENDENCY),
+            (RepositoryNodeType.MODULE, RepositoryNodeType.MODULE),
             (RepositoryNodeType.TYPE, RepositoryNodeType.DEPENDENCY),
             (RepositoryNodeType.CALLABLE, RepositoryNodeType.DEPENDENCY),
             (RepositoryNodeType.DEPENDENCY, RepositoryNodeType.DEPENDENCY),
+        }
+    ),
+    RepositoryRelationshipType.IMPORTS: frozenset(
+        {
+            (RepositoryNodeType.MODULE, RepositoryNodeType.MODULE),
+            (RepositoryNodeType.FILE, RepositoryNodeType.FILE),
+            (RepositoryNodeType.FILE, RepositoryNodeType.MODULE),
+        }
+    ),
+    RepositoryRelationshipType.IMPLEMENTS: frozenset(
+        {
+            (RepositoryNodeType.TYPE, RepositoryNodeType.TYPE),
+        }
+    ),
+    RepositoryRelationshipType.EXPOSES_API: frozenset(
+        {
+            (RepositoryNodeType.MODULE, RepositoryNodeType.TYPE),
+            (RepositoryNodeType.FILE, RepositoryNodeType.TYPE),
+            (RepositoryNodeType.MODULE, RepositoryNodeType.CALLABLE),
+            (RepositoryNodeType.FILE, RepositoryNodeType.CALLABLE),
+        }
+    ),
+    RepositoryRelationshipType.USES_DEPENDENCY: frozenset(
+        {
+            (RepositoryNodeType.MODULE, RepositoryNodeType.DEPENDENCY),
+            (RepositoryNodeType.FILE, RepositoryNodeType.DEPENDENCY),
+            (RepositoryNodeType.TYPE, RepositoryNodeType.DEPENDENCY),
+            (RepositoryNodeType.CALLABLE, RepositoryNodeType.DEPENDENCY),
         }
     ),
     RepositoryRelationshipType.CALLS: frozenset(
@@ -51,6 +80,14 @@ _ALLOWED_ENDPOINTS: dict[
         }
     ),
 }
+
+
+def allowed_relationship_endpoints(
+    relationship_type: RepositoryRelationshipType,
+) -> frozenset[tuple[RepositoryNodeType, RepositoryNodeType]]:
+    """Return the allowed endpoint pairs for a Repository Graph relationship type."""
+
+    return _ALLOWED_ENDPOINTS[relationship_type]
 
 
 class RepositoryGraphSchemaError(ValueError):

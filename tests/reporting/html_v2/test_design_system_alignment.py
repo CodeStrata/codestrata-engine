@@ -49,9 +49,13 @@ def test_report_css_styles_domain_legacy_primitives() -> None:
 def test_generated_html_embeds_tokens_and_keeps_csp_offline(tmp_path: Path) -> None:
     html = HtmlReportRenderer().render(build_html_report_view_model(_report_input(tmp_path)))
     assert "Fraunces" not in html
-    assert "--cs-bg:" in html
-    assert "var(--cs-font-display)" in html
+    assert "--canvas:" in html
+    assert "--teal:" in html
+    assert "--lime:" in html
+    assert "Google Sans Flex" in html
+    assert "font-family:Arial,sans-serif" not in html
     assert 'class="brand-name"' not in html
+    assert "Current-code baseline" in html
     assert "Community Edition" in html
     assert "table-wrap" in html or "responsive-table" in html
     assert html.count('id="cover"') == 1
@@ -64,10 +68,12 @@ def test_generated_html_embeds_tokens_and_keeps_csp_offline(tmp_path: Path) -> N
     ]
     dupes = [item for item, count in Counter(structural_ids).items() if count > 1]
     assert not dupes, f"duplicate structural ids: {dupes}"
-    assert "<script" not in html.lower()
+    assert "<script src" not in html.lower()
+    assert html.lower().count("<script") == 1
     assert "Content-Security-Policy" in html
-    assert "font-src 'none'" in html
-    assert "script-src 'none'" in html
+    assert "font-src data:" in html
+    assert "Google Sans Flex Authors" in html
+    assert "script-src 'sha256-" in html
     assert "@media print" in html
     # Standalone favicon only (data URI); no external stylesheets.
     assert html.lower().count("<link ") == 1
@@ -79,6 +85,6 @@ def test_ai_variant_also_uses_design_system_css(tmp_path: Path) -> None:
     html = HtmlReportRenderer().render(
         build_html_report_view_model(_report_input(tmp_path, with_ai=True))
     )
-    assert "--cs-accent:" in html
+    assert "--teal:" in html
     assert "Fraunces" not in html
     assert "@media print" in html

@@ -1,0 +1,21 @@
+{
+  "assessment_status": "completed",
+  "canonical_digest": "abababababababababababababababababababababababababababababababab",
+  "findings": [
+    {"finding_id": "f-sql", "severity": "high"},
+    {"finding_id": "f-cycle", "severity": "medium"}
+  ],
+  "metrics": [
+    {"metric_id": "m.test_association", "value": null, "coverage": null}
+  ],
+  "coverage": [
+    {
+      "capability_id": "git.history",
+      "coverage_ratio": null,
+      "reason": "missing_git_history"
+    }
+  ],
+  "verdicts": [
+    {"family": "security", "verdict": "deteriorated"}
+  ]
+}

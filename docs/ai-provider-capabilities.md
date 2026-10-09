@@ -165,7 +165,7 @@ from codestrata.ai.provider_contracts.identifiers import ProviderId
 
 profile = capability_profile_for(ProviderId.OPENAI)
 profile.declares_capability(CapabilityId.MODERNIZATION_ADVISOR)  # True
-profile.supports_structured_json                                 # True
+profile.supports_structured_json  # True
 ```
 
 Every boolean field is a **capability declaration**, not a runtime

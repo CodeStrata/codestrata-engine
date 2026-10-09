@@ -33,8 +33,7 @@ def validate_ai_provider_configuration(configuration: AIProviderConfiguration) -
 
     if not isinstance(configuration, AIProviderConfiguration):
         raise ProviderContractValidationError(
-            "configuration must be an AIProviderConfiguration, got "
-            f"{type(configuration).__name__}"
+            f"configuration must be an AIProviderConfiguration, got {type(configuration).__name__}"
         )
     validate_configuration_version(configuration.configuration_version)
     validate_adapter_matches_provider(

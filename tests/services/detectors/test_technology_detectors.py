@@ -10,6 +10,7 @@ from codestrata.services.detectors import (
     JavaTechnologyDetector,
     PhpTechnologyDetector,
     PythonTechnologyDetector,
+    RustTechnologyDetector,
 )
 
 
@@ -198,9 +199,7 @@ dev = ["pytest>=8.0.0"]
     )
 
     repository = create_repository(tmp_path)
-    python_names = {
-        technology.name for technology in PythonTechnologyDetector().detect(repository)
-    }
+    python_names = {technology.name for technology in PythonTechnologyDetector().detect(repository)}
     assert "Python" in python_names
     assert "FastAPI" in python_names
     assert "pytest" in python_names
@@ -272,6 +271,44 @@ def test_javascript_detector_reads_engines_node_version(tmp_path: Path) -> None:
     technologies = JavaScriptTechnologyDetector().detect(create_repository(tmp_path))
     node = next(item for item in technologies if item.name == "Node.js")
     assert node.version == ">=18"
+
+
+def test_javascript_detector_detects_next_nest_and_svelte(tmp_path: Path) -> None:
+    (tmp_path / "package.json").write_text(
+        json.dumps(
+            {
+                "dependencies": {
+                    "next": "^15.0.0",
+                    "@nestjs/core": "^11.0.0",
+                    "@nestjs/common": "^11.0.0",
+                    "svelte": "^5.0.0",
+                },
+                "peerDependencies": {"@sveltejs/kit": "^2.0.0"},
+            }
+        ),
+        encoding="utf-8",
+    )
+    (tmp_path / "app.ts").write_text("export const app = true;\n", encoding="utf-8")
+    technologies = JavaScriptTechnologyDetector().detect(create_repository(tmp_path))
+    names = {item.name for item in technologies}
+    assert {"Next.js", "NestJS", "Svelte", "SvelteKit"} <= names
+    assert sum(item.name == "NestJS" for item in technologies) == 1
+
+
+def test_rust_detector_detects_cargo_and_axum(tmp_path: Path) -> None:
+    (tmp_path / "Cargo.toml").write_text(
+        '[package]\nname = "demo"\nedition = "2021"\n\n[dependencies]\naxum = "0.8"\n',
+        encoding="utf-8",
+    )
+    source = tmp_path / "src"
+    source.mkdir()
+    (source / "main.rs").write_text("fn main() {}\n", encoding="utf-8")
+    technologies = RustTechnologyDetector().detect(create_repository(tmp_path))
+    names = {item.name for item in technologies}
+    assert "Rust" in names
+    assert "Cargo" in names
+    axum = next(item for item in technologies if item.name == "Axum")
+    assert axum.version == "0.8"
 
 
 def test_python_detector_detects_openai_as_library(tmp_path: Path) -> None:

@@ -15,6 +15,8 @@ PHP_COMPLEXITY_PROVIDER_ID = "language.php.complexity"
 PHP_COMPLEXITY_PROVIDER_VERSION = "1.0.0"
 CSHARP_COMPLEXITY_PROVIDER_ID = "language.csharp.complexity"
 CSHARP_COMPLEXITY_PROVIDER_VERSION = "1.0.0"
+JAVASCRIPT_COMPLEXITY_PROVIDER_ID = "language.javascript.complexity"
+JAVASCRIPT_COMPLEXITY_PROVIDER_VERSION = "1.0.0"
 
 
 def make_file_complexity_id(*, provider_id: str, language: str, path: str) -> str:
@@ -28,9 +30,7 @@ def make_type_complexity_id(
     path: str,
     qualified_name: str,
 ) -> str:
-    return stable_evidence_id(
-        "complexity.type", provider_id, language, path, qualified_name
-    )
+    return stable_evidence_id("complexity.type", provider_id, language, path, qualified_name)
 
 
 def make_callable_complexity_id(

@@ -14,13 +14,18 @@ from codestrata.telemetry.bands import (
 )
 from codestrata.telemetry.constants import (
     FORCE_DISABLE_ENV,
+    QUEUE_FILENAME,
     EventName,
 )
+
+# Imported for product facade typing / singleton; not used for active legacy emit.
+from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
 from codestrata.telemetry.identity import (
     ensure_installation_id,
     read_installation_id,
     reset_installation_id,
 )
+from codestrata.telemetry.paths import codestrata_home
 from codestrata.telemetry.preferences import (
     bump_counter,
     load_preferences,
@@ -36,10 +41,11 @@ from codestrata.telemetry.queue import (
     replace_queue,
 )
 from codestrata.telemetry.transport import configured_endpoint, send_payload
-from codestrata.telemetry.validate import build_event_payload, redact_for_display
-
-# Imported for product facade typing / singleton; not used for active legacy emit.
-from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
+from codestrata.telemetry.validate import (
+    build_event_payload,
+    redact_for_display,
+    validate_payload,
+)
 
 
 class TelemetryService:
@@ -54,20 +60,46 @@ class TelemetryService:
     def __init__(self, *, home: Path | None = None) -> None:
         self._home = home
 
+    @property
+    def home(self) -> Path:
+        if self._home is not None:
+            return self._home
+        return codestrata_home()
+
     def _prefs_path(self) -> Path | None:
         if self._home is None:
             return None
-        return self._home / "telemetry.json"
+        return self.home / "telemetry.json"
 
     def _id_path(self) -> Path | None:
         if self._home is None:
             return None
-        return self._home / "installation_id"
+        return self.home / "installation_id"
 
-    def _queue_path(self) -> Path | None:
-        if self._home is None:
-            return None
-        return self._home / "telemetry-queue.jsonl"
+    def _queue_path(self) -> Path:
+        return self.home / QUEUE_FILENAME
+
+    def _set_enabled(self, enabled: bool) -> dict[str, Any]:
+        return mark_decision(enabled, path=self._prefs_path())
+
+    def _build_sample_payload(
+        self,
+        *,
+        event: EventName | str = EventName.ASSESSMENT_COMPLETED,
+    ) -> dict[str, Any]:
+        installation_id, _ = self.ensure_identity()
+        return build_event_payload(
+            installation_id=installation_id,
+            event=event,
+            command="assess",
+            enabled_assessment_domains=["architecture", "security"],
+            language_categories=["python"],
+            repository_size_band="101-500",
+            duration_band="5-30s",
+            ai_enabled=False,
+            success=True,
+            queue_depth=queue_depth(path=self._queue_path()),
+        )
 
     def force_disabled_by_env(self) -> bool:
         value = os.environ.get(FORCE_DISABLE_ENV, "").strip().lower()
@@ -114,33 +146,38 @@ class TelemetryService:
         }
 
     def enable(self, *, emit_events: bool = True) -> dict[str, Any]:
-        installation_id, created = self.ensure_identity()
-        prefs = mark_decision(True, path=self._prefs_path())
+        _, created = self.ensure_identity()
+        prefs = self._set_enabled(True)
         if created or not prefs.get("installation_created_at"):
             prefs["installation_created_at"] = prefs.get("decision_at")
             save_preferences(prefs, path=self._prefs_path())
         if emit_events:
+            try:
+                self._send_or_queue(self._build_sample_payload())
+            except Exception:  # noqa: BLE001 - telemetry must never break CLI
+                pass
             self.emit(
                 EventName.TELEMETRY_ENABLED,
                 command="telemetry enable",
             )
+            bump_counter(str(EventName.TELEMETRY_ENABLED), path=self._prefs_path())
             if not prefs.get("installation_event_sent"):
                 self.emit(EventName.INSTALLATION_CREATED, command="telemetry enable")
                 prefs = load_preferences(path=self._prefs_path())
                 prefs["installation_event_sent"] = True
                 save_preferences(prefs, path=self._prefs_path())
             self._maybe_upgrade_event()
-            self.flush_queue()
         return self.status()
 
     def disable(self, *, emit_events: bool = True) -> dict[str, Any]:
-        was_enabled = self.is_enabled()
-        if emit_events:
-            self.ensure_identity()
-            if was_enabled:
-                # Record disable while still enabled so the event can queue/send.
-                self.emit(EventName.TELEMETRY_DISABLED, command="telemetry disable")
+        _ = emit_events  # E13.1: disable must not transmit; cancel pending instead.
         mark_decision(False, path=self._prefs_path())
+        from codestrata.telemetry.pending import cancel_pending_collection
+
+        cancel_pending_collection(
+            preference_path=self._prefs_path(),
+            queue=self._queue_path(),
+        )
         return self.status()
 
     def reset(self) -> dict[str, Any]:
@@ -160,20 +197,7 @@ class TelemetryService:
         *,
         event: EventName | str = EventName.ASSESSMENT_COMPLETED,
     ) -> dict[str, Any]:
-        installation_id, _ = self.ensure_identity()
-        payload = build_event_payload(
-            installation_id=installation_id,
-            event=event,
-            command="assess",
-            enabled_assessment_domains=["architecture", "security"],
-            language_categories=["python"],
-            repository_size_band="101-500",
-            duration_band="5-30s",
-            ai_enabled=False,
-            success=True,
-            queue_depth=queue_depth(path=self._queue_path()),
-        )
-        return redact_for_display(payload)
+        return redact_for_display(self._build_sample_payload(event=event))
 
     def emit(
         self,
@@ -208,30 +232,45 @@ class TelemetryService:
                 previous_version=previous_version,
                 queue_depth=queue_depth(path=self._queue_path()),
             )
+            validate_payload(payload)
             bump_counter(str(event), path=self._prefs_path())
-            if send_payload(payload):
-                return payload
-            enqueue(payload, path=self._queue_path())
+            self._send_or_queue(payload)
             return payload
         except Exception:  # noqa: BLE001 - telemetry must never break CLI
             return None
 
+    def _send_or_queue(self, payload: dict[str, Any]) -> bool:
+        """Send payload; persist locally when delivery fails, even with no endpoint."""
+
+        try:
+            delivered = send_payload(payload)
+        except Exception:  # noqa: BLE001 - failed delivery must still be queued
+            delivered = False
+
+        if delivered:
+            return True
+
+        try:
+            enqueue(payload, path=self._queue_path())
+        except Exception:  # noqa: BLE001 - queue persistence must not break CLI
+            return False
+        return False
+
     def flush_queue(self) -> int:
-        """Retry queued events. Return count successfully sent."""
+        """Retry queued events. Remove an entry only after a successful send."""
 
         if not self.is_enabled():
             return 0
-        items = load_queue(path=self._queue_path())
-        if not items:
-            return 0
-        remaining: list[dict[str, Any]] = []
+        path = self._queue_path()
+        pending = load_queue(path=path)
         sent = 0
-        for item in items:
-            if send_payload(item):
+        remaining: list[dict[str, Any]] = []
+        for payload in pending:
+            if send_payload(payload):
                 sent += 1
             else:
-                remaining.append(item)
-        replace_queue(remaining, path=self._queue_path())
+                remaining.append(payload)
+        replace_queue(remaining, path=path)
         return sent
 
     def record_assessment_started(

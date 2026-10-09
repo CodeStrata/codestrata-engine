@@ -16,6 +16,13 @@ from codestrata.repository_auth.models import (
     ResolvedRepositoryCredential,
     SanitizedAuthenticationMetadata,
 )
+from codestrata.repository_auth.read_only_git import (
+    ALLOWED_GIT_COMMANDS,
+    ReadOnlyGitError,
+    assert_read_only_git_arguments,
+    run_readonly_git,
+    run_readonly_git_bytes,
+)
 from codestrata.repository_auth.service import RepositoryAuthenticationService
 
 __all__ = [
@@ -27,7 +34,12 @@ __all__ = [
     "RepositoryAccessCategory",
     "RepositoryAccessError",
     "RepositoryAuthenticationConfig",
+    "ALLOWED_GIT_COMMANDS",
+    "ReadOnlyGitError",
     "RepositoryAuthenticationService",
+    "assert_read_only_git_arguments",
+    "run_readonly_git",
+    "run_readonly_git_bytes",
     "ResolvedRepositoryCredential",
     "SanitizedAuthenticationMetadata",
     "UnsupportedAuthenticationConfigurationError",

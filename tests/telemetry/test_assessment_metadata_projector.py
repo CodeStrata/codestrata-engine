@@ -96,9 +96,7 @@ def test_p2_rich_successful_result() -> None:
         ),
         head_confidence=(
             HeadConfidenceProjectionRow(head="security", confidence_level="moderate"),
-            HeadConfidenceProjectionRow(
-                head="architecture_intelligence", confidence_level="high"
-            ),
+            HeadConfidenceProjectionRow(head="architecture_intelligence", confidence_level="high"),
         ),
         finding_count=2,
         recommendation_count=1,
@@ -304,9 +302,7 @@ def test_p13_sensitive_canary_result() -> None:
                 category="security",
             ),
         ),
-        head_confidence=(
-            HeadConfidenceProjectionRow(head="security", confidence_level="limited"),
-        ),
+        head_confidence=(HeadConfidenceProjectionRow(head="security", confidence_level="limited"),),
     )
     payload = _serialize(source)
     blob = json.dumps(payload, sort_keys=True)
@@ -353,9 +349,7 @@ def test_p14_deterministic_ordering() -> None:
     assert rules == sorted(rules)
     heads = [row["head"] for row in first["head_confidence"]]
     assert heads == sorted(heads)
-    assert first["assessment"]["executed_heads"] == sorted(
-        first["assessment"]["executed_heads"]
-    )
+    assert first["assessment"]["executed_heads"] == sorted(first["assessment"]["executed_heads"])
 
 
 def test_p15_unique_assessment_id_across_runs() -> None:

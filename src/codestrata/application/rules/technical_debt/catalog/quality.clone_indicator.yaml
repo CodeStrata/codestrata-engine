@@ -1,0 +1,56 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: quality.clone_indicator
+  version: 1.0.0
+  title: Token clone indicator exceeds advisory ratio
+  category: quality
+  owner: codestrata
+  measurement: M18
+  tags: [quality, clone, advisory]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [quality.clone]
+select:
+  source: quality
+  clone:
+    all:
+      - ratio_gt: 0.10
+condition:
+  operator: quality.clone_indicator
+emit:
+  finding:
+    default_severity: low
+    message:
+      template: >-
+        Token clone indicator {{serialized}} ({{numerator}}/{{denominator}}
+        eligible lines, {{normalization_version}}) exceeds advisory threshold
+        {{threshold}}. This is an indicative clone, not proof that duplication
+        is wrong. Full-scope status={{full_scope_status}}.
+      bindings:
+        serialized: {type: string, evidence: serialized}
+        numerator: {type: string, evidence: numerator}
+        denominator: {type: string, evidence: denominator}
+        normalization_version: {type: string, evidence: normalization_version}
+        threshold: {type: string, evidence: threshold}
+        full_scope_status: {type: string, evidence: full_scope_status}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: quality_clone_ratio
+    operation: ratio
+evidence:
+  include:
+    - matched_file_spans
+    - normalization_version
+    - merged_numerator
+    - merged_denominator
+parameters:
+  max_ratio: {type: number, default: 0.10, exclusive_min: true}
+  min_tokens: {type: integer, default: 50}
+  min_lines: {type: integer, default: 5}
+  confidence: low
+  unknown:
+    unsupported_tokenization: partial
+    scan_cutoff: partial
+    no_eligible_lines: not_applicable

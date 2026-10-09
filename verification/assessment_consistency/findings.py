@@ -73,7 +73,9 @@ def check_findings(
                 if not isinstance(ev, dict):
                     continue
                 path = ev.get("path") or ev.get("file_path")
-                if isinstance(path, str) and (path.startswith("/Users/") or path.startswith("/home/")):
+                if isinstance(path, str) and (
+                    path.startswith("/Users/") or path.startswith("/home/")
+                ):
                     # Absolute operator paths — harness/privacy issue.
                     defects.append(
                         DefectCandidate(
@@ -90,14 +92,20 @@ def check_findings(
     checks.append(
         CheckResult(
             name="finding_id_uniqueness",
-            ok=not any(d.classification == "finding_contract" and "duplicate" in d.actual for d in defects),
+            ok=not any(
+                d.classification == "finding_contract" and "duplicate" in d.actual for d in defects
+            ),
             detail="Finding IDs unique within each report",
         )
     )
     checks.append(
         CheckResult(
             name="finding_severity_vocabulary",
-            ok=not any("severity in" in d.expected for d in defects if d.classification == "finding_contract"),
+            ok=not any(
+                "severity in" in d.expected
+                for d in defects
+                if d.classification == "finding_contract"
+            ),
             detail="Finding severities use canonical vocabulary",
         )
     )
@@ -112,7 +120,8 @@ def check_consolidation(
     checks: list[CheckResult] = []
     defects: list[DefectCandidate] = []
     for bundle in bundles:
-        # Title-only merge absence: multiple findings with same title but different rule_id must remain separate.
+        # Title-only merge absence: multiple findings with same title but different rule_id must
+        # remain separate.
         by_title: dict[str, set[str]] = {}
         for finding in bundle.findings:
             title = str(finding.get("title") or "").strip().lower()

@@ -38,19 +38,12 @@ def test_sample_php_app_complexity_collects(tmp_path: Path) -> None:
     if not sample.is_dir():
         return
     paths = tuple(
-        path.relative_to(sample).as_posix()
-        for path in sample.rglob("*.php")
-        if path.is_file()
+        path.relative_to(sample).as_posix() for path in sample.rglob("*.php") if path.is_file()
     )
-    texts = {
-        relative: (sample / relative).read_text(encoding="utf-8")
-        for relative in paths
-    }
+    texts = {relative: (sample / relative).read_text(encoding="utf-8") for relative in paths}
     settings = ComplexityEvidenceSettings().model_copy(
         update={
-            "python": ComplexityEvidenceSettings().python.model_copy(
-                update={"enabled": False}
-            ),
+            "python": ComplexityEvidenceSettings().python.model_copy(update={"enabled": False}),
             "java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False}),
         }
     )
@@ -66,11 +59,7 @@ def test_sample_php_app_complexity_collects(tmp_path: Path) -> None:
 
 def test_sample_php_detector_still_laravel(tmp_path: Path) -> None:
     sample = _sample_php_app()
-    files = [
-        path.relative_to(sample).as_posix()
-        for path in sample.rglob("*")
-        if path.is_file()
-    ]
+    files = [path.relative_to(sample).as_posix() for path in sample.rglob("*") if path.is_file()]
     repository = Repository(name="sample-php-app", path=sample.resolve(), files=files)
     names = {item.name for item in PhpTechnologyDetector().detect(repository)}
     assert "PHP" in names

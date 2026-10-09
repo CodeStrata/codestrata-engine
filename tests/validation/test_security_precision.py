@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.inventory import FactClassification, compute_precision_recall
 from validation.models import ExpectedResults, ValidationVerdict
@@ -33,9 +32,7 @@ def test_contradictory_security_expectations_rejected() -> None:
     with pytest.raises(ValidationError, match="contradictory"):
         ExpectedResults(
             security=SecurityExpectation(
-                required_findings=(
-                    SecurityFindingExpectation(rule_id="security.debug-enabled"),
-                ),
+                required_findings=(SecurityFindingExpectation(rule_id="security.debug-enabled"),),
                 forbidden_rule_ids=("security.debug-enabled",),
             )
         )
@@ -113,9 +110,7 @@ def test_precision_recall_zero_denominator_unavailable() -> None:
 
 def test_aggregate_security_metrics_deterministic_order() -> None:
     expectation = SecurityExpectation(
-        required_findings=(
-            SecurityFindingExpectation(rule_id="security.debug-enabled"),
-        ),
+        required_findings=(SecurityFindingExpectation(rule_id="security.debug-enabled"),),
         maximum_false_positive_count=0,
     )
     actual = (
@@ -153,9 +148,7 @@ def test_all_repositories_have_security_expectations() -> None:
 
 def test_controlled_security_fixture_precision(tmp_path: Path) -> None:
     definition = next(
-        item
-        for item in load_all_repositories()
-        if item.repository_id == "local-security-hygiene"
+        item for item in load_all_repositories() if item.repository_id == "local-security-hygiene"
     )
     expected = resolve_expected_results(definition)
     assert expected.security is not None

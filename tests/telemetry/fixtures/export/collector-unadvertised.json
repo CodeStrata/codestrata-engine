@@ -1,0 +1,7 @@
+{
+  "kind": "unadvertised_live",
+  "advertised_schemas": [],
+  "receipts_supported": false,
+  "live_v2_calls": false,
+  "server_ready": false
+}

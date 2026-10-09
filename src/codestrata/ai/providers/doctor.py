@@ -284,9 +284,7 @@ def evaluate_openrouter_readiness(
     elif not model_ok:
         readiness = OpenRouterReadinessStatus.MODEL_MISSING
         detail = "model configuration missing"
-        guidance = (
-            "Set --model-id, CODESTRATA_OPENROUTER_MODEL_ID, or [ai.openrouter].model"
-        )
+        guidance = "Set --model-id, CODESTRATA_OPENROUTER_MODEL_ID, or [ai.openrouter].model"
     else:
         readiness = OpenRouterReadinessStatus.READY
         detail = "local readiness checks passed"

@@ -18,9 +18,11 @@ from verification.bedrock_provider_migration.models import CheckResult
 
 
 def _usage_of(response: Any) -> Any:
-    return build_bedrock_provider(client=fixtures.Client(response)).execute(
-        fixtures.provider_request()
-    ).usage
+    return (
+        build_bedrock_provider(client=fixtures.Client(response))
+        .execute(fixtures.provider_request())
+        .usage
+    )
 
 
 def check_the_converse_usage_field_names_are_unchanged() -> CheckResult:
@@ -110,9 +112,7 @@ def check_the_reported_latency_wins_over_the_measurement() -> CheckResult:
 
 def check_the_measurement_is_used_when_no_latency_is_reported() -> CheckResult:
     usage = _usage_of(fixtures.converse_response())
-    resolved = usage_mapping.resolve_latency_ms(
-        reported_latency_ms=None, measured_latency_ms=500.0
-    )
+    resolved = usage_mapping.resolve_latency_ms(reported_latency_ms=None, measured_latency_ms=500.0)
     return CheckResult(
         name="the_wall_clock_measurement_is_used_when_the_service_reports_no_latency",
         category="usage",
@@ -152,9 +152,7 @@ def check_a_failure_records_a_token_free_usage() -> CheckResult:
 
 def check_usage_records_no_cost_or_billing_field() -> CheckResult:
     usage = _usage_of(fixtures.converse_response())
-    offenders = sorted(
-        name for name in FORBIDDEN_USAGE_FIELD_NAMES if hasattr(usage, name)
-    )
+    offenders = sorted(name for name in FORBIDDEN_USAGE_FIELD_NAMES if hasattr(usage, name))
     return CheckResult(
         name="the_usage_record_carries_no_cost_pricing_or_billing_field",
         category="usage",

@@ -1,0 +1,20 @@
+schema_name: codestrata.release.packaging-inventory.v1
+schema_version: 1.0.0
+inventory_id: engine-release-packaging-inventory
+inventory_version: "1.0"
+wheel_required_members:
+  - codestrata/resources/config/codestrata.defaults.toml
+  - codestrata/resources/schemas/assessment/codestrata.io/v1.2/AssessmentReport.json
+  - codestrata/resources/release/verification-profiles-v1.yaml
+  - codestrata/resources/release/headless-runtime-limits-v1.yaml
+  - codestrata/resources/release/runtime-lock-v1.txt
+  - codestrata/resources/release/packaging-inventory-v1.yaml
+  - codestrata/application/rules/technical_debt/catalog/quality.complexity.yaml
+sdist_required_paths:
+  - src/codestrata/resources/release/verification-profiles-v1.yaml
+  - src/codestrata/resources/release/headless-runtime-limits-v1.yaml
+  - pyproject.toml
+public_source_export_globs:
+  - src/codestrata/**/*.py
+  - src/codestrata/resources/**/*
+  - src/codestrata/application/rules/**/*.yaml

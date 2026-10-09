@@ -58,34 +58,24 @@ class TelemetrySessionConsent:
         if self.prior_consent_reused and self.source is not (
             TelemetryDecisionSource.PERSISTED_PREFERENCE
         ):
-            raise SessionConsentError(
-                "prior_consent_reused requires source=persisted_preference"
-            )
+            raise SessionConsentError("prior_consent_reused requires source=persisted_preference")
         if self.prior_consent_reused and not self.persisted:
-            raise SessionConsentError(
-                "prior_consent_reused requires persisted=true"
-            )
+            raise SessionConsentError("prior_consent_reused requires persisted=true")
 
         decision = self.decision
         source = self.source
 
         if decision is TelemetryDecision.DISABLED_BY_DEFAULT:
             if source is not TelemetryDecisionSource.DEFAULT:
-                raise SessionConsentError(
-                    "disabled_by_default requires source=default"
-                )
+                raise SessionConsentError("disabled_by_default requires source=default")
             if self.explicit:
-                raise SessionConsentError(
-                    "disabled_by_default requires explicit=false"
-                )
+                raise SessionConsentError("disabled_by_default requires explicit=false")
             if self.transmission_authorized:
                 raise SessionConsentError(
                     "disabled_by_default requires transmission_authorized=false"
                 )
             if self.persisted or self.prior_consent_reused:
-                raise SessionConsentError(
-                    "disabled_by_default must not be persisted or reused"
-                )
+                raise SessionConsentError("disabled_by_default must not be persisted or reused")
             return
 
         if decision is TelemetryDecision.ALLOWED_FOR_SESSION:
@@ -132,9 +122,7 @@ class TelemetrySessionConsent:
                     "non_interactive_disabled requires source=non_interactive_policy"
                 )
             if self.explicit:
-                raise SessionConsentError(
-                    "non_interactive_disabled requires explicit=false"
-                )
+                raise SessionConsentError("non_interactive_disabled requires explicit=false")
             if self.transmission_authorized:
                 raise SessionConsentError(
                     "non_interactive_disabled requires transmission_authorized=false"

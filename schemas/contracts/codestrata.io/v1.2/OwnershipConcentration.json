@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/OwnershipConcentration.json",
+  "title": "CodeStrata Engine M25 Ownership Concentration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "record_id",
+    "scope",
+    "subject_id",
+    "history_profile_id",
+    "evidence_ids",
+    "status",
+    "notes"
+  ],
+  "properties": {
+    "schema_name": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "record_id": { "type": "string" },
+    "scope": { "type": "string", "enum": ["repository", "component", "file"] },
+    "subject_id": { "type": "string" },
+    "numerator": { "type": ["integer", "null"] },
+    "denominator": { "type": ["integer", "null"] },
+    "serialized_ratio": { "type": ["string", "null"] },
+    "history_profile_id": { "type": "string" },
+    "evidence_ids": { "type": "array" },
+    "status": { "type": "string" },
+    "notes": { "type": "string" }
+  }
+}

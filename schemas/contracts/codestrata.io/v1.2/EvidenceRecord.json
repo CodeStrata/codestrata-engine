@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/EvidenceRecord.json",
+  "title": "CodeStrata Engine Evidence Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "evidence_id",
+    "source_kind",
+    "working_state_digest",
+    "source_revision",
+    "extractor_version"
+  ],
+  "properties": {
+    "schema_name": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "evidence_id": { "type": "string" },
+    "source_kind": { "type": "string" },
+    "working_state_digest": { "type": "string" },
+    "source_revision": { "type": "string" },
+    "extractor_version": { "type": "string" },
+    "relative_path": { "type": ["string", "null"] },
+    "span": { "type": ["string", "null"] },
+    "graph_record_id": { "type": ["string", "null"] },
+    "feed_record_id": { "type": ["string", "null"] },
+    "commit_id": { "type": ["string", "null"] },
+    "limitation": { "type": ["string", "null"] }
+  }
+}

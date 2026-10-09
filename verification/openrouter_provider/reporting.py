@@ -26,7 +26,8 @@ from verification.openrouter_provider.models import (
 
 NOTES: tuple[str, ...] = (
     "OpenRouter adapter implements provider-platform contracts with an injected mocked client.",
-    "AssessAIProviderRegistry registers bedrock, openai, and openrouter (Decision B; explicit-only).",
+    "AssessAIProviderRegistry registers bedrock, openai, and openrouter "
+    "(Decision B; explicit-only).",
     "Configuration and authentication live in Slice 11.10; doctor local readiness in Slice 11.11.",
     f"Common-contract decision: {COMMON_CONTRACT_COMPATIBILITY_DECISION}",
 )

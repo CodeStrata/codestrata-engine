@@ -17,6 +17,7 @@ from codestrata.application.rules.architecture.pack import ArchitectureRulePack,
 from codestrata.application.rules.architecture.registration import register_architecture_pack
 from codestrata.application.rules.architecture.view_builder import (
     build_architecture_analysis_view,
+    extract_imports,
     find_directed_cycles,
 )
 from codestrata.application.rules.facade import RuleExecutionFacade
@@ -52,8 +53,8 @@ from codestrata.domain.rules.context import (
     RuleExecutionPolicy,
 )
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleResultStatus,
     RuleSkipReason,
     RuleSuppressionSource,
@@ -81,14 +82,10 @@ def _context_with_view(view, *, enterprise_context=None) -> RuleExecutionContext
 def _cycle_fixture() -> dict[str, str]:
     return {
         "src/com/example/domain/A.java": (
-            "package com.example.domain;\n"
-            "import com.example.application.B;\n"
-            "public class A {}\n"
+            "package com.example.domain;\nimport com.example.application.B;\npublic class A {}\n"
         ),
         "src/com/example/application/B.java": (
-            "package com.example.application;\n"
-            "import com.example.domain.A;\n"
-            "public class B {}\n"
+            "package com.example.application;\nimport com.example.domain.A;\npublic class B {}\n"
         ),
     }
 
@@ -183,8 +180,7 @@ def test_invalid_direction_and_boundary() -> None:
             "public class Core {}\n"
         ),
         "src/main/java/com/example/infrastructure/Adapter.java": (
-            "package com.example.infrastructure;\n"
-            "public class Adapter {}\n"
+            "package com.example.infrastructure;\npublic class Adapter {}\n"
         ),
         "src/main/java/com/example/controller/Ui.java": (
             "package com.example.controller;\n"
@@ -192,8 +188,7 @@ def test_invalid_direction_and_boundary() -> None:
             "public class Ui {}\n"
         ),
         "src/main/java/com/example/persistence/Repo.java": (
-            "package com.example.persistence;\n"
-            "public class Repo {}\n"
+            "package com.example.persistence;\npublic class Repo {}\n"
         ),
     }
     view = _view_from_texts(texts)
@@ -229,10 +224,13 @@ def test_coupling_thresholds() -> None:
         )
     view = _view_from_texts(texts)
     context = _context_with_view(view)
-    by_id = {str(rule.metadata.rule_id): rule for rule in architecture_rules(
-        outgoing_module_threshold=20,
-        minimum_module_count=5,
-    )}
+    by_id = {
+        str(rule.metadata.rule_id): rule
+        for rule in architecture_rules(
+            outgoing_module_threshold=20,
+            minimum_module_count=5,
+        )
+    }
     assert by_id[RULE_EXCESSIVE_CROSS_MODULE_COUPLING].evaluate(context).status is (
         RuleResultStatus.NOT_MATCHED
     )
@@ -253,6 +251,7 @@ def test_component_concentration() -> None:
         "src/main/java/com/example/core/Core.java": (
             "package com.example.core;\n"
             "import com.example.a.A;\nimport com.example.b.B;\n"
+            "import com.example.c.C;\nimport com.example.d.D;\n"
             "public class Core {}\n"
         ),
         "src/main/java/com/example/a/A.java": (
@@ -261,8 +260,12 @@ def test_component_concentration() -> None:
         "src/main/java/com/example/b/B.java": (
             "package com.example.b;\nimport com.example.core.Core;\npublic class B {}\n"
         ),
-        "src/main/java/com/example/c/C.java": "package com.example.c;\npublic class C {}\n",
-        "src/main/java/com/example/d/D.java": "package com.example.d;\npublic class D {}\n",
+        "src/main/java/com/example/c/C.java": (
+            "package com.example.c;\nimport com.example.core.Core;\npublic class C {}\n"
+        ),
+        "src/main/java/com/example/d/D.java": (
+            "package com.example.d;\nimport com.example.core.Core;\npublic class D {}\n"
+        ),
     }
     view = _view_from_texts(texts)
     context = _context_with_view(view)
@@ -275,6 +278,68 @@ def test_component_concentration() -> None:
     }[RULE_COMPONENT_CONCENTRATION]
     result = rule.evaluate(context)
     assert result.status is RuleResultStatus.MATCHED
+    assert result.matches[0].title.startswith("Concentrated architectural connectivity in ")
+    assert "core" in result.matches[0].title
+
+
+def test_two_module_split_is_not_concentration() -> None:
+    texts = {
+        "src/main/java/com/example/app/App.java": (
+            "package com.example.app;\nimport com.example.environments.Env;\npublic class App {}\n"
+        ),
+        "src/main/java/com/example/environments/Env.java": (
+            "package com.example.environments;\nimport com.example.app.App;\npublic class Env {}\n"
+        ),
+        "src/main/java/com/example/a/A.java": "package com.example.a;\npublic class A {}\n",
+        "src/main/java/com/example/b/B.java": "package com.example.b;\npublic class B {}\n",
+        "src/main/java/com/example/c/C.java": "package com.example.c;\npublic class C {}\n",
+    }
+    view = _view_from_texts(texts)
+    context = _context_with_view(view)
+    rule = {str(item.metadata.rule_id): item for item in architecture_rules()}[
+        RULE_COMPONENT_CONCENTRATION
+    ]
+    result = rule.evaluate(context)
+    assert result.status is RuleResultStatus.NOT_APPLICABLE
+    assert result.matches == ()
+
+
+def test_environment_unit_is_not_named_as_a_bottleneck() -> None:
+    texts = {
+        "src/main/java/com/example/core/Core.java": (
+            "package com.example.core;\n"
+            "import com.example.a.A;\nimport com.example.b.B;\n"
+            "import com.example.c.C;\nimport com.example.d.D;\n"
+            "import com.example.environments.Env;\n"
+            "public class Core {}\n"
+        ),
+        "src/main/java/com/example/a/A.java": (
+            "package com.example.a;\nimport com.example.core.Core;\npublic class A {}\n"
+        ),
+        "src/main/java/com/example/b/B.java": (
+            "package com.example.b;\nimport com.example.core.Core;\npublic class B {}\n"
+        ),
+        "src/main/java/com/example/c/C.java": (
+            "package com.example.c;\nimport com.example.core.Core;\npublic class C {}\n"
+        ),
+        "src/main/java/com/example/d/D.java": (
+            "package com.example.d;\nimport com.example.core.Core;\npublic class D {}\n"
+        ),
+        "src/main/java/com/example/environments/Env.java": (
+            "package com.example.environments;\n"
+            "import com.example.core.Core;\n"
+            "public class Env {}\n"
+        ),
+    }
+    view = _view_from_texts(texts)
+    context = _context_with_view(view)
+    rule = {str(item.metadata.rule_id): item for item in architecture_rules()}[
+        RULE_COMPONENT_CONCENTRATION
+    ]
+    result = rule.evaluate(context)
+    titles = [item.title for item in result.matches]
+    assert titles
+    assert all("environments" not in title for title in titles)
 
 
 def test_framework_leakage() -> None:
@@ -315,9 +380,9 @@ def test_enterprise_standard_mismatch() -> None:
         ),
     }
     view = _view_from_texts(texts)
-    rule = {
-        str(r.metadata.rule_id): r for r in architecture_rules()
-    }[RULE_ENTERPRISE_STANDARD_MISMATCH]
+    rule = {str(r.metadata.rule_id): r for r in architecture_rules()}[
+        RULE_ENTERPRISE_STANDARD_MISMATCH
+    ]
     without = _context_with_view(view)
     assert rule.evaluate_applicability(without).reason_code is (
         RuleSkipReason.MISSING_ENTERPRISE_CONTEXT
@@ -478,3 +543,84 @@ def test_serialization_of_pack_dict() -> None:
     payload = ArchitectureRulePack().to_dict()
     assert payload["pack_id"] == "architecture.core"
     assert isinstance(payload["included_rule_ids"], list)
+
+
+def test_js_framework_markers_do_not_tag_java_domain() -> None:
+    view = build_architecture_analysis_view(
+        relative_paths=[
+            "src/domain/Order.java",
+            "src/domain/panel.ts",
+        ],
+        file_texts={
+            "src/domain/Order.java": (
+                "package com.example.domain;\n"
+                "import org.springframework.stereotype.Component;\n"
+                "@Component\n"
+                "@Controller\n"
+                "public class Order {}\n"
+            ),
+            "src/domain/panel.ts": (
+                "import { Component } from '@angular/core';\n"
+                "import { Controller } from '@nestjs/common';\n"
+                "@Component({})\n"
+                "@Controller()\n"
+                "export class Panel {}\n"
+            ),
+        },
+    )
+    java_hits = {hit.framework for hit in view.framework_hits if hit.path.endswith(".java")}
+    ts_hits = {hit.framework for hit in view.framework_hits if hit.path.endswith(".ts")}
+    assert "angular" not in java_hits
+    assert "nestjs" not in java_hits
+    assert "spring-web" in java_hits
+    assert ts_hits >= {"angular", "nestjs"}
+
+
+def test_mjs_imports_produce_same_edge_as_js() -> None:
+    view_js = build_architecture_analysis_view(
+        relative_paths=["src/domain/orders.js", "src/services/checkout.js"],
+        file_texts={
+            "src/domain/orders.js": "export const orders = [];\n",
+            "src/services/checkout.js": "import { orders } from 'src/domain/orders';\n",
+        },
+    )
+    view_mjs = build_architecture_analysis_view(
+        relative_paths=["src/domain/orders.mjs", "src/services/checkout.mjs"],
+        file_texts={
+            "src/domain/orders.mjs": "export const orders = [];\n",
+            "src/services/checkout.mjs": "import { orders } from 'src/domain/orders';\n",
+        },
+    )
+    edges_js = {(e.source_unit_id, e.target_unit_id) for e in view_js.edges}
+    edges_mjs = {(e.source_unit_id, e.target_unit_id) for e in view_mjs.edges}
+    assert edges_mjs == edges_js
+    assert ("src/services", "src/domain") in edges_mjs
+
+    # Acceptance: a domain .mjs file with import x from './orders.js'
+    # produces the same kind of edge a .js file does
+    imports_js = extract_imports("src/domain/index.js", "import x from './orders.js';\n")
+    imports_mjs = extract_imports("src/domain/index.mjs", "import x from './orders.js';\n")
+    assert imports_mjs == imports_js == ("./orders.js",)
+
+
+def test_vue_and_svelte_imports_from_script_block() -> None:
+    vue_text = """
+<template>
+  <button @click="submit">{{ label }}</button>
+</template>
+<script>
+import { orders } from 'src/domain/orders';
+export default {};
+</script>
+"""
+    imports = extract_imports("src/components/Button.vue", vue_text)
+    assert "src/domain/orders" in imports
+
+    # Script without JS/TS lang is ignored
+    coffee_text = """
+<template><div>{{ x }}</div></template>
+<script lang="coffee">
+import x from 'src/domain/orders'
+</script>
+"""
+    assert extract_imports("src/components/Other.vue", coffee_text) == ()

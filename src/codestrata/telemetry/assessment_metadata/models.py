@@ -6,14 +6,14 @@ Never import Platform packages.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
-from codestrata.telemetry.events import FailureCategory
 from codestrata.telemetry.assessment_metadata.policy import (
     ASSESSMENT_METADATA_WIRE_SCHEMA_VERSION,
     ASSESSMENT_REPORT_SCHEMA_VERSION,
 )
+from codestrata.telemetry.events import FailureCategory
 
 APPROVED_SEVERITIES: frozenset[str] = frozenset(
     {"informational", "low", "medium", "high", "critical"}
@@ -113,9 +113,7 @@ APPROVED_SHAPES: frozenset[str] = frozenset(
         "unknown",
     }
 )
-APPROVED_PLATFORMS: frozenset[str] = frozenset(
-    {"darwin", "linux", "windows", "other"}
-)
+APPROVED_PLATFORMS: frozenset[str] = frozenset({"darwin", "linux", "windows", "other"})
 
 
 @dataclass(frozen=True, slots=True)
@@ -310,9 +308,7 @@ class AssessmentMetadataWireRequest:
             },
             "event_id": self.event_id,
             "execution": execution,
-            "finding_aggregates": [
-                row.to_stable_dict() for row in self.finding_aggregates
-            ],
+            "finding_aggregates": [row.to_stable_dict() for row in self.finding_aggregates],
             "head_confidence": [row.to_stable_dict() for row in self.head_confidence],
             "repository": repository,
             "schema_version": self.schema_version,

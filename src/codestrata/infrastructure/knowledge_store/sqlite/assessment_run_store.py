@@ -55,10 +55,13 @@ class SqliteAssessmentRunStore:
         request_fingerprint: str | None = None,
         invalidation_fingerprint: str | None = None,
     ) -> AssessmentRunRecord:
-        if self._connection.execute(
-            "SELECT 1 FROM repositories WHERE repository_id = ?",
-            (repository_id,),
-        ).fetchone() is None:
+        if (
+            self._connection.execute(
+                "SELECT 1 FROM repositories WHERE repository_id = ?",
+                (repository_id,),
+            ).fetchone()
+            is None
+        ):
             raise RepositoryNotFoundError(f"Repository not found: {repository_id}")
 
         run_id = self._id_factory()
@@ -98,13 +101,14 @@ class SqliteAssessmentRunStore:
     def attach_snapshot(self, run_id: str, snapshot_id: str) -> AssessmentRunRecord:
         run = self._require_run(run_id)
         if run.status is not AssessmentRunStatus.RUNNING:
-            raise KnowledgeStoreError(
-                f"Cannot attach snapshot to run in status {run.status.value}"
-            )
-        if self._connection.execute(
-            "SELECT 1 FROM repository_snapshots WHERE snapshot_id = ?",
-            (snapshot_id,),
-        ).fetchone() is None:
+            raise KnowledgeStoreError(f"Cannot attach snapshot to run in status {run.status.value}")
+        if (
+            self._connection.execute(
+                "SELECT 1 FROM repository_snapshots WHERE snapshot_id = ?",
+                (snapshot_id,),
+            ).fetchone()
+            is None
+        ):
             raise KnowledgeStoreError(f"Snapshot not found: {snapshot_id}")
         try:
             self._connection.execute("BEGIN IMMEDIATE")
@@ -130,13 +134,14 @@ class SqliteAssessmentRunStore:
     ) -> AssessmentRunRecord:
         run = self._require_run(run_id)
         if run.status is not AssessmentRunStatus.RUNNING:
-            raise KnowledgeStoreError(
-                f"Cannot complete run in status {run.status.value}"
-            )
-        if self._connection.execute(
-            "SELECT 1 FROM repository_snapshots WHERE snapshot_id = ?",
-            (snapshot_id,),
-        ).fetchone() is None:
+            raise KnowledgeStoreError(f"Cannot complete run in status {run.status.value}")
+        if (
+            self._connection.execute(
+                "SELECT 1 FROM repository_snapshots WHERE snapshot_id = ?",
+                (snapshot_id,),
+            ).fetchone()
+            is None
+        ):
             raise KnowledgeStoreError(f"Snapshot not found: {snapshot_id}")
 
         staged_rows: list[tuple[str, StagedKnowledgeArtifact, str, str]] = []
@@ -148,9 +153,7 @@ class SqliteAssessmentRunStore:
                 )
                 # Verify immediately before commit.
                 self._blobs.read_json_blob(blob_ref, expected_hash=blob_hash)
-                staged_rows.append(
-                    (self._id_factory(), artifact, blob_ref, blob_hash)
-                )
+                staged_rows.append((self._id_factory(), artifact, blob_ref, blob_hash))
         except KnowledgeStoreError:
             raise
         except Exception as error:  # noqa: BLE001
@@ -431,21 +434,15 @@ class SqliteAssessmentRunStore:
             ruleset_version=str(row["ruleset_version"]),
             started_at=parse_timestamp(str(row["started_at"])),
             completed_at=(
-                None
-                if row["completed_at"] is None
-                else parse_timestamp(str(row["completed_at"]))
+                None if row["completed_at"] is None else parse_timestamp(str(row["completed_at"]))
             ),
             failed_at=(
                 None if row["failed_at"] is None else parse_timestamp(str(row["failed_at"]))
             ),
             error_code=None if row["error_code"] is None else str(row["error_code"]),
-            error_message=(
-                None if row["error_message"] is None else str(row["error_message"])
-            ),
+            error_message=(None if row["error_message"] is None else str(row["error_message"])),
             request_fingerprint=(
-                None
-                if row["request_fingerprint"] is None
-                else str(row["request_fingerprint"])
+                None if row["request_fingerprint"] is None else str(row["request_fingerprint"])
             ),
             invalidation_fingerprint=(
                 None
@@ -465,9 +462,7 @@ class SqliteAssessmentRunStore:
             blob_ref=str(row["blob_ref"]),
             blob_hash=str(row["blob_hash"]),
             source_fingerprint=(
-                None
-                if row["source_fingerprint"] is None
-                else str(row["source_fingerprint"])
+                None if row["source_fingerprint"] is None else str(row["source_fingerprint"])
             ),
             created_at=parse_timestamp(str(row["created_at"])),
         )

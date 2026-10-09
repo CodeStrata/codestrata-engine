@@ -1,0 +1,38 @@
+{
+  "scenario": "unchanged_code_new_cve",
+  "description": "Customer source code is unchanged; a new CVE finding appears strictly due to vulnerability feed update.",
+  "base": {
+    "source_digest": "sha256:source_abc123",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": []
+  },
+  "candidate": {
+    "source_digest": "sha256:source_abc123",
+    "feed_digest": "sha256:feed_v2",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "cve-2026-4401",
+        "identity_key": "cve::cve-2026-4401::lib-x",
+        "title": "Remote code execution in lib-x",
+        "category": "security",
+        "severity": "critical",
+        "cause": "feed"
+      }
+    ]
+  },
+  "expected": {
+    "attribution": "feed_only",
+    "label": "feed-driven",
+    "is_feed_driven": true,
+    "customer_code_deterioration": false,
+    "changed_dimensions": ["feed"],
+    "controlled_rerun_performed": false,
+    "finding_lifecycle": "new",
+    "finding_cause": "feed",
+    "evidence_note": "feed_driven_cve_changes_not_customer_code_deterioration"
+  }
+}

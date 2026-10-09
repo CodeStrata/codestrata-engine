@@ -64,10 +64,7 @@ class AssessmentMetadataEmissionDiagnostics:
             return "assessment metadata upload accepted"
         if self.attempts == 0:
             return "assessment metadata upload not attempted"
-        return (
-            "assessment metadata upload failed "
-            f"({self.last_failure_category or 'unknown'})"
-        )
+        return f"assessment metadata upload failed ({self.last_failure_category or 'unknown'})"
 
 
 __all__ = ["AssessmentMetadataEmissionDiagnostics"]

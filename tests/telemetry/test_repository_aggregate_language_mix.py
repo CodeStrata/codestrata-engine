@@ -55,9 +55,7 @@ def test_language_count_cap() -> None:
 
 
 def test_extractor_merges_js_ts() -> None:
-    mix = extract_language_mix_from_label_counts(
-        {"JavaScript": 2, "TypeScript": 3, "Python": 1}
-    )
+    mix = extract_language_mix_from_label_counts({"JavaScript": 2, "TypeScript": 3, "Python": 1})
     assert mix == (
         LanguageAggregate("javascript_typescript", 5),
         LanguageAggregate("python", 1),

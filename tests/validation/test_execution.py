@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from validation.actual import actual_from_report, normalized_for_determinism, run_real_assessment
 from validation.models import (
     RepositorySourceType,
@@ -171,12 +170,15 @@ def test_fail_verdict_when_expectations_miss(
     # writing expectation into the real expectations dir is undesirable.
     # Use resolve via custom validation_root with a symlink to the fixture.
     fixture_link = validation_root / "fixture"
-    real_fixture = (
-        Path(__file__).resolve().parents[3] / "test-fixtures" / "sample-js-app"
-    )
+    real_fixture = Path(__file__).resolve().parents[3] / "test-fixtures" / "sample-js-app"
     if not real_fixture.is_dir():
-        real_fixture = Path(__file__).resolve().parents[2].parent / "test-fixtures" / "sample-js-app"
-    fixture_link.symlink_to(real_fixture, target_is_directory=True)
+        real_fixture = (
+            Path(__file__).resolve().parents[2].parent / "test-fixtures" / "sample-js-app"
+        )
+    try:
+        fixture_link.symlink_to(real_fixture, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
     definition = ValidationRepository(
         repository_id="local-fail-case",
         display_name="Fail case",

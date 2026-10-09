@@ -47,9 +47,7 @@ def test_D_unknown_field_fails_reconcile() -> None:
         transmitted_currently=False,
         example="acme",
     )
-    broken = dataclasses.replace(
-        catalog, shared_fields=catalog.shared_fields + (extra,)
-    )
+    broken = dataclasses.replace(catalog, shared_fields=catalog.shared_fields + (extra,))
     with pytest.raises(CatalogReconciliationError):
         reconcile_catalog_against_runtime(broken)
 

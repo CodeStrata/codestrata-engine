@@ -625,6 +625,727 @@ class MissingCiWorkflowRule:
         return RuleResult(rule_id=self.id(), findings=(finding,))
 
 
+class AngularDetectedRule:
+    """Reports Angular framework presence and extracted version."""
+
+    def id(self) -> str:
+        return "codestrata-rule-angular-detected"
+
+    def name(self) -> str:
+        return "Angular detected"
+
+    def description(self) -> str:
+        return "Reports Angular framework presence and declared version."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        bindings = context.bindings_for_key("angular")
+        angular_ver = context.angular_version()
+        has_angular_json = context.has_basename("angular.json")
+        if not bindings and angular_ver is None and not has_angular_json:
+            return RuleResult(rule_id=self.id(), findings=())
+        affected: list[NodeId] = []
+        for binding in bindings:
+            affected.extend(context.assessment_nodes_for_binding(binding))
+        version_text = angular_ver.raw if angular_ver is not None else None
+        if version_text is not None:
+            title = f"Angular {version_text} detected"
+            description = f"Angular is present at version {version_text}."
+        else:
+            title = "Angular detected"
+            description = (
+                "Angular framework artifacts or dependencies were detected in repository inventory."
+            )
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=title,
+            description=description,
+            severity=FindingSeverity.INFORMATIONAL,
+            category=FindingCategory.MODERNIZATION,
+            evidence=tuple(
+                (
+                    *(
+                        _evidence(
+                            evidence_type="knowledge_binding",
+                            source_id=binding.binding_id,
+                            excerpt=f"matched_key={binding.matched_key}",
+                        )
+                        for binding in bindings
+                    ),
+                    *(
+                        (
+                            _evidence(
+                                evidence_type="dependency_version",
+                                source_id="dependency:npm:@angular/core",
+                                excerpt=f"@angular/core={version_text}",
+                            ),
+                        )
+                        if version_text is not None
+                        else ()
+                    ),
+                )
+            ),
+            affected_assessment_node_ids=tuple(
+                sorted(
+                    {node.root: node for node in affected}.values(),
+                    key=lambda node: node.root,
+                )
+            ),
+            subject_keys=(
+                "angular",
+                *(binding.binding_id for binding in bindings),
+                *(("angular-version", version_text) if version_text is not None else ()),
+            ),
+            metadata={
+                "matched_binding_count": len(bindings),
+                "angular_version": version_text,
+                "angular_major": angular_ver.major if angular_ver is not None else None,
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class UnsupportedAngularVersionRule:
+    """Flags legacy AngularJS or EOL Angular versions (< 16)."""
+
+    def id(self) -> str:
+        return "codestrata-rule-unsupported-angular-version"
+
+    def name(self) -> str:
+        return "Unsupported Angular version"
+
+    def description(self) -> str:
+        return "Flags legacy AngularJS 1.x or end-of-life Angular versions (< 16)."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        angular_ver = context.angular_version()
+        if angular_ver is None:
+            return RuleResult(
+                rule_id=self.id(),
+                findings=(),
+                skipped=True,
+                skip_reason="no Angular version extracted",
+            )
+        major = angular_ver.major
+        if major is None or major >= 16:
+            return RuleResult(rule_id=self.id(), findings=())
+        is_angularjs = major == 1
+        title = (
+            f"Legacy AngularJS {angular_ver.raw} detected"
+            if is_angularjs
+            else f"Unsupported Angular {angular_ver.raw}"
+        )
+        description = (
+            f"AngularJS {angular_ver.raw} reached End-of-Life and is completely unsupported."
+            if is_angularjs
+            else (
+                f"Angular {angular_ver.raw} is on a deprecated major line (< 16) "
+                "that has reached End-of-Life."
+            )
+        )
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=title,
+            description=description,
+            severity=FindingSeverity.HIGH,
+            category=FindingCategory.DEPENDENCY,
+            evidence=(
+                _evidence(
+                    evidence_type="dependency_version",
+                    source_id="dependency:npm:@angular/core",
+                    excerpt=f"angular={angular_ver.raw}",
+                ),
+            ),
+            subject_keys=("angular", angular_ver.raw, "unsupported-angular"),
+            metadata={
+                "angular_version": angular_ver.raw,
+                "angular_major": major,
+                "is_angularjs": is_angularjs,
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class ReactDetectedRule:
+    """Reports React presence and declared version."""
+
+    def id(self) -> str:
+        return "codestrata-rule-react-detected"
+
+    def name(self) -> str:
+        return "React detected"
+
+    def description(self) -> str:
+        return "Reports React library presence and declared version."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        bindings = context.bindings_for_key("react")
+        react_ver = context.react_version()
+        if not bindings and react_ver is None:
+            return RuleResult(rule_id=self.id(), findings=())
+        affected: list[NodeId] = []
+        for binding in bindings:
+            affected.extend(context.assessment_nodes_for_binding(binding))
+        version_text = react_ver.raw if react_ver is not None else None
+        if version_text is not None:
+            title = f"React {version_text} detected"
+            description = f"React is present at version {version_text}."
+        else:
+            title = "React detected"
+            description = "React dependencies or bindings were detected in repository inventory."
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=title,
+            description=description,
+            severity=FindingSeverity.INFORMATIONAL,
+            category=FindingCategory.MODERNIZATION,
+            evidence=tuple(
+                (
+                    *(
+                        _evidence(
+                            evidence_type="knowledge_binding",
+                            source_id=binding.binding_id,
+                            excerpt=f"matched_key={binding.matched_key}",
+                        )
+                        for binding in bindings
+                    ),
+                    *(
+                        (
+                            _evidence(
+                                evidence_type="dependency_version",
+                                source_id="dependency:npm:react",
+                                excerpt=f"react={version_text}",
+                            ),
+                        )
+                        if version_text is not None
+                        else ()
+                    ),
+                )
+            ),
+            affected_assessment_node_ids=tuple(
+                sorted(
+                    {node.root: node for node in affected}.values(),
+                    key=lambda node: node.root,
+                )
+            ),
+            subject_keys=(
+                "react",
+                *(binding.binding_id for binding in bindings),
+                *(("react-version", version_text) if version_text is not None else ()),
+            ),
+            metadata={
+                "matched_binding_count": len(bindings),
+                "react_version": version_text,
+                "react_major": react_ver.major if react_ver is not None else None,
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class OutdatedReactVersionRule:
+    """Flags React versions prior to React 18."""
+
+    def id(self) -> str:
+        return "codestrata-rule-outdated-react-version"
+
+    def name(self) -> str:
+        return "Outdated React version"
+
+    def description(self) -> str:
+        return "Flags React versions prior to React 18 as lacking modern concurrent features."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        react_ver = context.react_version()
+        if react_ver is None:
+            return RuleResult(
+                rule_id=self.id(),
+                findings=(),
+                skipped=True,
+                skip_reason="no React version extracted",
+            )
+        major = react_ver.major
+        if major is None or major >= 18:
+            return RuleResult(rule_id=self.id(), findings=())
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Outdated React {react_ver.raw}",
+            description=(
+                f"React {react_ver.raw} is prior to React 18 and lacks concurrent rendering, "
+                "automatic batching, and modern React Server Component architecture."
+            ),
+            severity=FindingSeverity.MEDIUM,
+            category=FindingCategory.DEPENDENCY,
+            evidence=(
+                _evidence(
+                    evidence_type="dependency_version",
+                    source_id="dependency:npm:react",
+                    excerpt=f"react={react_ver.raw}",
+                ),
+            ),
+            subject_keys=("react", react_ver.raw, "outdated-react"),
+            metadata={
+                "react_version": react_ver.raw,
+                "react_major": major,
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class VueDetectedRule:
+    """Reports Vue.js framework presence and declared version."""
+
+    def id(self) -> str:
+        return "codestrata-rule-vue-detected"
+
+    def name(self) -> str:
+        return "Vue.js detected"
+
+    def description(self) -> str:
+        return "Reports Vue.js framework presence and declared version."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        bindings = context.bindings_for_key("vue")
+        vue_ver = context.vue_version()
+        if not bindings and vue_ver is None:
+            return RuleResult(rule_id=self.id(), findings=())
+        affected: list[NodeId] = []
+        for binding in bindings:
+            affected.extend(context.assessment_nodes_for_binding(binding))
+        version_text = vue_ver.raw if vue_ver is not None else None
+        if version_text is not None:
+            title = f"Vue.js {version_text} detected"
+            description = f"Vue.js is present at version {version_text}."
+        else:
+            title = "Vue.js detected"
+            description = "Vue.js dependencies or bindings were detected in repository inventory."
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=title,
+            description=description,
+            severity=FindingSeverity.INFORMATIONAL,
+            category=FindingCategory.MODERNIZATION,
+            evidence=tuple(
+                (
+                    *(
+                        _evidence(
+                            evidence_type="knowledge_binding",
+                            source_id=binding.binding_id,
+                            excerpt=f"matched_key={binding.matched_key}",
+                        )
+                        for binding in bindings
+                    ),
+                    *(
+                        (
+                            _evidence(
+                                evidence_type="dependency_version",
+                                source_id="dependency:npm:vue",
+                                excerpt=f"vue={version_text}",
+                            ),
+                        )
+                        if version_text is not None
+                        else ()
+                    ),
+                )
+            ),
+            affected_assessment_node_ids=tuple(
+                sorted(
+                    {node.root: node for node in affected}.values(),
+                    key=lambda node: node.root,
+                )
+            ),
+            subject_keys=(
+                "vue",
+                *(binding.binding_id for binding in bindings),
+                *(("vue-version", version_text) if version_text is not None else ()),
+            ),
+            metadata={
+                "matched_binding_count": len(bindings),
+                "vue_version": version_text,
+                "vue_major": vue_ver.major if vue_ver is not None else None,
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class UnsupportedVueVersionRule:
+    """Flags Vue 2.x which reached End-of-Life on December 31, 2023."""
+
+    def id(self) -> str:
+        return "codestrata-rule-unsupported-vue-version"
+
+    def name(self) -> str:
+        return "Unsupported Vue 2 version"
+
+    def description(self) -> str:
+        return "Flags Vue 2 versions as end-of-life (EOL as of Dec 31, 2023)."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        vue_ver = context.vue_version()
+        if vue_ver is None:
+            return RuleResult(
+                rule_id=self.id(),
+                findings=(),
+                skipped=True,
+                skip_reason="no Vue version extracted",
+            )
+        major = vue_ver.major
+        if major != 2:
+            return RuleResult(rule_id=self.id(), findings=())
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Unsupported Vue 2 ({vue_ver.raw})",
+            description=(
+                f"Vue {vue_ver.raw} reached official End-of-Life on December 31, 2023 "
+                "and no longer receives official security patches or updates. Modernize to Vue 3."
+            ),
+            severity=FindingSeverity.HIGH,
+            category=FindingCategory.DEPENDENCY,
+            evidence=(
+                _evidence(
+                    evidence_type="dependency_version",
+                    source_id="dependency:npm:vue",
+                    excerpt=f"vue={vue_ver.raw}",
+                ),
+            ),
+            subject_keys=("vue", vue_ver.raw, "unsupported-vue2"),
+            metadata={
+                "vue_version": vue_ver.raw,
+                "vue_major": major,
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class NextJsDetectedRule:
+    """Reports Next.js framework presence and extracted version."""
+
+    def id(self) -> str:
+        return "codestrata-rule-nextjs-detected"
+
+    def name(self) -> str:
+        return "Next.js detected"
+
+    def description(self) -> str:
+        return "Reports Next.js framework presence and declared version."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        bindings = context.bindings_for_key("next")
+        next_ver = context.nextjs_version()
+        if not bindings and next_ver is None:
+            return RuleResult(rule_id=self.id(), findings=())
+        affected: list[NodeId] = []
+        for binding in bindings:
+            affected.extend(context.assessment_nodes_for_binding(binding))
+        ver_text = f" (version {next_ver.raw})" if next_ver is not None else ""
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Next.js framework detected{ver_text}",
+            description=(
+                f"Next.js framework identified in repository{ver_text}. "
+                "Next.js provides hybrid static and server rendering and TypeScript support."
+            ),
+            severity=FindingSeverity.INFORMATIONAL,
+            category=FindingCategory.MODERNIZATION,
+            affected_assessment_node_ids=tuple(
+                sorted(
+                    {node.root: node for node in affected}.values(),
+                    key=lambda node: node.root,
+                )
+            ),
+            evidence=(
+                _evidence(
+                    evidence_type="framework_manifest",
+                    source_id="dependency:npm:next",
+                    excerpt=f"next{ver_text}",
+                ),
+            ),
+            subject_keys=("next", "framework", next_ver.raw if next_ver else "detected"),
+            metadata={
+                "nextjs_version": next_ver.raw if next_ver else None,
+                "framework": "next",
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class OutdatedNextJsVersionRule:
+    """Flags Next.js versions older than 13.x (legacy Pages router only)."""
+
+    def id(self) -> str:
+        return "codestrata-rule-outdated-nextjs-version"
+
+    def name(self) -> str:
+        return "Outdated Next.js version (<13)"
+
+    def description(self) -> str:
+        return "Flags Next.js versions older than 13 as lacking App Router and Server Components."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        next_ver = context.nextjs_version()
+        if next_ver is None:
+            return RuleResult(
+                rule_id=self.id(),
+                findings=(),
+                skipped=True,
+                skip_reason="no Next.js version extracted",
+            )
+        major = next_ver.major
+        if major is None or major >= 13:
+            return RuleResult(rule_id=self.id(), findings=())
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Outdated Next.js version ({next_ver.raw})",
+            description=(
+                f"Next.js {next_ver.raw} predates Next.js 13 and lacks the App Router, "
+                "Server Components, and modern performance optimizations. Upgrade to Next.js 14+."
+            ),
+            severity=FindingSeverity.MEDIUM,
+            category=FindingCategory.DEPENDENCY,
+            evidence=(
+                _evidence(
+                    evidence_type="dependency_version",
+                    source_id="dependency:npm:next",
+                    excerpt=f"next={next_ver.raw}",
+                ),
+            ),
+            subject_keys=("next", next_ver.raw, "outdated-nextjs"),
+            metadata={"nextjs_version": next_ver.raw, "nextjs_major": major},
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class NestJsDetectedRule:
+    """Reports NestJS backend framework presence and extracted version."""
+
+    def id(self) -> str:
+        return "codestrata-rule-nestjs-detected"
+
+    def name(self) -> str:
+        return "NestJS detected"
+
+    def description(self) -> str:
+        return "Reports NestJS framework presence and declared version."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        bindings = context.bindings_for_key("nestjs")
+        nest_ver = context.nestjs_version()
+        if not bindings and nest_ver is None:
+            return RuleResult(rule_id=self.id(), findings=())
+        affected: list[NodeId] = []
+        for binding in bindings:
+            affected.extend(context.assessment_nodes_for_binding(binding))
+        ver_text = f" (version {nest_ver.raw})" if nest_ver is not None else ""
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"NestJS framework detected{ver_text}",
+            description=(
+                f"NestJS framework identified in repository{ver_text}. "
+                "NestJS provides modular architecture, TypeScript decorators, "
+                "and dependency injection."
+            ),
+            severity=FindingSeverity.INFORMATIONAL,
+            category=FindingCategory.MODERNIZATION,
+            affected_assessment_node_ids=tuple(
+                sorted(
+                    {node.root: node for node in affected}.values(),
+                    key=lambda node: node.root,
+                )
+            ),
+            evidence=(
+                _evidence(
+                    evidence_type="framework_manifest",
+                    source_id="dependency:npm:@nestjs/core",
+                    excerpt=f"@nestjs/core{ver_text}",
+                ),
+            ),
+            subject_keys=("nestjs", "framework", nest_ver.raw if nest_ver else "detected"),
+            metadata={
+                "nestjs_version": nest_ver.raw if nest_ver else None,
+                "framework": "nestjs",
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class OutdatedNestJsVersionRule:
+    """Flags NestJS versions older than 9.x."""
+
+    def id(self) -> str:
+        return "codestrata-rule-outdated-nestjs-version"
+
+    def name(self) -> str:
+        return "Outdated NestJS version (<9)"
+
+    def description(self) -> str:
+        return "Flags NestJS versions older than 9 as legacy/outdated."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        nest_ver = context.nestjs_version()
+        if nest_ver is None:
+            return RuleResult(
+                rule_id=self.id(),
+                findings=(),
+                skipped=True,
+                skip_reason="no NestJS version extracted",
+            )
+        major = nest_ver.major
+        if major is None or major >= 9:
+            return RuleResult(rule_id=self.id(), findings=())
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Outdated NestJS version ({nest_ver.raw})",
+            description=(
+                f"NestJS {nest_ver.raw} is older than NestJS 9 and lacks modern Node LTS "
+                "compatibility. Upgrade to NestJS 10 or newer."
+            ),
+            severity=FindingSeverity.MEDIUM,
+            category=FindingCategory.DEPENDENCY,
+            evidence=(
+                _evidence(
+                    evidence_type="dependency_version",
+                    source_id="dependency:npm:@nestjs/core",
+                    excerpt=f"@nestjs/core={nest_ver.raw}",
+                ),
+            ),
+            subject_keys=("nestjs", nest_ver.raw, "outdated-nestjs"),
+            metadata={"nestjs_version": nest_ver.raw, "nestjs_major": major},
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class SvelteDetectedRule:
+    """Reports Svelte framework presence and extracted version."""
+
+    def id(self) -> str:
+        return "codestrata-rule-svelte-detected"
+
+    def name(self) -> str:
+        return "Svelte detected"
+
+    def description(self) -> str:
+        return "Reports Svelte framework presence and declared version."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        bindings = context.bindings_for_key("svelte")
+        svelte_ver = context.svelte_version()
+        if not bindings and svelte_ver is None:
+            return RuleResult(rule_id=self.id(), findings=())
+        affected: list[NodeId] = []
+        for binding in bindings:
+            affected.extend(context.assessment_nodes_for_binding(binding))
+        ver_text = f" (version {svelte_ver.raw})" if svelte_ver is not None else ""
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Svelte framework detected{ver_text}",
+            description=(
+                f"Svelte framework identified in repository{ver_text}. "
+                "Svelte compiles components into efficient imperative JavaScript."
+            ),
+            severity=FindingSeverity.INFORMATIONAL,
+            category=FindingCategory.MODERNIZATION,
+            affected_assessment_node_ids=tuple(
+                sorted(
+                    {node.root: node for node in affected}.values(),
+                    key=lambda node: node.root,
+                )
+            ),
+            evidence=(
+                _evidence(
+                    evidence_type="framework_manifest",
+                    source_id="dependency:npm:svelte",
+                    excerpt=f"svelte{ver_text}",
+                ),
+            ),
+            subject_keys=("svelte", "framework", svelte_ver.raw if svelte_ver else "detected"),
+            metadata={
+                "svelte_version": svelte_ver.raw if svelte_ver else None,
+                "framework": "svelte",
+            },
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
+class OutdatedSvelteVersionRule:
+    """Flags Svelte versions older than 4.x."""
+
+    def id(self) -> str:
+        return "codestrata-rule-outdated-svelte-version"
+
+    def name(self) -> str:
+        return "Outdated Svelte version (<4)"
+
+    def description(self) -> str:
+        return "Flags Svelte versions older than 4 as legacy."
+
+    def supported_languages(self) -> frozenset[str]:
+        return _ALL_LANGUAGES
+
+    def evaluate(self, context: RuleContext) -> RuleResult:
+        svelte_ver = context.svelte_version()
+        if svelte_ver is None:
+            return RuleResult(
+                rule_id=self.id(),
+                findings=(),
+                skipped=True,
+                skip_reason="no Svelte version extracted",
+            )
+        major = svelte_ver.major
+        if major is None or major >= 4:
+            return RuleResult(rule_id=self.id(), findings=())
+        finding = Finding.create(
+            rule_id=self.id(),
+            title=f"Outdated Svelte version ({svelte_ver.raw})",
+            description=(
+                f"Svelte {svelte_ver.raw} is older than Svelte 4 and does not support modern "
+                "runes or SvelteKit 2. Upgrade to Svelte 4 or 5."
+            ),
+            severity=FindingSeverity.MEDIUM,
+            category=FindingCategory.DEPENDENCY,
+            evidence=(
+                _evidence(
+                    evidence_type="dependency_version",
+                    source_id="dependency:npm:svelte",
+                    excerpt=f"svelte={svelte_ver.raw}",
+                ),
+            ),
+            subject_keys=("svelte", svelte_ver.raw, "outdated-svelte"),
+            metadata={"svelte_version": svelte_ver.raw, "svelte_major": major},
+        )
+        return RuleResult(rule_id=self.id(), findings=(finding,))
+
+
 def builtin_rules() -> tuple[Rule, ...]:
     """Return the ordered builtin rule set."""
 
@@ -641,4 +1362,16 @@ def builtin_rules() -> tuple[Rule, ...]:
         MissingNodeEngineRule(),
         NpmLockfileMissingRule(),
         MissingCiWorkflowRule(),
+        AngularDetectedRule(),
+        UnsupportedAngularVersionRule(),
+        ReactDetectedRule(),
+        OutdatedReactVersionRule(),
+        VueDetectedRule(),
+        UnsupportedVueVersionRule(),
+        NextJsDetectedRule(),
+        OutdatedNextJsVersionRule(),
+        NestJsDetectedRule(),
+        OutdatedNestJsVersionRule(),
+        SvelteDetectedRule(),
+        OutdatedSvelteVersionRule(),
     )

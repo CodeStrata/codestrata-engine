@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import pytest
@@ -10,15 +9,13 @@ from typer.testing import CliRunner
 
 from codestrata.cli.report import report_app
 from codestrata.community_cloud.report_publishing import (
-    PUBLIC_PUBLISH_WARNING,
+    ReportPublishError,
     resolve_community_credential,
     telemetry_eligible_for_publish,
     user_facing_publish_error,
-    ReportPublishError,
 )
 from codestrata.telemetry.consent import deny_session_consent
 from codestrata.telemetry.session import TelemetrySession
-
 
 runner = CliRunner()
 
@@ -32,10 +29,7 @@ def test_resolve_credential_without_env(monkeypatch: pytest.MonkeyPatch) -> None
 
 def test_publish_eligibility_independent_of_telemetry() -> None:
     assert telemetry_eligible_for_publish(None) is True
-    assert (
-        telemetry_eligible_for_publish(TelemetrySession(consent=deny_session_consent()))
-        is True
-    )
+    assert telemetry_eligible_for_publish(TelemetrySession(consent=deny_session_consent())) is True
 
 
 def test_user_facing_errors_hide_operator_guidance() -> None:
@@ -47,17 +41,9 @@ def test_user_facing_errors_hide_operator_guidance() -> None:
     assert "Local report remains unchanged" in msg
 
 
-def test_noninteractive_requires_confirm(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_noninteractive_requires_confirm(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CI", "1")
     monkeypatch.delenv("CODESTRATA_FORCE_INTERACTIVE", raising=False)
-    monkeypatch.delenv("CODESTRATA_TELEMETRY_OPT_IN", raising=False)
-    monkeypatch.delenv("CODESTRATA_COMMUNITY_CLIENT_CREDENTIAL", raising=False)
-    root = tmp_path / ".codestrata-artifacts" / "assessments" / "local-demo" / "current"
-    root.mkdir(parents=True)
-    (root / "assessment.html").write_text("<html></html>", encoding="utf-8")
-    (root / "assessment.json").write_text("{}", encoding="utf-8")
     result = runner.invoke(
         report_app,
         ["publish", "--artifacts-root", str(tmp_path / ".codestrata-artifacts")],
@@ -70,11 +56,6 @@ def test_noninteractive_private_requires_ack(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setenv("CI", "1")
-    monkeypatch.delenv("CODESTRATA_FORCE_INTERACTIVE", raising=False)
-    root = tmp_path / ".codestrata-artifacts" / "assessments" / "local-demo" / "current"
-    root.mkdir(parents=True)
-    (root / "assessment.html").write_text("<html></html>", encoding="utf-8")
-    (root / "assessment.json").write_text("{}", encoding="utf-8")
     result = runner.invoke(
         report_app,
         [
@@ -85,19 +66,17 @@ def test_noninteractive_private_requires_ack(
         ],
     )
     assert result.exit_code == 2
-    assert "acknowledge-private-repository" in (result.stdout + result.stderr).lower() or (
-        "private/local" in (result.stdout + result.stderr).lower()
-    )
+    assert "deprecated" in (result.stdout + result.stderr).lower()
 
 
 def test_help_recommends_interactive_path() -> None:
     result = runner.invoke(report_app, ["publish", "--help"])
     assert result.exit_code == 0
     out = result.stdout
-    assert "codestrata report publish" in out
+    assert "report publish" in out
     assert "CODESTRATA_TELEMETRY_OPT_IN" not in out
     assert "CODESTRATA_COMMUNITY_CLIENT_CREDENTIAL" not in out
-    assert PUBLIC_PUBLISH_WARNING.split(".")[0] in out or "Interactive" in out or "confirm" in out.lower()
+    assert "deprecated" in out.lower()
 
 
 def test_verify_public_report_get_rejects_api_json_error(
@@ -110,11 +89,9 @@ def test_verify_public_report_get_rejects_api_json_error(
         headers = {"Content-Type": "application/json"}
 
         def read(self, _n: int = -1) -> bytes:
-            return (
-                b'{"error":{"code":"not_found","message":"Endpoint not found."}}'
-            )
+            return b'{"error":{"code":"not_found","message":"Endpoint not found."}}'
 
-        def __enter__(self) -> "_FakeResp":
+        def __enter__(self) -> _FakeResp:
             return self
 
         def __exit__(self, *args: object) -> None:

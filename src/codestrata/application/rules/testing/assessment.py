@@ -95,9 +95,7 @@ def evaluate_testing_pack_for_context_detailed(
         diagnostics.append("repository_testing_evidence_unavailable")
     else:
         evidence_pipeline = "repository_testing"
-        evidence_fingerprint = evidence.evidence_fingerprint or _fingerprint_evidence(
-            evidence
-        )
+        evidence_fingerprint = evidence.evidence_fingerprint or _fingerprint_evidence(evidence)
         candidate_files_discovered = evidence.coverage.candidate_test_files_discovered
         frameworks_declared = evidence.coverage.frameworks_declared
 
@@ -115,9 +113,7 @@ def evaluate_testing_pack_for_context_detailed(
             "configuration_facts": {
                 **shared_context.configuration_facts,
                 "testing_enabled": "true",
-                "repository_testing_evidence_present": str(
-                    evidence is not None
-                ).lower(),
+                "repository_testing_evidence_present": str(evidence is not None).lower(),
             },
         }
     )
@@ -137,14 +133,10 @@ def evaluate_testing_pack_for_context_detailed(
         str(record.rule_id): record.category or RuleCategory.TESTING
         for record in platform_result.records
     }
-    findings = mapper.map_matches(
-        platform_result.matches, category_by_rule=category_by_rule
-    )
+    findings = mapper.map_matches(platform_result.matches, category_by_rule=category_by_rule)
     evaluated = tuple(platform_result.plan.execution_order)
     skipped = tuple(
-        entry.rule_id
-        for entry in platform_result.plan.skipped
-        if entry.rule_id not in evaluated
+        entry.rule_id for entry in platform_result.plan.skipped if entry.rule_id not in evaluated
     )
     for record in platform_result.records:
         if record.status.value == "not_applicable" and record.rule_id not in skipped:

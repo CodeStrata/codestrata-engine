@@ -4,13 +4,14 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from codestrata.cli.init_cmd import write_minimal_config
 from verification.cli_initialization.artifacts import (
     classify_artifacts,
     forbidden_present,
     required_missing,
 )
 from verification.cli_initialization.workspace import create_minimal_repository
+
+from codestrata.cli.init_cmd import write_minimal_config
 
 
 def test_classify_required_config(tmp_path: Path) -> None:

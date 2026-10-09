@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/HeadlessInvocation.json",
+  "title": "CodeStrata Engine Headless Local Invocation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "kind", "requested_package_purpose", "source_path", "output_path", "pinned_inputs", "export_trust", "permitted_scope", "network_mode", "hosted_calls"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.headless-invocation.v1" },
+    "schema_version": { "type": "string" },
+    "kind": { "type": "string", "enum": ["assess", "compare", "candidate_validate", "preview"] },
+    "requested_package_purpose": { "type": "string", "enum": ["production", "preview", "candidate_validation"] },
+    "source_path": { "type": "string" },
+    "output_path": { "type": "string" },
+    "baseline_path": { "type": ["string", "null"] },
+    "pinned_inputs": { "type": "object", "additionalProperties": false },
+    "export_trust": { "type": "object", "additionalProperties": false },
+    "permitted_scope": { "type": "object", "additionalProperties": false },
+    "expiry": { "type": ["string", "null"] },
+    "supplied_context": { "type": ["object", "null"] },
+    "network_mode": { "type": "string", "const": "offline" },
+    "hosted_calls": { "type": "boolean", "const": false }
+  }
+}

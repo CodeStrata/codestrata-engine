@@ -52,11 +52,7 @@ def synthesize_finding_traceability(
     unique = dedupe_evidence_refs(tuple(refs))
     ordered = order_evidence_refs(unique)
     primary = select_primary_evidence_id(ordered)
-    synthesized = (
-        tuple(sorted({item.evidence_id for item in ordered}))
-        if len(ordered) > 1
-        else ()
-    )
+    synthesized = tuple(sorted({item.evidence_id for item in ordered})) if len(ordered) > 1 else ()
     limits = tuple(sorted({str(item).strip() for item in limitations if str(item).strip()}))
     if not ordered:
         completeness = EvidenceCompleteness.UNAVAILABLE

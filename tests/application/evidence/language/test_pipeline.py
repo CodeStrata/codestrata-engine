@@ -40,9 +40,7 @@ def test_registry_rejects_duplicates() -> None:
 
 def test_planner_auto_detect_and_precedence() -> None:
     registry = LanguageEvidenceProviderRegistry()
-    registry.register_collection(
-        [PythonLanguageEvidenceProvider(), JavaLanguageEvidenceProvider()]
-    )
+    registry.register_collection([PythonLanguageEvidenceProvider(), JavaLanguageEvidenceProvider()])
     planner = LanguageEvidenceProviderPlanner(registry)
     context = LanguageEvidenceContext(
         repository_id="demo",

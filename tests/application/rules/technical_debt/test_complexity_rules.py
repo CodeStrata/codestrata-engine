@@ -44,7 +44,7 @@ from codestrata.domain.rules.context import (
     RuleExecutionContext,
     RuleExecutionPolicy,
 )
-from codestrata.domain.rules.enums import RuleCategory, MatchEvidenceConfidence, RuleResultStatus
+from codestrata.domain.rules.enums import MatchEvidenceConfidence, RuleCategory, RuleResultStatus
 from codestrata.domain.technical_debt.ids import (
     COMPLEXITY_RULE_IDS,
     PACK_ID,
@@ -216,12 +216,8 @@ def test_excessive_branching_and_nesting_and_parameters() -> None:
 
 def test_oversized_type_positive_and_boundary() -> None:
     rule = OversizedTypeRule(max_physical_lines=300)
-    positive = _context(
-        _evidence(types=(_type(name="Huge", lines=IntMetric.available(301)),))
-    )
-    boundary = _context(
-        _evidence(types=(_type(name="Exact", lines=IntMetric.available(300)),))
-    )
+    positive = _context(_evidence(types=(_type(name="Huge", lines=IntMetric.available(301)),)))
+    boundary = _context(_evidence(types=(_type(name="Exact", lines=IntMetric.available(300)),)))
     assert rule.evaluate(positive).status is RuleResultStatus.MATCHED
     assert rule.evaluate(boundary).status is RuleResultStatus.NOT_MATCHED
 
@@ -288,9 +284,7 @@ def test_deterministic_ordering_and_finding_ids() -> None:
         assert second == first
         first_matches.extend(first.matches)
         second_matches.extend(second.matches)
-    assert [item.summary for item in first_matches] == [
-        item.summary for item in second_matches
-    ]
+    assert [item.summary for item in first_matches] == [item.summary for item in second_matches]
     mapper = RuleFindingMapper()
     category_by_rule = {rule_id: RuleCategory.TECHNICAL_DEBT for rule_id in COMPLEXITY_RULE_IDS}
     findings_one = mapper.map_matches(tuple(first_matches), category_by_rule=category_by_rule)

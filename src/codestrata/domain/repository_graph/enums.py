@@ -16,6 +16,8 @@ from codestrata.domain.repository.enums import RepositoryFileKind
 
 __all__ = [
     "DependencyScope",
+    "InventoryPrimaryClass",
+    "OBSERVED_STRUCTURAL_EDGE_TYPES",
     "RepositoryCallableKind",
     "RepositoryFileKind",
     "RepositoryNodeType",
@@ -42,7 +44,23 @@ class RepositoryRelationshipType(StrEnum):
     CONTAINS = "contains"
     DECLARES = "declares"
     DEPENDS_ON = "depends_on"
+    IMPORTS = "imports"
+    IMPLEMENTS = "implements"
+    EXPOSES_API = "exposes_API"
+    USES_DEPENDENCY = "uses_dependency"
     CALLS = "calls"
+
+
+OBSERVED_STRUCTURAL_EDGE_TYPES: frozenset[RepositoryRelationshipType] = frozenset(
+    {
+        RepositoryRelationshipType.IMPORTS,
+        RepositoryRelationshipType.DEPENDS_ON,
+        RepositoryRelationshipType.IMPLEMENTS,
+        RepositoryRelationshipType.EXPOSES_API,
+        RepositoryRelationshipType.USES_DEPENDENCY,
+        RepositoryRelationshipType.CALLS,
+    }
+)
 
 
 class RepositoryTypeKind(StrEnum):
@@ -67,6 +85,25 @@ class RepositoryCallableKind(StrEnum):
     CONSTRUCTOR = "constructor"
     INITIALIZER = "initializer"
     LAMBDA = "lambda"
+    UNKNOWN = "unknown"
+
+
+class InventoryPrimaryClass(StrEnum):
+    """Mutually exclusive M01 repository file class.
+
+    Distinct from ``RepositoryFileKind``, which is a coarser inventory label
+    that still includes build/manifest kinds. M01 publishes these nine classes
+    only. Detection of a language or manifest is not structural support.
+    """
+
+    SOURCE = "source"
+    TEST = "test"
+    CONFIG = "config"
+    INFRA = "infra"
+    DOCS = "docs"
+    GENERATED = "generated"
+    VENDOR = "vendor"
+    BINARY = "binary"
     UNKNOWN = "unknown"
 
 

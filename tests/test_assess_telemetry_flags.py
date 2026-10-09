@@ -100,9 +100,7 @@ def test_conflict_message_and_exit() -> None:
     assert TELEMETRY_FLAG_CONFLICT_MESSAGE in (result.stdout + result.stderr)
 
 
-def test_simulated_allow_alone_does_not_enable(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_simulated_allow_alone_does_not_enable(tmp_path: Path, monkeypatch) -> None:
     monkeypatch.setenv("CODESTRATA_HOME", str(tmp_path))
     reset_telemetry_singletons()
     telemetry = ensure_interactive_product_telemetry(
@@ -113,8 +111,8 @@ def test_simulated_allow_alone_does_not_enable(
     assert telemetry.runtime.session.consent.transmission_authorized is False
     prompt = get_last_interactive_prompt_result()
     assert prompt is not None
-    assert getattr(prompt, "prompted") is False
-    assert getattr(prompt, "attempts") == 0
+    assert prompt.prompted is False
+    assert prompt.attempts == 0
 
 
 def test_simulated_allow_with_v2_enables(tmp_path: Path, monkeypatch) -> None:

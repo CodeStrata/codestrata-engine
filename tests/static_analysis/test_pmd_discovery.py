@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
+
+import pytest
 
 from codestrata.static_analysis.providers.pmd_discovery import (
     CODESTRATA_PMD_PATH_ENV,
@@ -166,6 +169,7 @@ def test_not_a_file(tmp_path: Path) -> None:
     assert "not a file" in result.message.lower()
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="POSIX execute bits are not available")
 def test_not_executable(tmp_path: Path) -> None:
     path = tmp_path / "pmd"
     path.write_text("#!/bin/sh\n", encoding="utf-8")

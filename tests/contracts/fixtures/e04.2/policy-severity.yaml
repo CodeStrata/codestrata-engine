@@ -1,0 +1,10 @@
+schema_name: codestrata.policy-override-bundle.v1
+schema_version: "1.0.0"
+policies:
+  - policy_ref: policy:opaque:acme.engineering-policy@3.0.0
+    version: "3.0.0"
+    overrides:
+      - rule_id: architecture.dependency-cycle
+        revision: "1.0.0"
+        severity: critical
+exceptions: []

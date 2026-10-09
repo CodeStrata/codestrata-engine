@@ -22,6 +22,13 @@ MINIMAL_CODESTRATA_TOML = """\
 #
 # [ai] / [ai.bedrock] / [ai.openai] settings are optional and only used with --with-ai.
 # Blank AI model fields are treated as unset.
+#
+# Bundled catalog: codestrata.engineering-standard
+# Documented parameter: max_cycle_length = 8
+# Exclusions: [knowledge].enabled and [static_analysis].enabled stay false.
+# Suppressions are unsigned local configuration. They do not author rules.
+# Migration: prefer assess --repo <path> --no-ai. scan is legacy.
+# compare requires --baseline and --candidate. No hidden baseline.
 
 [repository]
 # Local path (default: current directory). Or use a GitHub URL:

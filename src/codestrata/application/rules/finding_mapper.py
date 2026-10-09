@@ -7,8 +7,8 @@ from typing import Any
 from codestrata.domain.findings.enums import FindingCategory, FindingSeverity
 from codestrata.domain.findings.models import Finding, FindingEvidence
 from codestrata.domain.rules.enums import RuleCategory
-from codestrata.domain.rules.rule_confidence import rule_confidence_to_json
 from codestrata.domain.rules.results import RuleMatch
+from codestrata.domain.rules.rule_confidence import rule_confidence_to_json
 
 _CATEGORY_MAP: dict[RuleCategory, FindingCategory] = {
     RuleCategory.ARCHITECTURE: FindingCategory.ARCHITECTURE,
@@ -55,9 +55,7 @@ class RuleFindingMapper:
             metadata["rule_confidence_basis"] = ",".join(
                 item.value for item in match.rule_confidence.basis
             )
-            metadata["rule_confidence_limitations"] = "|".join(
-                match.rule_confidence.limitations
-            )
+            metadata["rule_confidence_limitations"] = "|".join(match.rule_confidence.limitations)
             metadata["rule_confidence_calibration_status"] = (
                 match.rule_confidence.calibration_status.value
             )
@@ -76,36 +74,28 @@ class RuleFindingMapper:
 
             metadata.update(enrich_debt_metadata(str(match.rule_id)))
             metadata.update(_technical_debt_evidence_metadata(match))
-        elif match.provenance == "dependency.core" or str(match.rule_id).startswith(
-            "dependency."
-        ):
+        elif match.provenance == "dependency.core" or str(match.rule_id).startswith("dependency."):
             from codestrata.application.rules.dependency.helpers import (
                 enrich_finding_metadata as enrich_dependency_metadata,
             )
 
             metadata.update(enrich_dependency_metadata(str(match.rule_id)))
             metadata.update(_dependency_evidence_metadata(match))
-        elif match.provenance == "security.core" or str(match.rule_id).startswith(
-            "security."
-        ):
+        elif match.provenance == "security.core" or str(match.rule_id).startswith("security."):
             from codestrata.application.rules.security.helpers import (
                 enrich_finding_metadata as enrich_security_metadata,
             )
 
             metadata.update(enrich_security_metadata(str(match.rule_id)))
             metadata.update(_security_evidence_metadata(match))
-        elif match.provenance == "testing.core" or str(match.rule_id).startswith(
-            "testing."
-        ):
+        elif match.provenance == "testing.core" or str(match.rule_id).startswith("testing."):
             from codestrata.application.rules.testing.helpers import (
                 enrich_finding_metadata as enrich_testing_metadata,
             )
 
             metadata.update(enrich_testing_metadata(str(match.rule_id)))
             metadata.update(_testing_evidence_metadata(match))
-        elif match.provenance == "cloud.core" or str(match.rule_id).startswith(
-            "cloud."
-        ):
+        elif match.provenance == "cloud.core" or str(match.rule_id).startswith("cloud."):
             from codestrata.application.rules.cloud.helpers import (
                 enrich_finding_metadata as enrich_cloud_metadata,
             )
@@ -310,12 +300,9 @@ def _dependency_evidence_metadata(match: RuleMatch) -> dict[str, str]:
     # Preserve all participating evidence IDs when multi-evidence matches.
     if len(match.evidence) > 1:
         ids = [
-            item.attributes.get("evidence_id") or item.subject_reference
-            for item in match.evidence
+            item.attributes.get("evidence_id") or item.subject_reference for item in match.evidence
         ]
-        promoted["participating_evidence_ids"] = ",".join(
-            item for item in ids if item
-        )
+        promoted["participating_evidence_ids"] = ",".join(item for item in ids if item)
     return promoted
 
 

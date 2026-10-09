@@ -99,25 +99,19 @@ _FAMILY_TITLES: dict[str, str] = {
 
 _FAMILY_NOTES: dict[str, str] = {
     "api_boundaries": (
-        "Detected API and service boundary signals do not establish "
-        "suitability for AI or agents."
+        "Detected API and service boundary signals do not establish suitability for AI or agents."
     ),
     "documentation_metadata": (
-        "Detected documentation and metadata signals do not establish "
-        "quality or completeness."
+        "Detected documentation and metadata signals do not establish quality or completeness."
     ),
     "data_retrieval": (
-        "Detected data access and retrieval signals do not establish RAG "
-        "readiness or data quality."
+        "Detected data access and retrieval signals do not establish RAG readiness or data quality."
     ),
     "ai_integrations": (
         "Detected AI and LLM integration signals do not prove production "
         "use, model quality, or safety."
     ),
-    "tool_mcp": (
-        "Detected tool and MCP integration signals do not establish agent "
-        "readiness."
-    ),
+    "tool_mcp": ("Detected tool and MCP integration signals do not establish agent readiness."),
     "workflow_agents": (
         "Detected workflow and agent boundary signals do not establish "
         "autonomous or production maturity."
@@ -164,15 +158,11 @@ def build_ai_readiness_intelligence(
         if str(getattr(item, "finding_id", "") or "").strip()
     }
     ai_recs = tuple(
-        item
-        for item in recommendations
-        if _is_ai_readiness_recommendation(item, ai_finding_ids)
+        item for item in recommendations if _is_ai_readiness_recommendation(item, ai_finding_ids)
     )
 
     finding_links = _finding_links(ai_findings)
-    recommendation_links = _recommendation_links(
-        ai_recs, report, ai_finding_ids
-    )
+    recommendation_links = _recommendation_links(ai_recs, report, ai_finding_ids)
     signal_groups = _signal_groups(report, ai_findings)
     coverage_rows = _coverage_rows(report)
     overview = _overview(
@@ -278,14 +268,11 @@ def _finding_links(findings: Sequence[Any]) -> tuple[AiReadinessFindingLink, ...
             severity=item.severity,
             confidence=_finding_confidence_label(item),
             evidence_ids=_evidence_ids(item),
-            recommendation_ids=tuple(
-                getattr(item, "driven_recommendation_ids", ()) or ()
-            ),
+            recommendation_ids=tuple(getattr(item, "driven_recommendation_ids", ()) or ()),
             path=_finding_path(item),
             rule_id=str(getattr(item, "rule_id", "") or "ai_readiness.unknown"),
             evidence_completeness=(
-                str(getattr(item, "evidence_completeness", "") or "").strip()
-                or None
+                str(getattr(item, "evidence_completeness", "") or "").strip() or None
             ),
         )
         for item in findings
@@ -324,9 +311,7 @@ def _evidence_ids(item: Any) -> tuple[str, ...]:
     refs = getattr(item, "evidence_refs", None)
     if refs:
         return tuple(
-            getattr(ref, "evidence_id", "")
-            for ref in refs
-            if getattr(ref, "evidence_id", None)
+            getattr(ref, "evidence_id", "") for ref in refs if getattr(ref, "evidence_id", None)
         )
     ids = getattr(item, "evidence_ids", None)
     if ids:
@@ -432,7 +417,7 @@ def _signals_for_family(
                     "Repository-observable AI-enablement signals associated "
                     f"with {signal} were detected."
                 ),
-                family=family,  # type: ignore[arg-type]
+                family=family,
                 path=path,
                 evidence_ids=(),
                 finding_id=first_finding_id,
@@ -450,7 +435,7 @@ def _signals_for_family(
                 "Repository-observable AI-enablement signals associated "
                 f"with {family_label} were detected."
             ),
-            family=family,  # type: ignore[arg-type]
+            family=family,
             path=path,
             evidence_ids=(),
             finding_id=first_finding_id,
@@ -606,10 +591,7 @@ def _limitations(
     if report.status in {"disabled", "not_requested", "not_applicable", "failed"}:
         notes.append("AI readiness analysis did not produce a complete assessment.")
     if not finding_links and report.inventory_summary.finding_count == 0:
-        notes.append(
-            "No AI readiness findings were produced within the assessed "
-            "repository scope."
-        )
+        notes.append("No AI readiness findings were produced within the assessed repository scope.")
     # Soft-scrub legacy posture / none-detected if they carry soft claims.
     posture = (report.overall_posture_summary or "").strip()
     if posture and _contains_soft_claim(posture):

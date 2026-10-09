@@ -2,18 +2,18 @@
 
 from __future__ import annotations
 
-from codestrata.application.rules.confidence_catalog import confidence_for_rule
 from codestrata.application.rules.architecture.metadata import (
     dimensions_for,
     executive_for,
     taxonomy_for,
 )
 from codestrata.application.rules.architecture.recommendations import recommendation_for
+from codestrata.application.rules.confidence_catalog import confidence_for_rule
 from codestrata.domain.rules.architecture.models import ArchitectureAnalysisView, ArchitectureUnit
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -21,8 +21,8 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
-from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 
 
 def architecture_view(context: RuleExecutionContext) -> ArchitectureAnalysisView | None:
@@ -145,11 +145,7 @@ def min_coverage_ok(view: ArchitectureAnalysisView, *, minimum: float = 0.15) ->
     """Extraction coverage + primary population safeguards."""
 
     extraction = view.extraction_coverage or view.coverage_ratio
-    return (
-        view.files_parsed >= 1
-        and extraction >= minimum
-        and view.primary_unit_count >= 2
-    )
+    return view.files_parsed >= 1 and extraction >= minimum and view.primary_unit_count >= 2
 
 
 def classification_coverage_ok(
@@ -167,13 +163,24 @@ def classification_coverage_ok(
     return view.classification_coverage >= minimum and layered >= minimum_layered
 
 
+def _is_environment_unit(unit_id: str) -> bool:
+    parts = unit_id.replace("\\", "/").replace(".", "/").lower().split("/")
+    return bool(set(parts) & {"environment", "environments"})
+
+
 def comparable_coupling_units(view: ArchitectureAnalysisView) -> tuple[ArchitectureUnit, ...]:
-    """Units eligible for coupling comparison (exclude composition/registration/test)."""
+    """Units eligible for coupling comparison.
+
+    Composition roots, registration, tests, config, and environment folders are
+    excluded. An environment tree is configuration, not a connectivity hub.
+    """
 
     return tuple(
         unit
         for unit in view.primary_units()
-        if unit.role == "architectural_module" and unit.layer != "test"
+        if unit.role == "architectural_module"
+        and unit.layer not in {"test", "config"}
+        and not _is_environment_unit(unit.unit_id)
     )
 
 

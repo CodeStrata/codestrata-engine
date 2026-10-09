@@ -38,9 +38,7 @@ class SecurityConclusionKind(StrEnum):
     PRODUCTION_SECURITY_FINDINGS_PRESENT = "production_security_findings_present"
     TEST_OR_FIXTURE_FINDINGS_ONLY = "test_or_fixture_findings_only"
     UNKNOWN_ROLE_FINDINGS_PRESENT = "unknown_role_findings_present"
-    NO_PRODUCTION_FINDINGS_IN_SUPPORTED_SCOPE = (
-        "no_production_findings_in_supported_scope"
-    )
+    NO_PRODUCTION_FINDINGS_IN_SUPPORTED_SCOPE = "no_production_findings_in_supported_scope"
     PRIVATE_KEY_MATERIAL_DETECTED = "private_key_material_detected"
     LITERAL_CREDENTIALS_DETECTED = "literal_credentials_detected"
     PLACEHOLDER_CREDENTIALS_DETECTED = "placeholder_credentials_detected"
@@ -78,9 +76,7 @@ class SecurityRecommendationKind(StrEnum):
     ENABLE_AUTHENTICATION = "enable_authentication"
     RESTRICT_CORS_ORIGINS = "restrict_cors_origins"
     DISABLE_DEBUG_CONFIGURATION = "disable_debug_configuration"
-    REVIEW_TEST_FIXTURE_SECURITY_OBSERVATIONS = (
-        "review_test_fixture_security_observations"
-    )
+    REVIEW_TEST_FIXTURE_SECURITY_OBSERVATIONS = "review_test_fixture_security_observations"
     CLASSIFY_UNKNOWN_ROLE_FILES = "classify_unknown_role_files"
     REVIEW_SECURITY_FINDING_HOTSPOTS = "review_security_finding_hotspots"
     CORRECT_MALFORMED_CONFIGURATION = "correct_malformed_configuration"

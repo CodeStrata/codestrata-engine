@@ -14,7 +14,7 @@ from codestrata.application.agents.models import (
 )
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.domain.repository.enums import RepositoryRevisionType
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from tests.application.knowledge.queries.conftest_helpers import (
     fingerprint_for,
     make_manifest,

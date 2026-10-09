@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/FactRecord.json",
+  "title": "CodeStrata Engine Fact Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "fact_id",
+    "subject_kind",
+    "subject_id",
+    "source_kind",
+    "unit",
+    "evidence_ids",
+    "extraction_status"
+  ],
+  "properties": {
+    "schema_name": { "type": "string" },
+    "schema_version": { "type": "string" },
+    "fact_id": { "type": "string" },
+    "measurement_id": { "type": ["string", "null"] },
+    "subject_kind": { "type": "string" },
+    "subject_id": { "type": "string" },
+    "source_kind": { "type": "string" },
+    "value": {},
+    "unit": { "type": "string" },
+    "evidence_ids": { "type": "array", "items": { "type": "string" } },
+    "extraction_status": { "type": "string" },
+    "direction": { "type": "string" }
+  }
+}

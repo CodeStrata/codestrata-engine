@@ -9,6 +9,7 @@ from pathlib import Path
 
 ARTIFACT_ROOT_NAME = ".codestrata-artifacts"
 ASSESSMENTS_DIRNAME = "assessments"
+TRENDS_DIRNAME = "trends"
 INTELLIGENCE_DIRNAME = "intelligence"
 VALIDATION_DIRNAME = "validation"
 VALIDATION_REPOSITORIES_DIRNAME = "repositories"
@@ -86,6 +87,7 @@ def ensure_artifact_tree(base: Path | None = None) -> Path:
     root = artifact_root(base)
     for relative in (
         ASSESSMENTS_DIRNAME,
+        TRENDS_DIRNAME,
         INTELLIGENCE_DIRNAME,
         f"{VALIDATION_DIRNAME}/{VALIDATION_REPOSITORIES_DIRNAME}",
         f"{VALIDATION_DIRNAME}/{VALIDATION_SUITES_DIRNAME}",
@@ -119,6 +121,33 @@ def build_assessment_run_id(repository_name: str, timestamp: str | None = None) 
 
 def assessments_directory(base: Path | None = None) -> Path:
     return artifact_root(base) / ASSESSMENTS_DIRNAME
+
+
+def trends_directory(base: Path | None = None) -> Path:
+    return artifact_root(base) / TRENDS_DIRNAME
+
+
+def create_trend_series_directory(
+    repository_id: str,
+    series_id: str,
+    *,
+    base: Path | None = None,
+    create_directory: bool = True,
+) -> Path:
+    """Return ``.codestrata-artifacts/trends/<repository-id>/<series-id>/``.
+
+    Never uses assessments current/previous slots.
+    """
+
+    repo = sanitize_repository_slug(repository_id)
+    series = sanitize_repository_slug(series_id)
+    if not repo or not series or ".." in repository_id or ".." in series_id:
+        raise ValueError("trend repository_id and series_id must be path-safe")
+    root = ensure_artifact_tree(base) if create_directory else artifact_root(base)
+    path = root / TRENDS_DIRNAME / repo / series
+    if create_directory:
+        path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def create_assessment_run_paths(

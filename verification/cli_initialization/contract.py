@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 CLI_INITIALIZATION_VERIFICATION_ID = "cli-initialization-verification"
 CLI_INITIALIZATION_VERIFICATION_VERSION = "1.0.0"

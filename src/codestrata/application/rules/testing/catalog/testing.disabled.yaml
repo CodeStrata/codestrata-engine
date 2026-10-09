@@ -1,0 +1,50 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: testing.disabled
+  version: 1.0.0
+  title: Explicitly disabled or skipped tests
+  category: testing
+  owner: codestrata
+  measurement: M20
+  tags: [testing, disabled, skipped]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [testing.skip]
+select:
+  source: testing
+  skipped:
+    all:
+      - explicit_disabled_gt: 0
+condition:
+  operator: testing.disabled
+emit:
+  finding:
+    default_severity: low
+    message:
+      template: >-
+        Observed {{explicit_disabled}} explicitly disabled or skipped test(s)
+        ({{formula_version}}). Conditional skips={{conditional}}; dynamic skip
+        conditions remain unknown eligibility, not unconditional disabled.
+      bindings:
+        explicit_disabled: {type: string, evidence: explicit_disabled}
+        formula_version: {type: string, evidence: formula_version}
+        conditional: {type: string, evidence: conditional}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: testing_explicit_disabled_count
+    operation: count
+evidence:
+  include:
+    - test_id
+    - annotation
+    - span
+    - static_condition
+parameters:
+  low_min: {type: integer, default: 1}
+  medium_min: {type: integer, default: 10}
+  unknown:
+    dynamic_skip_condition: unknown_eligibility
+    unsupported_decorator: not_disabled
+    no_tests: not_applicable

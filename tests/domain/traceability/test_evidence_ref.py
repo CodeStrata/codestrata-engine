@@ -169,6 +169,22 @@ def test_dedupe_merges_same_evidence_id_different_rule_id() -> None:
     assert result[0].location is not None
 
 
+def test_dedupe_keeps_preferred_production_mode_when_citations_differ() -> None:
+    direct = EvidenceRef(
+        evidence_id="ev:1",
+        production_mode=EvidenceProductionMode.DIRECT,
+        location=EvidenceLocation(path="a.py"),
+    )
+    aggregated = EvidenceRef(
+        evidence_id="ev:1",
+        production_mode=EvidenceProductionMode.AGGREGATED,
+    )
+    result = dedupe_evidence_refs((aggregated, direct))
+    assert len(result) == 1
+    assert result[0].production_mode is EvidenceProductionMode.DIRECT
+    assert result[0].location is not None
+
+
 def test_contradictory_duplicate_rejection() -> None:
     left = EvidenceRef(
         evidence_id="ev:1",

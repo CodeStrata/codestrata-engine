@@ -29,9 +29,9 @@ from codestrata.artifacts.layout import (
     manifests_directory,
 )
 from codestrata.artifacts.manifest import (
+    ARTIFACT_MANIFEST_BASENAME,
     ASSESSMENT_HTML_BASENAME,
     ASSESSMENT_JSON_BASENAME,
-    ARTIFACT_MANIFEST_BASENAME,
 )
 from codestrata.artifacts.portfolio_identity import (
     is_logical_portfolio_id,
@@ -41,10 +41,11 @@ from codestrata.artifacts.repository_identity import (
     is_logical_repository_id,
     resolve_repository_artifact_id,
 )
+from codestrata.integration.community_runtime import PORTFOLIO_LIFECYCLE_REMOVED
 
-SLOT_CURRENT = "current"
-SLOT_PREVIOUS = "previous"
 ArtifactSlot = Literal["current", "previous"]
+SLOT_CURRENT: ArtifactSlot = "current"
+SLOT_PREVIOUS: ArtifactSlot = "previous"
 MAX_VERSIONS = 2
 
 EIR_JSON = "engineering-intelligence-report.json"
@@ -123,7 +124,7 @@ def acquire_lifecycle_lock(logical_dir: Path, *, timeout_s: float = 30.0) -> Lif
             return LifecycleLock(path=lock)
         except FileExistsError:
             if time.monotonic() >= deadline:
-                raise LifecycleError(f"lifecycle lock timeout: {logical_dir.name}")
+                raise LifecycleError(f"lifecycle lock timeout: {logical_dir.name}") from None
             time.sleep(0.05)
 
 
@@ -193,7 +194,9 @@ def promote_assessment_run(
             staging_directory,
             repository_id=repository_id,
             artifact_slot=SLOT_CURRENT,
-            previous_assessment_run_id=_read_run_id(current) if current.exists() else previous_run_id,
+            previous_assessment_run_id=_read_run_id(current)
+            if current.exists()
+            else previous_run_id,
         )
 
         if previous.exists():
@@ -219,36 +222,13 @@ def promote_intelligence_run(
     staging_directory: Path,
     base: Path | None = None,
 ) -> Path:
-    if not is_logical_portfolio_id(portfolio_id):
-        raise LifecycleError(f"invalid portfolio_id: {portfolio_id!r}")
-    validate_eir_bundle(staging_directory)
+    """Portfolio/EIR promotion is removed from Community execution.
 
-    logical = intelligence_logical_directory(portfolio_id, base=base)
-    lock = acquire_lifecycle_lock(logical)
-    try:
-        current = logical / SLOT_CURRENT
-        previous = logical / SLOT_PREVIOUS
-        _annotate_eir_manifest(
-            staging_directory,
-            portfolio_id=portfolio_id,
-            artifact_slot=SLOT_CURRENT,
-            previous_portfolio_run_id=_read_eir_run_id(current) if current.exists() else None,
-        )
-        if previous.exists():
-            _rmtree_safe(previous)
-        if current.exists():
-            _annotate_eir_manifest(
-                current,
-                portfolio_id=portfolio_id,
-                artifact_slot=SLOT_PREVIOUS,
-                previous_portfolio_run_id=None,
-            )
-            _replace_dir(current, previous)
-        _replace_dir(staging_directory, current)
-        refresh_artifact_index(base=base)
-        return current
-    finally:
-        lock.release()
+    Existing ``intelligence/`` trees are not modified.
+    """
+
+    _ = (portfolio_id, staging_directory, base)
+    raise LifecycleError(PORTFOLIO_LIFECYCLE_REMOVED)
 
 
 def discard_staging(staging_directory: Path) -> None:
@@ -430,7 +410,9 @@ def resolve_current_assessment_html(
     if assessments_root is not None:
         candidate = assessments_root / rid / SLOT_CURRENT / ASSESSMENT_HTML_BASENAME
     else:
-        candidate = assessment_slot_directory(rid, SLOT_CURRENT, base=base) / ASSESSMENT_HTML_BASENAME
+        candidate = (
+            assessment_slot_directory(rid, SLOT_CURRENT, base=base) / ASSESSMENT_HTML_BASENAME
+        )
     if candidate.is_file() and not candidate.is_symlink():
         return candidate
     return None

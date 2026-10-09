@@ -12,6 +12,7 @@ build/
 .mypy_cache/
 .ruff_cache/
 .coverage
+.coverage.*
 htmlcov/
 .tox/
 .venv/
@@ -36,3 +37,10 @@ venv/
 # Generated local assessment scratch (never publish)
 .tmp-assess/
 **/.tmp-assess/
+
+# Gradle user caches. Does not match build.gradle or gradle/wrapper.
+**/.gradle/
+
+# G00+ quality/candidate run logs (never publish)
+.quality-runs/
+.venv-engine-next/

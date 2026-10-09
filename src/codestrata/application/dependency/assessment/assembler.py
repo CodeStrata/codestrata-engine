@@ -62,11 +62,7 @@ def dependency_findings(findings: Sequence[Finding]) -> tuple[Finding, ...]:
 
     return tuple(
         sorted(
-            (
-                finding
-                for finding in findings
-                if finding.rule_id.startswith(RULE_ID_PREFIX)
-            ),
+            (finding for finding in findings if finding.rule_id.startswith(RULE_ID_PREFIX)),
             key=lambda item: (item.rule_id, item.id),
         )
     )
@@ -124,9 +120,7 @@ def _assessment_limitations(
                 summary="CVE and vulnerability data not assessed",
             ),
             category=DependencyLimitationCategory.CVE_DATA_NOT_ASSESSED,
-            summary=(
-                "No CVE, advisory, or vulnerability database is consulted."
-            ),
+            summary=("No CVE, advisory, or vulnerability database is consulted."),
             affected_capability="dependency_security",
             importance="material",
         ),
@@ -146,22 +140,20 @@ def _assessment_limitations(
                 summary="Version freshness not assessed",
             ),
             category=DependencyLimitationCategory.VERSION_FRESHNESS_NOT_ASSESSED,
-            summary=(
-                "Declared vs latest version comparison is not performed."
-            ),
+            summary=("Declared vs latest version comparison is not performed."),
             affected_capability="dependency_versions",
             importance="contextual",
         ),
         DependencyLimitation(
             limitation_id=build_limitation_id(
                 category=DependencyLimitationCategory.OTHER.value,
-                summary="npm and package.json not supported",
+                summary="package.json not parsed by Dependency Evidence",
             ),
             category=DependencyLimitationCategory.OTHER,
             summary=(
-                "npm / package.json ecosystems are out of scope for this "
-                "milestone. No framework or DependencyRole classification is "
-                "inferred."
+                "Dependency Evidence does not parse package.json. "
+                "npm versions in the technology inventory are declaration highlights, "
+                "not dependency hygiene findings."
             ),
             affected_capability="dependency_ecosystems",
             importance="material",
@@ -221,9 +213,7 @@ def _coverage(
     if pack_enabled:
         rule_status = DependencyCoverageAreaStatus.MEASURED
         rule_maturity = DependencyCoverageMaturity.MEDIUM
-        rule_limits = (
-            f"{len(HYGIENE_RULE_IDS)} declaration hygiene rules are registered.",
-        )
+        rule_limits = (f"{len(HYGIENE_RULE_IDS)} declaration hygiene rules are registered.",)
     else:
         rule_status = DependencyCoverageAreaStatus.UNSUPPORTED
         rule_maturity = DependencyCoverageMaturity.UNKNOWN
@@ -231,9 +221,7 @@ def _coverage(
 
     if evidence_enabled and evidence is not None:
         denom = max(evidence.coverage.manifests_discovered, 1)
-        numer = evidence.coverage.manifests_parsed + (
-            evidence.coverage.manifests_partially_parsed
-        )
+        numer = evidence.coverage.manifests_parsed + (evidence.coverage.manifests_partially_parsed)
         ratio = min(numer / denom, 1.0)
         evidence_status = (
             DependencyCoverageAreaStatus.MEASURED
@@ -285,9 +273,7 @@ def _coverage(
             limitations=("Enterprise context was not supplied.",),
         ),
     )
-    return DependencyCoverageSummary(
-        areas=tuple(sorted(areas, key=lambda item: item.area_id))
-    )
+    return DependencyCoverageSummary(areas=tuple(sorted(areas, key=lambda item: item.area_id)))
 
 
 def _section_traceability(
@@ -428,9 +414,7 @@ def _section_traceability(
             edges.append(
                 DependencyTraceabilityEdge(
                     edge_id=build_trace_edge_id(
-                        relation=(
-                            DependencyTraceabilityRelation.CONCLUSION_TO_FINDING.value
-                        ),
+                        relation=(DependencyTraceabilityRelation.CONCLUSION_TO_FINDING.value),
                         source_id=conclusion_id,
                         target_id=finding_id,
                     ),
@@ -443,9 +427,7 @@ def _section_traceability(
             edges.append(
                 DependencyTraceabilityEdge(
                     edge_id=build_trace_edge_id(
-                        relation=(
-                            DependencyTraceabilityRelation.CONCLUSION_TO_HOTSPOT.value
-                        ),
+                        relation=(DependencyTraceabilityRelation.CONCLUSION_TO_HOTSPOT.value),
                         source_id=conclusion_id,
                         target_id=hotspot_id,
                     ),
@@ -458,9 +440,7 @@ def _section_traceability(
             edges.append(
                 DependencyTraceabilityEdge(
                     edge_id=build_trace_edge_id(
-                        relation=(
-                            DependencyTraceabilityRelation.CONCLUSION_TO_MANIFEST.value
-                        ),
+                        relation=(DependencyTraceabilityRelation.CONCLUSION_TO_MANIFEST.value),
                         source_id=conclusion_id,
                         target_id=manifest_id,
                     ),
@@ -473,9 +453,7 @@ def _section_traceability(
             edges.append(
                 DependencyTraceabilityEdge(
                     edge_id=build_trace_edge_id(
-                        relation=(
-                            DependencyTraceabilityRelation.CONCLUSION_TO_DIAGNOSTIC.value
-                        ),
+                        relation=(DependencyTraceabilityRelation.CONCLUSION_TO_DIAGNOSTIC.value),
                         source_id=conclusion_id,
                         target_id=diagnostic_id,
                     ),
@@ -488,9 +466,7 @@ def _section_traceability(
         edges.append(
             DependencyTraceabilityEdge(
                 edge_id=build_trace_edge_id(
-                    relation=(
-                        DependencyTraceabilityRelation.SECTION_TO_RECOMMENDATION.value
-                    ),
+                    relation=(DependencyTraceabilityRelation.SECTION_TO_RECOMMENDATION.value),
                     source_id=SECTION_ID,
                     target_id=recommendation_id,
                 ),
@@ -517,9 +493,7 @@ def _section_traceability(
                     target_id=conclusion_id,
                 )
             )
-    return DependencyTraceabilityIndex(
-        edges=tuple(sorted(edges, key=lambda item: item.edge_id))
-    )
+    return DependencyTraceabilityIndex(edges=tuple(sorted(edges, key=lambda item: item.edge_id)))
 
 
 class DependencyAssessmentAssembler:
@@ -531,9 +505,7 @@ class DependencyAssessmentAssembler:
         repository_id: str,
         reason: str = "dependency_pack_disabled",
     ) -> DependencyAssessmentSection:
-        limitations = _assessment_limitations(
-            pack_enabled=False, evidence_enabled=False
-        )
+        limitations = _assessment_limitations(pack_enabled=False, evidence_enabled=False)
         fingerprint = build_empty_section_fingerprint(
             repository_id=repository_id,
             pack_enabled=False,
@@ -549,9 +521,7 @@ class DependencyAssessmentAssembler:
             evidence_pipeline="not_configured",
             configuration_fingerprint=fingerprint,
             execution_summary=DependencyExecutionSummary(),
-            coverage=_coverage(
-                pack_enabled=False, evidence_enabled=False, evidence=None
-            ),
+            coverage=_coverage(pack_enabled=False, evidence_enabled=False, evidence=None),
             limitations=limitations,
             diagnostics=(reason,),
             traceability=_section_traceability(pack_id=PACK_ID, limitations=limitations),
@@ -566,9 +536,7 @@ class DependencyAssessmentAssembler:
         repository_id: str,
         reason: str = "dependency_section_not_requested",
     ) -> DependencyAssessmentSection:
-        limitations = _assessment_limitations(
-            pack_enabled=False, evidence_enabled=False
-        )
+        limitations = _assessment_limitations(pack_enabled=False, evidence_enabled=False)
         fingerprint = build_empty_section_fingerprint(
             repository_id=repository_id,
             pack_enabled=False,
@@ -584,9 +552,7 @@ class DependencyAssessmentAssembler:
             evidence_pipeline="not_configured",
             configuration_fingerprint=fingerprint,
             execution_summary=DependencyExecutionSummary(),
-            coverage=_coverage(
-                pack_enabled=False, evidence_enabled=False, evidence=None
-            ),
+            coverage=_coverage(pack_enabled=False, evidence_enabled=False, evidence=None),
             limitations=limitations,
             diagnostics=(reason,),
             traceability=_section_traceability(pack_id=PACK_ID, limitations=limitations),
@@ -604,9 +570,7 @@ class DependencyAssessmentAssembler:
     ) -> DependencyAssessmentSection:
         """Succeeded empty section when pack is requested but no findings exist."""
 
-        limitations = _assessment_limitations(
-            pack_enabled=pack_enabled, evidence_enabled=False
-        )
+        limitations = _assessment_limitations(pack_enabled=pack_enabled, evidence_enabled=False)
         fingerprint = build_empty_section_fingerprint(
             repository_id=repository_id,
             pack_enabled=pack_enabled,
@@ -631,9 +595,7 @@ class DependencyAssessmentAssembler:
                 rules_executed=0,
                 visible_finding_count=0,
             ),
-            coverage=_coverage(
-                pack_enabled=pack_enabled, evidence_enabled=False, evidence=None
-            ),
+            coverage=_coverage(pack_enabled=pack_enabled, evidence_enabled=False, evidence=None),
             limitations=limitations,
             diagnostics=(reason,),
             traceability=_section_traceability(pack_id=PACK_ID, limitations=limitations),
@@ -649,9 +611,7 @@ class DependencyAssessmentAssembler:
         reason: str = "dependency_evidence_unavailable",
         evidence_enabled: bool = False,
     ) -> DependencyAssessmentSection:
-        limitations = _assessment_limitations(
-            pack_enabled=True, evidence_enabled=evidence_enabled
-        )
+        limitations = _assessment_limitations(pack_enabled=True, evidence_enabled=evidence_enabled)
         fingerprint = build_empty_section_fingerprint(
             repository_id=repository_id,
             pack_enabled=True,
@@ -709,9 +669,7 @@ class DependencyAssessmentAssembler:
         dep_findings = dependency_findings(findings)
         all_refs = build_finding_references(dep_findings) if include_findings else ()
         production_refs = tuple(
-            item
-            for item in all_refs
-            if item.source_role is DependencySourceRole.PRODUCTION
+            item for item in all_refs if item.source_role is DependencySourceRole.PRODUCTION
         )
         primary_finding_ids = tuple(item.finding_id for item in production_refs)
         all_finding_ids = tuple(item.finding_id for item in all_refs)
@@ -732,8 +690,8 @@ class DependencyAssessmentAssembler:
             dependency_evidence,
             extra_diagnostics=diagnostics,
         )
-        prod_parse_failures, test_parse_failures, unknown_parse_failures = (
-            parse_failure_counts(dependency_evidence)
+        prod_parse_failures, test_parse_failures, unknown_parse_failures = parse_failure_counts(
+            dependency_evidence
         )
 
         status = _resolve_status(
@@ -744,9 +702,7 @@ class DependencyAssessmentAssembler:
         )
 
         limitations = (
-            _assessment_limitations(
-                pack_enabled=pack_enabled, evidence_enabled=evidence_enabled
-            )
+            _assessment_limitations(pack_enabled=pack_enabled, evidence_enabled=evidence_enabled)
             if include_limitations
             else ()
         )
@@ -824,8 +780,7 @@ class DependencyAssessmentAssembler:
                     *(
                         (f"evidence_status:{dependency_evidence.status.value}",)
                         if dependency_evidence is not None
-                        and dependency_evidence.status
-                        is DependencyParseStatus.PARTIALLY_SUCCEEDED
+                        and dependency_evidence.status is DependencyParseStatus.PARTIALLY_SUCCEEDED
                         else ()
                     ),
                 }
@@ -849,9 +804,7 @@ class DependencyAssessmentAssembler:
             evidence_pipeline=evidence_pipeline,
             evidence_fingerprint=evidence_fingerprint
             or (
-                dependency_evidence.evidence_fingerprint
-                if dependency_evidence is not None
-                else ""
+                dependency_evidence.evidence_fingerprint if dependency_evidence is not None else ""
             ),
             configuration_fingerprint=fingerprint,
             execution_summary=execution_summary,
@@ -883,8 +836,7 @@ class DependencyAssessmentAssembler:
                     limitations=limitations,
                     finding_ids=all_finding_ids if include_traceability else (),
                     manifest_ids=tuple(
-                        item.manifest_inventory_id
-                        for item in manifest_inventory.entries
+                        item.manifest_inventory_id for item in manifest_inventory.entries
                     )
                     if include_traceability
                     else (),
@@ -941,4 +893,3 @@ def _resolve_status(
         # Supported manifests may be test/fixture-only; inventory remains usable.
         return DependencyAssessmentStatus.SUCCEEDED
     return DependencyAssessmentStatus.SUCCEEDED
-

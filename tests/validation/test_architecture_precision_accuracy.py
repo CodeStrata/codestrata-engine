@@ -7,11 +7,6 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-
-from codestrata.application.rules.architecture.view_builder import (
-    build_architecture_analysis_view,
-    find_directed_cycles,
-)
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.architecture import (
     ArchitectureCycleExpectation,
@@ -31,6 +26,11 @@ from validation.paths import VALIDATION_ROOT
 from validation.registry import load_all_repositories, resolve_expected_results
 from validation.runner import run_validation_suite
 from validation.summary import build_validation_summary
+
+from codestrata.application.rules.architecture.view_builder import (
+    build_architecture_analysis_view,
+    find_directed_cycles,
+)
 
 
 def test_contradictory_architecture_expectations_rejected() -> None:
@@ -72,9 +72,7 @@ def test_classify_tp_fp_fn_ambiguous_and_metrics() -> None:
             ),
         ),
         forbidden_rule_ids=("architecture.layer-boundary-violation",),
-        allowed_findings=(
-            ArchitectureFindingExpectation(rule_id="ARCH001"),
-        ),
+        allowed_findings=(ArchitectureFindingExpectation(rule_id="ARCH001"),),
         forbidden_unsupported_claims=("microservices",),
     )
     actual = (
@@ -173,7 +171,9 @@ def test_controlled_architecture_fixture_precision(tmp_path: Path) -> None:
     )
     cycles = find_directed_cycles(view.adjacency())
     assert cycles
-    assert all(not _is_test_path(path) for edge in view.included_edges() for path in edge.evidence_paths)
+    assert all(
+        not _is_test_path(path) for edge in view.included_edges() for path in edge.evidence_paths
+    )
 
     actual, _ = run_real_assessment(
         repository_path=fixture,
@@ -184,7 +184,8 @@ def test_controlled_architecture_fixture_precision(tmp_path: Path) -> None:
     assert "architecture.dependency-cycle" in rule_ids
     assert "architecture.layer-boundary-violation" in rule_ids
     assert not any(
-        item.path and "src/test/" in item.path.replace("\\", "/")
+        item.path
+        and "src/test/" in item.path.replace("\\", "/")
         and item.rule_id.startswith("architecture.")
         and item.rule_id
         in {
@@ -243,8 +244,7 @@ def test_controlled_architecture_fixture_precision(tmp_path: Path) -> None:
         graph=ArchitectureGraphActual(
             nodes=tuple(unit.unit_id for unit in view.units),
             edges=tuple(
-                f"{edge.source_unit_id}->{edge.target_unit_id}"
-                for edge in view.included_edges()
+                f"{edge.source_unit_id}->{edge.target_unit_id}" for edge in view.included_edges()
             ),
             cycles=tuple(canonicalize_cycle(cycle) for cycle in cycles),
         ),

@@ -179,9 +179,7 @@ def test_schema_compatibility() -> None:
 
 
 def test_diagnostics_no_payload_leakage() -> None:
-    diag = empty_analytics_diagnostics(
-        limitation_codes=default_analytics_policy().limitations
-    )
+    diag = empty_analytics_diagnostics(limitation_codes=default_analytics_policy().limitations)
     blob = diag.to_stable_json()
     assert diag.collection_enabled is False
     assert diag.installation_id_allowed is False
@@ -207,8 +205,9 @@ def test_error_taxonomy_codes_are_bounded() -> None:
 
 
 def test_no_platform_or_cloud_imports() -> None:
-    import codestrata.telemetry.analytics as pkg
     import pathlib
+
+    import codestrata.telemetry.analytics as pkg
 
     root = pathlib.Path(pkg.__file__).resolve().parent
     forbidden = ("codestrata_platform", "boto3", "botocore", "fastapi", "community_data_lake")

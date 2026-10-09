@@ -333,7 +333,11 @@ def scenario_d_nested(
     # Nested config path is under repo — classify: if init wrote into nested, it's a new file.
     # compare_source_integrity will flag nested codestrata.toml as unexpected unless approved.
     # Approved paths only cover repo-root codestrata.toml; nested config is actual contract.
-    unexpected = [f for f in src_fail if f.startswith("unexpected_new:") and "codestrata.toml" not in f and "reports/" not in f]
+    unexpected = [
+        f
+        for f in src_fail
+        if f.startswith("unexpected_new:") and "codestrata.toml" not in f and "reports/" not in f
+    ]
     if unexpected:
         failures.extend(unexpected[:10])
 
@@ -373,13 +377,15 @@ def scenario_e_empty(
     failures: list[str] = []
     if assess.has_traceback:
         failures.append("traceback")
-    # Safe outcome: non-zero OR zero with honest empty/limited assessment — not fabricated success with fake findings.
+    # Safe outcome: non-zero OR zero with honest empty/limited assessment — not fabricated success
+    # with fake findings.
     run_dir = find_latest_run_directory(repo / "reports")
     if assess.exit_code == 0 and run_dir and (run_dir / "report.json").is_file():
         doc = load_json(run_dir / "report.json")
         assessment = doc.get("assessment") if isinstance(doc.get("assessment"), dict) else doc
         findings = assessment.get("findings") or []
-        # Empty repo should not invent large fabricated finding sets; allow zero/few hygiene findings.
+        # Empty repo should not invent large fabricated finding sets; allow zero/few hygiene
+        # findings.
         if isinstance(findings, list) and len(findings) > 50:
             failures.append("suspected_fabricated_analysis")
     after = capture_inventory(repo)
@@ -393,7 +399,9 @@ def scenario_e_empty(
         "source_integrity": "pass" if ok_src else "fail",
         "normalized_summary": {"safe_empty_outcome": not failures},
     }
-    return _result(sid, not failures, detail="empty repository safe outcome", failures=failures, meta=meta)
+    return _result(
+        sid, not failures, detail="empty repository safe outcome", failures=failures, meta=meta
+    )
 
 
 def scenario_f_unsupported(
@@ -425,7 +433,9 @@ def scenario_f_unsupported(
         "assessment_command": assess.argv,
         "normalized_summary": {"unsupported_handled": not failures},
     }
-    return _result(sid, not failures, detail="unsupported/plain-text repository", failures=failures, meta=meta)
+    return _result(
+        sid, not failures, detail="unsupported/plain-text repository", failures=failures, meta=meta
+    )
 
 
 def scenario_g_malformed_config(
@@ -465,7 +475,13 @@ def scenario_g_malformed_config(
         "source_integrity": "pass" if not filtered else "fail",
         "normalized_summary": {"config_preserved": config.read_text(encoding="utf-8") == original},
     }
-    return _result(sid, not failures, detail="malformed config fails before assessment", failures=failures, meta=meta)
+    return _result(
+        sid,
+        not failures,
+        detail="malformed config fails before assessment",
+        failures=failures,
+        meta=meta,
+    )
 
 
 def scenario_h_missing_config(
@@ -493,7 +509,8 @@ def scenario_h_missing_config(
             ),
         },
     }
-    # Pass if behavior is deterministic (no traceback) — either fails clearly or succeeds without silent init.
+    # Pass if behavior is deterministic (no traceback) — either fails clearly or succeeds without
+    # silent init.
     if implicit_init:
         failures.append("undocumented_implicit_init")
     return _result(
@@ -599,7 +616,14 @@ def scenario_j_existing_artifacts(
             "isolated": bool(run1 and run2 and run1 != run2),
         },
     }
-    return _result(sid, not failures, detail="existing output reuse", failures=failures, limitations=limitations, meta=meta)
+    return _result(
+        sid,
+        not failures,
+        detail="existing output reuse",
+        failures=failures,
+        limitations=limitations,
+        meta=meta,
+    )
 
 
 def scenario_k_failed_assessment(
@@ -620,14 +644,17 @@ def scenario_k_failed_assessment(
         failures.append("traceback")
     run_dir = find_latest_run_directory(repo / "reports")
     if run_dir and (run_dir / "report.json").is_file():
-        # If artifacts exist after failure, they must not be treated as success — exit already non-zero.
+        # If artifacts exist after failure, they must not be treated as success — exit already
+        # non-zero.
         pass
     meta = {
         "exit_code": assess.exit_code,
         "assessment_command": assess.argv,
         "normalized_summary": {"failed_safely": assess.exit_code != 0 and not assess.has_traceback},
     }
-    return _result(sid, not failures, detail="bounded assessment failure", failures=failures, meta=meta)
+    return _result(
+        sid, not failures, detail="bounded assessment failure", failures=failures, meta=meta
+    )
 
 
 def scenario_l_noninteractive(
@@ -675,7 +702,9 @@ def scenario_m_offline(
         if ai.get("executed") or ai.get("provider_invoked"):
             failures.append("ai_network_activity")
             ok = False
-    return _result(sid, ok and not failures, detail="offline deterministic mode", failures=failures, meta=meta)
+    return _result(
+        sid, ok and not failures, detail="offline deterministic mode", failures=failures, meta=meta
+    )
 
 
 def scenario_n_determinism(
@@ -702,7 +731,9 @@ def scenario_n_determinism(
     run_a = find_latest_run_directory(dest_a / "reports")
     run_b = find_latest_run_directory(dest_b / "reports")
     if not run_a or not run_b:
-        return _result(sid, False, detail="missing run dirs", failures=["missing_run_dir"], meta=meta_a)
+        return _result(
+            sid, False, detail="missing run dirs", failures=["missing_run_dir"], meta=meta_a
+        )
 
     left = load_json(run_a / "report.json")
     right = load_json(run_b / "report.json")

@@ -1,0 +1,23 @@
+{
+  "schema_name": "codestrata.git-history-index.v1",
+  "profile_id": "git.history.reachable-non-merge-180d-1000",
+  "m25_repository": {
+    "status": "value",
+    "largest_share_serialized": "0.777778",
+    "contributors_to_50pct": 1,
+    "attributable_lines": 9
+  },
+  "m25_file_alpha": {
+    "status": "value",
+    "largest_share_serialized": "1.000000",
+    "contributors_to_50pct": 1
+  },
+  "m25_file_beta": {
+    "status": "value",
+    "largest_share_serialized": "0.500000",
+    "contributors_to_50pct": 1
+  },
+  "notes": [
+    "Alice Example four alpha lines plus one .mailmap line and two beta lines (7); Bob two beta lines; repository 7/9=0.777778. File ratios stay 1.0 and are not averaged into the repository ratio."
+  ]
+}

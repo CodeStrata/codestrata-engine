@@ -1,0 +1,43 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: dependency.unbounded-requirement
+  version: 1.0.0
+  title: Unbounded requirement
+  category: dependency
+  owner: codestrata
+  measurement: M12
+  tags: [dependency, hygiene, unbounded]
+applies_to:
+  languages: [java, python, php, csharp]
+  requires:
+    facts: [dependency.declarations]
+select:
+  source: dependency
+  declarations:
+    all:
+      - unbounded_requirement: true
+condition:
+  operator: dependency.unbounded_requirement
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        {{ecosystem_label}} '{{identity}}'{{extras_note}} in '{{path}}'{{marker_note}}
+        does not constrain the selected version.
+      bindings:
+        ecosystem_label: {type: string, evidence: ecosystem_label}
+        identity: {type: string, evidence: normalized_identity}
+        extras_note: {type: string, evidence: extras_note}
+        path: {type: string, evidence: path}
+        marker_note: {type: string, evidence: marker_note}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: unbounded_requirement_finding_count
+    operation: count
+evidence:
+  include:
+    - declaration_path
+    - raw_version
+parameters: {}

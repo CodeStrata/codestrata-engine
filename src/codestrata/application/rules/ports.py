@@ -12,5 +12,4 @@ class RuleSuppressionSourcePort(Protocol):
         self,
         *,
         repository_id: str | None = None,
-    ) -> tuple[RuleSuppression, ...]:
-        ...
+    ) -> tuple[RuleSuppression, ...]: ...

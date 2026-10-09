@@ -228,9 +228,7 @@ class BedrockAIModelProvider(AIModelProvider):
         provider_result = execution.provider_result
         error = provider_result.error if provider_result is not None else None
         if error is None:
-            return AIProviderInvocationError(
-                "Bedrock invocation did not produce a usable response"
-            )
+            return AIProviderInvocationError("Bedrock invocation did not produce a usable response")
         return legacy_bridge.legacy_error_for(
             error,
             profile_name=adapter.configuration.client_inputs.guidance_profile_name,

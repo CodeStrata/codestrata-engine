@@ -25,7 +25,12 @@ def build_priority_action_id(
 
     primary = require_nonblank(primary_recommendation_id, label="primary_recommendation_id")
     supporting = tuple(
-        sorted({require_nonblank(item, label="recommendation_id") for item in supporting_recommendation_ids})
+        sorted(
+            {
+                require_nonblank(item, label="recommendation_id")
+                for item in supporting_recommendation_ids
+            }
+        )
     )
     if supporting and primary not in supporting:
         raise ValueError("primary_recommendation_id must be in supporting_recommendation_ids")

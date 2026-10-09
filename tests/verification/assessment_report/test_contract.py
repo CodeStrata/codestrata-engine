@@ -14,5 +14,7 @@ def test_contract_constants() -> None:
     assert contract.verification_id == ASSESSMENT_REPORT_VERIFICATION_ID
     assert contract.assessment_schema_version == "1.2"
     assert "report.json" in contract.required_artifacts
-    assert EXPECTED_SECTION_ORDER[0][0] == "leadership-verdict"
+    assert EXPECTED_SECTION_ORDER[0][0] == "attention-first"
     assert EXPECTED_SECTION_ORDER[-1][0] == "technical-appendix"
+    legacy = {"leadership-verdict", "executive-summary", "key-takeaways"}
+    assert legacy.isdisjoint(section_id for section_id, _title in EXPECTED_SECTION_ORDER)

@@ -86,9 +86,7 @@ def build_technical_debt_intelligence(
         if str(getattr(item, "finding_id", "") or "").strip()
     }
     td_recs = tuple(
-        item
-        for item in recommendations
-        if _is_technical_debt_recommendation(item, td_finding_ids)
+        item for item in recommendations if _is_technical_debt_recommendation(item, td_finding_ids)
     )
 
     finding_links = _finding_links(td_findings)
@@ -127,9 +125,7 @@ def build_technical_debt_intelligence(
         limitations=limitations,
         finding_count=len(finding_links),
         recommendation_count=len(recommendation_links),
-        measured_evidence_count=sum(
-            1 for row in measurements if row.availability == "available"
-        ),
+        measured_evidence_count=sum(1 for row in measurements if row.availability == "available"),
         empty_findings_message=empty_message,
     )
 
@@ -180,9 +176,7 @@ def _finding_links(
                 for ref in (getattr(item, "evidence_refs", ()) or ())
                 if getattr(ref, "evidence_id", None)
             ),
-            recommendation_ids=tuple(
-                getattr(item, "driven_recommendation_ids", ()) or ()
-            ),
+            recommendation_ids=tuple(getattr(item, "driven_recommendation_ids", ()) or ()),
             affected_scope=_safe_scope(getattr(item, "affected_nodes", ()) or ()),
         )
         for item in findings
@@ -262,9 +256,7 @@ def _measurements(
                 availability = "available"
             operator = (getattr(ref, "threshold_operator", None) or "").strip() or None
             threshold_value = getattr(ref, "threshold_value", None)
-            threshold = (
-                str(threshold_value) if threshold_value is not None else None
-            )
+            threshold = str(threshold_value) if threshold_value is not None else None
             scope = getattr(ref, "measurement_scope", None)
             location = _safe_path(getattr(ref, "path", None))
             symbol = _safe_token(getattr(ref, "symbolic_reference", None))
@@ -329,22 +321,16 @@ def _hotspots(findings: Sequence[Any]) -> tuple[TechnicalDebtHotspotRow, ...]:
             path = _safe_path(getattr(measurement_ref, "path", None))
             symbol = _safe_token(getattr(measurement_ref, "symbolic_reference", None))
             metric_name = (
-                (getattr(measurement_ref, "measurement_name", None) or "").strip()
-                or "Measurement"
-            )
+                getattr(measurement_ref, "measurement_name", None) or ""
+            ).strip() or "Measurement"
             measurement_value = getattr(measurement_ref, "measurement_value", None)
             if measurement_value is None:
                 observed_value = "unavailable"
             else:
                 observed_value = str(measurement_value)
             threshold_value = getattr(measurement_ref, "threshold_value", None)
-            threshold = (
-                str(threshold_value) if threshold_value is not None else None
-            )
-            operator = (
-                (getattr(measurement_ref, "threshold_operator", None) or "").strip()
-                or None
-            )
+            threshold = str(threshold_value) if threshold_value is not None else None
+            operator = (getattr(measurement_ref, "threshold_operator", None) or "").strip() or None
             exceedance = _exceedance_sort_key(
                 observed_value=observed_value,
                 threshold=threshold,
@@ -356,9 +342,7 @@ def _hotspots(findings: Sequence[Any]) -> tuple[TechnicalDebtHotspotRow, ...]:
                 path = _safe_path(getattr(ref, "path", None))
                 if path:
                     if symbol is None:
-                        symbol = _safe_token(
-                            getattr(ref, "symbolic_reference", None)
-                        )
+                        symbol = _safe_token(getattr(ref, "symbolic_reference", None))
                     break
 
         if path is None:
@@ -386,12 +370,8 @@ def _hotspots(findings: Sequence[Any]) -> tuple[TechnicalDebtHotspotRow, ...]:
                     for ref in (getattr(finding, "evidence_refs", ()) or ())
                     if getattr(ref, "evidence_id", None)
                 ),
-                recommendation_ids=tuple(
-                    getattr(finding, "driven_recommendation_ids", ()) or ()
-                ),
-                evidence_completeness=(
-                    getattr(finding, "evidence_completeness", None) or None
-                ),
+                recommendation_ids=tuple(getattr(finding, "driven_recommendation_ids", ()) or ()),
+                evidence_completeness=(getattr(finding, "evidence_completeness", None) or None),
                 exceedance_sort_key=exceedance,
             )
         )
@@ -532,8 +512,7 @@ def _limitations(
         notes.append("Technical debt analysis did not produce a complete assessment.")
     if not finding_links:
         notes.append(
-            "No complexity-related technical debt findings were produced within "
-            "the assessed scope."
+            "No complexity-related technical debt findings were produced within the assessed scope."
         )
     seen: set[str] = set()
     out: list[str] = []

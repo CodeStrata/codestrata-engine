@@ -70,15 +70,11 @@ class RuleExecutor:
                     continue
 
                 raw = rule.evaluate(context)
-                evaluation = validate_evaluation_result(
-                    raw, policy=context.policy, rule_id=rule_id
-                )
+                evaluation = validate_evaluation_result(raw, policy=context.policy, rule_id=rule_id)
             except RuleResultValidationError as error:
                 validation_failures += 1
                 failed_rules += 1
-                evaluation = SharedRuleEvaluationResult.failed(
-                    error.safe_message, rule_id=rule_id
-                )
+                evaluation = SharedRuleEvaluationResult.failed(error.safe_message, rule_id=rule_id)
                 if context.policy.fail_on_rule_error:
                     raise RuleExecutionError(
                         error.safe_message,
@@ -96,9 +92,7 @@ class RuleExecutor:
                 continue
             except RuleDomainError as error:
                 failed_rules += 1
-                evaluation = SharedRuleEvaluationResult.failed(
-                    error.safe_message, rule_id=rule_id
-                )
+                evaluation = SharedRuleEvaluationResult.failed(error.safe_message, rule_id=rule_id)
                 if context.policy.fail_on_rule_error:
                     raise RuleExecutionError(
                         error.safe_message,

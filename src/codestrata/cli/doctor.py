@@ -137,9 +137,7 @@ def run_doctor_checks(
             ok=py_ok,
             detail=f"Python {sys.version_info.major}.{sys.version_info.minor}."
             f"{sys.version_info.micro}",
-            fix=None
-            if py_ok
-            else "Install Python 3.12+ and recreate your virtual environment.",
+            fix=None if py_ok else "Install Python 3.12+ and recreate your virtual environment.",
         )
     )
 
@@ -268,8 +266,7 @@ def run_doctor_checks(
                 DoctorCheck(
                     name="config",
                     ok=True,
-                    detail=f"Loaded {config} (profile={settings.profile}; "
-                    f"repository={source})",
+                    detail=f"Loaded {config} (profile={settings.profile}; repository={source})",
                 )
             )
             checks.append(
@@ -312,7 +309,7 @@ def run_doctor_checks(
                     DoctorCheck(
                         name="repository_path",
                         ok=path_ok,
-                        detail=f"repository.path → {repo_path}",
+                        detail=f"repository.path -> {repo_path}",
                         fix=None
                         if path_ok
                         else "Set [repository].path to an existing directory, "
@@ -382,6 +379,11 @@ def run_doctor_checks(
 
     if include_extensions:
         checks.extend(_extension_doctor_checks(loaded_settings))
+
+    from codestrata.cli.community_contract import doctor_contract_checks
+
+    for name, ok, detail in doctor_contract_checks():
+        checks.append(DoctorCheck(name=name, ok=ok, detail=detail))
 
     return checks
 

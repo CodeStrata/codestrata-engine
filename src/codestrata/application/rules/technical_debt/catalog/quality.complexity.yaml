@@ -1,0 +1,56 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: quality.complexity
+  version: 1.0.0
+  title: Function complexity or size exceeds heuristic threshold
+  category: quality
+  owner: codestrata
+  measurement: M16
+  tags: [quality, complexity, size, heuristic]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [quality.function]
+select:
+  source: quality
+  functions:
+    any:
+      - cyclomatic_gt: 15
+      - nloc_gt: 80
+condition:
+  operator: quality.complexity
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Function '{{qualified_name}}' in '{{path}}' has {{metric}}={{value}}
+        which exceeds heuristic threshold {{threshold}} ({{formula_version}}).
+        This is a configurable heuristic, not a language-independent
+        maintainability index.
+      bindings:
+        qualified_name: {type: string, evidence: qualified_name}
+        path: {type: string, evidence: path}
+        metric: {type: string, evidence: metric}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+        formula_version: {type: string, evidence: formula_version}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: quality_complexity_finding_count
+    operation: count
+evidence:
+  include:
+    - function_id
+    - span
+    - counted_branch_locations
+    - formula_version
+parameters:
+  max_cyclomatic: {type: integer, default: 15, exclusive_min: true}
+  max_function_nloc: {type: integer, default: 80, exclusive_min: true}
+  cyclomatic_severity: medium
+  size_severity: low
+  unknown:
+    unparsed_function: unknown
+    no_cross_language_fallback: true

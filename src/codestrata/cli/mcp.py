@@ -12,7 +12,7 @@ import typer
 
 from codestrata import __version__ as PACKAGE_VERSION
 from codestrata.config import load_settings
-from codestrata.interfaces.mcp.factory import create_mcp_server
+from codestrata.interfaces.mcp.factory import create_artifact_mcp_server
 from codestrata.interfaces.mcp.mapping import to_mcp_payload
 from codestrata.logging_config import configure_logging
 from codestrata.security.database_url import sanitize_exception_message
@@ -37,6 +37,12 @@ def _configure_stderr_logging(level: str) -> None:
     for handler in root.handlers:
         if isinstance(handler, logging.StreamHandler):
             handler.setStream(sys.stderr)
+
+
+def build_cli_mcp_server(*, settings: Any, config_path: Path | None) -> Any:
+    """Build the user-facing MCP server: bounded artifact evidence only."""
+
+    return create_artifact_mcp_server(settings=settings, config_path=config_path)
 
 
 def _load_or_exit(config: Path, *, profile: str | None = None) -> Any:
@@ -119,14 +125,12 @@ def serve(
         mcp_updates["host"] = host
     if port is not None:
         mcp_updates["port"] = port
-    settings = settings.model_copy(
-        update={"mcp": settings.mcp.model_copy(update=mcp_updates)}
-    )
+    settings = settings.model_copy(update={"mcp": settings.mcp.model_copy(update=mcp_updates)})
     resolved_level = (log_level or settings.mcp.log_level).upper()
     _configure_stderr_logging(resolved_level)
     logger = logging.getLogger("codestrata.interfaces.mcp")
     try:
-        server = create_mcp_server(settings=settings, config_path=config)
+        server = build_cli_mcp_server(settings=settings, config_path=config)
     except Exception as error:  # noqa: BLE001 - CLI boundary
         logger.exception("mcp_server_composition_failed")
         print(
@@ -145,7 +149,7 @@ def serve(
         if resolved_transport == "stdio":
             server.run(transport="stdio")
         else:
-            server.run(transport=resolved_transport)  # type: ignore[arg-type]
+            server.run(transport=resolved_transport)
     except KeyboardInterrupt:
         logger.info("CodeStrata MCP server interrupted; shutting down")
         raise typer.Exit(code=0) from None
@@ -184,7 +188,7 @@ def tools_command(
         raise typer.Exit(code=1)
 
     try:
-        server = create_mcp_server(settings=settings, config_path=config)
+        server = build_cli_mcp_server(settings=settings, config_path=config)
     except Exception as error:  # noqa: BLE001
         print(
             f"CodeStrata MCP failed to start: {sanitize_exception_message(str(error))}",
@@ -207,8 +211,8 @@ def tools_command(
         "transport": settings.mcp.transport,
         "product_boundary": {
             "community_engine": (
-                "Local assessment knowledge tools (list/get/explain, run_assessment, "
-                "optional AI artifacts)."
+                "Bounded local artifact evidence tools. Assessment execution, "
+                "rule activation, and run_assessment are not registered."
             ),
             "platform_extensions": (
                 "repository_* Retrieval/Answering and enterprise_* Engineering "
@@ -257,7 +261,7 @@ def health_command(
         raise typer.Exit(code=1)
 
     try:
-        server = create_mcp_server(settings=settings, config_path=config)
+        server = build_cli_mcp_server(settings=settings, config_path=config)
     except Exception as error:  # noqa: BLE001
         print(
             f"CodeStrata MCP failed to start: {sanitize_exception_message(str(error))}",
@@ -268,7 +272,14 @@ def health_command(
     import asyncio
 
     async def _health() -> Any:
-        return await server.call_tool("repository_health", {})
+        listed = await server.list_tools()
+        names = sorted(tool.name for tool in listed)
+        return {
+            "status": "ok",
+            "server": "artifact",
+            "run_assessment_registered": "run_assessment" in names,
+            "tools": names,
+        }
 
     try:
         result = asyncio.run(_health())

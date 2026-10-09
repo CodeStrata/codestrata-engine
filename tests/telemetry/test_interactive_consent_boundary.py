@@ -5,21 +5,19 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 from codestrata.telemetry.consent import allow_session_consent_from_interactive_prompt
+from codestrata.telemetry.errors import TelemetryRuntimeError
 from codestrata.telemetry.interactive_consent import (
     PROMPT_INTRO,
     PROMPT_QUESTION,
     run_interactive_consent_prompt,
 )
-from codestrata.telemetry.prompt_runtime_factory import create_interactive_session_telemetry
 from codestrata.telemetry.projection import project_from_mapping
-from codestrata.telemetry.errors import TelemetryRuntimeError
-import pytest
+from codestrata.telemetry.prompt_runtime_factory import create_interactive_session_telemetry
 
-
-TELEMETRY_ROOT = (
-    Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
-)
+TELEMETRY_ROOT = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
 
 
 @pytest.fixture(autouse=True)
@@ -125,7 +123,14 @@ def test_Z_prompt_result_deterministic_ordering() -> None:
 
 
 def test_no_platform_datalake_imports() -> None:
-    forbidden = ("codestrata_platform", "codestrata_platform.community_cloud","community_cloud_api", "boto3", "fastapi", "data_lake")
+    forbidden = (
+        "codestrata_platform",
+        "codestrata_platform.community_cloud",
+        "community_cloud_api",
+        "boto3",
+        "fastapi",
+        "data_lake",
+    )
     for path in TELEMETRY_ROOT.rglob("*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

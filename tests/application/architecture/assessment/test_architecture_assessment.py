@@ -51,9 +51,7 @@ def _finding(rule_id: str, *subjects: str) -> Finding:
 
 
 def test_section_id_and_version_stable() -> None:
-    section = ArchitectureAssessmentAssembler().assemble_disabled(
-        repository_id="repo:demo"
-    )
+    section = ArchitectureAssessmentAssembler().assemble_disabled(repository_id="repo:demo")
     assert section.section_id == SECTION_ID
     assert section.section_version == SECTION_SCHEMA_VERSION
     assert section.status is ArchitectureAssessmentStatus.DISABLED
@@ -103,9 +101,7 @@ def test_assemble_findings_and_conclusions_option_a(tmp_path: Path) -> None:
     assert len(section.recommendation_groups) == 2
     assert section.strengths == ()
     assert section.business_impact == "unknown"
-    assert any(
-        item.category.value == "static-analysis-only" for item in section.limitations
-    )
+    assert any(item.category.value == "static-analysis-only" for item in section.limitations)
     assert section.traceability.edge_count > 0
     extraction = next(
         area for area in section.coverage.areas if area.area_id == "extraction_coverage"
@@ -145,15 +141,11 @@ def test_findings_only_when_conclusions_disabled() -> None:
     assert len(section.finding_ids) == 1
     assert section.conclusions == ()
     assert section.recommendation_groups == ()
-    assert any(
-        "conclusions" in item.summary.lower() for item in section.limitations
-    )
+    assert any("conclusions" in item.summary.lower() for item in section.limitations)
 
 
 def test_deterministic_serialization() -> None:
-    section = ArchitectureAssessmentAssembler().assemble_disabled(
-        repository_id="repo:demo"
-    )
+    section = ArchitectureAssessmentAssembler().assemble_disabled(repository_id="repo:demo")
     left = dumps_stable_json(section.model_dump(mode="json"))
     right = dumps_stable_json(section.model_dump(mode="json"))
     assert left == right

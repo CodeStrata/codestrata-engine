@@ -114,9 +114,7 @@ class RecommendationConfidence(BaseModel):
 
     @field_validator("basis", mode="before")
     @classmethod
-    def normalize_basis(
-        cls, value: object
-    ) -> tuple[RecommendationConfidenceBasis, ...]:
+    def normalize_basis(cls, value: object) -> tuple[RecommendationConfidenceBasis, ...]:
         basis = tuple(RecommendationConfidenceBasis(item) for item in as_tuple(value))
         if not basis:
             raise ValueError("basis must contain at least one confidence basis")
@@ -128,9 +126,7 @@ class RecommendationConfidence(BaseModel):
         return tuple(
             sorted(
                 {
-                    require_nonblank(
-                        str(item), label="recommendation confidence limitation"
-                    )
+                    require_nonblank(str(item), label="recommendation confidence limitation")
                     for item in as_tuple(value)
                 }
             )
@@ -141,13 +137,8 @@ class RecommendationConfidence(BaseModel):
         if RecommendationConfidenceBasis.LEGACY_RECOMMENDATION in self.basis:
             if self.level is not RecommendationConfidenceLevel.UNAVAILABLE:
                 raise ValueError("legacy_recommendation must be UNAVAILABLE")
-            if (
-                self.derivation_status
-                is not RecommendationConfidenceDerivationStatus.UNAVAILABLE
-            ):
-                raise ValueError(
-                    "legacy_recommendation requires unavailable derivation_status"
-                )
+            if self.derivation_status is not RecommendationConfidenceDerivationStatus.UNAVAILABLE:
+                raise ValueError("legacy_recommendation requires unavailable derivation_status")
         if RecommendationConfidenceBasis.MISSING_SUPPORTING_FINDINGS in self.basis:
             if self.level is not RecommendationConfidenceLevel.UNAVAILABLE:
                 raise ValueError("missing_supporting_findings must be UNAVAILABLE")
@@ -190,9 +181,7 @@ class RecommendationConfidence(BaseModel):
     def unavailable(
         cls,
         *,
-        limitations: tuple[str, ...] = (
-            "Recommendation confidence could not be derived.",
-        ),
+        limitations: tuple[str, ...] = ("Recommendation confidence could not be derived.",),
         basis: tuple[RecommendationConfidenceBasis, ...] = (
             RecommendationConfidenceBasis.LEGACY_RECOMMENDATION,
         ),
@@ -211,4 +200,7 @@ def recommendation_confidence_to_json(
     confidence: RecommendationConfidence,
 ) -> dict[str, Any]:
     payload = confidence.model_dump(mode="json")
-    return json.loads(json.dumps(payload, sort_keys=True))
+    loaded = json.loads(json.dumps(payload, sort_keys=True))
+    if not isinstance(loaded, dict):
+        raise TypeError("JSON projection must be an object")
+    return loaded

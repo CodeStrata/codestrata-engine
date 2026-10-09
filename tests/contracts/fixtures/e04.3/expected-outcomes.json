@@ -1,0 +1,28 @@
+{
+  "outcomes": [
+    {
+      "name": "compliant",
+      "expected_status": "pass",
+      "actual_status": "pass",
+      "coverage": "complete"
+    },
+    {
+      "name": "violating",
+      "expected_status": "fail",
+      "actual_status": "fail",
+      "coverage": "complete"
+    },
+    {
+      "name": "unknown-edge",
+      "expected_status": "unknown",
+      "actual_status": "unknown",
+      "coverage": "partial"
+    },
+    {
+      "name": "budget",
+      "expected_status": "error",
+      "actual_status": "error",
+      "coverage": "partial"
+    }
+  ]
+}

@@ -43,6 +43,6 @@ def test_formatting_excludes_sensitive() -> None:
         "https://",
         "/Users/",
         "queue_depth",
-        "enabled\": true",
+        'enabled": true',
     ):
         assert needle not in text

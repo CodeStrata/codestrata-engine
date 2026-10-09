@@ -58,19 +58,12 @@ def test_packs_include_csharp() -> None:
 
 def test_sample_csharp_app_complexity_collects() -> None:
     paths = tuple(
-        path.relative_to(SAMPLE).as_posix()
-        for path in SAMPLE.rglob("*.cs")
-        if path.is_file()
+        path.relative_to(SAMPLE).as_posix() for path in SAMPLE.rglob("*.cs") if path.is_file()
     )
-    texts = {
-        relative: (SAMPLE / relative).read_text(encoding="utf-8")
-        for relative in paths
-    }
+    texts = {relative: (SAMPLE / relative).read_text(encoding="utf-8") for relative in paths}
     settings = ComplexityEvidenceSettings().model_copy(
         update={
-            "python": ComplexityEvidenceSettings().python.model_copy(
-                update={"enabled": False}
-            ),
+            "python": ComplexityEvidenceSettings().python.model_copy(update={"enabled": False}),
             "java": ComplexityEvidenceSettings().java.model_copy(update={"enabled": False}),
             "php": ComplexityEvidenceSettings().php.model_copy(update={"enabled": False}),
         }

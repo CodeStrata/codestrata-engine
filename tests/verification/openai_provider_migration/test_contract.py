@@ -24,8 +24,8 @@ def test_output_location_is_pinned() -> None:
     assert contract.REPORT_FILENAME == "openai-provider-migration-verification.json"
 
 
-def test_expected_modules_are_the_twelve_adapter_modules() -> None:
-    assert len(contract.EXPECTED_MODULES) == 12
+def test_expected_modules_are_the_adapter_modules() -> None:
+    assert len(contract.EXPECTED_MODULES) == 13
     assert contract.EXPECTED_MODULES == tuple(sorted(contract.EXPECTED_MODULES))
     assert "adapter.py" in contract.EXPECTED_MODULES
     assert "legacy_bridge.py" in contract.EXPECTED_MODULES

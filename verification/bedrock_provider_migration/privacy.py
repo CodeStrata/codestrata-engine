@@ -133,9 +133,7 @@ def check_the_serialized_result_is_clean() -> CheckResult:
 
 
 def check_the_failure_result_view_is_clean() -> CheckResult:
-    adapter = _secret_adapter(
-        fixtures.sdk_exception("ValidationException", SECRET_EXCEPTION_TEXT)
-    )
+    adapter = _secret_adapter(fixtures.sdk_exception("ValidationException", SECRET_EXCEPTION_TEXT))
     result = adapter.execute(_secret_request())
     rendered = canonical_json(diagnostics.diagnostic_view_of_provider_result(result))
     leaked = leaked_substrings(rendered)

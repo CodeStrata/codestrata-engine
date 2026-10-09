@@ -129,9 +129,7 @@ def test_customer_universe_merges_phase1_and_phase3(tmp_path: Path) -> None:
 
     write_customer_finding_artifacts(report_input, tmp_path / "run")
     findings_json = (tmp_path / "run" / "findings.json").read_text(encoding="utf-8")
-    recommendations_json = (tmp_path / "run" / "recommendations.json").read_text(
-        encoding="utf-8"
-    )
+    recommendations_json = (tmp_path / "run" / "recommendations.json").read_text(encoding="utf-8")
     assert '"finding_count": 2' in findings_json
     assert '"recommendation_count": 1' in recommendations_json
     assert "Evaluate reusable Kubernetes deployment packaging" in recommendations_json

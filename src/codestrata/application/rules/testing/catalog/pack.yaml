@@ -1,0 +1,36 @@
+api_version: codestrata.io/ruleset/v1
+kind: RuleSet
+metadata:
+  id: codestrata.testing.core
+  version: 1.0.0
+  title: Testing Core
+  owner: codestrata
+extends: []
+selectors: {}
+rules:
+  testing.disabled:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  testing.ci_gap:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  testing.test-001:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  testing.test-002:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  testing.test-003:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  testing.test-005:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+deferred_rule_ids:
+  - testing.test-004

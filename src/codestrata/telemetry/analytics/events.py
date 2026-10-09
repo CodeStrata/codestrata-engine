@@ -30,9 +30,7 @@ class AnalyticsLifecycle(StrEnum):
     VALIDATED = "validated"
 
 
-APPROVED_ANALYTICS_CATEGORIES: frozenset[str] = frozenset(
-    item.value for item in AnalyticsCategory
-)
+APPROVED_ANALYTICS_CATEGORIES: frozenset[str] = frozenset(item.value for item in AnalyticsCategory)
 
 # Allowlisted analytics contract fields only.
 APPROVED_ANALYTICS_FIELD_NAMES: frozenset[str] = frozenset(
@@ -133,9 +131,7 @@ _APPROVED_OPERATION_CATEGORIES: frozenset[str] = frozenset(
 _APPROVED_DURATION_BUCKETS: frozenset[str] = frozenset(
     {"lt_1s", "s_1_10", "s_10_60", "m_1_5", "gt_5m", "unknown"}
 )
-_APPROVED_OS_FAMILIES: frozenset[str] = frozenset(
-    {"linux", "macos", "windows", "posix", "other"}
-)
+_APPROVED_OS_FAMILIES: frozenset[str] = frozenset({"linux", "macos", "windows", "posix", "other"})
 _APPROVED_ARCHITECTURES: frozenset[str] = frozenset({"x86_64", "arm64", "other"})
 _APPROVED_FAILURE_CATEGORIES: frozenset[str] = frozenset(
     {

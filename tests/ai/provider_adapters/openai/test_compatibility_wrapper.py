@@ -206,9 +206,7 @@ def test_missing_api_key_raises_the_legacy_configuration_error_naming_the_variab
     with pytest.raises(AIProviderConfigurationError) as caught:
         provider.invoke(_model_request(), _options())
 
-    assert str(caught.value) == (
-        "OpenAI API key not found in environment variable MY_KEY_VAR"
-    )
+    assert str(caught.value) == ("OpenAI API key not found in environment variable MY_KEY_VAR")
 
 
 def test_exactly_one_provider_call_is_made_per_invocation() -> None:
@@ -276,9 +274,7 @@ def test_retained_module_helpers_stay_byte_compatible() -> None:
     assert (text, stop_reason, request_id) == ("hello", "stop", "chatcmpl-2")
     assert usage.input_tokens == 10
 
-    mapped = openai_provider_module._map_openai_exception(
-        fakes.named_exception("RateLimitError")
-    )
+    mapped = openai_provider_module._map_openai_exception(fakes.named_exception("RateLimitError"))
     assert isinstance(mapped, AIProviderTimeoutError)
 
 

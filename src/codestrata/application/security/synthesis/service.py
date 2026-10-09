@@ -210,15 +210,9 @@ def _partition(
     tuple[SecurityFindingReference, ...],
     tuple[SecurityFindingReference, ...],
 ]:
-    production = tuple(
-        item for item in refs if item.source_role is SecuritySourceRole.PRODUCTION
-    )
-    test = tuple(
-        item for item in refs if item.source_role is SecuritySourceRole.TEST
-    )
-    unknown = tuple(
-        item for item in refs if item.source_role is SecuritySourceRole.UNKNOWN
-    )
+    production = tuple(item for item in refs if item.source_role is SecuritySourceRole.PRODUCTION)
+    test = tuple(item for item in refs if item.source_role is SecuritySourceRole.TEST)
+    unknown = tuple(item for item in refs if item.source_role is SecuritySourceRole.UNKNOWN)
     return production, test, unknown
 
 
@@ -298,9 +292,7 @@ def _rule_theme(
         source_role=refs[0].source_role,
         finding_ids=_bound_ids([item.finding_id for item in refs], _FINDING_REF_LIMIT),
         rule_ids=tuple(sorted({item.rule_id for item in refs})),
-        category_ids=tuple(
-            sorted({item.security_category.value for item in refs})
-        ),
+        category_ids=tuple(sorted({item.security_category.value for item in refs})),
         counts={"finding_count": len(refs)},
         ordering_key=ordering_key,
     )
@@ -327,9 +319,7 @@ def _concentration_facts(
     for rule_id, count in sorted(by_rule.items()):
         facts.append(
             SecurityConcentrationFact(
-                fact_id=build_concentration_fact_id(
-                    kind="findings_by_rule", subject=rule_id
-                ),
+                fact_id=build_concentration_fact_id(kind="findings_by_rule", subject=rule_id),
                 kind="findings_by_rule",
                 subject=rule_id,
                 count=count,
@@ -341,9 +331,7 @@ def _concentration_facts(
     for category, count in sorted(by_category.items()):
         facts.append(
             SecurityConcentrationFact(
-                fact_id=build_concentration_fact_id(
-                    kind="findings_by_category", subject=category
-                ),
+                fact_id=build_concentration_fact_id(kind="findings_by_category", subject=category),
                 kind="findings_by_category",
                 subject=category,
                 count=count,
@@ -354,9 +342,7 @@ def _concentration_facts(
     for role, count in sorted(by_role.items()):
         facts.append(
             SecurityConcentrationFact(
-                fact_id=build_concentration_fact_id(
-                    kind="findings_by_source_role", subject=role
-                ),
+                fact_id=build_concentration_fact_id(kind="findings_by_source_role", subject=role),
                 kind="findings_by_source_role",
                 subject=role,
                 count=count,
@@ -374,9 +360,7 @@ def _concentration_facts(
     for severity, count in sorted(by_severity.items()):
         facts.append(
             SecurityConcentrationFact(
-                fact_id=build_concentration_fact_id(
-                    kind="findings_by_severity", subject=severity
-                ),
+                fact_id=build_concentration_fact_id(kind="findings_by_severity", subject=severity),
                 kind="findings_by_severity",
                 subject=severity,
                 count=count,
@@ -428,9 +412,7 @@ def _concentration_facts(
             count=len(multi),
             total=len(hotspots.hotspots),
             share=_share(len(multi), len(hotspots.hotspots)),
-            supporting_hotspot_ids=tuple(
-                item.hotspot_id for item in multi[:_HOTSPOT_REF_LIMIT]
-            ),
+            supporting_hotspot_ids=tuple(item.hotspot_id for item in multi[:_HOTSPOT_REF_LIMIT]),
         )
     )
     return tuple(sorted(facts, key=lambda item: (item.kind, item.subject, item.fact_id)))
@@ -591,9 +573,7 @@ def synthesize_security(
     literal_refs = _findings_for_rules(all_refs, {RULE_CREDENTIAL_LITERAL})
     placeholder_refs = _findings_for_rules(all_refs, {RULE_PLACEHOLDER_CREDENTIAL})
     tls_refs = _findings_for_rules(all_refs, {RULE_TLS_VERIFICATION_DISABLED})
-    hostname_refs = _findings_for_rules(
-        all_refs, {RULE_HOSTNAME_VERIFICATION_DISABLED}
-    )
+    hostname_refs = _findings_for_rules(all_refs, {RULE_HOSTNAME_VERIFICATION_DISABLED})
     auth_refs = _findings_for_rules(all_refs, {RULE_AUTHENTICATION_DISABLED})
     cors_refs = _findings_for_rules(all_refs, {RULE_PERMISSIVE_CORS_ORIGIN})
     debug_refs = _findings_for_rules(all_refs, {RULE_DEBUG_ENABLED})
@@ -643,10 +623,7 @@ def synthesize_security(
                 "only; it does not assert key usability or exploitability."
             ),
             source_role=SecuritySourceRole.PRODUCTION
-            if any(
-                item.source_role is SecuritySourceRole.PRODUCTION
-                for item in private_refs
-            )
+            if any(item.source_role is SecuritySourceRole.PRODUCTION for item in private_refs)
             else private_refs[0].source_role,
             theme_ids=(theme.theme_id,) if theme else (),
             finding_ids=[item.finding_id for item in private_refs],
@@ -691,10 +668,7 @@ def synthesize_security(
                 "reference values; validity is not verified."
             ),
             source_role=SecuritySourceRole.PRODUCTION
-            if any(
-                item.source_role is SecuritySourceRole.PRODUCTION
-                for item in literal_refs
-            )
+            if any(item.source_role is SecuritySourceRole.PRODUCTION for item in literal_refs)
             else literal_refs[0].source_role,
             finding_ids=[item.finding_id for item in literal_refs],
             rule_ids=(RULE_CREDENTIAL_LITERAL,),
@@ -827,16 +801,8 @@ def synthesize_security(
             rule_ids=tuple(
                 sorted(
                     {
-                        *(
-                            (RULE_TLS_VERIFICATION_DISABLED,)
-                            if tls_refs
-                            else ()
-                        ),
-                        *(
-                            (RULE_HOSTNAME_VERIFICATION_DISABLED,)
-                            if hostname_refs
-                            else ()
-                        ),
+                        *((RULE_TLS_VERIFICATION_DISABLED,) if tls_refs else ()),
+                        *((RULE_HOSTNAME_VERIFICATION_DISABLED,) if hostname_refs else ()),
                     }
                 )
             ),
@@ -854,8 +820,7 @@ def synthesize_security(
                         "configuration in the deployment environment."
                     ),
                     rationale=(
-                        "TLS-verification-disabled findings cite explicit "
-                        "configuration facts."
+                        "TLS-verification-disabled findings cite explicit configuration facts."
                     ),
                     conclusion_ids=(conclusion.conclusion_id,),
                     audience=SecurityConclusionAudience.PRODUCTION_HEALTH,
@@ -868,13 +833,9 @@ def synthesize_security(
                     kind=SecurityRecommendationKind.ENABLE_HOSTNAME_VERIFICATION,
                     action_key="enable-hostname-verification",
                     title="Enable hostname verification",
-                    action=(
-                        "Enable TLS hostname verification for the identified "
-                        "configuration."
-                    ),
+                    action=("Enable TLS hostname verification for the identified configuration."),
                     rationale=(
-                        "Hostname-verification-disabled findings cite explicit "
-                        "configuration facts."
+                        "Hostname-verification-disabled findings cite explicit configuration facts."
                     ),
                     conclusion_ids=(conclusion.conclusion_id,),
                     audience=SecurityConclusionAudience.PRODUCTION_HEALTH,
@@ -922,13 +883,9 @@ def synthesize_security(
                 action_key="enable-authentication",
                 title="Enable authentication",
                 action=(
-                    "Enable the configured authentication control for the "
-                    "identified configuration."
+                    "Enable the configured authentication control for the identified configuration."
                 ),
-                rationale=(
-                    "Authentication-disabled findings cite explicit configuration "
-                    "facts."
-                ),
+                rationale=("Authentication-disabled findings cite explicit configuration facts."),
                 conclusion_ids=(conclusion.conclusion_id,),
                 audience=SecurityConclusionAudience.PRODUCTION_HEALTH,
                 finding_ids=[item.finding_id for item in auth_refs],
@@ -977,9 +934,7 @@ def synthesize_security(
                     "Replace wildcard CORS origins with an explicit allow-list for "
                     "the identified configuration."
                 ),
-                rationale=(
-                    "Permissive CORS findings cite supported configuration facts."
-                ),
+                rationale=("Permissive CORS findings cite supported configuration facts."),
                 conclusion_ids=(conclusion.conclusion_id,),
                 audience=SecurityConclusionAudience.PRODUCTION_HEALTH,
                 finding_ids=[item.finding_id for item in cors_refs],
@@ -1006,18 +961,13 @@ def synthesize_security(
             audience=SecurityConclusionAudience.PRODUCTION_HEALTH,
             title="Debug enabled",
             summary=(
-                f"{len(debug_refs)} supported configuration facts explicitly "
-                "enable debug mode."
+                f"{len(debug_refs)} supported configuration facts explicitly enable debug mode."
             ),
             technical_interpretation=(
-                "Debug findings preserve source-role labels and do not assert "
-                "runtime exposure."
+                "Debug findings preserve source-role labels and do not assert runtime exposure."
             ),
             source_role=SecuritySourceRole.PRODUCTION
-            if any(
-                item.source_role is SecuritySourceRole.PRODUCTION
-                for item in debug_refs
-            )
+            if any(item.source_role is SecuritySourceRole.PRODUCTION for item in debug_refs)
             else debug_refs[0].source_role,
             theme_ids=(theme.theme_id,) if theme else (),
             finding_ids=[item.finding_id for item in debug_refs],
@@ -1054,9 +1004,7 @@ def synthesize_security(
             ),
             scope=SecurityThemeScope.TEST_OBSERVATION,
             source_role=SecuritySourceRole.TEST,
-            finding_ids=_bound_ids(
-                [item.finding_id for item in test_refs], _FINDING_REF_LIMIT
-            ),
+            finding_ids=_bound_ids([item.finding_id for item in test_refs], _FINDING_REF_LIMIT),
             rule_ids=tuple(sorted({item.rule_id for item in test_refs})),
             counts={"test_findings": len(test_refs)},
             ordering_key="20_test",
@@ -1117,9 +1065,7 @@ def synthesize_security(
             ),
             scope=SecurityThemeScope.COVERAGE,
             source_role=SecuritySourceRole.UNKNOWN,
-            finding_ids=_bound_ids(
-                [item.finding_id for item in unknown_refs], _FINDING_REF_LIMIT
-            ),
+            finding_ids=_bound_ids([item.finding_id for item in unknown_refs], _FINDING_REF_LIMIT),
             rule_ids=tuple(sorted({item.rule_id for item in unknown_refs})),
             counts={"unknown_findings": len(unknown_refs)},
             ordering_key="21_unknown",
@@ -1165,9 +1111,7 @@ def synthesize_security(
         )
 
     if hotspot_inventory.hotspots:
-        top_paths = ", ".join(
-            item.path for item in hotspot_inventory.hotspots[:_TOP_HOTSPOT_LIMIT]
-        )
+        top_paths = ", ".join(item.path for item in hotspot_inventory.hotspots[:_TOP_HOTSPOT_LIMIT])
         theme = SecurityTheme(
             theme_id=build_theme_id(
                 kind=SecurityThemeKind.FINDING_CONCENTRATION.value,
@@ -1195,12 +1139,8 @@ def synthesize_security(
             ),
             counts={
                 "hotspot_count": len(hotspot_inventory.hotspots),
-                "top_hotspot_findings": hotspot_inventory.hotspots[
-                    0
-                ].total_finding_count,
-                "production_in_top": hotspot_inventory.hotspots[
-                    0
-                ].production_finding_count,
+                "top_hotspot_findings": hotspot_inventory.hotspots[0].total_finding_count,
+                "production_in_top": hotspot_inventory.hotspots[0].production_finding_count,
             },
             ordering_key="30_concentration",
         )
@@ -1231,8 +1171,7 @@ def synthesize_security(
                     "and remediate the supporting hygiene conditions."
                 ),
                 rationale=(
-                    "Hotspots summarize finding concentration without asserting "
-                    "risk ratings."
+                    "Hotspots summarize finding concentration without asserting risk ratings."
                 ),
                 conclusion_ids=(conclusion.conclusion_id,),
                 audience=SecurityConclusionAudience.REPOSITORY,
@@ -1283,17 +1222,17 @@ def synthesize_security(
             title="Partial evidence coverage",
             summary=theme.description,
             technical_interpretation=(
-                "Evidence diagnostics remain diagnostics and are not Security "
-                "findings."
+                "Evidence diagnostics remain diagnostics and are not Security findings."
             ),
             source_role=SecuritySourceRole.UNKNOWN,
             theme_ids=(theme.theme_id,),
             diagnostic_ids=diag_ids,
         )
         conclusions.append(conclusion)
-        if any(
-            "malformed" in item.diagnostic_code.lower() for item in evidence_diags
-        ) or evidence_summary.malformed_files > 0:
+        if (
+            any("malformed" in item.diagnostic_code.lower() for item in evidence_diags)
+            or evidence_summary.malformed_files > 0
+        ):
             recommendations.append(
                 _make_recommendation(
                     kind=SecurityRecommendationKind.CORRECT_MALFORMED_CONFIGURATION,
@@ -1362,8 +1301,7 @@ def synthesize_security(
             title="Unsupported Security analysis scope",
             summary=theme.description,
             technical_interpretation=(
-                "Zero findings within supported scope do not prove repository "
-                "security."
+                "Zero findings within supported scope do not prove repository security."
             ),
             source_role=SecuritySourceRole.UNKNOWN,
             theme_ids=(theme.theme_id,),
@@ -1390,8 +1328,7 @@ def synthesize_security(
                 action_key="add-git-history-secret-scanning",
                 title="Add Git history secret scanning",
                 action=(
-                    "Add Git history secret scanning outside this repository "
-                    "snapshot assessment."
+                    "Add Git history secret scanning outside this repository snapshot assessment."
                 ),
                 rationale="Git history analysis is an accepted unsupported limitation.",
                 conclusion_ids=(conclusion.conclusion_id,),
@@ -1409,8 +1346,7 @@ def synthesize_security(
                     "repository-sensitive hygiene assessment."
                 ),
                 rationale=(
-                    "External vulnerability metadata is an accepted unsupported "
-                    "limitation."
+                    "External vulnerability metadata is an accepted unsupported limitation."
                 ),
                 conclusion_ids=(conclusion.conclusion_id,),
                 audience=SecurityConclusionAudience.COVERAGE,
@@ -1518,18 +1454,12 @@ def synthesize_security(
         if existing is None:
             rec_by_kind[item.kind.value] = item
             continue
-        merged_findings = _bound_ids(
-            (*existing.finding_ids, *item.finding_ids), _FINDING_REF_LIMIT
-        )
+        merged_findings = _bound_ids((*existing.finding_ids, *item.finding_ids), _FINDING_REF_LIMIT)
         merged_conclusions = _bound_ids(
             (*existing.conclusion_ids, *item.conclusion_ids), _FINDING_REF_LIMIT
         )
-        merged_themes = _bound_ids(
-            (*existing.theme_ids, *item.theme_ids), _FINDING_REF_LIMIT
-        )
-        merged_hotspots = _bound_ids(
-            (*existing.hotspot_ids, *item.hotspot_ids), _HOTSPOT_REF_LIMIT
-        )
+        merged_themes = _bound_ids((*existing.theme_ids, *item.theme_ids), _FINDING_REF_LIMIT)
+        merged_hotspots = _bound_ids((*existing.hotspot_ids, *item.hotspot_ids), _HOTSPOT_REF_LIMIT)
         merged_diags = _bound_ids(
             (*existing.diagnostic_ids, *item.diagnostic_ids), _DIAGNOSTIC_REF_LIMIT
         )
@@ -1559,9 +1489,7 @@ def synthesize_security(
             if conclusion.conclusion_id in item.conclusion_ids
         )
         linked_conclusions.append(
-            conclusion.model_copy(update={"recommendation_ids": linked})
-            if linked
-            else conclusion
+            conclusion.model_copy(update={"recommendation_ids": linked}) if linked else conclusion
         )
 
     status = (
@@ -1578,9 +1506,7 @@ def synthesize_security(
         conclusions=tuple(linked_conclusions),
         conclusion_ids=tuple(item.conclusion_id for item in linked_conclusions),
         recommendations=ordered_recommendations,
-        recommendation_ids=tuple(
-            item.recommendation_id for item in ordered_recommendations
-        ),
+        recommendation_ids=tuple(item.recommendation_id for item in ordered_recommendations),
         diagnostics=(),
     )
 

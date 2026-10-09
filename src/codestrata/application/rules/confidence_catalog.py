@@ -189,7 +189,9 @@ _CLOUD.update(
             RuleConfidenceBasis.PARTIAL_EXTRACTION,
             RuleConfidenceBasis.INFERRED_CLASSIFICATION,
             calibration=RuleConfidenceCalibrationStatus.PROVISIONAL,
-            limitations=("Broad cloud-native foundations are inferred from partial static signals.",),
+            limitations=(
+                "Broad cloud-native foundations are inferred from partial static signals.",
+            ),
         ),
         "cloud.cloud-061": _confidence(
             RuleConfidenceLevel.LIMITED,
@@ -270,7 +272,9 @@ _PERFORMANCE.update(
             RuleConfidenceBasis.PARTIAL_EXTRACTION,
             RuleConfidenceBasis.INFERRED_CLASSIFICATION,
             calibration=RuleConfidenceCalibrationStatus.PROVISIONAL,
-            limitations=("Negative or broad performance inference depends on partial static signals.",),
+            limitations=(
+                "Negative or broad performance inference depends on partial static signals.",
+            ),
         )
         for rule_id in (
             "performance.perf-003",

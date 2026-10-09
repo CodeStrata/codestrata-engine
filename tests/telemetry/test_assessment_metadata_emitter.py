@@ -14,8 +14,8 @@ from codestrata.telemetry.assessment_metadata.diagnostics import (
     AssessmentMetadataEmissionDiagnostics,
 )
 from codestrata.telemetry.assessment_metadata.emitter import (
-    emit_assessment_metadata_safely,
     emission_authorized,
+    emit_assessment_metadata_safely,
 )
 from codestrata.telemetry.assessment_metadata.models import (
     AssessmentMetadataProjectionSource,
@@ -27,9 +27,9 @@ from codestrata.telemetry.assessment_metadata.policy import (
 )
 from codestrata.telemetry.assessment_metadata.source import new_assessment_id
 from codestrata.telemetry.assessment_metadata.transport import (
+    AssessmentMetadataTransportResult,
     CaptureAssessmentMetadataTransport,
     HttpAssessmentMetadataTransport,
-    AssessmentMetadataTransportResult,
 )
 from codestrata.telemetry.consent import allow_session_consent, deny_session_consent
 from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
@@ -185,9 +185,7 @@ def test_e4_to_e9_http_errors_unaffected(status: int, category: str) -> None:
 
 
 def test_e4_timeout_unaffected() -> None:
-    client = FakeTelemetryHttpClient(
-        FakeTelemetryHttpResponse(status_code=0, raise_timeout=True)
-    )
+    client = FakeTelemetryHttpClient(FakeTelemetryHttpResponse(status_code=0, raise_timeout=True))
     transport = HttpAssessmentMetadataTransport(
         endpoint="https://example.test/api/v1/assessment-metadata",
         credential=TelemetryTransportCredential(bearer_token=_TOKEN),

@@ -54,14 +54,10 @@ def _normalize_json_value(value: object) -> object:
     if isinstance(value, (list, tuple)):
         return [_normalize_json_value(item) for item in value]
     if isinstance(value, (str, int, float, bool)):
-        if isinstance(value, float) and (
-            value != value or value in (float("inf"), float("-inf"))
-        ):
+        if isinstance(value, float) and (value != value or value in (float("inf"), float("-inf"))):
             raise TraceabilityValidationError("non-finite floats are not JSON-safe")
         return value
-    raise TraceabilityValidationError(
-        f"unsupported serialization type: {type(value).__name__}"
-    )
+    raise TraceabilityValidationError(f"unsupported serialization type: {type(value).__name__}")
 
 
 def to_stable_dict(model: BaseModel, *, omit_empty: bool = True) -> dict[str, Any]:

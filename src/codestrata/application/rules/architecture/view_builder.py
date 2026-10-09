@@ -42,6 +42,7 @@ class RawPackageFacts:
     files_excluded: int = 0
     notes: list[str] = field(default_factory=list)
 
+
 _JAVA_PACKAGE = re.compile(r"^\s*package\s+([a-zA-Z_][\w.]*)\s*;", re.MULTILINE)
 _JAVA_IMPORT = re.compile(r"^\s*import\s+(?:static\s+)?([a-zA-Z_][\w.]*)\s*;", re.MULTILINE)
 _PY_FROM = re.compile(r"^\s*from\s+([a-zA-Z_][\w.]*)\s+import\s+", re.MULTILINE)
@@ -79,6 +80,69 @@ _CSHARP_USING = re.compile(
     r"^\s*using\s+(?:static\s+)?([A-Za-z_][A-Za-z0-9_.]*)\s*;",
     re.MULTILINE,
 )
+
+_SCRIPT_BLOCK = re.compile(
+    r"<script(?P<attrs>[^>]*)>(?P<body>[\s\S]*?)</script>",
+    re.IGNORECASE,
+)
+_SCRIPT_LANG = re.compile(r"""\blang\s*=\s*["']?([^"'\s>]+)""", re.IGNORECASE)
+_SCRIPT_TYPE = re.compile(r"""\btype\s*=\s*["']?([^"'\s>]+)""", re.IGNORECASE)
+
+_ALLOWED_SCRIPT_LANGS = frozenset(
+    {"js", "javascript", "ts", "typescript", "jsx", "tsx"}
+)
+_ALLOWED_SCRIPT_TYPES = frozenset(
+    {
+        "text/javascript",
+        "application/javascript",
+        "text/typescript",
+        "application/typescript",
+        "module",
+    }
+)
+
+
+def _script_attrs_are_javascript(attrs: str) -> bool:
+    lang_match = _SCRIPT_LANG.search(attrs)
+    if lang_match:
+        lang = lang_match.group(1).lower().strip("\"'")
+        if lang not in _ALLOWED_SCRIPT_LANGS:
+            return False
+    type_match = _SCRIPT_TYPE.search(attrs)
+    if type_match:
+        script_type = type_match.group(1).lower().strip("\"'")
+        if script_type not in _ALLOWED_SCRIPT_TYPES and not (
+            script_type.endswith("javascript") or script_type.endswith("typescript")
+        ):
+            return False
+    return True
+
+
+def extract_component_script(text: str) -> str:
+    """Keep every JS/TS script body and one newline per other source line.
+
+    Callers scan this text in place of the single-file component. Line numbers
+    stay on the original file because dropped markup keeps its newlines.
+    """
+
+    if not text:
+        return ""
+    spans = [
+        match.span("body")
+        for match in _SCRIPT_BLOCK.finditer(text)
+        if _script_attrs_are_javascript(match.group("attrs"))
+    ]
+    if not spans:
+        return ""
+    parts: list[str] = []
+    cursor = 0
+    for start, end in spans:
+        parts.append("\n" * text.count("\n", cursor, start))
+        parts.append(text[start:end])
+        cursor = end
+    parts.append("\n" * text.count("\n", cursor))
+    return "".join(parts)
+
 
 _LAYER_MARKERS: dict[str, frozenset[str]] = {
     "presentation": frozenset(
@@ -170,6 +234,25 @@ _FRAMEWORK_PATTERNS: tuple[tuple[str, str, re.Pattern[str]], ...] = (
     ("wcf", "System.ServiceModel", re.compile(r"System\.ServiceModel")),
     ("di", "AddScoped", re.compile(r"\bAdd(?:Scoped|Transient|Singleton)\s*\(")),
     ("hosted", "IHostedService", re.compile(r"\bIHostedService\b|\bBackgroundService\b")),
+    ("angular", "@Component", re.compile(r"@Component\b")),
+    ("angular", "@Injectable", re.compile(r"@Injectable\b")),
+    ("angular", "@Directive", re.compile(r"@Directive\b")),
+    ("angular", "@Pipe", re.compile(r"@Pipe\b")),
+    ("angular", "@NgModule", re.compile(r"@NgModule\b")),
+    ("angular", "@angular/core", re.compile(r"['\"]@angular/core['\"]")),
+    ("react", "react", re.compile(r"['\"]react['\"]")),
+    ("vue", "vue", re.compile(r"['\"]vue['\"]")),
+    ("nestjs", "@nestjs/common", re.compile(r"['\"]@nestjs/common['\"]")),
+    ("nestjs", "@Controller", re.compile(r"@Controller\b")),
+    ("next", "next/navigation", re.compile(r"['\"]next/(?:navigation|router|server)['\"]")),
+    ("svelte", "svelte", re.compile(r"['\"]svelte(?:/[^'\"]*)?['\"]")),
+)
+
+# These markers share names with Java and C# (@Component, @Controller).
+# They are applied only to JS/TS-family sources.
+_JS_FRAMEWORK_IDS = frozenset({"angular", "react", "vue", "nestjs", "next", "svelte"})
+_JS_FRAMEWORK_SUFFIXES = frozenset(
+    {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".vue", ".svelte"}
 )
 
 # Hexagonal-ish: dependency should point inward toward domain.
@@ -247,7 +330,9 @@ def collect_raw_package_facts(
     language_suffixes = {
         "python": frozenset({".py"}),
         "java": frozenset({".java"}),
-        "javascript": frozenset({".js", ".jsx", ".ts", ".tsx"}),
+        "javascript": frozenset(
+            {".js", ".jsx", ".mjs", ".cjs", ".ts", ".tsx", ".vue", ".svelte"}
+        ),
         "php": frozenset({".php"}),
         "csharp": frozenset({".cs"}),
     }
@@ -351,8 +436,16 @@ def collect_raw_package_facts(
             prior = edge_kinds.get(key)
             edge_kinds[key] = stronger_edge_kind(prior, kind)
         if package_layers.get(package_id) == "domain":
+            suffix = PurePosixPath(path).suffix.lower()
+            framework_text = (
+                extract_component_script(text)
+                if suffix in {".vue", ".svelte"}
+                else text
+            )
             for framework, label, pattern in _FRAMEWORK_PATTERNS:
-                if pattern.search(text):
+                if framework in _JS_FRAMEWORK_IDS and suffix not in _JS_FRAMEWORK_SUFFIXES:
+                    continue
+                if pattern.search(framework_text):
                     facts.framework_hits.append(
                         ArchitectureFrameworkHit(
                             unit_id=package_id,
@@ -496,9 +589,7 @@ def finalize_architecture_view(
         for unit_id in sorted(collapsed)
     )
 
-    extraction = (
-        (facts.files_parsed / facts.files_considered) if facts.files_considered else 0.0
-    )
+    extraction = (facts.files_parsed / facts.files_considered) if facts.files_considered else 0.0
     classified = sum(
         1
         for unit in units
@@ -663,16 +754,14 @@ def package_unit_from_path(path: str) -> str | None:
             name = posix.stem.lower()
             return name if name != "__init__" else None
         return ".".join(filtered).lower()
-    if suffix in {".ts", ".tsx", ".js", ".jsx"}:
+    if suffix in {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue", ".svelte"}:
         filtered = [part for part in parts[:-1] if part not in {"node_modules"}]
         if not filtered:
             return None
         return "/".join(filtered).lower()
     if suffix == ".php":
         filtered = [
-            part
-            for part in parts[:-1]
-            if part not in {".", "..", "vendor", "node_modules"}
+            part for part in parts[:-1] if part not in {".", "..", "vendor", "node_modules"}
         ]
         if filtered and filtered[0] in {"src", "app", "tests", "test"}:
             # Keep app/src root for Laravel-style trees; drop only bare "src".
@@ -745,6 +834,9 @@ def resolve_known_unit(candidate: str, known: set[str]) -> str | None:
         prefix = ".".join(parts[:length])
         if prefix in known:
             return prefix
+        slash_prefix = "/".join(parts[:length])
+        if slash_prefix in known:
+            return slash_prefix
     slash = candidate.replace(".", "/").strip("/").lower()
     if slash in known:
         return slash
@@ -761,11 +853,7 @@ def classify_layer(path: str) -> str:
 
 def classify_layer_with_confidence(path: str) -> tuple[str, str]:
     tokens = {part.lower() for part in PurePosixPath(path.replace("\\", "/")).parts}
-    hits = [
-        layer
-        for layer, markers in _LAYER_MARKERS.items()
-        if tokens.intersection(markers)
-    ]
+    hits = [layer for layer, markers in _LAYER_MARKERS.items() if tokens.intersection(markers)]
     if not hits:
         return "unknown", "low"
     if len(hits) > 1:
@@ -783,9 +871,14 @@ def extract_imports(path: str, text: str) -> tuple[str, ...]:
     elif suffix == ".py":
         found.update(_PY_FROM.findall(text))
         found.update(_PY_IMPORT.findall(text))
-    elif suffix in {".ts", ".tsx", ".js", ".jsx"}:
+    elif suffix in {".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"}:
         found.update(_JS_FROM.findall(text))
         found.update(_JS_REQUIRE.findall(text))
+    elif suffix in {".vue", ".svelte"}:
+        script_text = extract_component_script(text)
+        if script_text:
+            found.update(_JS_FROM.findall(script_text))
+            found.update(_JS_REQUIRE.findall(script_text))
     elif suffix == ".php":
         found.update(item.replace("\\", ".") for item in _PHP_USE.findall(text))
         found.update(_PHP_REQUIRE.findall(text))
@@ -803,6 +896,10 @@ def extract_type_only_imports(path: str, text: str) -> set[str]:
             found.update(_PY_IMPORT.findall(block))
     elif suffix in {".ts", ".tsx"}:
         found.update(_TS_TYPE_IMPORT.findall(text))
+    elif suffix in {".vue", ".svelte"}:
+        script_text = extract_component_script(text)
+        if script_text:
+            found.update(_TS_TYPE_IMPORT.findall(script_text))
     return found
 
 
@@ -923,7 +1020,22 @@ def _is_source_path(path: str, *, ignore_markers: Sequence[str]) -> bool:
         return False
     if any(marker in lower for marker in ignore_markers):
         return False
-    return lower.endswith((".java", ".py", ".ts", ".tsx", ".js", ".jsx", ".php", ".cs"))
+    return lower.endswith(
+        (
+            ".java",
+            ".py",
+            ".ts",
+            ".tsx",
+            ".js",
+            ".jsx",
+            ".mjs",
+            ".cjs",
+            ".vue",
+            ".svelte",
+            ".php",
+            ".cs",
+        )
+    )
 
 
 def _infer_edge_kind(path: str, symbol: str) -> str:
@@ -964,9 +1076,7 @@ def _best_confidence(
     if chosen_layer == "unknown":
         return "low"
     agreeing = [
-        conf
-        for conf, layer in zip(confidences, layers, strict=False)
-        if layer == chosen_layer
+        conf for conf, layer in zip(confidences, layers, strict=False) if layer == chosen_layer
     ]
     if not agreeing:
         return "low"

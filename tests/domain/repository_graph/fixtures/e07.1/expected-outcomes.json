@@ -1,0 +1,50 @@
+{
+  "m05": {
+    "cycle_ab": {
+      "count": 1,
+      "members": ["mod.a", "mod.b"],
+      "yaml_cycles": "fail"
+    },
+    "acyclic_ab": {
+      "count": 0,
+      "members": [],
+      "yaml_cycles": "pass"
+    },
+    "self_loop": {
+      "count": 1,
+      "members": ["mod.a"],
+      "yaml_cycles": "fail"
+    },
+    "unresolved_import": {
+      "count": 0,
+      "metric_status": "unknown",
+      "yaml_cycles": "unknown"
+    },
+    "known_cycle_unrelated_unknown": {
+      "count": 1,
+      "members": ["mod.a", "mod.b"],
+      "yaml_cycles": "fail"
+    },
+    "reordered_same_digest": true
+  },
+  "m06": {
+    "fan_out_10": {
+      "max_fan_out": 10,
+      "yaml_fan_out": "pass"
+    },
+    "fan_out_11": {
+      "max_fan_out": 11,
+      "yaml_fan_out": "fail"
+    },
+    "duplicate_edges": {
+      "max_fan_out": 1
+    },
+    "zero_file_edges": {
+      "ratio_status": "not_applicable"
+    },
+    "unknown_imports": {
+      "metric_status": "unknown",
+      "yaml_fan_out": "unknown"
+    }
+  }
+}

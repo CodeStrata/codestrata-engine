@@ -63,9 +63,7 @@ NEGATIVE_SCENARIO_COUNT_MIN = 26
 ALLOWED_VERDICTS: tuple[str, ...] = ("pass", "pass_with_limitations")
 
 COMMON_CONTRACT_VERSION_UNCHANGED = "1.0"
-COMMON_CONTRACT_COMPATIBILITY_DECISION = (
-    "additive_provider_id_under_contract_1_0_no_version_bump"
-)
+COMMON_CONTRACT_COMPATIBILITY_DECISION = "additive_provider_id_under_contract_1_0_no_version_bump"
 
 
 @dataclass(frozen=True, slots=True)

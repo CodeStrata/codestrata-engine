@@ -165,13 +165,15 @@ def sanitize_display_path(path: str) -> str:
     compact = path.strip()
     if not compact:
         return ""
+    posix = compact.replace("\\", "/")
     candidate = Path(compact)
-    if candidate.is_absolute():
-        return candidate.name or compact
-    if len(compact) >= 3 and compact[1] == ":" and compact[2] in {"\\", "/"}:
-        return Path(compact.replace("\\", "/")).name or compact
-    if compact.startswith("\\\\"):
-        return Path(compact.replace("\\", "/")).name or compact
+    if (
+        candidate.is_absolute()
+        or posix.startswith("/")
+        or (len(compact) >= 3 and compact[1] == ":" and compact[2] in {"\\", "/"})
+        or compact.startswith("\\\\")
+    ):
+        return Path(posix).name or compact
     return compact
 
 

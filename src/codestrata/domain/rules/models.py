@@ -168,6 +168,30 @@ class RuleContext(BaseModel):
     def node_engine_version(self) -> DependencyVersion | None:
         return self.dependency_version(name="nodejs", ecosystem="nodejs")
 
+    def angular_version(self) -> DependencyVersion | None:
+        version = self.dependency_version(name="@angular/core", ecosystem="npm")
+        if version is not None:
+            return version
+        return self.dependency_version(name="angular", ecosystem="npm")
+
+    def react_version(self) -> DependencyVersion | None:
+        return self.dependency_version(name="react", ecosystem="npm")
+
+    def vue_version(self) -> DependencyVersion | None:
+        return self.dependency_version(name="vue", ecosystem="npm")
+
+    def nextjs_version(self) -> DependencyVersion | None:
+        return self.dependency_version(name="next", ecosystem="npm")
+
+    def nestjs_version(self) -> DependencyVersion | None:
+        version = self.dependency_version(name="@nestjs/core", ecosystem="npm")
+        if version is not None:
+            return version
+        return self.dependency_version(name="nestjs", ecosystem="npm")
+
+    def svelte_version(self) -> DependencyVersion | None:
+        return self.dependency_version(name="svelte", ecosystem="npm")
+
     def has_maven_project(self) -> bool:
         return self.has_basename("pom.xml") or "maven" in self.bound_keys()
 

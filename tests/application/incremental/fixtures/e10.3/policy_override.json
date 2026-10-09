@@ -1,0 +1,51 @@
+{
+  "scenario": "policy_override",
+  "description": "Source code and feed are identical; a configuration policy rule overrides finding severity.",
+  "base": {
+    "source_digest": "sha256:source_abc123",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "rule-sec-01",
+        "identity_key": "rule-sec-01::src/auth.py:45",
+        "title": "Insecure cookie flag",
+        "category": "security",
+        "severity": "high",
+        "is_policy_override": false
+      }
+    ]
+  },
+  "candidate": {
+    "source_digest": "sha256:source_abc123",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_custom_override",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "rule-sec-01",
+        "identity_key": "rule-sec-01::src/auth.py:45",
+        "title": "Insecure cookie flag",
+        "category": "security",
+        "severity": "low",
+        "is_policy_override": true,
+        "cause": "configuration"
+      }
+    ]
+  },
+  "expected": {
+    "attribution": "configuration_only",
+    "label": "configuration-driven",
+    "is_feed_driven": false,
+    "customer_code_deterioration": false,
+    "changed_dimensions": ["configuration"],
+    "controlled_rerun_performed": false,
+    "finding_lifecycle": "unchanged",
+    "finding_cause": "configuration",
+    "is_policy_override": true,
+    "previous_severity": "high",
+    "current_severity": "low",
+    "evidence_note": "policy_override_or_config_change_not_source_fix"
+  }
+}

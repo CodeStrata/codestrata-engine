@@ -1,0 +1,9 @@
+{
+  "match_kind": "rename_location",
+  "location_moved": true,
+  "finding_churn": false,
+  "lineage_status": "unique",
+  "file_id": "repo:demo:file:src/service.py",
+  "previous_file_id": "repo:demo:file:src/app.py",
+  "component_id": "repo:demo:module:src"
+}

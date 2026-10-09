@@ -44,9 +44,7 @@ class AssessmentTelemetryIsolationResult:
     limitation_codes: tuple[str, ...] = ()
 
     def __post_init__(self) -> None:
-        object.__setattr__(
-            self, "limitation_codes", tuple(sorted(set(self.limitation_codes)))
-        )
+        object.__setattr__(self, "limitation_codes", tuple(sorted(set(self.limitation_codes))))
 
     def to_stable_dict(self) -> dict[str, Any]:
         payload: dict[str, Any] = {

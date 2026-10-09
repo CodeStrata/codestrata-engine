@@ -63,9 +63,7 @@ def test_anchor_stability_and_validity() -> None:
 def test_completeness_and_limitation_labels() -> None:
     assert completeness_label("complete") == "Complete evidence"
     assert completeness_label("legacy") == "Legacy evidence"
-    assert "not yet available" in limitation_label(
-        "evidence_ref_mapping_deferred_for_pack"
-    ).lower()
+    assert "not yet available" in limitation_label("evidence_ref_mapping_deferred_for_pack").lower()
     assert "omitted" in limitation_label("snippet_omitted_unverified_redaction").lower()
     assert limitation_label("some_unknown_code").startswith("Some")
 
@@ -178,9 +176,7 @@ def _report_with_chain(tmp_path: Path) -> ModernizationReportInput:
         supporting_finding_ids=(finding.id,),
         primary_finding_id=finding.id,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
-        actions=(
-            RecommendationAction(order=1, title="Rotate", description="Rotate secret"),
-        ),
+        actions=(RecommendationAction(order=1, title="Rotate", description="Rotate secret"),),
         subject_keys=("repo",),
     )
     return ModernizationReportInput(

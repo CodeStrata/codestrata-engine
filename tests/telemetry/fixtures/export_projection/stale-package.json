@@ -1,0 +1,14 @@
+{
+  "body": {
+    "artifact_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "categories": ["evidence", "graph"],
+    "export_policy_version": "1.0",
+    "package_id": "codestrata.local-export-original",
+    "package_version": "1.0.0",
+    "purpose": "production",
+    "schema": "codestrata.export-original.v1",
+    "schema_version": "1.0.0",
+    "validity_not_after": "2020-01-01T00:00:00Z",
+    "validity_not_before": null
+  }
+}

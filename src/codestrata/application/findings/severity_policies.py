@@ -127,9 +127,7 @@ class FindingSeverityPolicy(BaseModel):
             if previous_max is not None and lo < previous_max:
                 raise ValueError(f"overlapping measurement bands in {self.policy_id}")
             previous_max = (
-                float(band.max_ratio_inclusive)
-                if band.max_ratio_inclusive is not None
-                else None
+                float(band.max_ratio_inclusive) if band.max_ratio_inclusive is not None else None
             )
             if band.severity not in allowed:
                 raise ValueError(
@@ -231,7 +229,15 @@ def _build_catalog() -> tuple[FindingSeverityPolicy, ...]:
     policies: list[FindingSeverityPolicy] = []
 
     # Security
-    security_map: dict[str, tuple[FindingSeverity, tuple[FindingSeverityBasis, ...], tuple[FindingSeverity, ...], tuple[str, ...]]] = {
+    security_map: dict[
+        str,
+        tuple[
+            FindingSeverity,
+            tuple[FindingSeverityBasis, ...],
+            tuple[FindingSeverity, ...],
+            tuple[str, ...],
+        ],
+    ] = {
         "security.private-key-material": (
             FindingSeverity.HIGH,
             (FindingSeverityBasis.DIRECT_SECRET_EXPOSURE,),
@@ -372,9 +378,7 @@ def _build_catalog() -> tuple[FindingSeverityPolicy, ...]:
                     FindingSeverity.MEDIUM,
                     FindingSeverity.HIGH,
                 ),
-                limitations=(
-                    "Declaration semantics only; no vulnerability or exploit inference.",
-                ),
+                limitations=("Declaration semantics only; no vulnerability or exploit inference.",),
             )
         )
 
@@ -506,9 +510,7 @@ def _build_catalog() -> tuple[FindingSeverityPolicy, ...]:
         "cloud.cloud-061",
     }
     for rule_id in CLOUD_RULE_IDS:
-        base = (
-            FindingSeverity.LOW if rule_id in cloud_low else FindingSeverity.INFORMATIONAL
-        )
+        base = FindingSeverity.LOW if rule_id in cloud_low else FindingSeverity.INFORMATIONAL
         policies.append(
             _policy(
                 rule_id,
@@ -559,9 +561,7 @@ def _build_catalog() -> tuple[FindingSeverityPolicy, ...]:
         "performance.perf-072",
     }
     for rule_id in PERFORMANCE_RULE_IDS:
-        base = (
-            FindingSeverity.LOW if rule_id in perf_low else FindingSeverity.INFORMATIONAL
-        )
+        base = FindingSeverity.LOW if rule_id in perf_low else FindingSeverity.INFORMATIONAL
         policies.append(
             _policy(
                 rule_id,
@@ -569,9 +569,7 @@ def _build_catalog() -> tuple[FindingSeverityPolicy, ...]:
                 FindingSeverityBasis.STATIC_SIGNAL_ONLY,
                 FindingSeverityBasis.RUNTIME_IMPACT_UNVERIFIED,
                 allowed=_READINESS_ALLOWED,
-                limitations=(
-                    "Static performance signals cannot establish runtime performance.",
-                ),
+                limitations=("Static performance signals cannot establish runtime performance.",),
             )
         )
 

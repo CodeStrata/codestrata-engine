@@ -1,0 +1,38 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: technical_debt.large-callable
+  version: 1.0.0
+  title: Large callable
+  category: technical_debt
+  owner: codestrata
+  measurement: M16
+  tags: [technical_debt, complexity, size]
+applies_to:
+  languages: [java, python, php, csharp, javascript, typescript]
+  requires:
+    facts: [complexity.callable]
+select:
+  source: complexity
+  callables:
+    all:
+      - physical_line_count_gt: 50
+condition:
+  operator: technical_debt.large-callable
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Callable '{{qualified_signature}}' has physical_line_count={{value}}
+        which exceeds threshold {{threshold}}.
+      bindings:
+        qualified_signature: {type: string, evidence: qualified_signature}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+    documentation_url: docs/analysis-intelligence/technical-debt/complexity-rules.md
+  metric:
+    name: technical_debt_large_callable_count
+    operation: count
+parameters:
+  max_physical_lines: {type: integer, default: 50, exclusive_min: true}

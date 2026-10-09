@@ -164,10 +164,7 @@ class BoundaryIntegrityPolicy:
             return ConclusionPolicyResult.not_applicable("cycle_only_use_cyclic_policy")
         if not direct:
             return ConclusionPolicyResult.not_applicable("no_direct_boundary_finding")
-        if (
-            context.classification_coverage is not None
-            and context.classification_coverage < 0.1
-        ):
+        if context.classification_coverage is not None and context.classification_coverage < 0.1:
             return ConclusionPolicyResult.not_applicable("insufficient_classification_coverage")
 
         aspects: list[str] = []
@@ -184,8 +181,7 @@ class BoundaryIntegrityPolicy:
         scope_text = ", ".join(scope[:6]) or "related architectural units"
         title = "Architectural boundary integrity is incomplete"
         summary = (
-            f"Related findings indicate incomplete isolation among {scope_text} "
-            f"({aspect_text})."
+            f"Related findings indicate incomplete isolation among {scope_text} ({aspect_text})."
         )
         technical = (
             "Static dependency analysis shows one or more boundary-related conditions "
@@ -397,9 +393,7 @@ class EnterpriseNonconformancePolicy:
     def evaluate(self, context: ConclusionPolicyContext) -> ConclusionPolicyResult:
         if not context.enterprise_context_present:
             return ConclusionPolicyResult.not_applicable("enterprise_context_absent")
-        members = _findings_for_rules(
-            context.findings, {RULE_ENTERPRISE_STANDARD_MISMATCH}
-        )
+        members = _findings_for_rules(context.findings, {RULE_ENTERPRISE_STANDARD_MISMATCH})
         if not members:
             return ConclusionPolicyResult.not_applicable("no_enterprise_mismatch")
         conclusion = _build_conclusion(

@@ -1,0 +1,1057 @@
+{
+  "cases": [
+    {
+      "id": "all-positive",
+      "operator": "all",
+      "kind": "positive",
+      "call": {
+        "operator": "all",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "kind", "value": "module"}
+        ]
+      },
+      "context": {
+        "facts": {
+          "lang": {"status": "complete", "value": "java"},
+          "kind": {"status": "complete", "value": "module"}
+        }
+      },
+      "expected": {"truth": "true", "error": false}
+    },
+    {
+      "id": "all-negative",
+      "operator": "all",
+      "kind": "negative",
+      "call": {
+        "operator": "all",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "kind", "value": "module"}
+        ]
+      },
+      "context": {
+        "facts": {
+          "lang": {"status": "complete", "value": "java"},
+          "kind": {"status": "complete", "value": "file"}
+        }
+      },
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "all-budget",
+      "operator": "all",
+      "kind": "budget",
+      "call": {
+        "operator": "all",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "kind", "value": "module"}
+        ]
+      },
+      "context": {
+        "facts": {
+          "lang": {"status": "complete", "value": "java"},
+          "kind": {"status": "complete", "value": "module"}
+        }
+      },
+      "limits": {"max_operands": 1},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "any-positive",
+      "operator": "any",
+      "kind": "positive",
+      "call": {
+        "operator": "any",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "python"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "any-negative",
+      "operator": "any",
+      "kind": "negative",
+      "call": {
+        "operator": "any",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "go"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "any-budget",
+      "operator": "any",
+      "kind": "budget",
+      "call": {
+        "operator": "any",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "limits": {"max_operands": 1},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "not-positive",
+      "operator": "not",
+      "kind": "positive",
+      "call": {
+        "operator": "not",
+        "operands": [{"operator": "equals", "fact": "lang", "value": "java"}]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "python"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "not-negative",
+      "operator": "not",
+      "kind": "negative",
+      "call": {
+        "operator": "not",
+        "operands": [{"operator": "equals", "fact": "lang", "value": "java"}]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "not-budget",
+      "operator": "not",
+      "kind": "budget",
+      "call": {
+        "operator": "not",
+        "operands": [{"operator": "equals", "fact": "lang", "value": "java"}]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "python"}}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "equals-positive",
+      "operator": "equals",
+      "kind": "positive",
+      "call": {"operator": "equals", "fact": "lang", "value": "java"},
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "equals-negative",
+      "operator": "equals",
+      "kind": "negative",
+      "call": {"operator": "equals", "fact": "lang", "value": "java"},
+      "context": {"facts": {"lang": {"status": "complete", "value": "python"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "equals-budget",
+      "operator": "equals",
+      "kind": "budget",
+      "call": {"operator": "equals", "fact": "lang", "value": "java"},
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "in-positive",
+      "operator": "in",
+      "kind": "positive",
+      "call": {"operator": "in", "fact": "lang", "values": ["java", "python"]},
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "in-negative",
+      "operator": "in",
+      "kind": "negative",
+      "call": {"operator": "in", "fact": "lang", "values": ["java", "python"]},
+      "context": {"facts": {"lang": {"status": "complete", "value": "go"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "in-budget",
+      "operator": "in",
+      "kind": "budget",
+      "call": {"operator": "in", "fact": "lang", "values": ["java", "python", "go"]},
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "matches-positive",
+      "operator": "matches",
+      "kind": "positive",
+      "call": {"operator": "matches", "fact": "path", "value": "^api/"},
+      "context": {"facts": {"path": {"status": "complete", "value": "api/User.java"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "matches-negative",
+      "operator": "matches",
+      "kind": "negative",
+      "call": {"operator": "matches", "fact": "path", "value": "^api/"},
+      "context": {"facts": {"path": {"status": "complete", "value": "internal/User.java"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "matches-budget",
+      "operator": "matches",
+      "kind": "budget",
+      "call": {"operator": "matches", "fact": "path", "value": "abc"},
+      "context": {"facts": {"path": {"status": "complete", "value": "abcdefghijklmnopqrstuvwxyz"}}},
+      "limits": {"regex_max_steps": 5},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "exists-positive",
+      "operator": "exists",
+      "kind": "positive",
+      "call": {"operator": "exists", "fact": "module"},
+      "context": {"facts": {"module": {"status": "complete", "value": "app"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "exists-negative",
+      "operator": "exists",
+      "kind": "negative",
+      "call": {"operator": "exists", "fact": "module"},
+      "context": {"facts": {"module": {"status": "missing"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "exists-budget",
+      "operator": "exists",
+      "kind": "budget",
+      "call": {"operator": "exists", "fact": "module"},
+      "context": {"facts": {"module": {"status": "complete", "value": "app"}}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "count-positive",
+      "operator": "count",
+      "kind": "positive",
+      "call": {"operator": "count", "values": ["a", "b", "c"]},
+      "expected": {"metric_status": "value", "metric_serialized": "3"}
+    },
+    {
+      "id": "count-negative",
+      "operator": "count",
+      "kind": "negative",
+      "call": {"operator": "count", "values": []},
+      "expected": {"metric_status": "value", "metric_serialized": "0"}
+    },
+    {
+      "id": "count-budget",
+      "operator": "count",
+      "kind": "budget",
+      "call": {"operator": "count", "values": ["a", "b", "c"]},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "sum-positive",
+      "operator": "sum",
+      "kind": "positive",
+      "call": {"operator": "sum", "values": [1, 2, 3]},
+      "expected": {"metric_status": "value", "metric_serialized": "6"}
+    },
+    {
+      "id": "sum-negative",
+      "operator": "sum",
+      "kind": "negative",
+      "call": {"operator": "sum", "values": []},
+      "expected": {"metric_status": "not_applicable", "reason": "empty_input"}
+    },
+    {
+      "id": "sum-budget",
+      "operator": "sum",
+      "kind": "budget",
+      "call": {"operator": "sum", "values": [1, 2, 3]},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "min-positive",
+      "operator": "min",
+      "kind": "positive",
+      "call": {"operator": "min", "values": [9, 2, 5]},
+      "expected": {"metric_status": "value", "metric_serialized": "2"}
+    },
+    {
+      "id": "min-negative",
+      "operator": "min",
+      "kind": "negative",
+      "call": {"operator": "min", "values": []},
+      "expected": {"metric_status": "not_applicable", "reason": "empty_input"}
+    },
+    {
+      "id": "min-budget",
+      "operator": "min",
+      "kind": "budget",
+      "call": {"operator": "min", "values": [1, 2, 3]},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "max-positive",
+      "operator": "max",
+      "kind": "positive",
+      "call": {"operator": "max", "values": [9, 2, 5]},
+      "expected": {"metric_status": "value", "metric_serialized": "9"}
+    },
+    {
+      "id": "max-negative",
+      "operator": "max",
+      "kind": "negative",
+      "call": {"operator": "max", "values": []},
+      "expected": {"metric_status": "not_applicable", "reason": "empty_input"}
+    },
+    {
+      "id": "max-budget",
+      "operator": "max",
+      "kind": "budget",
+      "call": {"operator": "max", "values": [1, 2, 3]},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "ratio-positive",
+      "operator": "ratio",
+      "kind": "positive",
+      "call": {"operator": "ratio", "values": [1, 2]},
+      "expected": {"metric_status": "value", "metric_serialized": "0.500000"}
+    },
+    {
+      "id": "ratio-negative",
+      "operator": "ratio",
+      "kind": "negative",
+      "call": {"operator": "ratio", "values": [1, 0]},
+      "expected": {"metric_status": "not_applicable"}
+    },
+    {
+      "id": "ratio-budget",
+      "operator": "ratio",
+      "kind": "budget",
+      "call": {"operator": "ratio", "values": [1, 2]},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "distinct-positive",
+      "operator": "distinct",
+      "kind": "positive",
+      "call": {"operator": "distinct", "values": ["a", "a", "b"]},
+      "expected": {"metric_status": "value", "metric_serialized": "2"}
+    },
+    {
+      "id": "distinct-negative",
+      "operator": "distinct",
+      "kind": "negative",
+      "call": {"operator": "distinct", "values": []},
+      "expected": {"metric_status": "value", "metric_serialized": "0"}
+    },
+    {
+      "id": "distinct-budget",
+      "operator": "distinct",
+      "kind": "budget",
+      "call": {"operator": "distinct", "values": ["a", "b", "c"]},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "percentile-positive",
+      "operator": "percentile",
+      "kind": "positive",
+      "call": {
+        "operator": "percentile",
+        "value": 0.9,
+        "values": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+      },
+      "expected": {"metric_status": "value", "metric_serialized": "90"}
+    },
+    {
+      "id": "percentile-negative",
+      "operator": "percentile",
+      "kind": "negative",
+      "call": {"operator": "percentile", "value": 0.5, "values": []},
+      "expected": {"metric_status": "not_applicable", "reason": "empty_input"}
+    },
+    {
+      "id": "percentile-budget",
+      "operator": "percentile",
+      "kind": "budget",
+      "call": {"operator": "percentile", "value": 0.5, "values": [1, 2, 3]},
+      "limits": {"max_collection_items": 2},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "neighbors-positive",
+      "operator": "neighbors",
+      "kind": "positive",
+      "call": {
+        "operator": "neighbors",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "max_depth": 1,
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}],
+          "complete": true
+        }
+      },
+      "expected": {"truth": "true", "members": ["b"]}
+    },
+    {
+      "id": "neighbors-negative",
+      "operator": "neighbors",
+      "kind": "negative",
+      "call": {
+        "operator": "neighbors",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "b", "target": "a", "edge_type": "imports"}],
+          "complete": true
+        }
+      },
+      "expected": {"truth": "false", "members": []}
+    },
+    {
+      "id": "neighbors-budget",
+      "operator": "neighbors",
+      "kind": "budget",
+      "call": {
+        "operator": "neighbors",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}]
+        }
+      },
+      "limits": {"graph_max_visited_edges": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "degree-positive",
+      "operator": "degree",
+      "kind": "positive",
+      "call": {
+        "operator": "degree",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b", "c"],
+          "edges": [
+            {"source": "a", "target": "b", "edge_type": "imports"},
+            {"source": "a", "target": "c", "edge_type": "imports"}
+          ]
+        }
+      },
+      "expected": {"metric_status": "value", "metric_serialized": "2", "members": ["b", "c"]}
+    },
+    {
+      "id": "degree-negative",
+      "operator": "degree",
+      "kind": "negative",
+      "call": {
+        "operator": "degree",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "b", "target": "a", "edge_type": "imports"}]
+        }
+      },
+      "expected": {"metric_status": "value", "metric_serialized": "0"}
+    },
+    {
+      "id": "degree-budget",
+      "operator": "degree",
+      "kind": "budget",
+      "call": {
+        "operator": "degree",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}]
+        }
+      },
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "exists_path-positive",
+      "operator": "exists_path",
+      "kind": "positive",
+      "call": {
+        "operator": "exists_path",
+        "fact": "a",
+        "value": "c",
+        "edge_types": ["imports"],
+        "traversal": "transitive",
+        "max_depth": 4,
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b", "c"],
+          "edges": [
+            {"source": "a", "target": "b", "edge_type": "imports"},
+            {"source": "b", "target": "c", "edge_type": "imports"}
+          ]
+        }
+      },
+      "expected": {"truth": "true", "members": ["c"]}
+    },
+    {
+      "id": "exists_path-negative",
+      "operator": "exists_path",
+      "kind": "negative",
+      "call": {
+        "operator": "exists_path",
+        "fact": "a",
+        "value": "z",
+        "edge_types": ["imports"],
+        "traversal": "transitive",
+        "max_depth": 4,
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b", "z"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}],
+          "complete": true
+        }
+      },
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "exists_path-budget",
+      "operator": "exists_path",
+      "kind": "budget",
+      "call": {
+        "operator": "exists_path",
+        "fact": "a",
+        "value": "b",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}]
+        }
+      },
+      "limits": {"graph_max_visited_edges": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "reachable-positive",
+      "operator": "reachable",
+      "kind": "positive",
+      "call": {
+        "operator": "reachable",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "traversal": "transitive",
+        "max_depth": 4,
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b", "c"],
+          "edges": [
+            {"source": "a", "target": "b", "edge_type": "imports"},
+            {"source": "b", "target": "c", "edge_type": "imports"}
+          ]
+        }
+      },
+      "expected": {"truth": "true", "members": ["b", "c"], "metric_status": "value", "metric_serialized": "2"}
+    },
+    {
+      "id": "reachable-negative",
+      "operator": "reachable",
+      "kind": "negative",
+      "call": {
+        "operator": "reachable",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "b", "target": "a", "edge_type": "imports"}],
+          "complete": true
+        }
+      },
+      "expected": {"truth": "false", "members": []}
+    },
+    {
+      "id": "reachable-budget",
+      "operator": "reachable",
+      "kind": "budget",
+      "call": {
+        "operator": "reachable",
+        "fact": "a",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}]
+        }
+      },
+      "limits": {"graph_max_visited_edges": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "cycle-positive",
+      "operator": "cycle",
+      "kind": "positive",
+      "call": {
+        "operator": "cycle",
+        "edge_types": ["imports"],
+        "traversal": "direct",
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [
+            {"source": "a", "target": "b", "edge_type": "imports"},
+            {"source": "b", "target": "a", "edge_type": "imports"}
+          ]
+        }
+      },
+      "expected": {"truth": "true", "members": ["a", "b"]}
+    },
+    {
+      "id": "cycle-negative",
+      "operator": "cycle",
+      "kind": "negative",
+      "call": {
+        "operator": "cycle",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}],
+          "complete": true
+        }
+      },
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "cycle-budget",
+      "operator": "cycle",
+      "kind": "budget",
+      "call": {
+        "operator": "cycle",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["a", "b"],
+          "edges": [{"source": "a", "target": "b", "edge_type": "imports"}]
+        }
+      },
+      "limits": {"graph_max_visited_nodes": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "crosses_boundary-positive",
+      "operator": "crosses_boundary",
+      "kind": "positive",
+      "call": {
+        "operator": "crosses_boundary",
+        "fact": "api",
+        "value": "internal",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["api", "internal"],
+          "edges": [{"source": "api", "target": "internal", "edge_type": "imports"}]
+        }
+      },
+      "expected": {"truth": "true", "members": ["api->internal"]}
+    },
+    {
+      "id": "crosses_boundary-negative",
+      "operator": "crosses_boundary",
+      "kind": "negative",
+      "call": {
+        "operator": "crosses_boundary",
+        "fact": "api",
+        "value": "internal",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["api", "public"],
+          "edges": [{"source": "api", "target": "public", "edge_type": "imports"}],
+          "complete": true
+        }
+      },
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "crosses_boundary-budget",
+      "operator": "crosses_boundary",
+      "kind": "budget",
+      "call": {
+        "operator": "crosses_boundary",
+        "fact": "api",
+        "value": "internal",
+        "edge_types": ["imports"],
+        "dependency_view": "declared"
+      },
+      "context": {
+        "declared_graph": {
+          "nodes": ["api", "internal"],
+          "edges": [{"source": "api", "target": "internal", "edge_type": "imports"}]
+        }
+      },
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "changed-positive",
+      "operator": "changed",
+      "kind": "positive",
+      "call": {"operator": "changed", "fact": "loc"},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "changed-negative",
+      "operator": "changed",
+      "kind": "negative",
+      "call": {"operator": "changed", "fact": "loc"},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 10}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "changed-budget",
+      "operator": "changed",
+      "kind": "budget",
+      "call": {"operator": "changed", "fact": "loc"},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "introduced-positive",
+      "operator": "introduced",
+      "kind": "positive",
+      "call": {"operator": "introduced", "fact": "new_mod"},
+      "context": {"baseline": {}, "candidate": {"new_mod": "a"}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "introduced-negative",
+      "operator": "introduced",
+      "kind": "negative",
+      "call": {"operator": "introduced", "fact": "old_mod"},
+      "context": {"baseline": {"old_mod": "a"}, "candidate": {"old_mod": "a"}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "introduced-budget",
+      "operator": "introduced",
+      "kind": "budget",
+      "call": {"operator": "introduced", "fact": "new_mod"},
+      "context": {"baseline": {}, "candidate": {"new_mod": "a"}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "removed-positive",
+      "operator": "removed",
+      "kind": "positive",
+      "call": {"operator": "removed", "fact": "gone"},
+      "context": {"baseline": {"gone": "a"}, "candidate": {}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "removed-negative",
+      "operator": "removed",
+      "kind": "negative",
+      "call": {"operator": "removed", "fact": "kept"},
+      "context": {"baseline": {"kept": "a"}, "candidate": {"kept": "a"}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "removed-budget",
+      "operator": "removed",
+      "kind": "budget",
+      "call": {"operator": "removed", "fact": "gone"},
+      "context": {"baseline": {"gone": "a"}, "candidate": {}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "increased_by-positive",
+      "operator": "increased_by",
+      "kind": "positive",
+      "call": {"operator": "increased_by", "fact": "loc", "value": 0},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "increased_by-negative",
+      "operator": "increased_by",
+      "kind": "negative",
+      "call": {"operator": "increased_by", "fact": "loc", "value": 0},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 10}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "increased_by-budget",
+      "operator": "increased_by",
+      "kind": "budget",
+      "call": {"operator": "increased_by", "fact": "loc", "value": 0},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "decreased_by-positive",
+      "operator": "decreased_by",
+      "kind": "positive",
+      "call": {"operator": "decreased_by", "fact": "loc", "value": 0},
+      "context": {"baseline": {"loc": 12}, "candidate": {"loc": 10}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "decreased_by-negative",
+      "operator": "decreased_by",
+      "kind": "negative",
+      "call": {"operator": "decreased_by", "fact": "loc", "value": 0},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "decreased_by-budget",
+      "operator": "decreased_by",
+      "kind": "budget",
+      "call": {"operator": "decreased_by", "fact": "loc", "value": 0},
+      "context": {"baseline": {"loc": 12}, "candidate": {"loc": 10}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "compare-positive",
+      "operator": "compare",
+      "kind": "positive",
+      "call": {"operator": "compare", "fact": "loc"},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "expected": {"truth": "true", "metric_status": "value", "metric_serialized": "2"}
+    },
+    {
+      "id": "compare-negative",
+      "operator": "compare",
+      "kind": "negative",
+      "call": {"operator": "compare", "fact": "loc"},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 10}},
+      "expected": {"truth": "false", "reason": "unchanged"}
+    },
+    {
+      "id": "compare-budget",
+      "operator": "compare",
+      "kind": "budget",
+      "call": {"operator": "compare", "fact": "loc"},
+      "context": {"baseline": {"loc": 10}, "candidate": {"loc": 12}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "threshold-positive",
+      "operator": "threshold",
+      "kind": "positive",
+      "call": {"operator": "threshold", "fact": "fan_out", "value": 10},
+      "context": {"metrics": {"fan_out": {"status": "value", "value": "11"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "threshold-negative",
+      "operator": "threshold",
+      "kind": "negative",
+      "call": {"operator": "threshold", "fact": "fan_out", "value": 10},
+      "context": {"metrics": {"fan_out": {"status": "value", "value": "10"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "threshold-budget",
+      "operator": "threshold",
+      "kind": "budget",
+      "call": {"operator": "threshold", "fact": "fan_out", "value": 10},
+      "context": {"metrics": {"fan_out": {"status": "value", "value": "11"}}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "and-positive",
+      "operator": "and",
+      "kind": "positive",
+      "call": {
+        "operator": "and",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "exists", "fact": "module"}
+        ]
+      },
+      "context": {
+        "facts": {
+          "lang": {"status": "complete", "value": "java"},
+          "module": {"status": "complete", "value": "app"}
+        }
+      },
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "and-negative",
+      "operator": "and",
+      "kind": "negative",
+      "call": {
+        "operator": "and",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "and-budget",
+      "operator": "and",
+      "kind": "budget",
+      "call": {
+        "operator": "and",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "exists", "fact": "module"}
+        ]
+      },
+      "context": {
+        "facts": {
+          "lang": {"status": "complete", "value": "java"},
+          "module": {"status": "complete", "value": "app"}
+        }
+      },
+      "limits": {"max_operands": 1},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "or-positive",
+      "operator": "or",
+      "kind": "positive",
+      "call": {
+        "operator": "or",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "python"}}},
+      "expected": {"truth": "true"}
+    },
+    {
+      "id": "or-negative",
+      "operator": "or",
+      "kind": "negative",
+      "call": {
+        "operator": "or",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "go"}}},
+      "expected": {"truth": "false"}
+    },
+    {
+      "id": "or-budget",
+      "operator": "or",
+      "kind": "budget",
+      "call": {
+        "operator": "or",
+        "operands": [
+          {"operator": "equals", "fact": "lang", "value": "java"},
+          {"operator": "equals", "fact": "lang", "value": "python"}
+        ]
+      },
+      "context": {"facts": {"lang": {"status": "complete", "value": "java"}}},
+      "limits": {"max_operands": 1},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    },
+    {
+      "id": "metric_ref-positive",
+      "operator": "metric_ref",
+      "kind": "positive",
+      "call": {"operator": "metric_ref", "fact": "fan_out"},
+      "context": {"metrics": {"fan_out": {"status": "value", "value": "11", "serialized": "11"}}},
+      "expected": {"metric_status": "value", "metric_serialized": "11"}
+    },
+    {
+      "id": "metric_ref-negative",
+      "operator": "metric_ref",
+      "kind": "negative",
+      "call": {"operator": "metric_ref", "fact": "missing"},
+      "expected": {"metric_status": "unknown", "reason": "missing_metric"}
+    },
+    {
+      "id": "metric_ref-budget",
+      "operator": "metric_ref",
+      "kind": "budget",
+      "call": {"operator": "metric_ref", "fact": "fan_out"},
+      "context": {"metrics": {"fan_out": {"status": "value", "value": "11"}}},
+      "limits": {"max_cost_units": 0},
+      "expected": {"error": true, "reason": "budget_exceeded"}
+    }
+  ]
+}

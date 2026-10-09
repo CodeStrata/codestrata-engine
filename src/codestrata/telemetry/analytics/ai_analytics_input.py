@@ -91,10 +91,7 @@ def build_ai_analytics_input(
     elif outcome in {"failure", "unavailable"}:
         if failure_category is None and active.failure_category_required_on_failure:
             raise AnalyticsError(AnalyticsErrorCode.OUTCOME_FAILURE_MISMATCH)
-        if (
-            failure_category is not None
-            and failure_category not in APPROVED_AI_FAILURE_CATEGORIES
-        ):
+        if failure_category is not None and failure_category not in APPROVED_AI_FAILURE_CATEGORIES:
             raise AnalyticsError(AnalyticsErrorCode.INVALID_FAILURE_CATEGORY)
     else:
         # skipped: failure_category must be absent (not a provider failure).

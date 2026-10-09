@@ -6,10 +6,25 @@ import json
 from pathlib import Path
 from typing import Any
 
-from codestrata.telemetry.paths import ensure_home, queue_path
+from codestrata.telemetry.paths import queue_path
 from codestrata.telemetry.validate import validate_payload
 
 DEFAULT_MAX_QUEUE = 500
+
+
+def _resolve_queue_path(path: Path | None) -> Path:
+    """Use the caller's path when given; never substitute a different home."""
+
+    if path is not None:
+        return path
+    return queue_path()
+
+
+def _ensure_queue_parent(target: Path) -> None:
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
 
 
 def enqueue(
@@ -19,8 +34,8 @@ def enqueue(
     max_queue: int = DEFAULT_MAX_QUEUE,
 ) -> None:
     validate_payload(payload)
-    ensure_home()
-    target = path or queue_path()
+    target = _resolve_queue_path(path)
+    _ensure_queue_parent(target)
     line = json.dumps(payload, sort_keys=True)
     try:
         with target.open("a", encoding="utf-8") as handle:
@@ -31,7 +46,7 @@ def enqueue(
 
 
 def load_queue(*, path: Path | None = None) -> list[dict[str, Any]]:
-    target = path or queue_path()
+    target = _resolve_queue_path(path)
     if not target.is_file():
         return []
     items: list[dict[str, Any]] = []
@@ -53,8 +68,8 @@ def load_queue(*, path: Path | None = None) -> list[dict[str, Any]]:
 
 
 def replace_queue(items: list[dict[str, Any]], *, path: Path | None = None) -> None:
-    ensure_home()
-    target = path or queue_path()
+    target = _resolve_queue_path(path)
+    _ensure_queue_parent(target)
     body = "".join(json.dumps(item, sort_keys=True) + "\n" for item in items)
     try:
         target.write_text(body, encoding="utf-8")
@@ -63,7 +78,7 @@ def replace_queue(items: list[dict[str, Any]], *, path: Path | None = None) -> N
 
 
 def clear_queue(*, path: Path | None = None) -> None:
-    target = path or queue_path()
+    target = _resolve_queue_path(path)
     try:
         if target.is_file():
             target.unlink()

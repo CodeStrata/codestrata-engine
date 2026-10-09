@@ -5,9 +5,6 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
-
-from codestrata.domain.quality_metrics.common import QualityMetricAvailability
-from codestrata.domain.quality_metrics.recall import build_recall_metric
 from validation.compare import pack_precision_from_result
 from validation.inventory import compute_precision_recall
 from validation.models import PackPrecisionRecord, ValidationVerdict
@@ -25,6 +22,9 @@ from validation.summary_from_records import (
     render_summary_markdown,
     validate_repository_record,
 )
+
+from codestrata.domain.quality_metrics.common import QualityMetricAvailability
+from codestrata.domain.quality_metrics.recall import build_recall_metric
 
 
 class _Result:
@@ -59,9 +59,7 @@ def test_pack_result_projects_canonical_recall_metric() -> None:
         _Result(repository_id="local-security-hygiene", tp=3, fp=1, fn=1, amb=2),
     )
     assert record.recall == pytest.approx(0.75)
-    assert record.recall_metric_id == (
-        "recall:repository:local-security-hygiene:security"
-    )
+    assert record.recall_metric_id == ("recall:repository:local-security-hygiene:security")
     assert record.recall_metric is not None
     assert Decimal(str(record.recall_metric["value"])) == Decimal("0.75")
     # FP and ambiguous do not enter recall.

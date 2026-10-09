@@ -74,7 +74,8 @@ def check_activation(
         # when category exactly matches pack_id — soft check via metadata only.
         for finding in bundle.findings:
             provider = str(finding.get("provider_name") or finding.get("category") or "")
-            # AI pack off must not claim AI ready via finding title alone — terminology module owns claims.
+            # AI pack off must not claim AI ready via finding title alone — terminology module owns
+            # claims.
             _ = provider
 
         cov = bundle.assessment.get("assessment_coverage") or {}

@@ -201,9 +201,7 @@ def merge_roadmap_initiatives(
         other.supporting_priority_action_ids,
     )
     source_actions = tuple(
-        actions_by_id[action_id]
-        for action_id in supporting_pas
-        if action_id in actions_by_id
+        actions_by_id[action_id] for action_id in supporting_pas if action_id in actions_by_id
     )
     if source_actions:
         rec_ids: tuple[str, ...] = ()
@@ -279,9 +277,7 @@ def build_roadmap_from_priority_actions(
         for prior in prerequisite_phases(item.phase):
             deps.extend(by_phase.get(prior, ()))
         linked.append(
-            item.model_copy(
-                update={"depends_on_initiative_ids": tuple(sorted(set(deps)))}
-            )
+            item.model_copy(update={"depends_on_initiative_ids": tuple(sorted(set(deps)))})
         )
 
     phases = _build_phases(linked)

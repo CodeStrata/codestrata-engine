@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import os
 import subprocess
+from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from verification.cli_initialization.artifacts import (
     classify_artifacts,
@@ -26,8 +27,8 @@ from verification.cli_initialization.workspace import (
     create_minimal_repository,
     create_nested_repository,
     create_space_path_repository,
-    create_unsupported_shape_repository,
     create_unrelated_files_repository,
+    create_unsupported_shape_repository,
     ensure_no_codestrata_config,
     file_digest,
     list_relative_files,
@@ -141,7 +142,11 @@ def run_scenario_a_minimal(
         )
     )
     if doctor_pre.exit_code == 0:
-        return _fail("A_minimal_supported_repository", "doctor unexpectedly passed before init", commands=commands)
+        return _fail(
+            "A_minimal_supported_repository",
+            "doctor unexpectedly passed before init",
+            commands=commands,
+        )
 
     init = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     init_cls = classify_output(init.stdout, init.stderr, exit_code=init.exit_code)
@@ -155,7 +160,12 @@ def run_scenario_a_minimal(
         )
     )
     if init.exit_code != 0 or init_cls.get("init") != "success":
-        return _fail("A_minimal_supported_repository", "init failed", commands=commands, failures=["init_failed"])
+        return _fail(
+            "A_minimal_supported_repository",
+            "init failed",
+            commands=commands,
+            failures=["init_failed"],
+        )
     if init_cls.get("safety") == "traceback_present":
         return _fail("A_minimal_supported_repository", "traceback on init", commands=commands)
 
@@ -187,7 +197,9 @@ def run_scenario_a_minimal(
         cwd=repo,
         env=env,
     )
-    post_cls = classify_output(doctor_post.stdout, doctor_post.stderr, exit_code=doctor_post.exit_code)
+    post_cls = classify_output(
+        doctor_post.stdout, doctor_post.stderr, exit_code=doctor_post.exit_code
+    )
     commands.append(
         command_record(
             "doctor_post_init",
@@ -250,7 +262,9 @@ def run_scenario_b_empty(
     init = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     cls = classify_output(init.stdout, init.stderr, exit_code=init.exit_code)
     commands.append(
-        command_record("init", ["init"], exit_code=init.exit_code, classifications=cls, detail="empty repo")
+        command_record(
+            "init", ["init"], exit_code=init.exit_code, classifications=cls, detail="empty repo"
+        )
     )
     if init.exit_code != 0:
         return _fail("B_empty_repository", "init failed on empty repo", commands=commands)
@@ -258,7 +272,12 @@ def run_scenario_b_empty(
     after = snapshot_workspace(repo)
     ok, failures = compare_snapshots(before, after, allowed_new={"codestrata.toml"})
     if not ok:
-        return _fail("B_empty_repository", "fabricated or modified files", commands=commands, failures=failures)
+        return _fail(
+            "B_empty_repository",
+            "fabricated or modified files",
+            commands=commands,
+            failures=failures,
+        )
     return _success(
         "B_empty_repository",
         "empty repository accepts init without fabricating sources",
@@ -284,13 +303,27 @@ def run_scenario_c_existing_valid(
     second = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     cls = classify_output(second.stdout, second.stderr, exit_code=second.exit_code)
     commands = [
-        command_record("init_first", ["init"], exit_code=first.exit_code, classifications={"init": "success"}, detail="first"),
-        command_record("init_second", ["init"], exit_code=second.exit_code, classifications=cls, detail="existing"),
+        command_record(
+            "init_first",
+            ["init"],
+            exit_code=first.exit_code,
+            classifications={"init": "success"},
+            detail="first",
+        ),
+        command_record(
+            "init_second",
+            ["init"],
+            exit_code=second.exit_code,
+            classifications=cls,
+            detail="existing",
+        ),
     ]
     if second.exit_code == 0:
         return _fail("C_existing_valid_configuration", "silent overwrite", commands=commands)
     if cls.get("init") != "existing_config_refused":
-        return _fail("C_existing_valid_configuration", "unexpected message class", commands=commands)
+        return _fail(
+            "C_existing_valid_configuration", "unexpected message class", commands=commands
+        )
     if (repo / "codestrata.toml").read_bytes() != original:
         return _fail("C_existing_valid_configuration", "config bytes changed", commands=commands)
     if cls.get("safety") == "traceback_present":
@@ -319,12 +352,18 @@ def run_scenario_d_malformed(
     result = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="malformed")
+        command_record(
+            "init", ["init"], exit_code=result.exit_code, classifications=cls, detail="malformed"
+        )
     ]
     if result.exit_code == 0:
-        return _fail("D_malformed_existing_configuration", "overwrote malformed config", commands=commands)
+        return _fail(
+            "D_malformed_existing_configuration", "overwrote malformed config", commands=commands
+        )
     if cfg.read_bytes() != bad:
-        return _fail("D_malformed_existing_configuration", "malformed bytes not preserved", commands=commands)
+        return _fail(
+            "D_malformed_existing_configuration", "malformed bytes not preserved", commands=commands
+        )
     if cls.get("safety") == "traceback_present":
         return _fail("D_malformed_existing_configuration", "traceback", commands=commands)
     return _success(
@@ -359,10 +398,14 @@ def run_scenario_e_unwritable(
         restore_writable(repo)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="unwritable")
+        command_record(
+            "init", ["init"], exit_code=result.exit_code, classifications=cls, detail="unwritable"
+        )
     ]
     if result.exit_code == 0:
-        return _fail("E_unwritable_repository", "init succeeded on unwritable repo", commands=commands)
+        return _fail(
+            "E_unwritable_repository", "init succeeded on unwritable repo", commands=commands
+        )
     if (repo / "codestrata.toml").exists():
         return _fail("E_unwritable_repository", "partial config created", commands=commands)
     if cls.get("safety") == "traceback_present":
@@ -390,7 +433,9 @@ def run_scenario_f_nested(
     result = _run_cli(codestrata, ["init"], cwd=nested, env=env)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="nested cwd")
+        command_record(
+            "init", ["init"], exit_code=result.exit_code, classifications=cls, detail="nested cwd"
+        )
     ]
     if result.exit_code != 0:
         return _fail("F_nested_working_directory", "init failed in nested cwd", commands=commands)
@@ -399,12 +444,20 @@ def run_scenario_f_nested(
     root_cfg = root / "codestrata.toml"
     if active.discovers_repository_root:
         if not root_cfg.exists() or nested_cfg.exists():
-            return _fail("F_nested_working_directory", "root discovery contract mismatch", commands=commands)
+            return _fail(
+                "F_nested_working_directory", "root discovery contract mismatch", commands=commands
+            )
     else:
         if not nested_cfg.exists():
-            return _fail("F_nested_working_directory", "config not written to nested cwd", commands=commands)
+            return _fail(
+                "F_nested_working_directory", "config not written to nested cwd", commands=commands
+            )
         if root_cfg.exists():
-            return _fail("F_nested_working_directory", "config incorrectly written to repo root", commands=commands)
+            return _fail(
+                "F_nested_working_directory",
+                "config incorrectly written to repo root",
+                commands=commands,
+            )
     return _success(
         "F_nested_working_directory",
         "nested cwd writes local config (no upward root discovery)",
@@ -427,10 +480,14 @@ def run_scenario_g_spaces(
     result = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="spaces")
+        command_record(
+            "init", ["init"], exit_code=result.exit_code, classifications=cls, detail="spaces"
+        )
     ]
     if result.exit_code != 0:
-        return _fail("G_path_containing_spaces", "init failed with spaces in path", commands=commands)
+        return _fail(
+            "G_path_containing_spaces", "init failed with spaces in path", commands=commands
+        )
     if not (repo / "codestrata.toml").is_file():
         return _fail("G_path_containing_spaces", "config missing", commands=commands)
     return _success(
@@ -458,19 +515,33 @@ def run_scenario_h_noninteractive(
     result = _run_cli(codestrata, ["init"], cwd=repo, env=isolated)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="noninteractive")
+        command_record(
+            "init",
+            ["init"],
+            exit_code=result.exit_code,
+            classifications=cls,
+            detail="noninteractive",
+        )
     ]
     combined = (result.stdout + result.stderr).lower()
     if result.exit_code != 0:
         return _fail("H_non_interactive_environment", "init blocked", commands=commands)
     for needle in ("password", "consent", "y/n", "continue?", "telemetry upload"):
         if needle in combined:
-            return _fail("H_non_interactive_environment", f"prompt-like output: {needle}", commands=commands)
+            return _fail(
+                "H_non_interactive_environment", f"prompt-like output: {needle}", commands=commands
+            )
     ok_cfg, failures, evidence = validate_generated_config(repo / "codestrata.toml")
     if not ok_cfg:
-        return _fail("H_non_interactive_environment", "config invalid", commands=commands, failures=failures)
+        return _fail(
+            "H_non_interactive_environment", "config invalid", commands=commands, failures=failures
+        )
     if evidence.get("telemetry_section_present"):
-        return _fail("H_non_interactive_environment", "telemetry section unexpectedly present", commands=commands)
+        return _fail(
+            "H_non_interactive_environment",
+            "telemetry section unexpectedly present",
+            commands=commands,
+        )
     return _success(
         "H_non_interactive_environment",
         "non-interactive init without prompts or silent AI/telemetry enablement",
@@ -493,11 +564,19 @@ def run_scenario_i_unsupported(
     result = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="unsupported shape")
+        command_record(
+            "init",
+            ["init"],
+            exit_code=result.exit_code,
+            classifications=cls,
+            detail="unsupported shape",
+        )
     ]
     # Current product: init does not inspect repository shape; scaffolding succeeds.
     if result.exit_code != 0:
-        return _fail("I_unsupported_repository_shape", "init failed unexpectedly", commands=commands)
+        return _fail(
+            "I_unsupported_repository_shape", "init failed unexpectedly", commands=commands
+        )
     return _success(
         "I_unsupported_repository_shape",
         "init scaffolds regardless of unsupported binary-only shape",
@@ -522,14 +601,21 @@ def run_scenario_j_unrelated(
     result = _run_cli(codestrata, ["init"], cwd=repo, env=env)
     cls = classify_output(result.stdout, result.stderr, exit_code=result.exit_code)
     commands = [
-        command_record("init", ["init"], exit_code=result.exit_code, classifications=cls, detail="unrelated")
+        command_record(
+            "init", ["init"], exit_code=result.exit_code, classifications=cls, detail="unrelated"
+        )
     ]
     if result.exit_code != 0:
         return _fail("J_existing_unrelated_files", "init failed", commands=commands)
     after = snapshot_workspace(repo)
     ok, failures = compare_snapshots(before, after, allowed_new={"codestrata.toml"})
     if not ok:
-        return _fail("J_existing_unrelated_files", "unrelated files changed", commands=commands, failures=failures)
+        return _fail(
+            "J_existing_unrelated_files",
+            "unrelated files changed",
+            commands=commands,
+            failures=failures,
+        )
     return _success(
         "J_existing_unrelated_files",
         "unrelated files preserved",
@@ -537,9 +623,7 @@ def run_scenario_j_unrelated(
         expected_artifacts=["codestrata.toml"],
         actual_artifacts=list_relative_files(repo),
         digests={"codestrata.toml": file_digest(repo / "codestrata.toml")},
-        classifications=classify_artifacts(
-            repo, pre_existing=set(before.digests)
-        ),
+        classifications=classify_artifacts(repo, pre_existing=set(before.digests)),
     )
 
 
@@ -555,8 +639,20 @@ def run_scenario_k_determinism(
     a = _run_cli(codestrata, ["init"], cwd=first_repo, env=env)
     b = _run_cli(codestrata, ["init"], cwd=second_repo, env=env)
     commands = [
-        command_record("init_a", ["init"], exit_code=a.exit_code, classifications=classify_output(a.stdout, a.stderr, exit_code=a.exit_code), detail="first"),
-        command_record("init_b", ["init"], exit_code=b.exit_code, classifications=classify_output(b.stdout, b.stderr, exit_code=b.exit_code), detail="second"),
+        command_record(
+            "init_a",
+            ["init"],
+            exit_code=a.exit_code,
+            classifications=classify_output(a.stdout, a.stderr, exit_code=a.exit_code),
+            detail="first",
+        ),
+        command_record(
+            "init_b",
+            ["init"],
+            exit_code=b.exit_code,
+            classifications=classify_output(b.stdout, b.stderr, exit_code=b.exit_code),
+            detail="second",
+        ),
     ]
     if a.exit_code != 0 or b.exit_code != 0:
         return _fail("K_determinism_pair", "init failed in determinism pair", commands=commands)

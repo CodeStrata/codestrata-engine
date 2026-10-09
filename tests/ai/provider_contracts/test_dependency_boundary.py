@@ -130,7 +130,7 @@ def test_no_file_under_ai_or_extensions_imports_provider_contracts_except_new_pa
     for path in sorted((src_root / "ai").rglob("*.py")):
         if "provider_contracts" in path.parts:
             continue
-        relative = str(path.relative_to(src_root))
+        relative = path.relative_to(src_root).as_posix()
         if relative.startswith(_MIGRATED_PATH_PREFIXES):
             continue
         imported = _imported_module_names(path)

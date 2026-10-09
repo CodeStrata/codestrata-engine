@@ -23,11 +23,11 @@ from codestrata.telemetry.consent_policy import (
 from codestrata.telemetry.non_interactive_policy import (
     COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_VERSION,
 )
-from codestrata.telemetry.preview_policy import (
-    COMMUNITY_TELEMETRY_PREVIEW_POLICY_VERSION,
-)
 from codestrata.telemetry.pre_transport_policy import (
     COMMUNITY_TELEMETRY_PRE_TRANSPORT_PRIVACY_POLICY_VERSION,
+)
+from codestrata.telemetry.preview_policy import (
+    COMMUNITY_TELEMETRY_PREVIEW_POLICY_VERSION,
 )
 from codestrata.telemetry.prompt_policy import (
     COMMUNITY_TELEMETRY_INTERACTIVE_CONSENT_POLICY_VERSION,

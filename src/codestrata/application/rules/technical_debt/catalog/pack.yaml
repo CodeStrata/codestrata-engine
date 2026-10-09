@@ -1,0 +1,57 @@
+api_version: codestrata.io/ruleset/v1
+kind: RuleSet
+metadata:
+  id: codestrata.quality.core
+  version: 1.0.0
+  title: Structural Quality Core
+  owner: codestrata
+extends: []
+selectors: {}
+rules:
+  quality.complexity:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  quality.nesting:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  quality.clone_indicator:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  quality.test_association:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  maintainability.hotspot:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  maintainability.dependency_age:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  technical_debt.large-callable:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  technical_debt.excessive-branching:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  technical_debt.deep-nesting:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  technical_debt.excessive-parameters:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  technical_debt.oversized-type:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+deferred_rule_ids:
+  - technical_debt.duplication
+  - technical_debt.code-smell

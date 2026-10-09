@@ -212,9 +212,7 @@ class TechnicalDebtFindingInventory(BaseModel):
         )
     )
     test: TechnicalDebtRoleInventory = Field(
-        default_factory=lambda: TechnicalDebtRoleInventory(
-            source_role=TechnicalDebtSourceRole.TEST
-        )
+        default_factory=lambda: TechnicalDebtRoleInventory(source_role=TechnicalDebtSourceRole.TEST)
     )
     unknown: TechnicalDebtRoleInventory = Field(
         default_factory=lambda: TechnicalDebtRoleInventory(
@@ -392,9 +390,7 @@ class TechnicalDebtAssessmentSection(BaseModel):
     execution_summary: TechnicalDebtExecutionSummary = Field(
         default_factory=TechnicalDebtExecutionSummary
     )
-    coverage: TechnicalDebtCoverageSummary = Field(
-        default_factory=TechnicalDebtCoverageSummary
-    )
+    coverage: TechnicalDebtCoverageSummary = Field(default_factory=TechnicalDebtCoverageSummary)
     finding_ids: tuple[str, ...] = ()
     finding_summaries: tuple[TechnicalDebtFindingReference, ...] = ()
     all_finding_ids: tuple[str, ...] = ()
@@ -405,9 +401,7 @@ class TechnicalDebtAssessmentSection(BaseModel):
     hotspot_inventory: TechnicalDebtHotspotInventory = Field(
         default_factory=TechnicalDebtHotspotInventory
     )
-    synthesis: TechnicalDebtSynthesisResult = Field(
-        default_factory=TechnicalDebtSynthesisResult
-    )
+    synthesis: TechnicalDebtSynthesisResult = Field(default_factory=TechnicalDebtSynthesisResult)
     themes: tuple[TechnicalDebtTheme, ...] = ()
     theme_ids: tuple[str, ...] = ()
     concentration_facts: tuple[TechnicalDebtConcentrationFact, ...] = ()

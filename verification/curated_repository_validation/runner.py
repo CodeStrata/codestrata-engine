@@ -3,22 +3,20 @@
 from __future__ import annotations
 
 import json
-import shutil
-import traceback
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 from verification.cli_installation.environment import engine_root_from_package
+from verification.curated_repository_validation.artifacts import (
+    discover_run_dir,
+    preserve_run_artifacts,
+    validate_artifacts,
+)
 from verification.curated_repository_validation.assessment import (
     build_assessment_env,
     cleanup_venv,
     install_codestrata_cli,
     run_customer_workflow,
-)
-from verification.curated_repository_validation.artifacts import (
-    discover_run_dir,
-    preserve_run_artifacts,
-    validate_artifacts,
 )
 from verification.curated_repository_validation.batches import (
     resolve_batches,
@@ -115,9 +113,7 @@ def _run_one_repository(
 ) -> RepositoryValidationResult:
     limitations: list[str] = []
     if entry.requires_submodules:
-        limitations.append(
-            "catalog declares submodules; assessed without initializing submodules"
-        )
+        limitations.append("catalog declares submodules; assessed without initializing submodules")
     if entry.requires_git_lfs:
         limitations.append("catalog declares Git LFS; LFS objects were not fetched")
 
@@ -146,6 +142,7 @@ def _run_one_repository(
     )
 
     try:
+
         def _clone() -> CloneResult:
             cleanup_clone(workspace.clone_dir)
             return clone_release_entry(
@@ -296,7 +293,12 @@ def _run_one_repository(
             record.cause_scope = (
                 "engine_product"
                 if classification
-                in {"schema_failure", "traceability_failure", "privacy_failure", "artifact_malformed"}
+                in {
+                    "schema_failure",
+                    "traceability_failure",
+                    "privacy_failure",
+                    "artifact_malformed",
+                }
                 else "repository_specific"
             )
             record.verdict = "FAIL"
@@ -484,12 +486,9 @@ def run_curated_repository_validation(
     contract = default_contract()
 
     if not skip_readiness_gate:
-        readiness = assert_readiness_pass(engine)
-    else:
-        readiness = {}
+        assert_readiness_pass(engine)
 
     catalog = load_catalog_document(engine)
-    entries = load_release_validation_entries(engine)
     selected_tiers = tiers or TIER_ORDER
 
     codestrata, venv_dir = install_codestrata_cli(engine)
@@ -542,10 +541,11 @@ def run_curated_repository_validation(
     # Prefer records on disk if re-aggregating.
     if not all_results:
         for raw in list_repository_records(out):
-            all_results.append(RepositoryValidationResult(**{
-                k: raw.get(k)
-                for k in RepositoryValidationResult.__dataclass_fields__
-            }))
+            all_results.append(
+                RepositoryValidationResult(
+                    **{k: raw.get(k) for k in RepositoryValidationResult.__dataclass_fields__}
+                )
+            )
 
     report = build_final_report(
         catalog_id=catalog.get("catalog_id"),

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from unittest.mock import patch
 
 from codestrata.telemetry.decisions import TelemetryDecision, TelemetryDecisionSource
 from codestrata.telemetry.service import (
@@ -53,16 +52,11 @@ def test_E_F_persisted_preference_skips_prompt(tmp_path: Path, monkeypatch) -> N
 
     assert calls == 0
     assert telemetry.runtime.session.decision is TelemetryDecision.ALLOWED_FOR_SESSION
-    assert (
-        telemetry.runtime.session.decision_source
-        is TelemetryDecisionSource.PERSISTED_PREFERENCE
-    )
+    assert telemetry.runtime.session.decision_source is TelemetryDecisionSource.PERSISTED_PREFERENCE
     assert {p.name: p.read_bytes() for p in home.iterdir()} == before
 
 
-def test_legacy_enable_persists_preference_and_skips_prompt(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_legacy_enable_persists_preference_and_skips_prompt(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -77,6 +71,4 @@ def test_legacy_enable_persists_preference_and_skips_prompt(
         echo_func=lambda _m: None,
     )
     assert telemetry.runtime.session.decision is TelemetryDecision.ALLOWED_FOR_SESSION
-    assert (
-        telemetry.runtime.session.decision_source.value == "persisted_preference"
-    )
+    assert telemetry.runtime.session.decision_source.value == "persisted_preference"

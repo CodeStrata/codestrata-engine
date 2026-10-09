@@ -59,9 +59,7 @@ def test_jitter_disabled_by_default_and_deterministic_without_it() -> None:
 
 
 def test_jitter_when_enabled_is_still_deterministic_for_the_same_attempt() -> None:
-    policy = BackoffPolicy(
-        strategy=BackoffStrategy.FIXED, base_delay_seconds=10.0, jitter=True
-    )
+    policy = BackoffPolicy(strategy=BackoffStrategy.FIXED, base_delay_seconds=10.0, jitter=True)
     first = compute_backoff_delay(policy, 3)
     second = compute_backoff_delay(policy, 3)
     assert first == second

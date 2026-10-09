@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 from verification.assessment_consistency.models import RepositoryBundle
 
@@ -21,7 +22,9 @@ def verify_sv10_determinism_samples(sv10_dir: Path) -> dict[str, Any]:
     samples = load_sv10_determinism_samples(sv10_dir)
     expected = {"cleanarchitecture", "django", "bookstack", "aspnetcore"}
     ids = {str(s.get("repository_id")) for s in samples}
-    ok = expected.issubset(ids) and all(bool(s.get("ok")) for s in samples if s.get("repository_id") in expected)
+    ok = expected.issubset(ids) and all(
+        bool(s.get("ok")) for s in samples if s.get("repository_id") in expected
+    )
     return {
         "ok": ok,
         "expected_ids": sorted(expected),

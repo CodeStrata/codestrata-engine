@@ -24,9 +24,7 @@ class DeclaredAssessmentArea:
 # Finding-count based areas are intentionally omitted.
 HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
     "technology_inventory": (
-        DeclaredAssessmentArea(
-            "language_detection", "Language detection", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("language_detection", "Language detection", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "build_system_detection", "Build system detection", AreaClaimState.CLAIMED
         ),
@@ -38,26 +36,16 @@ HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
         DeclaredAssessmentArea(
             "version_availability", "Version availability", AreaClaimState.PARTIAL
         ),
-        DeclaredAssessmentArea(
-            "composition_facts", "Composition facts", AreaClaimState.PARTIAL
-        ),
+        DeclaredAssessmentArea("composition_facts", "Composition facts", AreaClaimState.PARTIAL),
     ),
     "architecture_intelligence": (
-        DeclaredAssessmentArea(
-            "extraction_coverage", "Source extraction", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("extraction_coverage", "Source extraction", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "classification_coverage", "Unit classification", AreaClaimState.CLAIMED
         ),
-        DeclaredAssessmentArea(
-            "framework_coverage", "Framework evidence", AreaClaimState.PARTIAL
-        ),
-        DeclaredAssessmentArea(
-            "build_metadata_coverage", "Build metadata", AreaClaimState.PARTIAL
-        ),
-        DeclaredAssessmentArea(
-            "architecture_rules", "Architecture rules", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("framework_coverage", "Framework evidence", AreaClaimState.PARTIAL),
+        DeclaredAssessmentArea("build_metadata_coverage", "Build metadata", AreaClaimState.PARTIAL),
+        DeclaredAssessmentArea("architecture_rules", "Architecture rules", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "enterprise_context_coverage",
             "Enterprise context",
@@ -101,9 +89,7 @@ HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
             "Security capability",
             AreaClaimState.CLAIMED,
         ),
-        DeclaredAssessmentArea(
-            "security_rules_enabled", "Security rules", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("security_rules_enabled", "Security rules", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "security_evidence_availability",
             "Sensitive evidence availability",
@@ -119,9 +105,7 @@ HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
         DeclaredAssessmentArea(
             "cloud_capability_requested", "Cloud capability", AreaClaimState.CLAIMED
         ),
-        DeclaredAssessmentArea(
-            "cloud_rules_enabled", "Cloud rules", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("cloud_rules_enabled", "Cloud rules", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "cloud_evidence_availability",
             "Cloud artifact evidence",
@@ -155,9 +139,7 @@ HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
         DeclaredAssessmentArea(
             "testing_capability_requested", "Testing capability", AreaClaimState.CLAIMED
         ),
-        DeclaredAssessmentArea(
-            "testing_rules_enabled", "Testing rules", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("testing_rules_enabled", "Testing rules", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "testing_evidence_availability",
             "Testing evidence",
@@ -165,6 +147,23 @@ HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
         ),
         DeclaredAssessmentArea(
             "testing_inventory_complete", "Testing inventory", AreaClaimState.PARTIAL
+        ),
+    ),
+    "quality_intelligence": (
+        DeclaredAssessmentArea(
+            "testing_capability_requested", "Testing capability", AreaClaimState.CLAIMED
+        ),
+        DeclaredAssessmentArea("testing_rules_enabled", "Testing rules", AreaClaimState.CLAIMED),
+        DeclaredAssessmentArea(
+            "testing_evidence_availability",
+            "Testing evidence",
+            AreaClaimState.CLAIMED,
+        ),
+        DeclaredAssessmentArea(
+            "testing_inventory_complete", "Testing inventory", AreaClaimState.PARTIAL
+        ),
+        DeclaredAssessmentArea(
+            "quality_capability_requested", "Quality capability", AreaClaimState.CLAIMED
         ),
     ),
     "performance": (
@@ -196,9 +195,7 @@ HEAD_DECLARED_AREAS: dict[str, tuple[DeclaredAssessmentArea, ...]] = {
             "Finding-backed recommendations",
             AreaClaimState.CLAIMED,
         ),
-        DeclaredAssessmentArea(
-            "priority_actions", "Priority Actions", AreaClaimState.CLAIMED
-        ),
+        DeclaredAssessmentArea("priority_actions", "Priority Actions", AreaClaimState.CLAIMED),
         DeclaredAssessmentArea(
             "roadmap_chain", "Roadmap chain completeness", AreaClaimState.PARTIAL
         ),

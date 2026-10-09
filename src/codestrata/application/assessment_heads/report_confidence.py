@@ -71,12 +71,18 @@ def build_assessment_head_confidence_map(
                 if str(note).strip():
                     limitations.append(str(note).strip())
         # Deferred EvidenceRef packs stay honest when Finding Confidence is unavailable.
-        if head_id in {
-            AssessmentHead.CLOUD_READINESS.value,
-            AssessmentHead.AI_READINESS.value,
-            "testing",
-            "performance",
-        } and levels and all(item == "unavailable" for item in levels):
+        if (
+            head_id
+            in {
+                AssessmentHead.CLOUD_READINESS.value,
+                AssessmentHead.AI_READINESS.value,
+                AssessmentHead.QUALITY_INTELLIGENCE.value,
+                "testing",
+                "performance",
+            }
+            and levels
+            and all(item == "unavailable" for item in levels)
+        ):
             limitations.append(
                 "EvidenceRef mapping for this assessment head is deferred; "
                 "Finding Confidence remains Unavailable."
@@ -88,9 +94,7 @@ def build_assessment_head_confidence_map(
                 for other in ASSESSMENT_RESULT_HEADS
                 if other is not AssessmentHead.MODERNIZATION_ASSESSMENT
                 and other.value in out
-                and out[other.value]
-                .get("component_summary", {})
-                .get("assessment_status")
+                and out[other.value].get("component_summary", {}).get("assessment_status")
                 not in {"not_enabled", "not_available", None, ""}
             )
         coverage_payload = coverage_map.get(head_id)
@@ -106,8 +110,7 @@ def build_assessment_head_confidence_map(
             contributing_head_levels=contributing,
             inventory_confidence=(
                 str(section.get("confidence") or "").strip().lower()
-                if head is AssessmentHead.TECHNOLOGY_INVENTORY
-                and isinstance(section, Mapping)
+                if head is AssessmentHead.TECHNOLOGY_INVENTORY and isinstance(section, Mapping)
                 else None
             ),
             assessment_coverage=coverage_payload,
@@ -124,9 +127,7 @@ def build_assessment_head_confidence_map(
         status = _status_from_pack(pack_status)
         levels = by_head.get(head_id, ())
         limitations = [
-            str(note).strip()
-            for note in section.get("limitations") or ()
-            if str(note).strip()
+            str(note).strip() for note in section.get("limitations") or () if str(note).strip()
         ]
         limitations.append(
             "EvidenceRef mapping for this assessment head is deferred; "
@@ -189,9 +190,7 @@ def _group_finding_levels(
             head_id = head.value
         buckets.setdefault(head_id, []).append(view.finding_confidence_level or "unavailable")
         completeness.setdefault(head_id, []).append(view.evidence_completeness)
-    out: dict[str, tuple[str, ...]] = {
-        key: tuple(values) for key, values in buckets.items()
-    }
+    out: dict[str, tuple[str, ...]] = {key: tuple(values) for key, values in buckets.items()}
     for key, values in completeness.items():
         out[f"{key}__completeness"] = tuple(values)
     return out
@@ -213,6 +212,7 @@ def _head_to_pack_key(head: AssessmentHead) -> str | None:
         AssessmentHead.TECHNICAL_DEBT_INTELLIGENCE: "technical_debt",
         AssessmentHead.DEPENDENCY_INTELLIGENCE: "dependency",
         AssessmentHead.SECURITY_INTELLIGENCE: "security",
+        AssessmentHead.QUALITY_INTELLIGENCE: "testing",
         AssessmentHead.CLOUD_READINESS: "cloud",
         AssessmentHead.AI_READINESS: "ai_readiness",
         AssessmentHead.MODERNIZATION_ASSESSMENT: "roadmap",

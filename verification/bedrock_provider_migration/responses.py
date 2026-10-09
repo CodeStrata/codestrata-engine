@@ -100,9 +100,9 @@ def check_undecodable_text_is_not_an_error() -> CheckResult:
 
 
 def check_a_text_expectation_skips_decoding() -> CheckResult:
-    result = build_bedrock_provider(
-        client=fixtures.Client(fixtures.converse_response())
-    ).execute(fixtures.provider_request(response_expectation=ResponseExpectation.TEXT))
+    result = build_bedrock_provider(client=fixtures.Client(fixtures.converse_response())).execute(
+        fixtures.provider_request(response_expectation=ResponseExpectation.TEXT)
+    )
     content = result.content
     return CheckResult(
         name="a_text_expectation_returns_raw_text_without_decoding_a_payload",
@@ -166,17 +166,12 @@ def check_a_structural_failure_is_failed_not_unavailable() -> CheckResult:
 
 def check_an_oversized_response_degrades_gracefully() -> CheckResult:
     oversized = "x" * (response_mapping.MAX_RESPONSE_TEXT_LENGTH + 1)
-    outcome = response_mapping.extract_converse_response(
-        fixtures.converse_response(text=oversized)
-    )
+    outcome = response_mapping.extract_converse_response(fixtures.converse_response(text=oversized))
     failure = outcome.failure
     return CheckResult(
         name="an_implausibly_large_response_becomes_a_bounded_invalid_response_failure",
         category="responses",
-        ok=(
-            failure is not None
-            and failure.error.code == error_mapping.CODE_UNREADABLE_RESPONSE
-        ),
+        ok=(failure is not None and failure.error.code == error_mapping.CODE_UNREADABLE_RESPONSE),
         detail=f"code={failure.error.code if failure else None}",
     )
 

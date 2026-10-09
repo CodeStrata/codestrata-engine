@@ -56,10 +56,16 @@ def temporary_askpass_context(
 
     try:
         temp_directory = tempfile.mkdtemp(prefix="codestrata-git-auth-")
-        os.chmod(temp_directory, stat.S_IRWXU)
+        try:
+            os.chmod(temp_directory, stat.S_IRWXU)
+        except OSError:
+            pass
         askpass_path = Path(temp_directory) / "codestrata-askpass.sh"
-        askpass_path.write_text(_ASKPASS_SCRIPT, encoding="utf-8")
-        os.chmod(askpass_path, stat.S_IRWXU)
+        askpass_path.write_text(_ASKPASS_SCRIPT, encoding="utf-8", newline="\n")
+        try:
+            os.chmod(askpass_path, stat.S_IRWXU)
+        except OSError:
+            pass
 
         redactor = redactor.with_helper_paths(str(askpass_path), temp_directory)
         environment = askpass_environment_overrides(

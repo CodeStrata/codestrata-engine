@@ -110,9 +110,7 @@ def inspect_architecture_assessment(
                     "architecture_pack_version": payload.get("architecture_pack_version"),
                     "finding_ids": payload.get("finding_ids", []),
                     "conclusion_ids": payload.get("conclusion_ids", []),
-                    "recommendation_group_ids": payload.get(
-                        "recommendation_group_ids", []
-                    ),
+                    "recommendation_group_ids": payload.get("recommendation_group_ids", []),
                     "business_impact": payload.get("business_impact"),
                     "execution_summary": payload.get("execution_summary"),
                 },
@@ -124,15 +122,11 @@ def inspect_architecture_assessment(
     typer.echo(f"section: {payload.get('section_id')}@{payload.get('section_version')}")
     typer.echo(f"status: {payload.get('status')}")
     typer.echo(
-        f"pack: {payload.get('architecture_pack_id')}@"
-        f"{payload.get('architecture_pack_version')}"
+        f"pack: {payload.get('architecture_pack_id')}@{payload.get('architecture_pack_version')}"
     )
     typer.echo(f"findings: {len(_as_list(payload.get('finding_ids')))}")
     typer.echo(f"conclusions: {len(_as_list(payload.get('conclusion_ids')))}")
-    typer.echo(
-        "recommendation groups: "
-        f"{len(_as_list(payload.get('recommendation_group_ids')))}"
-    )
+    typer.echo(f"recommendation groups: {len(_as_list(payload.get('recommendation_group_ids')))}")
 
 
 @assessment_app.command("findings")
@@ -147,9 +141,7 @@ def list_architecture_assessment_findings(
         return
     for item in findings:
         if isinstance(item, dict):
-            typer.echo(
-                f"{item.get('finding_id')} [{item.get('severity')}] {item.get('title')}"
-            )
+            typer.echo(f"{item.get('finding_id')} [{item.get('severity')}] {item.get('title')}")
 
 
 @assessment_app.command("conclusions")
@@ -160,15 +152,11 @@ def list_architecture_assessment_conclusions(
     payload = _load_assessment_artifact(artifact)
     conclusions = _as_list(payload.get("conclusions"))
     if json_output:
-        typer.echo(
-            json.dumps({"conclusions": conclusions}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"conclusions": conclusions}, indent=2, ensure_ascii=False))
         return
     for item in conclusions:
         if isinstance(item, dict):
-            typer.echo(
-                f"{item.get('conclusion_id')} [{item.get('category')}] {item.get('title')}"
-            )
+            typer.echo(f"{item.get('conclusion_id')} [{item.get('category')}] {item.get('title')}")
 
 
 @assessment_app.command("recommendations")
@@ -179,15 +167,11 @@ def list_architecture_assessment_recommendations(
     payload = _load_assessment_artifact(artifact)
     groups = _as_list(payload.get("recommendation_groups"))
     if json_output:
-        typer.echo(
-            json.dumps({"recommendation_groups": groups}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"recommendation_groups": groups}, indent=2, ensure_ascii=False))
         return
     for item in groups:
         if isinstance(item, dict):
-            typer.echo(
-                f"{item.get('recommendation_group_id')}: {item.get('title')}"
-            )
+            typer.echo(f"{item.get('recommendation_group_id')}: {item.get('title')}")
 
 
 @assessment_app.command("coverage")
@@ -205,9 +189,7 @@ def show_architecture_assessment_coverage(
         areas = _as_list(coverage.get("areas"))
     for item in areas:
         if isinstance(item, dict):
-            typer.echo(
-                f"{item.get('area_id')}: {item.get('status')} ratio={item.get('ratio')}"
-            )
+            typer.echo(f"{item.get('area_id')}: {item.get('status')} ratio={item.get('ratio')}")
 
 
 @assessment_app.command("limitations")
@@ -218,9 +200,7 @@ def show_architecture_assessment_limitations(
     payload = _load_assessment_artifact(artifact)
     limitations = _as_list(payload.get("limitations"))
     if json_output:
-        typer.echo(
-            json.dumps({"limitations": limitations}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"limitations": limitations}, indent=2, ensure_ascii=False))
         return
     for item in limitations:
         if isinstance(item, dict):
@@ -273,9 +253,7 @@ def inspect_architecture_report(
                     "status_label": section.get("status_label"),
                     "executive_summary": section.get("executive_summary"),
                     "architecture_pack_id": section.get("architecture_pack_id"),
-                    "architecture_pack_version": section.get(
-                        "architecture_pack_version"
-                    ),
+                    "architecture_pack_version": section.get("architecture_pack_version"),
                     "finding_count": len(_as_list(section.get("findings"))),
                     "conclusion_count": len(_as_list(section.get("conclusions"))),
                     "recommendation_group_count": len(
@@ -291,15 +269,11 @@ def inspect_architecture_report(
     typer.echo(f"section: {section.get('section_id')}@{section.get('section_version')}")
     typer.echo(f"status: {section.get('status_label')} ({section.get('status')})")
     typer.echo(
-        f"pack: {section.get('architecture_pack_id')}@"
-        f"{section.get('architecture_pack_version')}"
+        f"pack: {section.get('architecture_pack_id')}@{section.get('architecture_pack_version')}"
     )
     typer.echo(f"findings: {len(_as_list(section.get('findings')))}")
     typer.echo(f"conclusions: {len(_as_list(section.get('conclusions')))}")
-    typer.echo(
-        "recommendation groups: "
-        f"{len(_as_list(section.get('recommendation_groups')))}"
-    )
+    typer.echo(f"recommendation groups: {len(_as_list(section.get('recommendation_groups')))}")
     summary = section.get("executive_summary")
     if summary:
         typer.echo("")
@@ -314,15 +288,12 @@ def list_architecture_report_conclusions(
     section = _load_report_architecture_section(report)
     conclusions = _as_list(section.get("conclusions"))
     if json_output:
-        typer.echo(
-            json.dumps({"conclusions": conclusions}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"conclusions": conclusions}, indent=2, ensure_ascii=False))
         return
     for item in conclusions:
         if isinstance(item, dict):
             typer.echo(
-                f"{item.get('conclusion_id')} [{item.get('materiality')}] "
-                f"{item.get('title')}"
+                f"{item.get('conclusion_id')} [{item.get('materiality')}] {item.get('title')}"
             )
 
 
@@ -334,9 +305,7 @@ def list_architecture_report_recommendations(
     section = _load_report_architecture_section(report)
     groups = _as_list(section.get("recommendation_groups"))
     if json_output:
-        typer.echo(
-            json.dumps({"recommendation_groups": groups}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"recommendation_groups": groups}, indent=2, ensure_ascii=False))
         return
     for item in groups:
         if isinstance(item, dict):
@@ -357,8 +326,7 @@ def list_architecture_report_findings(
         if isinstance(item, dict):
             linked = "linked" if item.get("linked_to_conclusion") else "unlinked"
             typer.echo(
-                f"{item.get('finding_id')} [{item.get('severity')}] "
-                f"{item.get('title')} ({linked})"
+                f"{item.get('finding_id')} [{item.get('severity')}] {item.get('title')} ({linked})"
             )
 
 
@@ -370,15 +338,11 @@ def show_architecture_report_coverage(
     section = _load_report_architecture_section(report)
     coverage = _as_list(section.get("coverage_summary"))
     if json_output:
-        typer.echo(
-            json.dumps({"coverage_summary": coverage}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"coverage_summary": coverage}, indent=2, ensure_ascii=False))
         return
     for item in coverage:
         if isinstance(item, dict):
-            typer.echo(
-                f"{item.get('label')}: {item.get('status')} — {item.get('display')}"
-            )
+            typer.echo(f"{item.get('label')}: {item.get('status')} — {item.get('display')}")
 
 
 @report_app.command("limitations")
@@ -389,9 +353,7 @@ def show_architecture_report_limitations(
     section = _load_report_architecture_section(report)
     limitations = _as_list(section.get("limitations"))
     if json_output:
-        typer.echo(
-            json.dumps({"limitations": limitations}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"limitations": limitations}, indent=2, ensure_ascii=False))
         return
     for item in limitations:
         if isinstance(item, dict):
@@ -406,17 +368,14 @@ def show_architecture_report_traceability(
     section = _load_report_architecture_section(report)
     trace = section.get("traceability_summary") or {}
     if json_output:
-        typer.echo(
-            json.dumps({"traceability_summary": trace}, indent=2, ensure_ascii=False)
-        )
+        typer.echo(json.dumps({"traceability_summary": trace}, indent=2, ensure_ascii=False))
         return
     if isinstance(trace, dict):
         typer.echo(trace.get("summary") or f"edges: {trace.get('edge_count', 0)}")
         for item in _as_list(trace.get("sample_edges"))[:20]:
             if isinstance(item, dict):
                 typer.echo(
-                    f"{item.get('relation')}: {item.get('source_id')} -> "
-                    f"{item.get('target_id')}"
+                    f"{item.get('relation')}: {item.get('source_id')} -> {item.get('target_id')}"
                 )
 
 
@@ -460,9 +419,7 @@ def list_conclusions(
         typer.echo(json.dumps({"conclusions": conclusions}, indent=2, ensure_ascii=False))
         return
     for item in conclusions:
-        typer.echo(
-            f"{item.get('conclusion_id')} [{item.get('category')}] {item.get('title')}"
-        )
+        typer.echo(f"{item.get('conclusion_id')} [{item.get('category')}] {item.get('title')}")
 
 
 @conclusions_app.command("inspect")

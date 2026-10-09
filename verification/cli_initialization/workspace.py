@@ -3,11 +3,9 @@
 from __future__ import annotations
 
 import hashlib
-import os
 import stat
 from dataclasses import dataclass, field
 from pathlib import Path
-
 
 MINIMAL_SOURCE = """\
 # minimal supported fixture for SV.3

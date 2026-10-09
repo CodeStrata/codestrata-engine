@@ -29,11 +29,17 @@ def test_align_related_finding_ids_keeps_valid_drops_invalid_and_aliases() -> No
         allowed_finding_ids=allowed,
         alias_to_allowed=aliases,
     ) == ("keep-a", "keep-b")
-    assert align_related_finding_ids(
-        ["unknown-only"],
-        allowed_finding_ids=allowed,
-    ) == ()
-    assert align_related_finding_ids(
-        [],
-        allowed_finding_ids=allowed,
-    ) == ()
+    assert (
+        align_related_finding_ids(
+            ["unknown-only"],
+            allowed_finding_ids=allowed,
+        )
+        == ()
+    )
+    assert (
+        align_related_finding_ids(
+            [],
+            allowed_finding_ids=allowed,
+        )
+        == ()
+    )

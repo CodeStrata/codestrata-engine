@@ -24,10 +24,7 @@ def validate_provider_id(value: str) -> str:
 def validate_capability_id(value: str) -> str:
     compact = value.strip().lower()
     if not _CAPABILITY_ID_PATTERN.fullmatch(compact):
-        raise ValueError(
-            "capability_id must use dotted kebab form "
-            "(example: dependencies.imports)"
-        )
+        raise ValueError("capability_id must use dotted kebab form (example: dependencies.imports)")
     return compact
 
 

@@ -128,9 +128,7 @@ def build_effective_settings(
         },
         "analysis": {
             "runtime": {
-                "shared_source_text_cache": (
-                    settings.analysis.runtime.shared_source_text_cache
-                ),
+                "shared_source_text_cache": (settings.analysis.runtime.shared_source_text_cache),
                 "max_read_workers": settings.analysis.runtime.max_read_workers,
                 "max_source_files": settings.analysis.runtime.max_source_files,
                 "max_source_chars": settings.analysis.runtime.max_source_chars,

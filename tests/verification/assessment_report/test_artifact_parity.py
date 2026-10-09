@@ -19,7 +19,9 @@ def _run(tmp_path: Path, *, finding_id: str = "F-1") -> object:
         "schema_version": "1.2",
         "assessment": {
             "findings": [{"id": finding_id, "severity": "low"}],
-            "deterministic_recommendations": [{"id": "R-1", "supporting_finding_ids": [finding_id]}],
+            "deterministic_recommendations": [
+                {"id": "R-1", "supporting_finding_ids": [finding_id]}
+            ],
             "priority_actions": [],
             "evidence": [],
             "ai": {"executed": False, "provider_invoked": False, "status": "not_requested"},

@@ -6,7 +6,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-
 SCRIPT = r"""
 import json
 import sys
@@ -53,9 +52,7 @@ def test_D_subprocess_consent_not_reused(tmp_path: Path) -> None:
         "CODESTRATA_HOME": str(env_home),
         "CODESTRATA_TELEMETRY": "1",
         "CODESTRATA_TELEMETRY_ENDPOINT": "https://example.invalid/t",
-        "PYTHONPATH": str(
-            Path(__file__).resolve().parents[2] / "src"
-        ),
+        "PYTHONPATH": str(Path(__file__).resolve().parents[2] / "src"),
     }
     # Prefer repo venv python if available via sys.executable.
     allow = subprocess.run(

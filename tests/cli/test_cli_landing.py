@@ -29,9 +29,7 @@ from codestrata.cli.landing import (
 
 runner = CliRunner()
 _ANSI_RE = re.compile(r"\x1b\[[0-9;]*[A-Za-z]")
-_COLOR_SGR_RE = re.compile(
-    r"\x1b\[(?:\d*;)*(?:3[0-7]|4[0-7]|9[0-7]|10[0-7]|38|48)(?:;[0-9]+)*m"
-)
+_COLOR_SGR_RE = re.compile(r"\x1b\[(?:\d*;)*(?:3[0-7]|4[0-7]|9[0-7]|10[0-7]|38|48)(?:;[0-9]+)*m")
 
 
 def _visible_text(text: str) -> str:
@@ -202,19 +200,14 @@ def test_start_here_context_aware(tmp_path: Path) -> None:
     assert "Initialize" in content.headline
     assert content.command == "codestrata init"
 
-    (tmp_path / "codestrata.toml").write_text("[repository]\npath = \".\"\n", encoding="utf-8")
+    (tmp_path / "codestrata.toml").write_text('[repository]\npath = "."\n', encoding="utf-8")
     ctx = detect_start_here_context(cwd=tmp_path)
     content = start_here_content(ctx, columns=100)
     assert "Engineering Assessment" in content.headline
     assert content.command == "codestrata assess --repo ."
 
     report = (
-        tmp_path
-        / ".codestrata-artifacts"
-        / "assessments"
-        / "demo"
-        / "current"
-        / "assessment.html"
+        tmp_path / ".codestrata-artifacts" / "assessments" / "demo" / "current" / "assessment.html"
     )
     report.parent.mkdir(parents=True)
     report.write_text("<html></html>", encoding="utf-8")
@@ -328,7 +321,7 @@ def test_no_color_monochrome_readable(tmp_path: Path, monkeypatch) -> None:
 def test_landing_palette_is_ansi_high_contrast() -> None:
     from dataclasses import asdict
 
-    from codestrata.cli.landing import LANDING_PALETTE, _FORBIDDEN_CLI_HEX
+    from codestrata.cli.landing import _FORBIDDEN_CLI_HEX, LANDING_PALETTE
 
     values = list(asdict(LANDING_PALETTE).values())
     blob = " ".join(values)

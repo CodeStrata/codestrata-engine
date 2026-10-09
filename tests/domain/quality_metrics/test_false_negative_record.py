@@ -68,9 +68,7 @@ def test_different_identity_inputs_change_id() -> None:
         != first.false_negative_id
     )
     assert (
-        build_false_negative_record(
-            **{**base, "expected_rule_id": "rule.b"}
-        ).false_negative_id
+        build_false_negative_record(**{**base, "expected_rule_id": "rule.b"}).false_negative_id
         != first.false_negative_id
     )
     assert (

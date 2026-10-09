@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 from collections.abc import Callable, Sequence
 from datetime import UTC, datetime
@@ -17,13 +18,25 @@ from codestrata.ai.providers.parsing import sanitize_provider_text
 from codestrata.application.knowledge.errors import KnowledgeStoreError
 from codestrata.application.knowledge.ports import KnowledgeStore
 from codestrata.application.knowledge.session import AssessmentKnowledgeSession
+from codestrata.application.rules.prepared import (
+    AdmittedPreparedPackage,
+    PreparedOperatorFacts,
+    PreparedPackageError,
+)
+from codestrata.application.rules.prepared.execute import (
+    execute_admitted_customer_rules,
+    findings_for_execution,
+)
 from codestrata.config import CodestrataSettings, configured_repository_source, load_settings
 from codestrata.config.settings import (
     is_github_repository_source as is_github_repository_source_settings,
 )
+from codestrata.domain.contracts.enums import ExecutionPurpose
 from codestrata.models import AnalysisResult, Repository
 from codestrata.reporters.report_paths import (
-    DEFAULT_ASSESS_OUTPUT_DIRECTORY,
+    DEFAULT_ASSESS_OUTPUT_DIRECTORY as DEFAULT_ASSESS_OUTPUT_DIRECTORY,
+)
+from codestrata.reporters.report_paths import (
     ReportPaths,
     create_report_paths,
     format_report_run_timestamp,
@@ -54,7 +67,6 @@ from codestrata.repository_auth.exceptions import (
 )
 from codestrata.scan_boundary import BoundaryPolicy
 from codestrata.services.analysis_service import AnalysisService
-from codestrata.services.default_pipeline import create_default_analysis_service
 from codestrata.services.graph_assessment import (
     GraphArtifactWriteResult,
     GraphAssessmentPipeline,
@@ -99,6 +111,26 @@ DEFAULT_ASSESS_REPORT_TITLE = "Engineering Assessment"
 DEFAULT_ASSESS_TEMPERATURE = 0.0
 DEFAULT_ASSESS_MAX_OUTPUT_TOKENS = 5000
 CODESTRATA_BEDROCK_MODEL_ID_ENV = "CODESTRATA_BEDROCK_MODEL_ID"
+# Test/journey pin only. Production CLI leaves this unset and uses real UTC.
+CODESTRATA_EVALUATION_TIME_ENV = "CODESTRATA_EVALUATION_TIME"
+
+
+def default_assessment_clock() -> datetime:
+    """Return the assessment evaluation time.
+
+    Defaults to current UTC. When ``CODESTRATA_EVALUATION_TIME`` is set, the
+    pinned timestamp is used so journey tests can stay deterministic without
+    hardcoding a production date.
+    """
+
+    raw = os.environ.get(CODESTRATA_EVALUATION_TIME_ENV, "").strip()
+    if not raw:
+        return datetime.now(UTC)
+    text = raw[:-1] + "+00:00" if raw.endswith("Z") else raw
+    parsed = datetime.fromisoformat(text)
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=UTC)
+    return parsed.astimezone(UTC)
 
 logger = logging.getLogger(__name__)
 
@@ -347,6 +379,11 @@ class AssessmentApplicationService:
         scanned_repository: Repository | None = None,
         write_reports: bool = True,
         force_reindex: bool = False,
+        history_head: str | None = None,
+        prepared_customer_package: AdmittedPreparedPackage | None = None,
+        customer_operator_facts: PreparedOperatorFacts | None = None,
+        source_roots: tuple[str, ...] | None = None,
+        external_import_names: tuple[str, ...] = (),
     ) -> AssessmentCommandResult:
         """Orchestrate scan → analysis → graph pipeline → optional AI → HTML+JSON reports.
 
@@ -367,7 +404,7 @@ class AssessmentApplicationService:
         """
 
         active_console = console or Console(stderr=False)
-        now = clock or (lambda: datetime.now(UTC))
+        now = clock or default_assessment_clock
         total_started = perf_counter()
 
         def stage(message: str) -> None:
@@ -518,6 +555,11 @@ class AssessmentApplicationService:
                             force_reindex=force_reindex,
                             config_path=config_path,
                             assessment_activation=assessment_activation,
+                            history_head=history_head,
+                            prepared_customer_package=prepared_customer_package,
+                            customer_operator_facts=customer_operator_facts,
+                            source_roots=source_roots,
+                            external_import_names=external_import_names,
                         )
                     except AssessmentCommandError as error:
                         knowledge_session.fail(
@@ -661,6 +703,11 @@ class AssessmentApplicationService:
         json_summary: bool = False,
         config_path: Path | None = None,
         assessment_activation: str | None = None,
+        history_head: str | None = None,
+        prepared_customer_package: AdmittedPreparedPackage | None = None,
+        customer_operator_facts: PreparedOperatorFacts | None = None,
+        source_roots: tuple[str, ...] | None = None,
+        external_import_names: tuple[str, ...] = (),
     ) -> AssessmentCommandResult:
         stage("Analyzing technologies...")
         stage("Running Engineering Intelligence...")
@@ -674,12 +721,17 @@ class AssessmentApplicationService:
             verbose=verbose,
             console=active_console,
         )
-        service = analysis_service or create_default_analysis_service(
-            loaded_settings,
-            pmd_executable=resolved_pmd,
-            static_analysis_enabled=static_analysis_enabled,
-            pmd_profile=pmd_profile,
-        )
+        if analysis_service is None:
+            from codestrata.services.default_pipeline import create_default_analysis_service
+
+            service = create_default_analysis_service(
+                loaded_settings,
+                pmd_executable=resolved_pmd,
+                static_analysis_enabled=static_analysis_enabled,
+                pmd_profile=pmd_profile,
+            )
+        else:
+            service = analysis_service
         try:
             with benchmark_recorder.stage("repository_inventory"):
                 analysis_result = service.analyze(repository)
@@ -769,6 +821,48 @@ class AssessmentApplicationService:
         except GraphAssessmentPipelineError as error:
             raise AssessmentCommandError(sanitize_provider_text(str(error))) from error
         _write_scan_boundary_diagnostics(repository, report_paths.run_directory)
+        from codestrata.application.assessment.canonical_records import (
+            graph_reference_from_artifacts,
+            seal_assess_canonical_records,
+        )
+
+        analysis_result = seal_assess_canonical_records(
+            analysis_result,
+            repository_root=Path(repository.path),
+            evaluation_time=generated_at,
+            graph_reference=graph_reference_from_artifacts(graph_artifacts),
+            head=history_head,
+        )
+        if prepared_customer_package is not None:
+            try:
+                projected_facts = customer_operator_facts
+                if projected_facts is None:
+                    projected_facts = _project_prepared_python_facts(
+                        repository,
+                        source_roots=source_roots,
+                        external_import_names=external_import_names,
+                    )
+                customer_execution = execute_admitted_customer_rules(
+                    prepared_customer_package,
+                    facts=projected_facts,
+                    observed_at=generated_at,
+                    requested_purpose=ExecutionPurpose.PRODUCTION,
+                )
+            except PreparedPackageError as error:
+                raise AssessmentCommandError(str(error)) from error
+            customer_findings = findings_for_execution(
+                prepared_customer_package,
+                customer_execution,
+            )
+            analysis_result = analysis_result.model_copy(
+                update={
+                    "findings": [*analysis_result.findings, *customer_findings],
+                    "metadata": {
+                        **analysis_result.metadata,
+                        "prepared_customer_rules": customer_execution.provenance,
+                    },
+                }
+            )
         graph_elapsed_ms = round((perf_counter() - graph_started) * 1000, 2)
         for line in format_graph_console_summary(graph_artifacts.summary):
             active_console.print(line)
@@ -2462,16 +2556,11 @@ class AssessmentApplicationService:
                 correlate_rule_evaluation,
             )
 
-            rule_evaluation, _finding_consolidation = consolidate_rule_evaluation(
-                rule_evaluation
-            )
+            rule_evaluation, _finding_consolidation = consolidate_rule_evaluation(rule_evaluation)
             # Epic 5 Slice 5.12 — correlate distinct Findings after consolidation.
-            rule_evaluation, finding_correlation_result = correlate_rule_evaluation(
-                rule_evaluation
-            )
+            rule_evaluation, finding_correlation_result = correlate_rule_evaluation(rule_evaluation)
             finding_correlation_payload = tuple(
-                item.canonical_dict()
-                for item in finding_correlation_result.correlations
+                item.canonical_dict() for item in finding_correlation_result.correlations
             )
             findings_artifact = write_findings_artifact(
                 rule_evaluation,
@@ -3562,6 +3651,60 @@ class AssessmentApplicationService:
         return final_result
 
 
+def _project_prepared_python_facts(
+    repository: Repository,
+    *,
+    source_roots: tuple[str, ...] | None,
+    external_import_names: tuple[str, ...],
+) -> PreparedOperatorFacts:
+    """Read inventoried Python files and project them when the caller omitted facts."""
+
+    from codestrata.application.evidence.language.python_imports import (
+        MAX_PYTHON_FILE_CHARS,
+        MAX_PYTHON_FILES,
+    )
+    from codestrata.application.rules.prepared.import_projection import (
+        project_python_import_facts,
+        scan_boundary_coverage_inputs,
+    )
+
+    inventory = tuple(str(path).replace("\\", "/") for path in repository.files)
+    coverage = scan_boundary_coverage_inputs(repository.metadata)
+    texts: dict[str, str] = {}
+    unreadable: list[str] = []
+    root = Path(repository.path)
+    python_count = 0
+    for relative in inventory:
+        if not relative.endswith(".py"):
+            continue
+        python_count += 1
+        if python_count > MAX_PYTHON_FILES:
+            continue
+        candidate = root / relative
+        try:
+            if candidate.stat().st_size > MAX_PYTHON_FILE_CHARS:
+                texts[relative] = "x" * (MAX_PYTHON_FILE_CHARS + 1)
+                continue
+            texts[relative] = candidate.read_text(encoding="utf-8")
+        except (OSError, UnicodeError):
+            unreadable.append(relative)
+    return project_python_import_facts(
+        inventory,
+        texts,
+        source_roots=source_roots,
+        external_import_names=external_import_names,
+        excluded_paths=coverage.excluded_python_paths,
+        unreadable_paths=tuple(unreadable),
+        scan_collection_truncated=coverage.collection_truncated,
+        boundary_exclude_paths=coverage.boundary_exclude_paths,
+        pruned_directories=coverage.pruned_directories,
+        coverage_diagnostics_capped=coverage.coverage_diagnostics_capped,
+        total_files=repository.total_files,
+        max_files=MAX_PYTHON_FILES,
+        max_file_chars=MAX_PYTHON_FILE_CHARS,
+    )
+
+
 def run_assessment(
     repo: str | None,
     output_directory: Path,
@@ -3598,6 +3741,11 @@ def run_assessment(
     knowledge_store: KnowledgeStore | None = None,
     write_reports: bool = True,
     force_reindex: bool = False,
+    history_head: str | None = None,
+    prepared_customer_package: AdmittedPreparedPackage | None = None,
+    customer_operator_facts: PreparedOperatorFacts | None = None,
+    source_roots: tuple[str, ...] | None = None,
+    external_import_names: tuple[str, ...] = (),
 ) -> AssessmentCommandResult:
     """Orchestrate scan → analysis → graph pipeline → optional AI → HTML+JSON reports.
 
@@ -3644,6 +3792,11 @@ def run_assessment(
         knowledge_store=knowledge_store,
         write_reports=write_reports,
         force_reindex=force_reindex,
+        history_head=history_head,
+        prepared_customer_package=prepared_customer_package,
+        customer_operator_facts=customer_operator_facts,
+        source_roots=source_roots,
+        external_import_names=external_import_names,
     )
 
 
@@ -4614,7 +4767,11 @@ def _scan_repository(
         )
 
     if scanner is not None:
-        return scanner.scan(compact)
+        repository = scanner.scan(compact)
+        diagnostics = getattr(scanner, "last_diagnostics", None)
+        if diagnostics is not None and hasattr(diagnostics, "to_dict"):
+            repository.metadata["scan_boundary"] = diagnostics.to_dict()
+        return repository
 
     if is_github_repository_source(compact):
         github_scanner = GitHubRepositoryScanner(

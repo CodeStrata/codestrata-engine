@@ -5,12 +5,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-ENGINE_INTEGRATION = (
-    Path(__file__).resolve().parents[2]
-    / "src"
-    / "codestrata"
-    / "integration"
-)
+ENGINE_INTEGRATION = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "integration"
 
 
 def test_engine_integration_does_not_import_platform_package() -> None:
@@ -33,9 +28,7 @@ def test_engine_integration_does_not_import_platform_package() -> None:
 
 
 def test_engine_depends_on_platform_client_abstraction() -> None:
-    client_source = (ENGINE_INTEGRATION / "commercial" / "client.py").read_text(
-        encoding="utf-8"
-    )
+    client_source = (ENGINE_INTEGRATION / "commercial" / "client.py").read_text(encoding="utf-8")
     assert "class PlatformClient" in client_source
     assert "class RestPlatformClient" in client_source
     assert "class MockPlatformClient" in client_source

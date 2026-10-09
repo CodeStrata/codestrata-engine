@@ -131,23 +131,17 @@ def project_assessment_metadata(
         roadmap_initiative_count=max(0, int(source.roadmap_initiative_count)),
         evidence_count=max(0, int(source.evidence_count)),
         limitation_count=max(0, int(source.limitation_count)),
-        primary_language=_enum_or(
-            source.primary_language, APPROVED_LANGUAGES, "unavailable"
-        ),
+        primary_language=_enum_or(source.primary_language, APPROVED_LANGUAGES, "unavailable"),
         language_count=max(0, int(source.language_count)),
         dependency_ecosystem_count=max(0, int(source.dependency_ecosystem_count)),
-        file_count_bucket=_enum_or(
-            source.file_count_bucket, APPROVED_COUNT_BUCKETS, "unavailable"
-        ),
+        file_count_bucket=_enum_or(source.file_count_bucket, APPROVED_COUNT_BUCKETS, "unavailable"),
         source_file_count_bucket=_enum_or(
             source.source_file_count_bucket, APPROVED_COUNT_BUCKETS, "unavailable"
         ),
         test_file_count_bucket=_enum_or(
             source.test_file_count_bucket, APPROVED_COUNT_BUCKETS, "unavailable"
         ),
-        repository_shape=_enum_or(
-            source.repository_shape, APPROVED_SHAPES, "unknown"
-        ),
+        repository_shape=_enum_or(source.repository_shape, APPROVED_SHAPES, "unknown"),
         has_tests=bool(source.has_tests),
         has_build_files=bool(source.has_build_files),
         has_dependency_manifests=bool(source.has_dependency_manifests),

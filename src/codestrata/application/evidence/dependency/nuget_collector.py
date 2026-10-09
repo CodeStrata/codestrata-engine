@@ -160,9 +160,7 @@ def parse_nuget_manifest_text(
             key = package_name.lower()
             # Prefer explicit Version child over empty attribute.
             declarations = [
-                item
-                for item in declarations
-                if item.normalized_identity != key or item.raw_version
+                item for item in declarations if item.normalized_identity != key or item.raw_version
             ]
             declarations.append(
                 _declaration(
@@ -348,13 +346,9 @@ def collect_nuget_dependency_bundle(
             ),
         )
     )
-    parsed = sum(
-        1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED
-    )
+    parsed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED)
     partial = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+        1 for item in manifests_t if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
     )
     failed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED)
     unsupported_count = sum(len(item.unsupported_constructs) for item in manifests_t)

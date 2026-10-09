@@ -28,7 +28,8 @@ from codestrata.reporting.traceability.preservation import (
 def register_assessment_report_tools(server: FastMCP) -> None:
     @server.tool(name="inspect_assessment_report", structured_output=True)
     def inspect_assessment_report(report_path: str) -> dict[str, Any]:
-        """Return canonical assessment collections from an assessment report path without field loss."""
+        """Return canonical assessment collections from an assessment report path without field
+        loss."""
 
         def _run() -> dict[str, Any]:
             document = load_report_document(report_path)
@@ -91,9 +92,7 @@ def register_assessment_report_tools(server: FastMCP) -> None:
                     "entity_kind": entity_kind,
                     "entity_id": entity_id,
                     "error": "not_found",
-                    "message": (
-                        f"No {entity_kind} with id={entity_id!r} in canonical report"
-                    ),
+                    "message": (f"No {entity_kind} with id={entity_id!r} in canonical report"),
                 }
             return {
                 "found": True,

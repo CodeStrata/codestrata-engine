@@ -65,9 +65,7 @@ def test_determinism() -> None:
     a = build_privacy_first_telemetry_preview(event_name="operation_failed")
     b = build_privacy_first_telemetry_preview(event_name="operation_failed")
     assert a.to_stable_json() == b.to_stable_json()
-    assert format_privacy_first_telemetry_preview(a) == format_privacy_first_telemetry_preview(
-        b
-    )
+    assert format_privacy_first_telemetry_preview(a) == format_privacy_first_telemetry_preview(b)
     assert list(a.event.keys()) == sorted(a.event.keys())
     assert list(a.omitted_optional_fields) == sorted(a.omitted_optional_fields)
 
@@ -102,9 +100,7 @@ def test_privacy_scan() -> None:
 
 def payload_has_no_installation_id_field(text: str) -> bool:
     payload = json.loads(text)
-    return "installation_id" not in payload and "installation_id" not in payload.get(
-        "event", {}
-    )
+    return "installation_id" not in payload and "installation_id" not in payload.get("event", {})
 
 
 def test_no_transport_or_legacy_side_effects(tmp_path: Path, monkeypatch) -> None:

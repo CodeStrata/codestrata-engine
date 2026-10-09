@@ -89,9 +89,11 @@ def clone_qualified_repository(
         "GIT_LFS_SKIP_SMUDGE": "1",
         "GIT_CONFIG_GLOBAL": "/dev/null",
         "GIT_CONFIG_SYSTEM": "/dev/null",
-        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_COUNT": "2",
         "GIT_CONFIG_KEY_0": "core.hooksPath",
         "GIT_CONFIG_VALUE_0": "/dev/null",
+        "GIT_CONFIG_KEY_1": "core.longpaths",
+        "GIT_CONFIG_VALUE_1": "true",
     }
 
     # Shallow clone compatible with pinned commit/tag when possible.
@@ -203,10 +205,15 @@ def clone_qualified_repository(
             env={**dict(__import__("os").environ), **env},
         )
     if checkout.returncode != 0:
+        tail = (checkout.stderr or checkout.stdout or "").strip().replace("\n", " ")
+        tail = tail.replace(str(destination), "<clone-dest>")[-200:]
+        detail = f"checkout failed (exit {checkout.returncode})"
+        if tail:
+            detail = f"{detail}: {tail}"
         return CloneResult(
             False,
             None,
-            f"checkout failed (exit {checkout.returncode})",
+            detail,
             revision.revision_type,
             revision.value,
         )
@@ -223,7 +230,9 @@ def clone_qualified_repository(
         return CloneResult(False, None, "rev-parse failed", revision.revision_type, revision.value)
     sha = sha_proc.stdout.strip().lower()
     if not _SHA_RE.match(sha):
-        return CloneResult(False, None, "checked-out SHA invalid", revision.revision_type, revision.value)
+        return CloneResult(
+            False, None, "checked-out SHA invalid", revision.revision_type, revision.value
+        )
 
     if revision.revision_type == "commit":
         expected = revision.value.strip().lower()

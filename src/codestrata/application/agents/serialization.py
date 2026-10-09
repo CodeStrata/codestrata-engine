@@ -249,19 +249,13 @@ def _map_snapshot_changes(comparison: Any) -> dict[str, Any] | None:
     return {
         "previous_snapshot_id": getattr(comparison, "previous_snapshot_id", None),
         "current_snapshot_id": getattr(comparison, "current_snapshot_id", None),
-        "previous_content_fingerprint": getattr(
-            comparison, "previous_content_fingerprint", None
-        ),
-        "current_content_fingerprint": getattr(
-            comparison, "current_content_fingerprint", None
-        ),
+        "previous_content_fingerprint": getattr(comparison, "previous_content_fingerprint", None),
+        "current_content_fingerprint": getattr(comparison, "current_content_fingerprint", None),
         "counts": _convert(counts),
         "added_files": _convert(getattr(comparison, "added_files", ())[:50]),
         "modified_files": _convert(getattr(comparison, "modified_files", ())[:50]),
         "deleted_files": _convert(getattr(comparison, "deleted_files", ())[:50]),
-        "metadata_changed_files": _convert(
-            getattr(comparison, "metadata_changed_files", ())[:50]
-        ),
+        "metadata_changed_files": _convert(getattr(comparison, "metadata_changed_files", ())[:50]),
         "renamed_files": _convert(getattr(comparison, "renamed_files", ())),
         "rename_detection": "not_supported",
     }

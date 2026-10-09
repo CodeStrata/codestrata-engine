@@ -101,9 +101,7 @@ def _candidate(
     *,
     path: str,
     role: TestFileRole = TestFileRole.UNIT_TEST,
-    confirmation: EvidenceConfirmationLevel = (
-        EvidenceConfirmationLevel.DISCOVERED_CANDIDATE
-    ),
+    confirmation: EvidenceConfirmationLevel = (EvidenceConfirmationLevel.DISCOVERED_CANDIDATE),
     language_hint: str | None = "python",
     evidence_id: str | None = None,
 ) -> TestFileCandidateEvidence:
@@ -182,9 +180,7 @@ def _bundle(
         else (len(candidates) if candidates else (1 if frameworks or markers else 0))
     )
     cov_count = (
-        coverage_configurations
-        if coverage_configurations is not None
-        else len(coverage_facts)
+        coverage_configurations if coverage_configurations is not None else len(coverage_facts)
     )
     return AggregatedRepositoryTestingEvidence(
         repository_id="fixture",
@@ -236,9 +232,7 @@ def test_pack_registration_and_catalog() -> None:
     assert RULE_OBSERVED_WITHOUT_DECLARATION not in HYGIENE_RULE_IDS
 
     mapper = RuleFindingMapper()
-    evidence = _bundle(
-        markers=(_marker(path="tests/a.py", marker_type=TestMarkerType.SKIPPED),)
-    )
+    evidence = _bundle(markers=(_marker(path="tests/a.py", marker_type=TestMarkerType.SKIPPED),))
     context = _context(evidence)
     matches = []
     for rule in load_testing_rules():
@@ -258,9 +252,7 @@ def test_test001_disabled_skipped_markers() -> None:
     assert empty.status is RuleResultStatus.NOT_MATCHED
     assert empty.matches == ()
 
-    single = (
-        _marker(path="tests/a.py", marker_type=TestMarkerType.DISABLED),
-    )
+    single = (_marker(path="tests/a.py", marker_type=TestMarkerType.DISABLED),)
     result = rule.evaluate(_context(_bundle(markers=single)))
     assert result.status is RuleResultStatus.MATCHED
     assert len(result.matches) == 1
@@ -328,8 +320,7 @@ def test_test002_unconfirmed_candidates() -> None:
     unconfirmed_only = [
         item
         for item in considered
-        if item.confirmation_level
-        is not EvidenceConfirmationLevel.STRUCTURALLY_CONFIRMED
+        if item.confirmation_level is not EvidenceConfirmationLevel.STRUCTURALLY_CONFIRMED
     ]
     ratio = len(unconfirmed_only) / len(unconfirmed)
     assert ratio >= TEST002_MIN_RATIO
@@ -338,10 +329,7 @@ def test_test002_unconfirmed_candidates() -> None:
     assert len(material.matches) == 1
 
     # Small repo suppress.
-    small = [
-        _candidate(path=f"tests/s{i}.py")
-        for i in range(TEST002_MIN_CONSIDERED - 1)
-    ]
+    small = [_candidate(path=f"tests/s{i}.py") for i in range(TEST002_MIN_CONSIDERED - 1)]
     assert (
         rule.evaluate(_context(_bundle(candidates=tuple(small)))).status
         is RuleResultStatus.NOT_MATCHED
@@ -446,9 +434,10 @@ def test_test003_declared_without_observation() -> None:
         languages=("javascript",),
         candidate_files_inspected=0,
     )
-    assert rule.evaluate(
-        _context(incomplete, languages=("javascript",))
-    ).status is RuleResultStatus.NOT_MATCHED
+    assert (
+        rule.evaluate(_context(incomplete, languages=("javascript",))).status
+        is RuleResultStatus.NOT_MATCHED
+    )
 
 
 def test_test004_deferred_not_registered() -> None:
@@ -505,12 +494,8 @@ def test_determinism_shuffle_and_assessment_bytes(tmp_path: Path) -> None:
     ]
     shuffled = list(markers)
     random.Random(42).shuffle(shuffled)
-    left = DisabledOrSkippedMarkersRule().evaluate(
-        _context(_bundle(markers=tuple(markers)))
-    )
-    right = DisabledOrSkippedMarkersRule().evaluate(
-        _context(_bundle(markers=tuple(shuffled)))
-    )
+    left = DisabledOrSkippedMarkersRule().evaluate(_context(_bundle(markers=tuple(markers))))
+    right = DisabledOrSkippedMarkersRule().evaluate(_context(_bundle(markers=tuple(shuffled))))
     assert left.matches[0].subject_keys == right.matches[0].subject_keys
 
     mapper = RuleFindingMapper()
@@ -552,9 +537,7 @@ def test_privacy_no_absolute_paths_or_source_body() -> None:
     # Absolute path must never appear even if someone put it in marker text.
     evidence = _bundle(
         markers=markers,
-        candidates=(
-            _candidate(path="tests/secret_path.py"),
-        ),
+        candidates=(_candidate(path="tests/secret_path.py"),),
     )
     context = _context(evidence)
     matches = []
@@ -572,9 +555,7 @@ def test_privacy_no_absolute_paths_or_source_body() -> None:
             "desc": [item.description for item in findings],
             "meta": [dict(item.metadata) for item in findings],
             "ev": [
-                {"path": e.path, "excerpt": e.excerpt}
-                for item in findings
-                for e in item.evidence
+                {"path": e.path, "excerpt": e.excerpt} for item in findings for e in item.evidence
             ],
         }
     )

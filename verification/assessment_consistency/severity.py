@@ -45,9 +45,7 @@ def check_severity(
                 )
             if isinstance(assessment, dict):
                 calibrated = str(
-                    assessment.get("calibrated_severity")
-                    or assessment.get("severity")
-                    or ""
+                    assessment.get("calibrated_severity") or assessment.get("severity") or ""
                 ).lower()
                 # policy_id is optional in current severity_assessment serialization;
                 # require vocabulary + display/calibrated reconciliation instead.

@@ -36,9 +36,7 @@ def test_product_service_is_disabled_facade(monkeypatch, tmp_path: Path) -> None
     assert facade.status()["legacy_consent_not_reused"] is True
 
 
-def test_A_saved_enabled_preference_does_not_activate_runtime(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_A_saved_enabled_preference_does_not_activate_runtime(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "codestrata"
     home.mkdir()
     (home / "telemetry.json").write_text(

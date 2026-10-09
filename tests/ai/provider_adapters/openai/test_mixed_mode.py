@@ -43,13 +43,19 @@ def test_default_provider_is_still_bedrock() -> None:
     settings = CodestrataSettings.model_validate({"repository": {"path": "."}})
 
     assert settings.ai.provider == "bedrock"
-    assert _is_provider_class(create_assess_ai_provider(settings), bedrock_module.BedrockAIModelProvider)
+    assert _is_provider_class(
+        create_assess_ai_provider(settings), bedrock_module.BedrockAIModelProvider
+    )
 
 
 def test_both_providers_remain_registered_under_the_same_keys() -> None:
     reset_assess_ai_provider_registry_for_tests()
     try:
-        assert get_assess_ai_provider_registry().list_providers() == ("bedrock", "openai", "openrouter")
+        assert get_assess_ai_provider_registry().list_providers() == (
+            "bedrock",
+            "openai",
+            "openrouter",
+        )
     finally:
         reset_assess_ai_provider_registry_for_tests()
 
@@ -100,15 +106,9 @@ def test_bedrock_never_imports_the_openai_adapter() -> None:
         elif isinstance(node, ast.ImportFrom) and node.module:
             imported.add(node.module)
 
-    assert not any(
-        name.startswith("codestrata.ai.provider_adapters.openai") for name in imported
-    )
-    assert not any(
-        name.startswith("codestrata.ai.providers.openai_provider") for name in imported
-    )
-    assert any(
-        name.startswith("codestrata.ai.provider_adapters.bedrock") for name in imported
-    )
+    assert not any(name.startswith("codestrata.ai.provider_adapters.openai") for name in imported)
+    assert not any(name.startswith("codestrata.ai.providers.openai_provider") for name in imported)
+    assert any(name.startswith("codestrata.ai.provider_adapters.bedrock") for name in imported)
 
 
 def test_bedrock_source_invariants_hold() -> None:

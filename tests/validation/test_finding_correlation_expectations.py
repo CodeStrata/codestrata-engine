@@ -25,9 +25,7 @@ def test_extract_and_compare_required_forbidden() -> None:
         }
     ]
     keys = extract_correlation_pair_keys(findings=findings, correlations=correlations)
-    assert pair_key(
-        "security.credential-literal", "security.placeholder-credential"
-    ) in keys
+    assert pair_key("security.credential-literal", "security.placeholder-credential") in keys
 
     expectation = FindingCorrelationExpectation(
         required_correlations=(
@@ -44,9 +42,7 @@ def test_extract_and_compare_required_forbidden() -> None:
             ),
         ),
     )
-    assert compare_correlation_expectations(
-        expectation=expectation, actual_pair_keys=keys
-    ) == []
+    assert compare_correlation_expectations(expectation=expectation, actual_pair_keys=keys) == []
 
     missing = compare_correlation_expectations(
         expectation=FindingCorrelationExpectation(

@@ -44,10 +44,7 @@ def register_finding_tools(server: FastMCP, queries: KnowledgeQueryService) -> N
                 item
                 for item in findings
                 if (severity_filter is None or item.severity.lower() == severity_filter.lower())
-                and (
-                    category_filter is None
-                    or item.category.lower() == category_filter.lower()
-                )
+                and (category_filter is None or item.category.lower() == category_filter.lower())
             ]
             truncated = len(filtered) > capped
             return bounded_list(filtered[:capped], limit=capped, truncated=truncated)

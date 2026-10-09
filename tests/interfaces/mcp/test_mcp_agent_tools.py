@@ -25,7 +25,7 @@ from codestrata.application.agents.models import (
 from codestrata.application.assessment import AssessmentApplicationService
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.domain.repository.enums import RepositoryRevisionType
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from codestrata.interfaces.mcp import create_mcp_server
 from codestrata.interfaces.mcp.errors import raise_tool_error
 from tests.application.knowledge.queries.conftest_helpers import (

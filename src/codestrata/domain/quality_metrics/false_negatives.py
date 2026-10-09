@@ -10,8 +10,9 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+from collections.abc import Iterable, Sequence
 from enum import StrEnum
-from typing import Any, Iterable, Sequence
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -133,9 +134,7 @@ def build_false_negative_id(
     """Deterministic ``fn:{sha256[:24]}`` from structural expected-positive identity."""
 
     entity = (
-        entity_type.value
-        if isinstance(entity_type, FalseNegativeEntityType)
-        else str(entity_type)
+        entity_type.value if isinstance(entity_type, FalseNegativeEntityType) else str(entity_type)
     )
     material = "\n".join(
         [
@@ -275,14 +274,10 @@ class FalseNegativeRecord(BaseModel):
                 "unsupported_capability root cause"
             )
 
-        if (
-            self.classification is FalseNegativeClassification.CONFIRMED
-            and self.resolution
-            in {
-                FalseNegativeResolution.EXPECTATION_FIX,
-                FalseNegativeResolution.SUPPORTED_SCOPE_DOCUMENTED,
-            }
-        ):
+        if self.classification is FalseNegativeClassification.CONFIRMED and self.resolution in {
+            FalseNegativeResolution.EXPECTATION_FIX,
+            FalseNegativeResolution.SUPPORTED_SCOPE_DOCUMENTED,
+        }:
             raise ValueError(
                 "confirmed product FN cannot use expectation/scope-documented resolution"
             )
@@ -418,14 +413,11 @@ def merge_false_negative_records(
                 "resolved_run_id": resolved or preferred.resolved_run_id,
                 "supporting_evidence_ids": tuple(
                     sorted(
-                        set(existing.supporting_evidence_ids)
-                        | set(item.supporting_evidence_ids)
+                        set(existing.supporting_evidence_ids) | set(item.supporting_evidence_ids)
                     )
                 ),
                 "regression_test_refs": tuple(
-                    sorted(
-                        set(existing.regression_test_refs) | set(item.regression_test_refs)
-                    )
+                    sorted(set(existing.regression_test_refs) | set(item.regression_test_refs))
                 ),
                 "observation_run_ids": tuple(
                     sorted(

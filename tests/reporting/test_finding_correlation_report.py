@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 from codestrata.application.findings.correlation import correlate_findings
 from codestrata.domain.findings import (
     Finding,
@@ -9,8 +11,6 @@ from codestrata.domain.findings import (
     FindingEvidence,
     FindingSeverity,
 )
-from types import SimpleNamespace
-
 from codestrata.domain.recommendations.enums import RecommendationCategory
 from codestrata.services.recommendations.providers.builtin import (
     CorrelationAwareDependencyNormalizationRecommendation,
@@ -33,9 +33,7 @@ def _finding(
         severity=FindingSeverity.HIGH,
         category=category,
         subject_keys=(rule_id, path, symbol),
-        evidence=(
-            FindingEvidence(evidence_type="config", source_id=symbol, path=path),
-        ),
+        evidence=(FindingEvidence(evidence_type="config", source_id=symbol, path=path),),
         metadata=metadata
         or {
             "subject_keys": f"{rule_id},{path},{symbol}",
@@ -131,10 +129,12 @@ def test_no_automatic_recommendation_for_every_correlation() -> None:
     transport = CorrelationAwareTransportVerificationRecommendation()
     dependency = CorrelationAwareDependencyNormalizationRecommendation()
     assert not any(
-        transport.recommend(item, context) for item in result.findings  # type: ignore[arg-type]
+        transport.recommend(item, context)
+        for item in result.findings  # type: ignore[arg-type]
     )
     assert not any(
-        dependency.recommend(item, context) for item in result.findings  # type: ignore[arg-type]
+        dependency.recommend(item, context)
+        for item in result.findings  # type: ignore[arg-type]
     )
 
 

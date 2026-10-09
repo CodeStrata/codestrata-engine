@@ -17,10 +17,7 @@ from codestrata.telemetry.service import (
     reset_telemetry_singletons,
 )
 
-
-TELEMETRY_ROOT = (
-    Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
-)
+TELEMETRY_ROOT = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
 
 
 def test_cli_preview_default_json() -> None:
@@ -37,9 +34,7 @@ def test_cli_preview_default_json() -> None:
 
 
 def test_cli_preview_event_selector() -> None:
-    result = CliRunner().invoke(
-        app, ["telemetry", "preview", "--event", "operation_failed"]
-    )
+    result = CliRunner().invoke(app, ["telemetry", "preview", "--event", "operation_failed"])
     assert result.exit_code == 0
     payload = json.loads(result.stdout)
     assert payload["event_name"] == "operation_failed"
@@ -87,9 +82,7 @@ def test_preview_does_not_use_legacy(tmp_path: Path, monkeypatch) -> None:
     assert list(home.iterdir()) == []
 
 
-def test_preview_then_interactive_assess_still_eligible(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_preview_then_interactive_assess_still_eligible(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -137,13 +130,21 @@ def test_preview_then_non_interactive(tmp_path: Path, monkeypatch) -> None:
 def test_legacy_show_remains() -> None:
     result = CliRunner().invoke(app, ["telemetry", "show", "--help"])
     assert result.exit_code == 0
-    assert "legacy" in (result.stdout + result.stderr).lower() or "sample" in (
-        result.stdout + result.stderr
-    ).lower()
+    assert (
+        "legacy" in (result.stdout + result.stderr).lower()
+        or "sample" in (result.stdout + result.stderr).lower()
+    )
 
 
 def test_no_platform_imports_in_preview_modules() -> None:
-    forbidden = ("codestrata_platform", "codestrata_platform.community_cloud","community_cloud_api", "boto3", "fastapi", "data_lake")
+    forbidden = (
+        "codestrata_platform",
+        "codestrata_platform.community_cloud",
+        "community_cloud_api",
+        "boto3",
+        "fastapi",
+        "data_lake",
+    )
     for path in TELEMETRY_ROOT.glob("preview*.py"):
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
         for node in ast.walk(tree):

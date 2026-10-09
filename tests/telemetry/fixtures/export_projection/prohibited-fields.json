@@ -1,0 +1,12 @@
+{
+  "body": {
+    "artifact_digest": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "categories": ["evidence"],
+    "findings": ["leak"],
+    "repository_name": "VERY_PRIVATE_REPO_123",
+    "snippet": "print(1)",
+    "purpose": "production",
+    "schema": "codestrata.export-original.v1",
+    "schema_version": "1.0.0"
+  }
+}

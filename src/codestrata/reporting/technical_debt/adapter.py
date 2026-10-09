@@ -72,9 +72,7 @@ _STATUS_SUMMARIES = {
     TechnicalDebtAssessmentStatus.FAILED: (
         "Technical debt assessment could not be assembled safely."
     ),
-    TechnicalDebtAssessmentStatus.NOT_REQUESTED: (
-        "Technical debt assessment was not requested."
-    ),
+    TechnicalDebtAssessmentStatus.NOT_REQUESTED: ("Technical debt assessment was not requested."),
 }
 
 _COVERAGE_LABELS = {
@@ -129,8 +127,7 @@ class TechnicalDebtReportAdapter:
             tuple(
                 item
                 for item in section.themes
-                if item.source_role is TechnicalDebtSourceRole.PRODUCTION
-                and item.finding_count > 0
+                if item.source_role is TechnicalDebtSourceRole.PRODUCTION and item.finding_count > 0
             )
             if include_themes
             else ()
@@ -144,13 +141,10 @@ class TechnicalDebtReportAdapter:
         limitations = section.limitations if include_limitations else ()
 
         conclusion_views = tuple(_conclusion_view(item) for item in conclusions)
-        recommendation_views = tuple(
-            _recommendation_view(item) for item in recommendations
-        )
+        recommendation_views = tuple(_recommendation_view(item) for item in recommendations)
         theme_views = tuple(_theme_view(item) for item in themes)
         hotspot_views = tuple(
-            _hotspot_view(item, order=index)
-            for index, item in enumerate(hotspots, start=1)
+            _hotspot_view(item, order=index) for index, item in enumerate(hotspots, start=1)
         )
         coverage_views = tuple(_coverage_view(item) for item in coverage)
         limitation_views = tuple(_limitation_view(item) for item in limitations)
@@ -184,8 +178,7 @@ class TechnicalDebtReportAdapter:
             status_label=_STATUS_LABELS.get(status, status.value),
             status_summary=_STATUS_SUMMARIES.get(status, status.value),
             assessment_scope=(
-                "Repository-level static technical debt assessment for "
-                f"{section.repository_id}"
+                f"Repository-level static technical debt assessment for {section.repository_id}"
             ),
             repository_name=section.repository_id,
             technical_debt_pack_id=section.technical_debt_pack_id,
@@ -239,10 +232,7 @@ def _executive_summary(
             "non-debt report content remains available."
         )
     if section.status is TechnicalDebtAssessmentStatus.NOT_APPLICABLE:
-        return (
-            "No supported technical debt evidence was available for this repository "
-            "assessment."
-        )
+        return "No supported technical debt evidence was available for this repository assessment."
 
     production = section.execution_summary.production_finding_count
     test = section.execution_summary.test_finding_count
@@ -279,8 +269,7 @@ def _executive_summary(
         f" Significant production themes: {themes_note}."
         if themes_note
         else (
-            f" Findings spanned {theme_count} production theme"
-            f"{'s' if theme_count != 1 else ''}."
+            f" Findings spanned {theme_count} production theme{'s' if theme_count != 1 else ''}."
             if theme_count
             else ""
         )
@@ -348,11 +337,7 @@ def _metrics(
 ) -> tuple[TechnicalDebtReportMetric, ...]:
     summary = section.execution_summary
     complexity = next(
-        (
-            area
-            for area in section.coverage.areas
-            if area.area_id == "complexity_coverage"
-        ),
+        (area for area in section.coverage.areas if area.area_id == "complexity_coverage"),
         None,
     )
     return (
@@ -412,9 +397,7 @@ def _theme_view(item: TechnicalDebtTheme) -> TechnicalDebtReportThemeView:
     )
 
 
-def _hotspot_view(
-    item: TechnicalDebtHotspot, *, order: int
-) -> TechnicalDebtReportHotspotView:
+def _hotspot_view(item: TechnicalDebtHotspot, *, order: int) -> TechnicalDebtReportHotspotView:
     metric_parts = [
         f"{metric.metric}={metric.value}"
         + (f" (threshold {metric.threshold})" if metric.threshold else "")

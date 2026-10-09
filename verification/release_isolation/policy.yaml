@@ -1,0 +1,26 @@
+schema_version: 1
+story: E00.3
+package_revision: ENGINE-2026-09-15-R1
+required_push_glob: "release/**"
+ordinary_ci_workflow: .github/workflows/ci.yml
+lanes:
+  integration: release/engine-next
+  maintenance: main
+  story_prefix: engine/
+  hotfix_prefix: hotfix/
+namespaces:
+  venv: .venv-engine-next
+  output: engine/.tmp-assess/engine-next-candidate/
+  versioned_output_template: engine/.tmp-assess/candidates/{label}/
+  quality_logs: engine/.quality-runs/
+  rollback_venv: engine/.tmp-assess/e00.1-live-wheel
+  live_output_forbidden:
+    - .codestrata/
+    - engine/.codestrata/
+rollback:
+  name: codestrata-0.2.1-py3-none-any.whl
+  version: "0.2.1"
+  sha256: a079344c4e3cc4824a1f37b594004085314df00eb5712f0de2b84718932b0c18
+  notes: >
+    Exact live wheel digest from E00.1. Candidate work must not rewrite this
+    file or treat pyproject/tags as a substitute rollback identity.

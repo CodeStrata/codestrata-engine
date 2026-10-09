@@ -77,11 +77,7 @@ def _decide_pack(
             ),
             reason=(
                 "Explicit configuration override"
-                + (
-                    f" ({', '.join(forced.source_paths)})"
-                    if forced.source_paths
-                    else ""
-                )
+                + (f" ({', '.join(forced.source_paths)})" if forced.source_paths else "")
             ),
             evidence=forced.source_paths,
         )
@@ -126,9 +122,7 @@ def _decide_pack(
     return PackActivationRecord(
         pack_id=pack_id,
         enabled=desired,
-        decision=(
-            PackActivationDecision.ENABLED if desired else PackActivationDecision.SKIPPED
-        ),
+        decision=(PackActivationDecision.ENABLED if desired else PackActivationDecision.SKIPPED),
         reason=reason,
         evidence=evidence,
     )

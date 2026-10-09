@@ -49,9 +49,7 @@ from codestrata.telemetry.analytics.runtime_analytics_validation import (
 
 
 def _fixed_identity() -> AnonymousInstallationIdentity:
-    return AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    return AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
 
 
 def _sample_event(**overrides: object) -> RuntimeAnalyticsEvent:

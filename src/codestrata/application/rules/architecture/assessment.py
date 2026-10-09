@@ -47,6 +47,7 @@ class ArchitecturePackExecutionResult(BaseModel):
     evidence_pipeline: str = "legacy_view_builder"
     evidence_fingerprint: str = ""
 
+
 def architecture_pack_enabled(settings: CodestrataSettings | None) -> bool:
     if settings is None:
         return False
@@ -138,9 +139,7 @@ def evaluate_architecture_pack_for_context_detailed(
     if language_evidence_pipeline_enabled(settings):
         evidence_service = create_language_evidence_service(settings)
         evidence_result = evidence_service.collect(
-            repository_id=str(
-                getattr(legacy_context, "repository_id", None) or "repository"
-            ),
+            repository_id=str(getattr(legacy_context, "repository_id", None) or "repository"),
             relative_paths=relative_paths,
             file_texts=texts,
             configuration={
@@ -215,9 +214,7 @@ def evaluate_architecture_pack_for_context_detailed(
     findings = mapper.map_matches(platform_result.matches, category_by_rule=category_by_rule)
     evaluated = tuple(platform_result.plan.execution_order)
     skipped = tuple(
-        entry.rule_id
-        for entry in platform_result.plan.skipped
-        if entry.rule_id not in evaluated
+        entry.rule_id for entry in platform_result.plan.skipped if entry.rule_id not in evaluated
     )
     # Also treat not-applicable executed rules as skipped for legacy aggregation.
     for record in platform_result.records:
@@ -236,6 +233,7 @@ def evaluate_architecture_pack_for_context_detailed(
         evidence_pipeline=evidence_pipeline,
         evidence_fingerprint=evidence_fingerprint,
     )
+
 
 def merge_rule_evaluations(
     primary: RuleEvaluationResult,
@@ -259,9 +257,7 @@ def merge_rule_evaluations(
         by_id[finding.id] = merge_finding_traceability(existing, finding)
     return RuleEvaluationResult.from_findings(
         findings=tuple(by_id[item_id] for item_id in order),
-        rules_evaluated=tuple(
-            sorted(set(primary.rules_evaluated) | set(extra.rules_evaluated))
-        ),
+        rules_evaluated=tuple(sorted(set(primary.rules_evaluated) | set(extra.rules_evaluated))),
         rules_skipped=tuple(sorted(set(primary.rules_skipped) | set(extra.rules_skipped))),
     )
 

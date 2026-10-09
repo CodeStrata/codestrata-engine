@@ -1,0 +1,1 @@
+{"reasons": ["POSIX execute bits are not available", "symlink privilege on host", "CODESTRATA_RUN_REMOTE_VALIDATION is unset", "spring-petclinic clone missing"]}

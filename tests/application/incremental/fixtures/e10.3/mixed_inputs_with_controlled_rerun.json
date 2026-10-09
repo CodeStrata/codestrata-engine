@@ -1,0 +1,41 @@
+{
+  "scenario": "mixed_inputs_with_controlled_rerun",
+  "description": "Source and vulnerability feed both differ; paired controlled reruns isolate source-caused dependency resolution from feed-driven new vulnerability.",
+  "base": {
+    "source_digest": "sha256:source_v1",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "findings": ["cve::cve-2025-1001::pkg-a"]
+  },
+  "candidate": {
+    "source_digest": "sha256:source_v2",
+    "feed_digest": "sha256:feed_v2",
+    "config_digest": "sha256:config_standard",
+    "findings": ["cve::cve-2026-9999::pkg-b"]
+  },
+  "controlled_rerun_source": {
+    "description": "Candidate source evaluated against base feed (isolates source)",
+    "source_digest": "sha256:source_v2",
+    "feed_digest": "sha256:feed_v1",
+    "findings": []
+  },
+  "controlled_rerun_feed": {
+    "description": "Base source evaluated against candidate feed (isolates feed)",
+    "source_digest": "sha256:source_v1",
+    "feed_digest": "sha256:feed_v2",
+    "findings": [
+      "cve::cve-2025-1001::pkg-a",
+      "cve::cve-2026-9999::pkg-b"
+    ]
+  },
+  "expected": {
+    "attribution": "controlled_isolated",
+    "label": "controlled-isolated",
+    "controlled_rerun_performed": true,
+    "changed_dimensions": ["source", "feed"],
+    "isolated_causes": {
+      "source": ["cve::cve-2025-1001::pkg-a"],
+      "feed": ["cve::cve-2026-9999::pkg-b"]
+    }
+  }
+}

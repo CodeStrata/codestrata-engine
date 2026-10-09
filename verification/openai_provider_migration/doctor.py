@@ -67,9 +67,7 @@ def _doctor_imports(engine_root: Path) -> set[str]:
 
 def check_doctor_still_covers_both_providers(engine_root: Path) -> CheckResult:
     source = _doctor_source(engine_root)
-    covered = tuple(
-        name for name in sorted(DOCTOR_COVERED_PROVIDERS) if f'name="{name}"' in source
-    )
+    covered = tuple(name for name in sorted(DOCTOR_COVERED_PROVIDERS) if f'name="{name}"' in source)
     return CheckResult(
         name="doctor_still_reports_on_both_bedrock_and_openai",
         category="doctor",

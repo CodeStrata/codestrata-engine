@@ -28,6 +28,7 @@ from codestrata.telemetry.interactive_consent import (
     run_v2_upgrade_prompt,
 )
 from codestrata.telemetry.persisted_consent import consent_from_persisted_preference
+from codestrata.telemetry.product_transport import resolve_product_telemetry_transport
 from codestrata.telemetry.prompt_eligibility import (
     PromptEligibilityReason,
     evaluate_prompt_eligibility,
@@ -36,7 +37,6 @@ from codestrata.telemetry.prompt_result import (
     InteractiveConsentPromptResult,
     default_skipped_prompt_result,
 )
-from codestrata.telemetry.product_transport import resolve_product_telemetry_transport
 from codestrata.telemetry.runtime import TelemetryRuntime
 from codestrata.telemetry.runtime_factory import create_session_telemetry_runtime
 from codestrata.telemetry.transport import TelemetryTransport

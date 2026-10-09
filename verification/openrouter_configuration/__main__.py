@@ -11,9 +11,7 @@ from verification.openrouter_configuration.runner import engine_root, run_verifi
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="SV.11.10 OpenRouter Configuration Verification"
-    )
+    parser = argparse.ArgumentParser(description="SV.11.10 OpenRouter Configuration Verification")
     parser.add_argument("--engine-root", type=Path, default=None)
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--no-markdown", action="store_true")

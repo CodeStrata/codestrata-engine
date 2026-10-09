@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import hashlib
 import re
+from collections.abc import Mapping
 from enum import StrEnum
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -186,7 +187,9 @@ def canonical_finding_condition_key(finding: Any) -> str:
     subject material so equivalent same-rule emissions can consolidate.
     """
 
-    rule_id = require_nonblank(str(getattr(finding, "rule_id", "")), label="rule_id").strip().lower()
+    rule_id = (
+        require_nonblank(str(getattr(finding, "rule_id", "")), label="rule_id").strip().lower()
+    )
     subjects = _subject_tokens(finding)
     if not subjects:
         # Fall back to Finding ID material when subjects are absent — same ID
@@ -204,7 +207,9 @@ def canonical_finding_condition_key(finding: Any) -> str:
 def condition_key_parts(finding: Any) -> tuple[str, ...]:
     """Test helper: expose normalized condition parts (rule + subjects)."""
 
-    rule_id = require_nonblank(str(getattr(finding, "rule_id", "")), label="rule_id").strip().lower()
+    rule_id = (
+        require_nonblank(str(getattr(finding, "rule_id", "")), label="rule_id").strip().lower()
+    )
     return (rule_id, *_subject_tokens(finding))
 
 

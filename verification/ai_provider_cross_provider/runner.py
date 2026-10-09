@@ -78,7 +78,9 @@ def run_verification(root: Path | None = None) -> Any:
 
     draft = reporting.build_report(checks=checks, scenarios=scenarios, matrices=matrices)
     privacy_final, privacy_matrix = boundaries.run_privacy_checks(draft.to_dict())
-    checks = [check for check in checks if check.name != "privacy_scan_deferred_until_report_assembled"]
+    checks = [
+        check for check in checks if check.name != "privacy_scan_deferred_until_report_assembled"
+    ]
     checks.extend(privacy_final)
     matrices["privacy"] = privacy_matrix
     return reporting.build_report(checks=checks, scenarios=scenarios, matrices=matrices)

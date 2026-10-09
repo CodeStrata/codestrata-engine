@@ -70,8 +70,7 @@ def test_test_only_dependency_edges_excluded_from_primary_graph() -> None:
     assert ("com.example.application", "com.example.persistence") not in edges
     assert "test_only_dependency_edges_excluded" in view.normalization_notes
     assert (
-        select_primary_unit("codestrata.application.rules.architecture")
-        == "codestrata.application"
+        select_primary_unit("codestrata.application.rules.architecture") == "codestrata.application"
     )
     assert select_primary_unit("com.example.domain.model") == "com.example.domain"
     assert select_primary_unit("com.example.hub") == "com.example.hub"
@@ -80,9 +79,7 @@ def test_test_only_dependency_edges_excluded_from_primary_graph() -> None:
 
 def test_nested_package_collapse_preserves_sibling_modules() -> None:
     texts = {
-        "src/codestrata/application/rules/a.py": (
-            "from codestrata.domain.models import X\n"
-        ),
+        "src/codestrata/application/rules/a.py": ("from codestrata.domain.models import X\n"),
         "src/codestrata/application/service.py": "x = 1\n",
         "src/codestrata/domain/models.py": "X = 1\n",
         "src/codestrata/domain/events.py": "Y = 1\n",
@@ -224,9 +221,10 @@ def test_extraction_vs_classification_coverage() -> None:
     assert view.extraction_coverage == 1.0
     assert view.classification_coverage == 0.0
     assert classification_coverage_ok(view) is False
-    assert _rules()[RULE_INVALID_DEPENDENCY_DIRECTION].evaluate_applicability(
-        _ctx(view)
-    ).is_applicable is False
+    assert (
+        _rules()[RULE_INVALID_DEPENDENCY_DIRECTION].evaluate_applicability(_ctx(view)).is_applicable
+        is False
+    )
 
 
 def test_cycle_identity_stable_after_normalization() -> None:

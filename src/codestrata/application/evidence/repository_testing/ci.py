@@ -106,8 +106,7 @@ def collect_ci_facts(
 
     lines = text.splitlines()
     continue_on_error = any(
-        "continue-on-error:" in line.lower() and "true" in line.lower()
-        for line in lines
+        "continue-on-error:" in line.lower() and "true" in line.lower() for line in lines
     )
     results: list[CiTestInvocationFactEvidence] = []
 

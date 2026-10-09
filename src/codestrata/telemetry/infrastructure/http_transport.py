@@ -67,13 +67,13 @@ class HttpTelemetryTransport:
         client: TelemetryHttpClient | None = None,
     ) -> None:
         self._configuration = configuration
-        self._client = client or StdlibTelemetryHttpClient(
-            max_body_bytes=DEFAULT_MAX_BODY_BYTES
-        )
+        self._client = client or StdlibTelemetryHttpClient(max_body_bytes=DEFAULT_MAX_BODY_BYTES)
         self._diagnostics = TelemetryTransportDiagnostics(
-            transport_policy_version=configuration.policy.policy_version  # type: ignore[union-attr]
-            if configuration.policy is not None
-            else "1.0",
+            transport_policy_version=(
+                configuration.policy.policy_version
+                if configuration.policy is not None
+                else "1.0"
+            ),
             configured=True,
         )
 

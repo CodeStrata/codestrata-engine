@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import json
-
 import pytest
+from tests.telemetry.transport_test_helpers import FIXED_EVENT_ID, gated_event
 
 from codestrata.telemetry.event_identity import (
     generate_transport_event_id,
@@ -22,7 +21,6 @@ from codestrata.telemetry.transport_mapping import (
     map_privacy_safe_event_to_cloud_request,
 )
 from codestrata.telemetry.transport_models import CommunityCloudTelemetryWireRequest
-from tests.telemetry.transport_test_helpers import FIXED_EVENT_ID, gated_event
 
 
 def test_event_id_format() -> None:
@@ -32,9 +30,7 @@ def test_event_id_format() -> None:
 
 
 def test_mapping_produces_cloud_wire_without_installation_id() -> None:
-    wire = map_privacy_safe_event_to_cloud_request(
-        gated_event(), event_id=FIXED_EVENT_ID
-    )
+    wire = map_privacy_safe_event_to_cloud_request(gated_event(), event_id=FIXED_EVENT_ID)
     payload = wire.to_stable_dict()
     assert payload["schema_version"] == "1.0"
     assert payload["event_type"] == "feature_completed"

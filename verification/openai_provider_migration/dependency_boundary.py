@@ -251,9 +251,7 @@ def check_provider_contracts_remain_sdk_free(engine_root: Path) -> CheckResult:
 def check_wrapper_does_not_import_the_sdk(engine_root: Path) -> CheckResult:
     src_root = engine_root / "src" / "codestrata"
     names = _source_imports(src_root, "ai/providers/openai_provider.py")
-    offenders = sorted(
-        name for name in names if name == "openai" or name.startswith("openai.")
-    )
+    offenders = sorted(name for name in names if name == "openai" or name.startswith("openai."))
     return CheckResult(
         name="openai_provider_wrapper_does_not_import_the_openai_sdk",
         category="dependency_boundary",

@@ -1,0 +1,50 @@
+{
+  "schema": "codestrata.e11_3.first-assessment-expectations.v1",
+  "required_view_ids": [
+    "engineering-hotspots",
+    "ownership-concentration",
+    "temporal-co-change",
+    "change-summary",
+    "capability-coverage",
+    "before-after-delta",
+    "inventory-git",
+    "findings"
+  ],
+  "required_substrings": [
+    "health_score: none",
+    "First run",
+    "no baseline",
+    "delta unavailable",
+    "outcome movement unavailable",
+    "feed_missing",
+    "git_history_not_attached",
+    "Ownership mapping was not attached",
+    "technical_debt.deep-nesting",
+    "src/App.java",
+    "codestrata-rule-missing-tests",
+    "m22_records_not_attached"
+  ],
+  "required_finding_rule_ids": [
+    "technical_debt.deep-nesting",
+    "technical_debt.excessive-parameters",
+    "codestrata-rule-missing-tests",
+    "codestrata-rule-missing-license",
+    "codestrata-rule-missing-readme",
+    "codestrata-rule-missing-ci-workflow",
+    "codestrata-rule-java-detected",
+    "assessment.architecture",
+    "assessment.cloud-readiness",
+    "build.system.summary",
+    "repository.metrics.summary"
+  ],
+  "forbidden_substrings": [
+    "class=\"healthy\"",
+    "Stable",
+    "Improved",
+    "health_score: 0",
+    "https://cdn",
+    "<script"
+  ],
+  "minimum_finding_rows": 10,
+  "traceable_evidence_file": "src/App.java"
+}

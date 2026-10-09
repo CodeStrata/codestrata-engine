@@ -1,0 +1,733 @@
+tier: external_large
+pin_date: '2026-09-19'
+count: 50
+repositories:
+- id: doris
+  github_repository: apache/doris
+  github_url: https://github.com/apache/doris
+  sha: 979e053f0802fbc48f83dafe7f713c02968415a8
+  license: Apache-2.0
+  size_kib: 1409196
+  language: Java
+  language_group: java
+  project_shape: data_platform
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - 'Early representative: supported Java.'
+- id: spring-framework
+  github_repository: spring-projects/spring-framework
+  github_url: https://github.com/spring-projects/spring-framework
+  sha: b9fa06291846aa5ca5324e275c3ab263b30f02c2
+  license: Apache-2.0
+  size_kib: 245720
+  language: Java
+  language_group: java
+  project_shape: library_framework
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: spring-boot
+  github_repository: spring-projects/spring-boot
+  github_url: https://github.com/spring-projects/spring-boot
+  sha: adbbf047320013ee42284d6957293aaf75a56ad7
+  license: Apache-2.0
+  size_kib: 219235
+  language: Java
+  language_group: java
+  project_shape: library_framework
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: kafka
+  github_repository: apache/kafka
+  github_url: https://github.com/apache/kafka
+  sha: 995cfcf99f7917403e030428c00b5c51808ddc61
+  license: Apache-2.0
+  size_kib: 315523
+  language: Java
+  language_group: java
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Mixed Java/Scala build.
+- id: elasticsearch
+  github_repository: elastic/elasticsearch
+  github_url: https://github.com/elastic/elasticsearch
+  sha: 1d90414ee7f7646b30e9fc14bfd6bd83aabb5f40
+  license: NOASSERTION
+  size_kib: 1772023
+  language: Java
+  language_group: java
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - GitHub SPDX is NOASSERTION (Elastic License / SSPL mix).
+- id: flink
+  github_repository: apache/flink
+  github_url: https://github.com/apache/flink
+  sha: 7a80bb45841f9c30917478e1f147d5d6d0872bf7
+  license: Apache-2.0
+  size_kib: 554140
+  language: Java
+  language_group: java
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: cassandra
+  github_repository: apache/cassandra
+  github_url: https://github.com/apache/cassandra
+  sha: d48548c7afe91fc654f4dfd518628dd90ab16ccd
+  license: Apache-2.0
+  size_kib: 470321
+  language: Java
+  language_group: java
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: jenkins
+  github_repository: jenkinsci/jenkins
+  github_url: https://github.com/jenkinsci/jenkins
+  sha: 81dc9a3e13a3ec4c4f74bedb772e3382b8de0760
+  license: MIT
+  size_kib: 173507
+  language: Java
+  language_group: java
+  project_shape: web_application
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Includes Groovy; Groovy is not a launch deepest path.
+- id: hadoop
+  github_repository: apache/hadoop
+  github_url: https://github.com/apache/hadoop
+  sha: a3febb258a28c1023a09ba29bc41c1b98a2c2cc7
+  license: Apache-2.0
+  size_kib: 610016
+  language: Java
+  language_group: java
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: supported_java
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: quarkus
+  github_repository: quarkusio/quarkus
+  github_url: https://github.com/quarkusio/quarkus
+  sha: 34a4722ef14232f218b816f829749ea509a1e262
+  license: Apache-2.0
+  size_kib: 530271
+  language: Java
+  language_group: java
+  project_shape: library_framework
+  tier: external_large
+  depth_class: partial_framework
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Quarkus is an unsupported Java framework in E05.1.
+- id: typescript
+  github_repository: microsoft/TypeScript
+  github_url: https://github.com/microsoft/TypeScript
+  sha: 2c99d0883bf82e7d1cd13b18fa418363c72aa5b4
+  license: Apache-2.0
+  size_kib: 2863693
+  language: Go
+  language_group: javascript-typescript
+  project_shape: compiler
+  tier: external_large
+  depth_class: supported_js_ts
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - GitHub primary language is now Go; corpus language group remains JS/TS. Early
+    representative.
+- id: react
+  github_repository: react/react
+  github_url: https://github.com/react/react
+  sha: 59aff3e18cb5b3a336c280bbfa57ec37999511b9
+  license: MIT
+  size_kib: 1093312
+  language: JavaScript
+  language_group: javascript-typescript
+  project_shape: library_framework
+  tier: external_large
+  depth_class: supported_js_ts
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Canonical clone moved from facebook/react.
+  clone_aliases:
+  - facebook/react
+- id: nextjs
+  github_repository: vercel/next.js
+  github_url: https://github.com/vercel/next.js
+  sha: 7b58e5880cbac52ec705ee2039e963c32a854951
+  license: MIT
+  size_kib: 2569104
+  language: JavaScript
+  language_group: javascript-typescript
+  project_shape: web_framework
+  tier: external_large
+  depth_class: partial_framework
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Next.js is an unsupported JS framework in E05.1.
+- id: vscode
+  github_repository: microsoft/vscode
+  github_url: https://github.com/microsoft/vscode
+  sha: d3c24c3c4d7efab36b37acb1e91d9502c0c35b28
+  license: MIT
+  size_kib: 1469881
+  language: TypeScript
+  language_group: javascript-typescript
+  project_shape: mixed_monorepo
+  tier: external_large
+  depth_class: mixed_build_monorepo
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - 'Early representative: mixed build/monorepo.'
+- id: angular
+  github_repository: angular/angular
+  github_url: https://github.com/angular/angular
+  sha: 7569a02d2961155cc32b9491918bde8ae4c47616
+  license: MIT
+  size_kib: 658589
+  language: TypeScript
+  language_group: javascript-typescript
+  project_shape: mixed_monorepo
+  tier: external_large
+  depth_class: partial_framework
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Angular is an unsupported JS framework in E05.1.
+- id: node
+  github_repository: nodejs/node
+  github_url: https://github.com/nodejs/node
+  sha: e98208bc27ef1f69318f3bfee96310ffadf8272b
+  license: NOASSERTION
+  size_kib: 1602898
+  language: JavaScript
+  language_group: javascript-typescript
+  project_shape: mixed_native
+  tier: external_large
+  depth_class: mixed_build_monorepo
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - C++ runtime plus JS; GitHub SPDX NOASSERTION.
+- id: webpack
+  github_repository: webpack/webpack
+  github_url: https://github.com/webpack/webpack
+  sha: 1d75746db30fdaa6106340b30ae9b07bf092cff6
+  license: MIT
+  size_kib: 105588
+  language: JavaScript
+  language_group: javascript-typescript
+  project_shape: library_framework
+  tier: external_large
+  depth_class: supported_js_ts
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: react-native
+  github_repository: react/react-native
+  github_url: https://github.com/react/react-native
+  sha: af4d8eb08ad0d73f98adaa2cab5f4516ca74e875
+  license: MIT
+  size_kib: 983035
+  language: C++
+  language_group: javascript-typescript
+  project_shape: mixed_native
+  tier: external_large
+  depth_class: mixed_build_monorepo
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Canonical clone moved from facebook/react-native.
+  clone_aliases:
+  - facebook/react-native
+- id: babel
+  github_repository: babel/babel
+  github_url: https://github.com/babel/babel
+  sha: fd665901dece022a0eda2ae7adda03bc9baabd5e
+  license: MIT
+  size_kib: 146625
+  language: TypeScript
+  language_group: javascript-typescript
+  project_shape: mixed_monorepo
+  tier: external_large
+  depth_class: supported_js_ts
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: jest
+  github_repository: jestjs/jest
+  github_url: https://github.com/jestjs/jest
+  sha: 202dd8a14777c270607c2416bd5034c3c0abc984
+  license: MIT
+  size_kib: 323422
+  language: TypeScript
+  language_group: javascript-typescript
+  project_shape: mixed_monorepo
+  tier: external_large
+  depth_class: supported_js_ts
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: django
+  github_repository: django/django
+  github_url: https://github.com/django/django
+  sha: 862ade3409ceaa8ec5305e6f5aa26ee0e553cf02
+  license: BSD-3-Clause
+  size_kib: 282872
+  language: Python
+  language_group: python
+  project_shape: web_framework
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - 'Early representative: retained Python depth. Django framework extractor is unsupported.'
+- id: gradio
+  github_repository: gradio-app/gradio
+  github_url: https://github.com/gradio-app/gradio
+  sha: 15ce43720d1611f44e4661c74d604eabe0d04daf
+  license: Apache-2.0
+  size_kib: 360060
+  language: Python
+  language_group: python
+  project_shape: web_application
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: pandas
+  github_repository: pandas-dev/pandas
+  github_url: https://github.com/pandas-dev/pandas
+  sha: cf85d5d203826cab8e164e3ccbe755e49f328d99
+  license: BSD-3-Clause
+  size_kib: 413185
+  language: Python
+  language_group: python
+  project_shape: library_framework
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: scikit-learn
+  github_repository: scikit-learn/scikit-learn
+  github_url: https://github.com/scikit-learn/scikit-learn
+  sha: 7a6ed871e03e95de276b0bc354ffb21e8399de59
+  license: BSD-3-Clause
+  size_kib: 187556
+  language: Python
+  language_group: python
+  project_shape: library_framework
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: transformers
+  github_repository: huggingface/transformers
+  github_url: https://github.com/huggingface/transformers
+  sha: c587bc884db2c2e31fc2b8102314656b17aa07b1
+  license: Apache-2.0
+  size_kib: 518592
+  language: Python
+  language_group: python
+  project_shape: library_framework
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: ansible
+  github_repository: ansible/ansible
+  github_url: https://github.com/ansible/ansible
+  sha: 1a4c6636245e72e64422f3e83e264f32c304fb65
+  license: GPL-3.0
+  size_kib: 266031
+  language: Python
+  language_group: python
+  project_shape: automation
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: home-assistant
+  github_repository: home-assistant/core
+  github_url: https://github.com/home-assistant/core
+  sha: 2329db5a05085ef6d7b8e6b00eb380a9a4ad4091
+  license: Apache-2.0
+  size_kib: 898229
+  language: Python
+  language_group: python
+  project_shape: web_application
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: airflow
+  github_repository: apache/airflow
+  github_url: https://github.com/apache/airflow
+  sha: 224d34121c877c21e8dee97520b05c02f578a839
+  license: Apache-2.0
+  size_kib: 715910
+  language: Python
+  language_group: python
+  project_shape: mixed_monorepo
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: bagisto
+  github_repository: bagisto/bagisto
+  github_url: https://github.com/bagisto/bagisto
+  sha: 9beff85ece6fe13378a97e6f84765b50647d3327
+  license: MIT
+  size_kib: 416988
+  language: PHP
+  language_group: php
+  project_shape: web_application
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: moodle
+  github_repository: moodle/moodle
+  github_url: https://github.com/moodle/moodle
+  sha: e68a1418bea512dd5992c29eb9e36570a3844e94
+  license: GPL-3.0
+  size_kib: 971433
+  language: PHP
+  language_group: php
+  project_shape: web_application
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: laravel-framework
+  github_repository: laravel/framework
+  github_url: https://github.com/laravel/framework
+  sha: 1d9727160ad440d1ccf2fdcbb7e4f4f36efae212
+  license: MIT
+  size_kib: 105069
+  language: PHP
+  language_group: php
+  project_shape: library_framework
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Laravel is a supported PHP framework pin in E05.1.
+- id: magento2
+  github_repository: magento/magento2
+  github_url: https://github.com/magento/magento2
+  sha: 874f1f5cdf3bc52b61c3d66becf159cc16345d7a
+  license: OSL-3.0
+  size_kib: 751167
+  language: PHP
+  language_group: php
+  project_shape: web_application
+  tier: external_large
+  depth_class: partial_framework
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Magento is an unsupported PHP framework in E05.1.
+- id: phpmyadmin
+  github_repository: phpmyadmin/phpmyadmin
+  github_url: https://github.com/phpmyadmin/phpmyadmin
+  sha: 65f19ca48edf8f8d024447e136f8728fceb2a74c
+  license: GPL-2.0
+  size_kib: 2537937
+  language: PHP
+  language_group: php
+  project_shape: web_application
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: nextcloud
+  github_repository: nextcloud/server
+  github_url: https://github.com/nextcloud/server
+  sha: be4ffd4257b40fcbbcd116d41d85218acbd54e2b
+  license: AGPL-3.0
+  size_kib: 7151303
+  language: PHP
+  language_group: php
+  project_shape: web_application
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: wordpress
+  github_repository: WordPress/WordPress
+  github_url: https://github.com/WordPress/WordPress
+  sha: e2ce85670c84edceb36ed5762e532ca16c0276d9
+  license: NOASSERTION
+  size_kib: 712963
+  language: PHP
+  language_group: php
+  project_shape: web_application
+  tier: external_large
+  depth_class: partial_framework
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - WordPress is an unsupported PHP framework in E05.1. GitHub SPDX NOASSERTION.
+- id: aspnetcore
+  github_repository: dotnet/aspnetcore
+  github_url: https://github.com/dotnet/aspnetcore
+  sha: 1fcd7ef305697a1888f3ede076010350ae9f4f8d
+  license: MIT
+  size_kib: 396311
+  language: C#
+  language_group: csharp
+  project_shape: library_framework
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: dotnet-runtime
+  github_repository: dotnet/runtime
+  github_url: https://github.com/dotnet/runtime
+  sha: 7adc767a7bb3c41986db17f10a6369800501a624
+  license: MIT
+  size_kib: 1241346
+  language: C#
+  language_group: csharp
+  project_shape: mixed_monorepo
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: roslyn
+  github_repository: dotnet/roslyn
+  github_url: https://github.com/dotnet/roslyn
+  sha: 3c9fedee40c44979ca893b6490ad5748bbb137b5
+  license: MIT
+  size_kib: 2689724
+  language: C#
+  language_group: csharp
+  project_shape: compiler
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: powershell
+  github_repository: PowerShell/PowerShell
+  github_url: https://github.com/PowerShell/PowerShell
+  sha: 84a93015104945c16b7aa69ee67a82cb1e6499dc
+  license: MIT
+  size_kib: 109184
+  language: C#
+  language_group: csharp
+  project_shape: tool
+  tier: external_large
+  depth_class: retained_lower_depth
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: kubernetes
+  github_repository: kubernetes/kubernetes
+  github_url: https://github.com/kubernetes/kubernetes
+  sha: 96b5e4e3ae3f8d7aa50d360cf57f01eaba61f855
+  license: Apache-2.0
+  size_kib: 1524207
+  language: Go
+  language_group: go
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Go is outside the five retained language providers.
+- id: go
+  github_repository: golang/go
+  github_url: https://github.com/golang/go
+  sha: 46f508b3aa365918ac78a63340ce2343306835af
+  license: BSD-3-Clause
+  size_kib: 457161
+  language: Go
+  language_group: go
+  project_shape: compiler
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: terraform
+  github_repository: hashicorp/terraform
+  github_url: https://github.com/hashicorp/terraform
+  sha: 78194be60cdab9c71ea1caf5e5c0b4d96e2c3691
+  license: NOASSERTION
+  size_kib: 359215
+  language: Go
+  language_group: go
+  project_shape: tool
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - GitHub SPDX NOASSERTION (BSL-1.1 historically).
+- id: prometheus
+  github_repository: prometheus/prometheus
+  github_url: https://github.com/prometheus/prometheus
+  sha: 296080c0a504ea0e72941ef16143f0a9702b137b
+  license: Apache-2.0
+  size_kib: 290558
+  language: Go
+  language_group: go
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+- id: rust
+  github_repository: rust-lang/rust
+  github_url: https://github.com/rust-lang/rust
+  sha: 971903d9aee24befd88423f42826c232e27c8190
+  license: Apache-2.0
+  size_kib: 1000621
+  language: Rust
+  language_group: rust
+  project_shape: compiler
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - 'Early representative: partial/unsupported language.'
+- id: deno
+  github_repository: denoland/deno
+  github_url: https://github.com/denoland/deno
+  sha: abd22074e47c6a5cd14e9e4e84743f084aa5a575
+  license: MIT
+  size_kib: 250569
+  language: Rust
+  language_group: rust
+  project_shape: mixed_native
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Rust runtime with TypeScript surface.
+- id: rails
+  github_repository: rails/rails
+  github_url: https://github.com/rails/rails
+  sha: 8b5f77d2a26a4ed1f1ba16385b88f178ced27fc5
+  license: MIT
+  size_kib: 289650
+  language: Ruby
+  language_group: ruby
+  project_shape: web_framework
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Ruby is outside the five retained language providers.
+- id: spark
+  github_repository: apache/spark
+  github_url: https://github.com/apache/spark
+  sha: a76032ef17f0d7d05fd55891f007a3a8cad3267e
+  license: Apache-2.0
+  size_kib: 612080
+  language: Scala
+  language_group: scala
+  project_shape: distributed_system
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Scala is outside the five retained language providers.
+- id: kotlin
+  github_repository: JetBrains/kotlin
+  github_url: https://github.com/JetBrains/kotlin
+  sha: 32e72c24aa3530144f50bfe781622bdc5fa4d4a7
+  license: NOASSERTION
+  size_kib: 4355671
+  language: Kotlin
+  language_group: kotlin
+  project_shape: compiler
+  tier: external_large
+  depth_class: partial_unsupported
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - GitHub license API returned null; recorded NOASSERTION.
+- id: juice-shop
+  github_repository: juice-shop/juice-shop
+  github_url: https://github.com/juice-shop/juice-shop
+  sha: 1618a611b173b4bf114028e6e02549950606e29d
+  license: MIT
+  size_kib: 305008
+  language: TypeScript
+  language_group: javascript-typescript
+  project_shape: intentionally_vulnerable
+  tier: external_large
+  depth_class: flagship_labeled
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.
+  - Also a labeled flagship ground-truth source. Labels precede tuning.
+- id: vite
+  github_repository: vitejs/vite
+  github_url: https://github.com/vitejs/vite
+  sha: e9078f865cdff6bed77cd729214a7e2868f126b5
+  license: MIT
+  size_kib: 74665
+  language: TypeScript
+  language_group: javascript-typescript
+  project_shape: library_framework
+  tier: external_large
+  depth_class: supported_js_ts
+  notes:
+  - Pinned 2026-09-19 via git ls-remote HEAD plus GitHub repository size/license fields.
+  - Pinning does not clone the tree into this repository and does not assess it.

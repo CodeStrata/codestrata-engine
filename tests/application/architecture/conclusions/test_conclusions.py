@@ -84,9 +84,7 @@ def test_cycle_and_direction_relate_and_cluster() -> None:
         ),
     )
     relationships = build_finding_relationships(findings)
-    assert any(
-        item.reason_code == "cycle_and_direction_same_boundary" for item in relationships
-    )
+    assert any(item.reason_code == "cycle_and_direction_same_boundary" for item in relationships)
     clusters = cluster_findings(findings, relationships)
     assert len(clusters) >= 2
     boundary = [item for item in clusters if "boundary" in item.category]

@@ -124,9 +124,7 @@ class AIProviderConfiguration:
         if not isinstance(self.source_trace, tuple) or not all(
             isinstance(item, FieldSource) for item in self.source_trace
         ):
-            raise ProviderContractValidationError(
-                "source_trace must be a tuple of FieldSource"
-            )
+            raise ProviderContractValidationError("source_trace must be a tuple of FieldSource")
         traced_fields = {item.field_name for item in self.source_trace}
         missing = _REQUIRED_SOURCE_TRACE_FIELDS - traced_fields
         if missing:

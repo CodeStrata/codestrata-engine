@@ -53,7 +53,9 @@ def check_limitations(
                         classification="limitation_placement",
                         repository_ids=[rid],
                         entity_id="assessment_semantics",
-                        expected="limitation does not invent silent skip/failure without classification",
+                        expected=(
+                            "limitation does not invent silent skip/failure without classification"
+                        ),
                         actual=str(bundle.record.get("verdict")),
                         handling="documentation_only",
                     )
@@ -77,7 +79,8 @@ def check_limitations(
             "juice-shop",
             "nodegoat",
         }:
-            # Soft: other repos may have similar notes; only flag explicit Known Issues wording bleed.
+            # Soft: other repos may have similar notes; only flag explicit
+            # Known Issues wording bleed.
             if "intentionally contains secret-shaped" in text:
                 defects.append(
                     DefectCandidate(

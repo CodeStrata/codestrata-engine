@@ -101,9 +101,7 @@ def test_executor_stops_retrying_once_maximum_attempts_reached() -> None:
 
 
 def test_executor_records_timeout_applied_when_timeout_category_observed() -> None:
-    provider = FakeRetryableThenSucceedingProvider(
-        fail_count=1, category=ErrorCategory.TIMEOUT
-    )
+    provider = FakeRetryableThenSucceedingProvider(fail_count=1, category=ErrorCategory.TIMEOUT)
     executor = AIProviderExecutor(
         provider, sleeper=RecordingSleeper(), retry_policy=AIProviderRetryPolicy(maximum_attempts=3)
     )

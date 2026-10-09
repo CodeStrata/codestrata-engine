@@ -67,16 +67,12 @@ def test_N_events_do_not_reprompt(tmp_path: Path, monkeypatch) -> None:
         echo_func=lambda _m: None,
     )
     for _ in range(5):
-        telemetry.runtime.record(
-            RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-        )
+        telemetry.runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert calls == 1
     assert telemetry.is_enabled() is True
 
 
-def test_D_allow_persists_preference_without_network(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_D_allow_persists_preference_without_network(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -99,9 +95,7 @@ def test_D_allow_persists_preference_without_network(
     leftover = [p for p in home.rglob("*") if p.is_file()]
     assert (home / "telemetry.json") in leftover
     # Optional anonymous installation identity may also appear once authorized.
-    unexpected = [
-        p for p in leftover if p.name not in {"telemetry.json", "installation_id"}
-    ]
+    unexpected = [p for p in leftover if p.name not in {"telemetry.json", "installation_id"}]
     assert unexpected == []
     assert telemetry.runtime.session.counters.transport_sent == 0
     assert telemetry.runtime.session.decision is TelemetryDecision.ALLOWED_FOR_SESSION

@@ -36,9 +36,7 @@ class DependencyRulePack:
     supported_languages: tuple[str, ...] = ("java", "python", "php", "csharp")
     default_enabled: bool = False
     requires_enterprise_context: bool = False
-    documentation_reference: str = (
-        "docs/analysis-intelligence/shared-rule-platform.md"
-    )
+    documentation_reference: str = "docs/analysis-intelligence/shared-rule-platform.md"
     configuration_requirements: tuple[str, ...] = (
         "rules.enabled=true",
         "rules.dependency.enabled=true",
@@ -65,9 +63,7 @@ class DependencyRulePack:
             "default_enabled": self.default_enabled,
             "requires_enterprise_context": self.requires_enterprise_context,
             "configuration_requirements": list(self.configuration_requirements),
-            "enterprise_context_requirements": list(
-                self.enterprise_context_requirements
-            ),
+            "enterprise_context_requirements": list(self.enterprise_context_requirements),
             "documentation_reference": self.documentation_reference,
         }
 

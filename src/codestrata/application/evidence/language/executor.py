@@ -83,8 +83,10 @@ class LanguageEvidenceProviderExecutor:
                     break
                 continue
 
-            duration_ms = result.duration_ms if result.duration_ms is not None else int(
-                (time.perf_counter() - started) * 1000
+            duration_ms = (
+                result.duration_ms
+                if result.duration_ms is not None
+                else int((time.perf_counter() - started) * 1000)
             )
             evidence_count = 0
             if result.bundle is not None:

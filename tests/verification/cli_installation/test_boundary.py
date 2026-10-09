@@ -30,9 +30,7 @@ def test_manifest_in_does_not_ship_verification_in_wheel() -> None:
 
 
 def test_public_export_includes_verification() -> None:
-    manifest = yaml.safe_load(
-        (REPO / "public-export-manifest.yaml").read_text(encoding="utf-8")
-    )
+    manifest = yaml.safe_load((REPO / "public-export-manifest.yaml").read_text(encoding="utf-8"))
     engine = next(item for item in manifest["exports"] if item["name"] == "codestrata-engine")
     assert "verification/**" in engine["include"]
 

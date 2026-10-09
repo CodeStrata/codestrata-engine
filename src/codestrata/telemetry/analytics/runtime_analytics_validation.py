@@ -114,12 +114,8 @@ def validate_runtime_analytics_mapping(
         policy_version=str(
             payload.get("policy_version", COMMUNITY_RUNTIME_ANALYTICS_POLICY_VERSION)
         ),
-        analytics_schema_version=str(
-            payload.get("analytics_schema_version", "1.0")
-        ),
-        analytics_policy_version=str(
-            payload.get("analytics_policy_version", "1.0")
-        ),
+        analytics_schema_version=str(payload.get("analytics_schema_version", "1.0")),
+        analytics_policy_version=str(payload.get("analytics_policy_version", "1.0")),
         privacy_projection_applied=bool(payload["privacy_projection_applied"]),
         offline_mode=bool(payload.get("offline_mode", True)),
         operation_category=str(payload.get("operation_category", "runtime")),

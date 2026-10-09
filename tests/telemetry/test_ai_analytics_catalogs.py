@@ -30,7 +30,5 @@ def test_model_family_catalog() -> None:
 
 def test_ownership_and_outcome_vocabularies() -> None:
     assert "customer_managed" in APPROVED_AI_PROVIDER_OWNERSHIPS
-    assert APPROVED_AI_OUTCOMES == frozenset(
-        {"success", "failure", "unavailable", "skipped"}
-    )
+    assert APPROVED_AI_OUTCOMES == frozenset({"success", "failure", "unavailable", "skipped"})
     assert "authentication_failed" in APPROVED_AI_FAILURE_CATEGORIES

@@ -38,9 +38,7 @@ def register_snapshot_tools(server: FastMCP, queries: KnowledgeQueryService) -> 
 
         def _run() -> dict[str, Any]:
             return to_mcp_dict(
-                queries.get_repository_snapshot(
-                    require_nonblank(snapshot_id, label="snapshot_id")
-                )
+                queries.get_repository_snapshot(require_nonblank(snapshot_id, label="snapshot_id"))
             )
 
         return run_bounded("get_snapshot", _run)

@@ -12,6 +12,7 @@ from codestrata.application.traceability.evidence_confidence import (
     apply_parent_confidence_bounds,
     derive_evidence_confidence,
 )
+from codestrata.application.traceability.rule_evidence import evidence_ref_from_rule_evidence
 from codestrata.domain.rules.enums import RuleEvidenceKind
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.traceability import (
@@ -28,7 +29,6 @@ from codestrata.domain.traceability import (
     evidence_ref_from_stable_dict,
     evidence_ref_to_stable_dict,
 )
-from codestrata.application.traceability.rule_evidence import evidence_ref_from_rule_evidence
 
 
 def test_model_normalizes_and_rejects_invalid_high() -> None:

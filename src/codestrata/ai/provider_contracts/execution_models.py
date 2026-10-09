@@ -50,9 +50,7 @@ class AIProviderExecutionContext:
         if not isinstance(self.timeout_policy, TimeoutPolicy):
             raise ProviderContractValidationError("timeout_policy must be a TimeoutPolicy")
         if not isinstance(self.retry_policy, AIProviderRetryPolicy):
-            raise ProviderContractValidationError(
-                "retry_policy must be an AIProviderRetryPolicy"
-            )
+            raise ProviderContractValidationError("retry_policy must be an AIProviderRetryPolicy")
 
 
 @dataclass(frozen=True, slots=True)

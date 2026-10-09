@@ -1,0 +1,38 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: technical_debt.excessive-parameters
+  version: 1.0.0
+  title: Excessive parameters
+  category: technical_debt
+  owner: codestrata
+  measurement: M16
+  tags: [technical_debt, parameters]
+applies_to:
+  languages: [java, python, php, csharp, javascript, typescript]
+  requires:
+    facts: [complexity.callable]
+select:
+  source: complexity
+  callables:
+    all:
+      - parameter_count_gt: 5
+condition:
+  operator: technical_debt.excessive-parameters
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Callable '{{qualified_signature}}' has parameter_count={{value}}
+        which exceeds threshold {{threshold}}.
+      bindings:
+        qualified_signature: {type: string, evidence: qualified_signature}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+    documentation_url: docs/analysis-intelligence/technical-debt/complexity-rules.md
+  metric:
+    name: technical_debt_excessive_parameters_count
+    operation: count
+parameters:
+  max_parameters: {type: integer, default: 5, exclusive_min: true}

@@ -2,23 +2,23 @@
 
 from __future__ import annotations
 
+from verification.assessment_consistency.coverage import check_coverage
 from verification.assessment_consistency.findings import check_correlations, check_findings
 from verification.assessment_consistency.limitations import check_limitations
 from verification.assessment_consistency.models import RepositoryBundle
 from verification.assessment_consistency.priority import check_priority
 from verification.assessment_consistency.recommendations import check_recommendations
-from verification.assessment_consistency.coverage import check_coverage
-from verification.assessment_consistency.schemas import check_schemas
 from verification.assessment_consistency.scenarios import (
     minimal_record,
     mutate_correlation_self_ref,
-    mutate_duplicate_finding_id,
     mutate_dangling_recommendation_support,
+    mutate_duplicate_finding_id,
     mutate_priority_band_mismatch,
     mutate_schema_version,
     mutate_wrong_limitation_repo,
     mutate_zero_denominator_ratio,
 )
+from verification.assessment_consistency.schemas import check_schemas
 
 
 def _fixture_bundle() -> RepositoryBundle:
@@ -61,9 +61,7 @@ def _fixture_bundle() -> RepositoryBundle:
                     "areas": [],
                 }
             },
-            "assessment_head_confidence": {
-                "security_intelligence": {"level": "moderate"}
-            },
+            "assessment_head_confidence": {"security_intelligence": {"level": "moderate"}},
             "activation": {"mode": "default", "packs": []},
         },
     }

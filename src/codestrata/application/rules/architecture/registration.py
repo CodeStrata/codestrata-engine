@@ -27,9 +27,7 @@ def register_architecture_pack(
         outgoing_module_threshold=arch.excessive_cross_module_coupling.outgoing_module_threshold,
         minimum_module_count=arch.excessive_cross_module_coupling.minimum_module_count,
         relative_multiplier=arch.excessive_cross_module_coupling.relative_multiplier,
-        exclude_composition_roots=(
-            arch.excessive_cross_module_coupling.exclude_composition_roots
-        ),
+        exclude_composition_roots=(arch.excessive_cross_module_coupling.exclude_composition_roots),
         incident_edge_share_threshold=arch.component_concentration.incident_edge_share_threshold,
         minimum_component_count=arch.component_concentration.minimum_component_count,
         enabled_rule_ids=enabled_ids,

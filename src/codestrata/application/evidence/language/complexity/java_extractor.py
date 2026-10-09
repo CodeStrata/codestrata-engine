@@ -35,9 +35,7 @@ from codestrata.domain.evidence.language.complexity.models import (
 )
 from codestrata.domain.evidence.language.provenance import EvidenceProvenance
 
-_TYPE_DECL = re.compile(
-    r"\b(?P<kind>class|interface|enum)\s+(?P<name>[A-Za-z_][\w$]*)\b"
-)
+_TYPE_DECL = re.compile(r"\b(?P<kind>class|interface|enum)\s+(?P<name>[A-Za-z_][\w$]*)\b")
 _METHOD_LIKE = re.compile(
     r"(?P<mods>(?:(?:public|protected|private|static|final|abstract|synchronized|"
     r"native|default|strictfp)\s+)*)"
@@ -380,9 +378,7 @@ def _parameter_count(params_text: str) -> int:
 
 def _branch_point_count(body: str) -> int:
     return (
-        len(_BRANCH_WORD.findall(body))
-        + len(_BOOL_OP.findall(body))
-        + len(_TERNARY.findall(body))
+        len(_BRANCH_WORD.findall(body)) + len(_BOOL_OP.findall(body)) + len(_TERNARY.findall(body))
     )
 
 

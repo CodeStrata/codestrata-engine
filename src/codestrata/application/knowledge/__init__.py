@@ -1,5 +1,9 @@
 """Application-layer engineering knowledge persistence contracts."""
 
+from codestrata.application.knowledge.artifact_evidence import (
+    LocalArtifactEvidenceService,
+    project_canonical_evidence,
+)
 from codestrata.application.knowledge.errors import (
     KnowledgeArtifactNotFoundError,
     KnowledgeStoreCorruptionError,
@@ -11,6 +15,7 @@ from codestrata.application.knowledge.errors import (
     RepositoryLockTimeoutError,
     RepositoryNotFoundError,
 )
+from codestrata.application.knowledge.health import local_knowledge_health
 from codestrata.application.knowledge.identity import (
     NormalizedAlias,
     NormalizedRepositoryIdentity,
@@ -32,6 +37,9 @@ from codestrata.application.knowledge.models import (
     RepositorySnapshotRecord,
     StagedKnowledgeArtifact,
 )
+from codestrata.application.knowledge.permitted_evidence import (
+    collect_permitted_evidence_ids,
+)
 from codestrata.application.knowledge.ports import (
     AssessmentRunStore,
     KnowledgeStore,
@@ -42,6 +50,8 @@ from codestrata.application.knowledge.session import AssessmentKnowledgeSession
 
 __all__ = [
     "AssessmentKnowledgeSession",
+    "LocalArtifactEvidenceService",
+    "local_knowledge_health",
     "AssessmentRunRecord",
     "AssessmentRunStatus",
     "AssessmentRunStore",
@@ -67,6 +77,8 @@ __all__ = [
     "RepositorySnapshotRecord",
     "SnapshotStore",
     "StagedKnowledgeArtifact",
+    "collect_permitted_evidence_ids",
+    "project_canonical_evidence",
     "build_github_canonical_key",
     "build_local_canonical_key",
     "normalize_github_url_alias",

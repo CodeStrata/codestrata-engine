@@ -174,3 +174,37 @@ def test_returns_no_findings_without_dependency_facts(
     )
 
     assert result.findings == []
+
+
+def test_unmanaged_flag_with_explicit_version_does_not_emit_dep001(
+    tmp_path: Path,
+) -> None:
+    repository = Repository(
+        name="sample",
+        path=tmp_path,
+        files=["package.json"],
+    )
+
+    facts = RepositoryFacts(
+        dependencies=DependencyFacts(
+            dependencies=[
+                Dependency(
+                    name="jest",
+                    version="^29.7.0",
+                    ecosystem="npm",
+                    scope="development",
+                    manifest_path="package.json",
+                    unmanaged_version=True,
+                )
+            ]
+        )
+    )
+
+    result = DependencyHealthAnalyzer().analyze(
+        repository=repository,
+        technologies=[],
+        facts=facts,
+    )
+
+    assert not any(f.rule_id == "DEP001" for f in result.findings)
+

@@ -1,0 +1,34 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: testing.test-001
+  version: 1.0.0
+  title: Disabled or skipped tests detected
+  category: testing
+  owner: codestrata
+  measurement: M20
+  tags: [testing, disabled, skipped]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_testing.marker_facts]
+select:
+  source: repository_testing
+  marker_facts:
+    all:
+      - disabled_or_skipped: true
+condition:
+  operator: testing.test-001
+emit:
+  finding:
+    default_severity: low
+    message:
+      template: >-
+        Observed disabled or skipped test markers. This does not claim tests
+        are obsolete, failing, or unjustified.
+      bindings: {}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: testing_disabled_or_skipped_marker_count
+    operation: count
+parameters: {}

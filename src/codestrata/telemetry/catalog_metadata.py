@@ -50,15 +50,9 @@ EVENT_USAGE: dict[str, str] = {
     RuntimeEventType.APPLICATION_COMPLETED.value: (
         EventUsageStatus.SUPPORTED_BUT_NOT_CURRENTLY_EMITTED.value
     ),
-    RuntimeEventType.FEATURE_INVOKED.value: (
-        EventUsageStatus.EMITTED_BY_CURRENT_RUNTIME.value
-    ),
-    RuntimeEventType.FEATURE_COMPLETED.value: (
-        EventUsageStatus.EMITTED_BY_CURRENT_RUNTIME.value
-    ),
-    RuntimeEventType.OPERATION_FAILED.value: (
-        EventUsageStatus.EMITTED_BY_CURRENT_RUNTIME.value
-    ),
+    RuntimeEventType.FEATURE_INVOKED.value: (EventUsageStatus.EMITTED_BY_CURRENT_RUNTIME.value),
+    RuntimeEventType.FEATURE_COMPLETED.value: (EventUsageStatus.EMITTED_BY_CURRENT_RUNTIME.value),
+    RuntimeEventType.OPERATION_FAILED.value: (EventUsageStatus.EMITTED_BY_CURRENT_RUNTIME.value),
 }
 
 ENUM_MEANINGS: dict[str, dict[str, str]] = {

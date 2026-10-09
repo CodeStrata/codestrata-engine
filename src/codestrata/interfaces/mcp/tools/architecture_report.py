@@ -61,9 +61,7 @@ def register_architecture_report_tools(server: FastMCP) -> None:
                 "key_metrics": section.get("key_metrics", []),
                 "finding_count": len(section.get("findings") or []),
                 "conclusion_count": len(section.get("conclusions") or []),
-                "recommendation_group_count": len(
-                    section.get("recommendation_groups") or []
-                ),
+                "recommendation_group_count": len(section.get("recommendation_groups") or []),
                 "limitation_count": len(section.get("limitations") or []),
                 "enterprise_context_used": section.get("enterprise_context_used"),
             }

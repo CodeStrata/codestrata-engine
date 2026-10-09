@@ -137,9 +137,7 @@ def evaluate_dependency_pack_for_context_detailed(
         )
     if evidence is not None:
         evidence_pipeline = "dependency.manifest"
-        evidence_fingerprint = evidence.evidence_fingerprint or _fingerprint_evidence(
-            evidence
-        )
+        evidence_fingerprint = evidence.evidence_fingerprint or _fingerprint_evidence(evidence)
         manifests_discovered = evidence.coverage.manifests_discovered
         manifests_supported = evidence.coverage.manifests_supported
         declarations_collected = evidence.coverage.declarations_collected
@@ -183,14 +181,10 @@ def evaluate_dependency_pack_for_context_detailed(
         str(record.rule_id): record.category or RuleCategory.DEPENDENCY
         for record in platform_result.records
     }
-    findings = mapper.map_matches(
-        platform_result.matches, category_by_rule=category_by_rule
-    )
+    findings = mapper.map_matches(platform_result.matches, category_by_rule=category_by_rule)
     evaluated = tuple(platform_result.plan.execution_order)
     skipped = tuple(
-        entry.rule_id
-        for entry in platform_result.plan.skipped
-        if entry.rule_id not in evaluated
+        entry.rule_id for entry in platform_result.plan.skipped if entry.rule_id not in evaluated
     )
     for record in platform_result.records:
         if record.status.value == "not_applicable" and record.rule_id not in skipped:

@@ -22,9 +22,7 @@ from codestrata.domain.evidence.repository_testing.models import (
 class RepositoryTestingEvidenceService:
     """Collect deterministic repository-observable testing evidence."""
 
-    def __init__(
-        self, settings: RepositoryTestingEvidenceSettings | None = None
-    ) -> None:
+    def __init__(self, settings: RepositoryTestingEvidenceSettings | None = None) -> None:
         self._settings = settings or RepositoryTestingEvidenceSettings()
 
     @property
@@ -49,9 +47,7 @@ class RepositoryTestingEvidenceService:
                 evidence_fingerprint="",
             )
 
-        ignore = (
-            tuple(self._settings.ignore_path_markers) or DEFAULT_IGNORE_MARKERS
-        )
+        ignore = tuple(self._settings.ignore_path_markers) or DEFAULT_IGNORE_MARKERS
         return collect_repository_testing_evidence(
             repository_id=repository_id,
             relative_paths=relative_paths,

@@ -85,11 +85,7 @@ class ArchitectureConclusionService:
         started = time.perf_counter()
         architecture_findings = tuple(
             sorted(
-                (
-                    finding
-                    for finding in findings
-                    if finding.rule_id.startswith("architecture.")
-                ),
+                (finding for finding in findings if finding.rule_id.startswith("architecture.")),
                 key=lambda item: (item.rule_id, item.id),
             )
         )
@@ -232,9 +228,7 @@ class ArchitectureConclusionService:
         ordered_conclusions = tuple(attached)
 
         material = sum(
-            1
-            for item in ordered_conclusions
-            if item.materiality is ConclusionMateriality.MATERIAL
+            1 for item in ordered_conclusions if item.materiality is ConclusionMateriality.MATERIAL
         )
         highest = None
         if ordered_conclusions:
@@ -287,8 +281,7 @@ class ArchitectureConclusionService:
             recommendation_group_count=len(recommendation_groups),
             policy_records=tuple(records),
             duration_ms=duration_ms,
-            configuration_fingerprint=configuration_fingerprint
-            or _fingerprint_config(enabled),
+            configuration_fingerprint=configuration_fingerprint or _fingerprint_config(enabled),
             graph_fingerprint=graph_fingerprint,
             enterprise_context_used=enterprise_context_present,
             failure_count=failures,

@@ -17,8 +17,8 @@ from codestrata.domain.dependency.ids import (
     RULE_UNRESOLVED_VERSION,
 )
 from codestrata.domain.findings.correlation import (
-    CorrelationDirection,
     CorrelationConfidenceLevel,
+    CorrelationDirection,
     FindingCorrelationBasis,
     FindingCorrelationType,
 )
@@ -69,10 +69,7 @@ class FindingCorrelationPolicy(BaseModel):
     def normalize_rules(cls, value: object) -> tuple[str, ...]:
         items = tuple(
             sorted(
-                {
-                    require_nonblank(str(item), label="rule_id").strip()
-                    for item in as_tuple(value)
-                }
+                {require_nonblank(str(item), label="rule_id").strip() for item in as_tuple(value)}
             )
         )
         if len(items) < 2:
@@ -103,9 +100,7 @@ CORRELATION_POLICIES: tuple[FindingCorrelationPolicy, ...] = (
             FindingCorrelationBasis.SAME_PATH,
         ),
         minimum_confidence=CorrelationConfidenceLevel.HIGH,
-        limitations=(
-            "Correlates only when the same configuration key and path are shared.",
-        ),
+        limitations=("Correlates only when the same configuration key and path are shared.",),
     ),
     FindingCorrelationPolicy(
         policy_id="security.config.tls-hostname",
@@ -210,9 +205,7 @@ CORRELATION_POLICIES: tuple[FindingCorrelationPolicy, ...] = (
 
 def policies_for_rules(rule_a: str, rule_b: str) -> tuple[FindingCorrelationPolicy, ...]:
     pair = frozenset({rule_a, rule_b})
-    return tuple(
-        policy for policy in CORRELATION_POLICIES if pair.issubset(set(policy.rule_ids))
-    )
+    return tuple(policy for policy in CORRELATION_POLICIES if pair.issubset(set(policy.rule_ids)))
 
 
 def all_correlation_policies() -> tuple[FindingCorrelationPolicy, ...]:

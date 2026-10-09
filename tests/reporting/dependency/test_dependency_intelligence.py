@@ -60,9 +60,7 @@ def _decl(
     path: str,
     kind: DependencyDeclarationKind = DependencyDeclarationKind.RUNTIME,
     classification: SourceClassification = SourceClassification.SOURCE,
-    resolution: DependencyVersionResolutionStatus = (
-        DependencyVersionResolutionStatus.RESOLVED
-    ),
+    resolution: DependencyVersionResolutionStatus = (DependencyVersionResolutionStatus.RESOLVED),
     ecosystem: DependencyEcosystem = DependencyEcosystem.MAVEN,
     manifest_type: DependencyManifestType = DependencyManifestType.POM_XML,
     raw_version: str | None = "1.0.0",
@@ -76,9 +74,7 @@ def _decl(
         original_identity=identity,
         raw_version=raw_version,
         resolved_version_local=(
-            raw_version
-            if resolution is DependencyVersionResolutionStatus.RESOLVED
-            else None
+            raw_version if resolution is DependencyVersionResolutionStatus.RESOLVED else None
         ),
         version_availability=DependencyEvidenceAvailability.AVAILABLE,
         version_resolution_status=resolution,
@@ -120,9 +116,7 @@ def _evidence(
         manifests_discovered=len(manifests),
         manifests_supported=len(manifests),
         manifests_parsed=sum(
-            1
-            for item in manifests
-            if item.parse_status is DependencyParseStatus.SUCCEEDED
+            1 for item in manifests if item.parse_status is DependencyParseStatus.SUCCEEDED
         ),
         manifests_partially_parsed=sum(
             1
@@ -383,9 +377,7 @@ def test_absolute_manifest_paths_omitted() -> None:
     if not hotspots:
         return
     bad = hotspots[0].model_copy(update={"path": "/Users/secret/pom.xml"})
-    mutated = report.model_copy(
-        update={"manifest_hotspots": (bad, *hotspots[1:])}
-    )
+    mutated = report.model_copy(update={"manifest_hotspots": (bad, *hotspots[1:])})
     intel = build_dependency_intelligence(mutated, findings=(), recommendations=())
     assert intel is not None
     assert all(not row.path.startswith("/") for row in intel.manifests)

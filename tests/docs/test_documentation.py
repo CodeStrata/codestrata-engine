@@ -29,11 +29,7 @@ if (REPO_ROOT / "test-fixtures" / "sample-js-app").is_dir():
     EXAMPLES = REPO_ROOT / "examples"
 elif (ENGINE_ROOT / "test-fixtures" / "sample-js-app").is_dir():
     FIXTURES = ENGINE_ROOT / "test-fixtures"
-    EXAMPLES = (
-        ENGINE_ROOT / "examples"
-        if (ENGINE_ROOT / "examples").is_dir()
-        else FIXTURES
-    )
+    EXAMPLES = ENGINE_ROOT / "examples" if (ENGINE_ROOT / "examples").is_dir() else FIXTURES
 else:
     FIXTURES = ENGINE_ROOT / "test-fixtures"
     EXAMPLES = ENGINE_ROOT / "examples"
@@ -83,9 +79,7 @@ def test_relative_markdown_links_resolve() -> None:
         text = path.read_text(encoding="utf-8")
         for _label, raw_target in LINK_RE.findall(text):
             target = _strip_url(raw_target)
-            if not target or target.startswith(
-                ("http://", "https://", "mailto:", "tel:")
-            ):
+            if not target or target.startswith(("http://", "https://", "mailto:", "tel:")):
                 continue
             if target.startswith(("`", "#")):
                 continue
@@ -189,9 +183,7 @@ def test_toml_fences_in_key_docs_parse() -> None:
                         tomllib.loads(f'[repository]\npath = "."\n{snippet}')
                         continue
                     except Exception as nested:  # noqa: BLE001
-                        errors.append(
-                            f"{path.relative_to(ROOT)} fence#{index}: {nested}"
-                        )
+                        errors.append(f"{path.relative_to(ROOT)} fence#{index}: {nested}")
                         continue
                 errors.append(f"{path.relative_to(ROOT)} fence#{index}: {error}")
     assert not errors, "Invalid TOML fences:\n" + "\n".join(errors[:20])

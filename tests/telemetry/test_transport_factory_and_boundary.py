@@ -6,6 +6,17 @@ import os
 from pathlib import Path
 
 import pytest
+from tests.telemetry.transport_test_helpers import (
+    TEST_ENDPOINT,
+    TEST_TOKEN,
+    assert_no_secret_leak,
+    freeze_home_temp,
+    gated_event,
+    make_allowed_http_runtime,
+    make_config,
+    make_http_transport,
+    sample_runtime_event,
+)
 
 from codestrata.telemetry.consent import (
     allow_session_consent,
@@ -27,17 +38,6 @@ from codestrata.telemetry.status_formatting import format_privacy_first_telemetr
 from codestrata.telemetry.transport import TelemetryTransportResultKind
 from codestrata.telemetry.transport_factory import create_http_telemetry_transport
 from codestrata.telemetry.transport_http import HttpTelemetryTransport
-from tests.telemetry.transport_test_helpers import (
-    TEST_ENDPOINT,
-    TEST_TOKEN,
-    assert_no_secret_leak,
-    freeze_home_temp,
-    gated_event,
-    make_allowed_http_runtime,
-    make_config,
-    make_http_transport,
-    sample_runtime_event,
-)
 
 
 def test_default_factory_remains_unavailable(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -75,9 +75,7 @@ def test_allowed_with_http_transport_sends_gated_event() -> None:
 
 def test_capture_still_test_only_and_gated() -> None:
     capture = CaptureTelemetryTransport()
-    runtime = create_session_telemetry_runtime(
-        consent=allow_session_consent(), transport=capture
-    )
+    runtime = create_session_telemetry_runtime(consent=allow_session_consent(), transport=capture)
     runtime.record(sample_runtime_event())
     assert len(capture.captured) == 1
     assert create_default_telemetry_runtime().session.transport.transport_category == (

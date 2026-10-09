@@ -162,9 +162,7 @@ class SqliteKnowledgeStore:
         except KnowledgeStoreError:
             raise
         except sqlite3.Error as error:
-            raise KnowledgeStoreError(
-                "Failed to open the engineering knowledge store"
-            ) from error
+            raise KnowledgeStoreError("Failed to open the engineering knowledge store") from error
         except OSError as error:
             raise KnowledgeStoreError(
                 f"Failed to prepare knowledge store directory: {self._directory}"

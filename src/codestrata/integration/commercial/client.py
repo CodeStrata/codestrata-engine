@@ -796,9 +796,7 @@ class RestPlatformClient:
                     "Platform returned invalid JSON",
                     reason_code="invalid_json",
                 ) from error
-        raise PlatformUnavailableError(
-            f"Platform request failed after retries: {last_error}"
-        )
+        raise PlatformUnavailableError(f"Platform request failed after retries: {last_error}")
 
     def _request_json(
         self,
@@ -865,17 +863,13 @@ class RestPlatformClient:
                 if attempt + 1 < attempts:
                     time.sleep(self._backoff * (attempt + 1))
                     continue
-                raise PlatformUnavailableError(
-                    f"Platform unavailable: {error}"
-                ) from error
+                raise PlatformUnavailableError(f"Platform unavailable: {error}") from error
             except json.JSONDecodeError as error:
                 raise PlatformPermanentError(
                     "Platform returned invalid JSON",
                     reason_code="invalid_json",
                 ) from error
-        raise PlatformUnavailableError(
-            f"Platform request failed after retries: {last_error}"
-        )
+        raise PlatformUnavailableError(f"Platform request failed after retries: {last_error}")
 
 
 def _repository_ref(data: dict[str, object]) -> PlatformRepositoryRef:

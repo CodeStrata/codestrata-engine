@@ -46,7 +46,8 @@ def check_confidence(
                             handling="product_defect_for_sv13",
                         )
                     )
-            # Confidence not inferred from severity: if severity critical and confidence missing entirely — ok;
+            # Confidence not inferred from severity: if severity critical and confidence missing
+            # entirely — ok;
             # if finding_confidence equals severity string as sole level wrongly — rare.
             sev = str(finding.get("severity") or "").lower()
             if level and sev and level == sev and sev not in CONFIDENCE_LEVEL_VOCAB:
@@ -130,8 +131,14 @@ def check_confidence(
                 )
 
         # Coverage and confidence maps must both exist as separate objects.
-        if "assessment_coverage" in bundle.assessment and "assessment_head_confidence" in bundle.assessment:
-            if bundle.assessment["assessment_coverage"] is bundle.assessment["assessment_head_confidence"]:
+        if (
+            "assessment_coverage" in bundle.assessment
+            and "assessment_head_confidence" in bundle.assessment
+        ):
+            if (
+                bundle.assessment["assessment_coverage"]
+                is bundle.assessment["assessment_head_confidence"]
+            ):
                 defects.append(
                     DefectCandidate(
                         classification="confidence_semantics",

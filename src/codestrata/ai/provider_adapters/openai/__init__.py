@@ -12,6 +12,7 @@
 | ``diagnostics.py`` | Redacted diagnostic views |
 | ``adapter.py`` | ``OpenAIProvider`` — the ``AIProvider`` implementation |
 | ``factory.py`` | Construction without any import-time client or env read |
+| ``explanation_call.py`` | One retained local explanation request |
 | ``legacy_bridge.py`` | Legacy ``AIModelProvider`` <-> contract translation |
 
 Importing this package never constructs an OpenAI client, never imports the

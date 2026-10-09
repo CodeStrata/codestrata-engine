@@ -18,9 +18,7 @@ from codestrata.telemetry.analytics.installation_identity import (
 
 
 def _id() -> AnonymousInstallationIdentity:
-    return AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    return AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
 
 
 def test_validate_success() -> None:
@@ -57,9 +55,7 @@ def test_validate_cancelled_with_interrupted() -> None:
         enabled_assessment_heads=(),
         failure_category="interrupted",
     )
-    assert validate_assessment_analytics_event(event).fields["failure_category"] == (
-        "interrupted"
-    )
+    assert validate_assessment_analytics_event(event).fields["failure_category"] == ("interrupted")
 
 
 def test_invalid_duration_bucket() -> None:

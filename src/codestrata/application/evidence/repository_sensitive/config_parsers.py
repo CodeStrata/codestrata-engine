@@ -26,7 +26,7 @@ from codestrata.domain.evidence.repository_sensitive.enums import (
 try:
     import tomllib
 except ModuleNotFoundError:  # pragma: no cover
-    import tomli as tomllib  # type: ignore[no-redef]
+    import tomli as tomllib  # type: ignore[import-not-found, no-redef]
 
 try:
     import yaml
@@ -63,21 +63,19 @@ def _emit(
         return None
     family = classify_key_family(key)
     sensitive = is_sensitive_literal_key(key) or "password" in value.lower()
-    if value_looks_like_http_endpoint(value) and value.strip().lower().startswith(
-        "http://"
-    ):
+    if value_looks_like_http_endpoint(value) and value.strip().lower().startswith("http://"):
         # Collect plaintext HTTP endpoints as non-secret policy facts.
         sensitive = False
         if family is ConfigurationKeyFamily.UNKNOWN:
             family = ConfigurationKeyFamily.OTHER
     facts = value_facts(value, sensitive=sensitive)
     literal_boolean = None
+    metadata: dict[str, str] = {}
     if facts["value_kind"] is ValueKind.BOOLEAN:
         literal_boolean = parse_literal_boolean(value)
-    wildcard = (
-        family is ConfigurationKeyFamily.CORS_ORIGIN
-        and is_explicit_wildcard_origin(value)
-    )
+    elif facts["value_kind"] is ValueKind.UNKNOWN:
+        metadata["unsupported_expression"] = "true"
+    wildcard = family is ConfigurationKeyFamily.CORS_ORIGIN and is_explicit_wildcard_origin(value)
     return {
         "normalized_key": normalize_key(key),
         "key_family": family,
@@ -85,6 +83,7 @@ def _emit(
         "line_start": line,
         "literal_boolean": literal_boolean,
         "is_wildcard_origin": wildcard,
+        "metadata": metadata,
         **facts,
     }
 
@@ -193,17 +192,43 @@ def parse_yaml(text: str) -> tuple[list[dict[str, object]], list[str]]:
         diagnostics.append("yaml_parser_unavailable")
         return facts, diagnostics
     try:
-        data = yaml.safe_load(text)
+        documents = list(yaml.safe_load_all(text))
     except Exception as error:  # noqa: BLE001 - bounded diagnostic
         diagnostics.append(f"malformed_yaml:{type(error).__name__}")
         return facts, diagnostics
-    if data is None:
-        return facts, diagnostics
-    for key, value, section in _walk_mapping(data):
-        item = _emit(key=key, value=value, section=section, line=None)
-        if item:
+    for doc_index, data in enumerate(documents):
+        if data is None:
+            continue
+        profile = _yaml_profile(data)
+        for key, value, section in _walk_mapping(data):
+            item = _emit(key=key, value=value, section=profile or section, line=None)
+            if not item:
+                continue
+            metadata: dict[str, str] = {}
+            raw_meta = item.get("metadata")
+            if isinstance(raw_meta, dict):
+                metadata = {str(key): str(value) for key, value in raw_meta.items()}
+            metadata["yaml_document"] = str(doc_index)
+            if profile:
+                metadata["profile"] = profile
+            item["metadata"] = metadata
             facts.append(item)
     return facts, diagnostics
+
+
+def _yaml_profile(data: object) -> str | None:
+    if not isinstance(data, dict):
+        return None
+    spring = data.get("spring")
+    if isinstance(spring, dict):
+        profiles = spring.get("profiles")
+        if isinstance(profiles, str) and profiles.strip():
+            return profiles.strip()
+        if isinstance(profiles, dict):
+            active = profiles.get("active")
+            if isinstance(active, str) and active.strip():
+                return active.strip()
+    return None
 
 
 def parse_configuration(

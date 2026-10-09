@@ -63,9 +63,7 @@ def build_assessment_manifest(
         "scores": overall_scores or {},
         "findings_summary": findings_summary or {},
         "completed_heads": heads,
-        "head_references": [
-            {"head_id": item["head_id"], "path": item["path"]} for item in heads
-        ],
+        "head_references": [{"head_id": item["head_id"], "path": item["path"]} for item in heads],
         "reports": {
             "assessment_json": ASSESSMENT_JSON_BASENAME,
             "assessment_html": ASSESSMENT_HTML_BASENAME,

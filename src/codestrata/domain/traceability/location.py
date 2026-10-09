@@ -65,16 +65,11 @@ class EvidenceLocation(BaseModel):
                 object.__setattr__(self, "location_kind", LocationKind.SYMBOLIC)
             if self.precision is LocationPrecision.PATH_ONLY:
                 object.__setattr__(self, "precision", LocationPrecision.SYMBOLIC_ONLY)
-        elif (
-            self.line_start is not None
-            and self.location_kind is LocationKind.FILE
-        ):
+        elif self.line_start is not None and self.location_kind is LocationKind.FILE:
             object.__setattr__(self, "location_kind", LocationKind.FILE_SPAN)
 
         _validate_span_pair(self.line_start, self.line_end, "line_start", "line_end")
-        _validate_span_pair(
-            self.column_start, self.column_end, "column_start", "column_end"
-        )
+        _validate_span_pair(self.column_start, self.column_end, "column_start", "column_end")
 
         if (
             self.line_start is not None
@@ -84,9 +79,7 @@ class EvidenceLocation(BaseModel):
             and self.column_end is not None
             and self.column_end < self.column_start
         ):
-            raise TraceabilityValidationError(
-                "column_end must be >= column_start on the same line"
-            )
+            raise TraceabilityValidationError("column_end must be >= column_start on the same line")
 
         return self
 
@@ -100,8 +93,6 @@ def _validate_span_pair(
     if start is None and end is None:
         return
     if start is None or end is None:
-        raise TraceabilityValidationError(
-            f"{start_name} and {end_name} must both be set"
-        )
+        raise TraceabilityValidationError(f"{start_name} and {end_name} must both be set")
     if end < start:
         raise TraceabilityValidationError(f"{end_name} must be >= {start_name}")

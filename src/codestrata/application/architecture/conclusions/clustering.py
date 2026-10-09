@@ -120,11 +120,7 @@ def cluster_findings(
     findings: Sequence[Finding],
     relationships: Sequence[FindingRelationship],
 ) -> tuple[FindingCluster, ...]:
-    architecture = [
-        finding
-        for finding in findings
-        if finding.rule_id.startswith("architecture.")
-    ]
+    architecture = [finding for finding in findings if finding.rule_id.startswith("architecture.")]
     by_id: dict[str, Finding] = {finding.id: finding for finding in architecture}
     if not architecture:
         return ()
@@ -147,9 +143,7 @@ def cluster_findings(
         else:
             parent[root_l] = root_r
 
-    related_pairs = {
-        (rel.source_finding_id, rel.target_finding_id): rel for rel in relationships
-    }
+    related_pairs = {(rel.source_finding_id, rel.target_finding_id): rel for rel in relationships}
     for (left_id, right_id), rel in related_pairs.items():
         left = by_id.get(left_id)
         right = by_id.get(right_id)
@@ -219,8 +213,7 @@ def cluster_findings(
                 {
                     rel.reason_code
                     for rel in relationships
-                    if rel.source_finding_id in finding_ids
-                    and rel.target_finding_id in finding_ids
+                    if rel.source_finding_id in finding_ids and rel.target_finding_id in finding_ids
                 }
             )
         )

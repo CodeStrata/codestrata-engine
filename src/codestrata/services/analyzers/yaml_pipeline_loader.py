@@ -3,10 +3,30 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from dataclasses import dataclass
+from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+
+class YamlLoadStatus(StrEnum):
+    """Distinguish a missing or malformed pipeline from an empty mapping."""
+
+    OK = "ok"
+    MISSING = "missing"
+    UNREADABLE = "unreadable"
+    MALFORMED = "malformed"
+    NOT_MAPPING = "not_mapping"
+
+
+@dataclass(frozen=True, slots=True)
+class YamlLoadResult:
+    status: YamlLoadStatus
+    data: dict[str, Any]
+    reason: str = ""
+    text: str = ""
 
 
 class YamlPipelineLoader:
@@ -20,26 +40,61 @@ class YamlPipelineLoader:
 
         Missing, unreadable, invalid, or non-mapping YAML documents return
         an empty dictionary so pipeline analysis does not interrupt the
-        repository scan.
+        repository scan. Callers that must not treat malformed YAML as
+        "no jobs" should use ``load_document``.
         """
 
+        return self.load_document(pipeline_path).data
+
+    def load_document(
+        self,
+        pipeline_path: Path,
+    ) -> YamlLoadResult:
+        """Load YAML and retain why an empty mapping was produced."""
+
         if not pipeline_path.is_file():
-            return {}
+            return YamlLoadResult(YamlLoadStatus.MISSING, {}, "pipeline_file_missing")
 
         try:
             content = pipeline_path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError) as error:
+            return YamlLoadResult(
+                YamlLoadStatus.UNREADABLE,
+                {},
+                f"{type(error).__name__}",
+            )
+
+        return self.parse_document(content)
+
+    def parse_document(self, content: str) -> YamlLoadResult:
+        """Parse YAML text without reading the filesystem."""
+
+        try:
             raw_data = yaml.safe_load(content)
-        except (
-            OSError,
-            UnicodeDecodeError,
-            yaml.YAMLError,
-        ):
-            return {}
+        except yaml.YAMLError as error:
+            return YamlLoadResult(
+                YamlLoadStatus.MALFORMED,
+                {},
+                f"yaml_error:{type(error).__name__}",
+                text=content,
+            )
+
+        if raw_data is None:
+            return YamlLoadResult(YamlLoadStatus.NOT_MAPPING, {}, "empty_document", text=content)
 
         if not isinstance(raw_data, Mapping):
-            return {}
+            return YamlLoadResult(
+                YamlLoadStatus.NOT_MAPPING,
+                {},
+                "document_is_not_a_mapping",
+                text=content,
+            )
 
-        return self.mapping(raw_data)
+        return YamlLoadResult(
+            YamlLoadStatus.OK,
+            self.mapping(raw_data),
+            text=content,
+        )
 
     def mapping(
         self,

@@ -59,7 +59,11 @@ def check_coverage(
                     # Acceptable if claim/evaluation states mark unavailable/not applicable.
                     claim = str(area.get("claim_state") or "")
                     evaluation = str(area.get("evaluation_state") or "")
-                    if claim in {"claimed"} and evaluation in {"evaluated"} and status == "complete":
+                    if (
+                        claim in {"claimed"}
+                        and evaluation in {"evaluated"}
+                        and status == "complete"
+                    ):
                         # Measured complete with zeros can be valid for N/A areas; flag only
                         # explicit ratio fields serialized as 0.
                         ratio = area.get("coverage_ratio")
@@ -81,7 +85,8 @@ def check_coverage(
             )
             if finding_count == 0 and status == "complete":
                 # Valid: complete coverage with zero findings — must NOT be labeled healthy.
-                # Terminology module checks health claims; here ensure status stays complete not "healthy".
+                # Terminology module checks health claims; here ensure status stays complete not
+                # "healthy".
                 if status not in COVERAGE_STATUS_VOCAB:
                     pass
 

@@ -13,9 +13,7 @@ from codestrata.ai.provider_contracts.requests import (
 )
 
 DEFAULT_MODEL_ID = "amazon.nova-lite-v1:0"
-ENRICHMENT_TEXT = (
-    '{"executive_summary": {"headline": "H", "narrative": "N"}, "themes": []}'
-)
+ENRICHMENT_TEXT = '{"executive_summary": {"headline": "H", "narrative": "N"}, "themes": []}'
 
 
 class Client:

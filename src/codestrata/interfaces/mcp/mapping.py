@@ -10,7 +10,7 @@ from typing import Any
 
 from pydantic import BaseModel
 
-from codestrata.interfaces.mcp.models import BoundedListResponse
+from codestrata.interfaces.mcp.models import BoundedListResponse, PaginatedListResponse
 from codestrata.interfaces.mcp.security import redact_mapping
 
 
@@ -44,6 +44,32 @@ def bounded_list(
         returned_count=len(materialised),
         truncated=is_truncated,
         limit=limit,
+    )
+    return to_mcp_dict(payload)
+
+
+def paginated_list(
+    items: Sequence[Any],
+    *,
+    total_count: int,
+    offset: int,
+    limit: int,
+    has_more: bool,
+    truncated: bool = False,
+    budget_remaining: int | None = None,
+) -> dict[str, Any]:
+    """Wrap a sequence with pagination and budget metadata."""
+
+    materialised = list(items)
+    payload = PaginatedListResponse(
+        items=[to_mcp_payload(item) for item in materialised],
+        total_count=total_count,
+        returned_count=len(materialised),
+        offset=offset,
+        limit=limit,
+        has_more=has_more,
+        truncated=truncated,
+        budget_remaining=budget_remaining,
     )
     return to_mcp_dict(payload)
 

@@ -39,5 +39,6 @@ def test_legacy_command_joins_source_roots() -> None:
         minimum_priority=5,
     )
     assert command.args[1] == "-d"
-    assert "src/main/java" in command.args[2]
-    assert "src/test/java" in command.args[2]
+    joined = command.args[2].replace("\\", "/")
+    assert "src/main/java" in joined
+    assert "src/test/java" in joined

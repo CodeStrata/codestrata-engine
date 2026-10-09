@@ -54,9 +54,7 @@ def test_prompt_without_a_user_message_raises_the_legacy_configuration_error() -
 
 
 def test_prompt_without_instructions_falls_back_to_the_json_instruction() -> None:
-    payload = legacy_bridge.fold_prompt_request(
-        fakes.prompt_request(system=None, developer=None)
-    )
+    payload = legacy_bridge.fold_prompt_request(fakes.prompt_request(system=None, developer=None))
 
     assert payload.instruction_text == legacy_bridge.INSTRUCTION_TEXT_FALLBACK
 
@@ -98,9 +96,7 @@ def test_metadata_reports_provider_model_usage_and_latency() -> None:
         total_tokens=30,
     )
 
-    metadata = legacy_bridge.build_model_invocation_metadata(
-        model_id="gpt-4o-mini", detail=detail
-    )
+    metadata = legacy_bridge.build_model_invocation_metadata(model_id="gpt-4o-mini", detail=detail)
 
     assert metadata.provider == "openai"
     assert metadata.model_id == "gpt-4o-mini"
@@ -126,9 +122,7 @@ def test_inconsistent_provider_token_triple_is_reported_verbatim() -> None:
 
     detail = fakes.invocation_detail(input_tokens=10, output_tokens=20, total_tokens=999)
 
-    metadata = legacy_bridge.build_model_invocation_metadata(
-        model_id="gpt-4o-mini", detail=detail
-    )
+    metadata = legacy_bridge.build_model_invocation_metadata(model_id="gpt-4o-mini", detail=detail)
 
     assert metadata.usage.total_tokens == 999
 

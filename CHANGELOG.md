@@ -8,6 +8,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-10-08
+
+### Changed
+
+* Engine / CLI package version **0.3.0**. Ruleset schema remains **1.2.0**.
+* The effective-ruleset engine digest constant remains **0.2.1**. It is a
+  pinned rule-catalog identity for candidate `engine_digest` and is not an
+  input to admitted Effective RuleSet seals. Runtime package identity is
+  **0.3.0**. New change-cache keys record that runtime version.
+
+### Notes
+
+* This cut is selected and not published. PyPI `0.2.1` stays the rollback identity.
+* Local AI remains optional. Hosted baseline trials are a later workflow.
+* The 22-repository SV.10 corpus is not in this checkout. That full SV.11 run
+  is not recorded as PASS.
+* Publication (PyPI, GitHub Release, container registry, Marketplace, docs site)
+  is a separate step and is not implied here.
+
 ## [0.2.1] - 2026-08-14
 
 ### Added

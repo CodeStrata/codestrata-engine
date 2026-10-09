@@ -50,9 +50,7 @@ class TestFileCandidateEvidence(BaseModel):
     evidence_id: str
     path: str
     role: TestFileRole = TestFileRole.UNKNOWN_TEST
-    confirmation_level: EvidenceConfirmationLevel = (
-        EvidenceConfirmationLevel.DISCOVERED_CANDIDATE
-    )
+    confirmation_level: EvidenceConfirmationLevel = EvidenceConfirmationLevel.DISCOVERED_CANDIDATE
     discovery_bases: tuple[TestDiscoveryBasis, ...] = ()
     classification: SourceClassification = SourceClassification.TEST
     language_hint: str | None = None
@@ -91,9 +89,7 @@ class StructuralTestFactEvidence(BaseModel):
 
     evidence_id: str
     path: str
-    confirmation_level: EvidenceConfirmationLevel = (
-        EvidenceConfirmationLevel.STRUCTURALLY_INSPECTED
-    )
+    confirmation_level: EvidenceConfirmationLevel = EvidenceConfirmationLevel.STRUCTURALLY_INSPECTED
     framework_hints: tuple[TestFrameworkFamily, ...] = ()
     marker_counts: dict[str, int] = Field(default_factory=dict)
     structural_counts: dict[str, int] = Field(default_factory=dict)
@@ -440,9 +436,7 @@ class RepositoryTestingEvidenceCoverage(BaseModel):
     @field_validator("source_roles_represented", "languages_represented", mode="before")
     @classmethod
     def normalize_sequences(cls, value: object) -> tuple[str, ...]:
-        return tuple(
-            sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()})
-        )
+        return tuple(sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()}))
 
 
 class AggregatedRepositoryTestingEvidence(BaseModel):

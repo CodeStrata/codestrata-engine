@@ -109,9 +109,7 @@ def test_adapted_full_builtin_set(tmp_path: Path) -> None:
     via_adapter = RuleExecutionFacade().evaluate_adapted(context, rules=rules)
 
     _assert_findings_equal(via_engine.findings, via_adapter.findings)
-    assert [item.id for item in via_engine.findings] == [
-        item.id for item in via_adapter.findings
-    ]
+    assert [item.id for item in via_engine.findings] == [item.id for item in via_adapter.findings]
 
 
 def test_recommendations_unchanged_through_adapter(tmp_path: Path) -> None:

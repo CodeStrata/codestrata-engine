@@ -124,9 +124,7 @@ class SecurityReportCoverageSummary(BaseModel):
     @field_validator("source_roles_represented", "formats_represented", mode="before")
     @classmethod
     def normalize_sequences(cls, value: object) -> tuple[str, ...]:
-        return tuple(
-            sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()})
-        )
+        return tuple(sorted({str(item).strip() for item in as_tuple(value) if str(item).strip()}))
 
 
 class SecurityReportThemeView(BaseModel):

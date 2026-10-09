@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 
 import pytest
-
 from verification.assessment_report.reporting import report_contains_forbidden_leak
 from verification.assessment_report.runner import run_assessment_report_verification
 
@@ -55,7 +54,5 @@ def test_catalog_network_assessment_report_verification(tmp_path: Path) -> None:
     catalog_runs = [run for run in report.runs if run.source == "catalog"]
     assert catalog_runs
     assert catalog_runs[0].repository_id == "cleanarchitecture"
-    assert catalog_runs[0].qualified_revision_value == (
-        "859b115072337b3b7074007f8231d19f24966f1a"
-    )
+    assert catalog_runs[0].qualified_revision_value == ("859b115072337b3b7074007f8231d19f24966f1a")
     assert catalog_runs[0].report_schema_version == "1.2"

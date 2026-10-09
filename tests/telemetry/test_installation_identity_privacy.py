@@ -6,6 +6,7 @@ import inspect
 import json
 from pathlib import Path
 
+from codestrata.telemetry import identity as legacy_identity
 from codestrata.telemetry.analytics.installation_identity import (
     ensure_anonymous_installation_identity,
     generate_anonymous_installation_id,
@@ -18,8 +19,6 @@ from codestrata.telemetry.analytics.installation_identity_serialization import (
     identity_to_stable_json,
 )
 from codestrata.telemetry.analytics.policy import default_analytics_policy
-from codestrata.telemetry import identity as legacy_identity
-
 
 _FORBIDDEN_RECORD_KEYS = frozenset(
     {

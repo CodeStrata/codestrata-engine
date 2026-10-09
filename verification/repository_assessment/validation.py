@@ -16,11 +16,10 @@ from codestrata.reporting.traceability import (
     validate_canonical_assessment,
 )
 
-_ABS_PATH = re.compile(
-    r"(/Users/|/home/|/var/folders/|/tmp/|[A-Za-z]:\\)"
-)
+_ABS_PATH = re.compile(r"(/Users/|/home/|/var/folders/|/tmp/|[A-Za-z]:\\)")
 _SECRETISH = re.compile(
-    r"(AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|cscc_v1_[A-Za-z0-9]+|-----BEGIN [A-Z ]+PRIVATE KEY-----)"
+    r"(AKIA[0-9A-Z]{16}|sk-[A-Za-z0-9]{20,}|cscc_v1_[A-Za-z0-9]+|"
+    r"-----BEGIN [A-Z ]+PRIVATE KEY-----)"
 )
 
 
@@ -47,7 +46,9 @@ def validate_report_structure(path: Path) -> dict[str, Any]:
 
 
 def validate_traceability(document: dict[str, Any]) -> dict[str, Any]:
-    assessment = document.get("assessment") if isinstance(document.get("assessment"), dict) else document
+    assessment = (
+        document.get("assessment") if isinstance(document.get("assessment"), dict) else document
+    )
     try:
         state = validate_canonical_assessment(assessment)
         # Also run full chain when complete.
@@ -59,17 +60,24 @@ def validate_traceability(document: dict[str, Any]) -> dict[str, Any]:
 
 
 def validate_ai_disabled(document: dict[str, Any]) -> dict[str, Any]:
-    assessment = document.get("assessment") if isinstance(document.get("assessment"), dict) else document
+    assessment = (
+        document.get("assessment") if isinstance(document.get("assessment"), dict) else document
+    )
     ai = assessment.get("ai") if isinstance(assessment.get("ai"), dict) else {}
     executed = bool(ai.get("executed"))
     provider_invoked = bool(ai.get("provider_invoked"))
     status = str(ai.get("status") or "")
-    ok = (not executed) and (not provider_invoked) and status in {
-        "not_requested",
-        "disabled",
-        "skipped",
-        "",
-    }
+    ok = (
+        (not executed)
+        and (not provider_invoked)
+        and status
+        in {
+            "not_requested",
+            "disabled",
+            "skipped",
+            "",
+        }
+    )
     return {
         "ok": ok,
         "executed": executed,

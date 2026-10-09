@@ -125,9 +125,7 @@ def extract_python_file_complexity(
             callables.extend(class_callables)
 
     module_span = (
-        SourceSpan(path=path, line_start=1, line_end=lines)
-        if lines > 0
-        else SourceSpan(path=path)
+        SourceSpan(path=path, line_start=1, line_end=lines) if lines > 0 else SourceSpan(path=path)
     )
     types.insert(
         0,
@@ -347,11 +345,7 @@ def _parameter_count(
         + (1 if args.vararg is not None else 0)
         + (1 if args.kwarg is not None else 0)
     )
-    if (
-        exclude_implicit_receiver
-        and positional
-        and positional[0].arg in {"self", "cls"}
-    ):
+    if exclude_implicit_receiver and positional and positional[0].arg in {"self", "cls"}:
         count -= 1
     return count
 

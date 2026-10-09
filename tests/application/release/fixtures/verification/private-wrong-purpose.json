@@ -1,0 +1,63 @@
+{
+  "artifact_bytes": "",
+  "bundle": {
+    "algorithm": "ed25519",
+    "key_id": "result-signer-1",
+    "signature": "myQn4NlfWDEHVll2xgX+hZr3G3bnKgVMMF34gl/a0SjGVfBkv8gHKYh/G/u9LV8CBEjrZgdWfYSiUnQah9mnCA=="
+  },
+  "evaluation_time": "2026-09-21T00:00:00Z",
+  "key_id": "result-signer-1",
+  "package": {
+    "body": {
+      "compatibility": {
+        "capability_version": "1.0.0",
+        "dsl_version": "codestrata.io/rules/v1",
+        "engine_schema_major": 1,
+        "serialization_profile": "codestrata.canonical-json.v1"
+      },
+      "effective_ruleset_digest": "fb33d17b8db0d5c99171f4bba3f9150ac6d8fc13c04bb14ed055a0722ca4cca3",
+      "execution_purpose": "preview",
+      "package_id": "codestrata.engineering-standard.pkg",
+      "package_version": "1.0.0",
+      "payload_digests": [
+        {
+          "digest": "164a3daab4e5861befeb68b26cc5c0e5ffbe1801771515af41e2d9b73a178a4d",
+          "name": "artifact"
+        },
+        {
+          "digest": "fb33d17b8db0d5c99171f4bba3f9150ac6d8fc13c04bb14ed055a0722ca4cca3",
+          "name": "effective_ruleset"
+        }
+      ],
+      "preview_cannot_authorize_production": true,
+      "schema_name": "codestrata.signed-package-manifest.v1",
+      "schema_version": "1.0.0",
+      "validity_not_after": "2027-09-15T00:00:00Z",
+      "validity_not_before": null
+    },
+    "body_digest": "20323d37262c301c99204f7b0bab791ae3b740ff11c1e3e81b4cba69f22d1ef6",
+    "operational": {
+      "signature": null,
+      "signed_at": null
+    },
+    "schema_name": "codestrata.signed-package-manifest.v1",
+    "schema_version": "1.0.0"
+  },
+  "profile_id": "codestrata.release.offline-self-managed-key.v1",
+  "requested_purpose": "production",
+  "revocation": {
+    "instant_revocation": false,
+    "last_updated": "2026-09-20T00:00:00Z",
+    "revoked_key_ids": []
+  },
+  "signer_role": "private_result",
+  "trust_store": [
+    {
+      "key_id": "result-signer-1",
+      "not_after": "2027-09-15T00:00:00Z",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAnmIZ8wYf/tE8ERtmTnJuIx/x2jwla8Zl/mcEaLPdXJ0=\n-----END PUBLIC KEY-----\n",
+      "purpose": "production",
+      "role": "private_result"
+    }
+  ]
+}

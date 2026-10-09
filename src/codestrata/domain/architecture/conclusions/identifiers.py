@@ -10,12 +10,8 @@ from pydantic import RootModel, field_validator
 
 from codestrata.domain.graph.validation import require_nonblank
 
-_POLICY_ID_PATTERN = re.compile(
-    r"^architecture\.conclusion\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-)
-_CATEGORY_ID_PATTERN = re.compile(
-    r"^architecture\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
-)
+_POLICY_ID_PATTERN = re.compile(r"^architecture\.conclusion\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
+_CATEGORY_ID_PATTERN = re.compile(r"^architecture\.[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
 
 
 def validate_policy_id(value: str) -> str:
@@ -32,8 +28,7 @@ def validate_category_id(value: str) -> str:
     compact = value.strip().lower()
     if not _CATEGORY_ID_PATTERN.fullmatch(compact):
         raise ValueError(
-            "category must look like architecture.<name> "
-            "(example: architecture.boundary-integrity)"
+            "category must look like architecture.<name> (example: architecture.boundary-integrity)"
         )
     return compact
 

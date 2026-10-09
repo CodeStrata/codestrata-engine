@@ -185,9 +185,7 @@ def test_private_key_rule_precision() -> None:
     assert not has_private_key_material(filename_only)
     assert not has_private_key_material(binary)
 
-    result = rule.evaluate(
-        _context(_bundle(artifacts=(pem, openssh, cert, filename_only, binary)))
-    )
+    result = rule.evaluate(_context(_bundle(artifacts=(pem, openssh, cert, filename_only, binary))))
     assert result.matched
     assert len(result.matches) == 2
     payload = dumps_stable_json(
@@ -259,9 +257,7 @@ def test_credential_literal_and_placeholder_precision() -> None:
         _context(_bundle(facts=(literal, token, env_ref, empty, placeholder, ci_expr)))
     )
     assert len(result.matches) == 2
-    serialized = dumps_stable_json(
-        {"m": [item.summary for item in result.matches]}
-    )
+    serialized = dumps_stable_json({"m": [item.summary for item in result.matches]})
     assert "super-secret" not in serialized
     for item in result.matches:
         assert item.severity.value == "high"
@@ -290,9 +286,7 @@ def test_credential_literal_ci_expression_is_not_a_live_credential() -> None:
     )
     assert not is_literal_credential(gha)
     assert not is_literal_credential(gha_misclassified)
-    result = CredentialLiteralRule().evaluate(
-        _context(_bundle(facts=(gha, gha_misclassified)))
-    )
+    result = CredentialLiteralRule().evaluate(_context(_bundle(facts=(gha, gha_misclassified))))
     assert result.status is RuleResultStatus.NOT_MATCHED
     assert result.matches == ()
 
@@ -377,9 +371,7 @@ def test_transport_auth_cors_debug_rules() -> None:
         _context(_bundle(facts=(tls_off, tls_on, host_off)))
     )
     assert len(tls_result.matches) == 1
-    debug_result = DebugEnabledRule().evaluate(
-        _context(_bundle(facts=(debug_prod, debug_test)))
-    )
+    debug_result = DebugEnabledRule().evaluate(_context(_bundle(facts=(debug_prod, debug_test))))
     assert len(debug_result.matches) == 2
 
 
@@ -504,9 +496,7 @@ def test_gates_and_evidence_independence(tmp_path: Path) -> None:
     assert settings.assessment.sections.security.enabled is False
 
     # Evidence-only still works.
-    service = RepositorySensitiveEvidenceService(
-        RepositorySensitiveEvidenceSettings(enabled=True)
-    )
+    service = RepositorySensitiveEvidenceService(RepositorySensitiveEvidenceSettings(enabled=True))
     evidence = service.collect(
         repository_id="fixture",
         relative_paths=("app.properties",),
@@ -551,8 +541,17 @@ def test_evidence_diagnostic_never_becomes_finding() -> None:
     assert evaluated.status is RuleResultStatus.NOT_MATCHED
     assert evaluated.matches == ()
 
+
 def test_pack_descriptor() -> None:
     pack = SecurityRulePack()
     assert pack.pack_id == "security.core"
     assert "security.private-key-material" in pack.included_rule_ids
     assert pack.deferred_rule_ids
+
+
+def test_yaml_rule_module_does_not_adjust_severity() -> None:
+    import codestrata.application.rules.security.yaml_rule as yaml_rule
+
+    text = Path(yaml_rule.__file__).read_text(encoding="utf-8")
+    assert "adjust_rule_severity" not in text
+    assert "adjust_rule_confidence" not in text

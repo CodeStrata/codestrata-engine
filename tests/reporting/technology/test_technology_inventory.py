@@ -135,10 +135,7 @@ def test_dedupe_preserves_strongest_version_and_conflicts(tmp_path: Path) -> Non
     )
     inventory = build_technology_inventory(analysis)
     java_facts = [
-        fact
-        for group in inventory.groups
-        for fact in group.facts
-        if fact.name.lower() == "java"
+        fact for group in inventory.groups for fact in group.facts if fact.name.lower() == "java"
     ]
     versions = sorted({fact.version for fact in java_facts if fact.version})
     assert versions == ["11", "17"]
@@ -173,11 +170,7 @@ def test_version_states(tmp_path: Path) -> None:
         ],
     )
     inventory = build_technology_inventory(analysis)
-    by_name = {
-        fact.name: fact
-        for group in inventory.groups
-        for fact in group.facts
-    }
+    by_name = {fact.name: fact for group in inventory.groups for fact in group.facts}
     assert by_name["Node.js"].version_state == "exact"
     assert by_name["lodash"].version_state == "range"
     assert by_name["Make"].version_state == "unavailable"
@@ -212,7 +205,10 @@ def test_ecosystems_and_composition(tmp_path: Path) -> None:
     assert inventory.composition.source_files == 7
     assert inventory.composition.test_files == 3
     assert "api" in inventory.composition.modules
-    assert "scanned" in inventory.composition.scope_note.lower() or "scan" in inventory.composition.scope_note.lower()
+    assert (
+        "scanned" in inventory.composition.scope_note.lower()
+        or "scan" in inventory.composition.scope_note.lower()
+    )
 
 
 def test_build_systems_from_build_facts(tmp_path: Path) -> None:
@@ -310,7 +306,7 @@ def test_html_technology_inventory_section(tmp_path: Path) -> None:
     assert "Cloud-native" not in html
     assert "Production ready" not in html
     assert 'href="file://' not in html
-    assert "src=\"file://" not in html
+    assert 'src="file://' not in html
     assert "/Users/" not in html
     tech_head = next(
         head for head in document.assessment_heads if head.head == "technology_inventory"

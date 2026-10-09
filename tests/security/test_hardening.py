@@ -25,7 +25,10 @@ def test_scanner_ignores_symlinked_directories(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / "app.py").write_text("print(1)\n", encoding="utf-8")
-    (repo / "escape").symlink_to(outside, target_is_directory=True)
+    try:
+        (repo / "escape").symlink_to(outside, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
 
     files = LocalRepositoryScanner().scan(repo).files
     assert files == ["app.py"]
@@ -38,7 +41,10 @@ def test_scanner_skips_escaping_file_symlink(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
     repo.mkdir()
     (repo / "ok.txt").write_text("ok", encoding="utf-8")
-    (repo / "leak.txt").symlink_to(outside)
+    try:
+        (repo / "leak.txt").symlink_to(outside)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
 
     files = set(iter_repository_files(repo, excluded_directories=set()))
     assert files == {"ok.txt"}
@@ -48,7 +54,10 @@ def test_content_reader_refuses_symlink(tmp_path: Path) -> None:
     target = tmp_path / "target.txt"
     target.write_text("x", encoding="utf-8")
     link = tmp_path / "link.txt"
-    link.symlink_to(target)
+    try:
+        link.symlink_to(target)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
     reader = LocalFilesystemContentReader(tmp_path)
     with pytest.raises(ValueError, match="symlink"):
         reader.read("link.txt")
@@ -72,8 +81,7 @@ def test_enterprise_runtime_available_in_monorepo() -> None:
     # Platform registers `enterprise` on codestrata.cli_extensions. Engine-only CI
     # installs engine[dev] without Platform; do not require the entry point here.
     enterprise_installed = any(
-        ep.name == "enterprise"
-        for ep in entry_points().select(group="codestrata.cli_extensions")
+        ep.name == "enterprise" for ep in entry_points().select(group="codestrata.cli_extensions")
     )
     assert enterprise_runtime_available() is enterprise_installed
 

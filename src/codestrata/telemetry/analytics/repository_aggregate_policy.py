@@ -34,9 +34,7 @@ DEFAULT_MAX_RULE_EXECUTION_COUNT = 10_000
 DEFAULT_MAX_LANGUAGE_GROUPS = 6
 DEFAULT_MAX_HEAD_RULE_GROUPS = 9
 
-_REVIEW_STATUS = (
-    "local_construction_only_no_transmission_no_analytics_persistence_unwired"
-)
+_REVIEW_STATUS = "local_construction_only_no_transmission_no_analytics_persistence_unwired"
 
 _LIMITATIONS: tuple[str, ...] = (
     "repository_aggregates_category_only",
@@ -121,21 +119,13 @@ class CommunityRepositoryAggregateAnalyticsPolicy:
         if self.review_status != _REVIEW_STATUS:
             raise RepositoryAggregateAnalyticsPolicyError("unsupported review_status")
         if not self.local_collection_allowed:
-            raise RepositoryAggregateAnalyticsPolicyError(
-                "local_collection_allowed must be true"
-            )
+            raise RepositoryAggregateAnalyticsPolicyError("local_collection_allowed must be true")
         if self.persistence_enabled:
-            raise RepositoryAggregateAnalyticsPolicyError(
-                "persistence_enabled must be false"
-            )
+            raise RepositoryAggregateAnalyticsPolicyError("persistence_enabled must be false")
         if self.transmission_enabled:
-            raise RepositoryAggregateAnalyticsPolicyError(
-                "transmission_enabled must be false"
-            )
+            raise RepositoryAggregateAnalyticsPolicyError("transmission_enabled must be false")
         if not self.installation_id_required:
-            raise RepositoryAggregateAnalyticsPolicyError(
-                "installation_id_required must be true"
-            )
+            raise RepositoryAggregateAnalyticsPolicyError("installation_id_required must be true")
         if not self.installation_id_only_identifier:
             raise RepositoryAggregateAnalyticsPolicyError(
                 "installation_id_only_identifier must be true"
@@ -149,9 +139,7 @@ class CommunityRepositoryAggregateAnalyticsPolicy:
                 "category_repository_aggregates_only must be true"
             )
         if not self.bounded_exact_counts:
-            raise RepositoryAggregateAnalyticsPolicyError(
-                "bounded_exact_counts must be true"
-            )
+            raise RepositoryAggregateAnalyticsPolicyError("bounded_exact_counts must be true")
         if self.max_language_file_count <= 0 or self.max_rule_execution_count <= 0:
             raise RepositoryAggregateAnalyticsPolicyError("count maxima must be positive")
         if not self.fail_silent_optional_integration:
@@ -164,9 +152,7 @@ class CommunityRepositoryAggregateAnalyticsPolicy:
             "analytics_policy_version": self.analytics_policy_version,
             "analytics_schema_version": self.analytics_schema_version,
             "bounded_exact_counts": self.bounded_exact_counts,
-            "category_repository_aggregates_only": (
-                self.category_repository_aggregates_only
-            ),
+            "category_repository_aggregates_only": (self.category_repository_aggregates_only),
             "fail_silent_optional_integration": self.fail_silent_optional_integration,
             "installation_id_only_identifier": self.installation_id_only_identifier,
             "installation_id_required": self.installation_id_required,
@@ -194,9 +180,7 @@ class CommunityRepositoryAggregateAnalyticsPolicy:
         return cls()
 
 
-def default_repository_aggregate_analytics_policy() -> (
-    CommunityRepositoryAggregateAnalyticsPolicy
-):
+def default_repository_aggregate_analytics_policy() -> CommunityRepositoryAggregateAnalyticsPolicy:
     return CommunityRepositoryAggregateAnalyticsPolicy.default()
 
 

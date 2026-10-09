@@ -1,0 +1,37 @@
+{
+  "scenario": "dependency_fix_same_feed",
+  "description": "Customer upgrades a vulnerable dependency in source code; vulnerability feed is identical.",
+  "base": {
+    "source_digest": "sha256:source_old111",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "cve-2021-23337",
+        "identity_key": "cve::cve-2021-23337::lodash",
+        "title": "Command Injection in lodash",
+        "category": "security",
+        "severity": "high",
+        "cause": "source"
+      }
+    ]
+  },
+  "candidate": {
+    "source_digest": "sha256:source_new222",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": []
+  },
+  "expected": {
+    "attribution": "source_only",
+    "label": "source-driven",
+    "is_feed_driven": false,
+    "customer_code_deterioration": false,
+    "changed_dimensions": ["source"],
+    "controlled_rerun_performed": false,
+    "finding_lifecycle": "resolved",
+    "finding_cause": "source"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "schema_name": "codestrata.rule.v1",
+  "schema_version": "1.0.0",
+  "api_version": "codestrata.io/rules/v1",
+  "kind": "Rule",
+  "digest": "0000000000000000000000000000000000000000000000000000000000000000",
+  "extra_field": "nope",
+  "metadata": {
+    "id": "architecture.dependency-cycle",
+    "version": "1.0.0",
+    "title": "x",
+    "category": "architecture",
+    "owner": "codestrata"
+  },
+  "applies_to": { "languages": ["java"], "facts": ["graph.imports"] },
+  "select": { "source": "repository_graph", "nodes": {} },
+  "condition": { "operator": "cycle" },
+  "finding": { "default_severity": "high", "message_template": "x" }
+}

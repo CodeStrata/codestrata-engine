@@ -51,10 +51,7 @@ class DependencyEvidenceService:
                 diagnostics=("dependency_evidence_disabled",),
             )
 
-        ignore = (
-            tuple(self._settings.ignore_path_markers)
-            or DEFAULT_DEPENDENCY_IGNORE_MARKERS
-        )
+        ignore = tuple(self._settings.ignore_path_markers) or DEFAULT_DEPENDENCY_IGNORE_MARKERS
         bundles = []
         if self._settings.maven.enabled:
             bundles.append(
@@ -119,9 +116,7 @@ class DependencyEvidenceService:
             or bundle.declarations
             or bundle.diagnostics
         )
-        return aggregate_dependency_bundles(
-            repository_id=repository_id, bundles=active
-        )
+        return aggregate_dependency_bundles(repository_id=repository_id, bundles=active)
 
 
 def create_dependency_evidence_service(

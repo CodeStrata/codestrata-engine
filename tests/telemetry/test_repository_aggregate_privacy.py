@@ -4,6 +4,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from codestrata.telemetry.analytics.installation_identity import (
+    AnonymousInstallationIdentity,
+)
 from codestrata.telemetry.analytics.repository_aggregate import (
     collect_repository_aggregate_analytics,
 )
@@ -13,10 +16,6 @@ from codestrata.telemetry.analytics.repository_aggregate_extractor import (
 from codestrata.telemetry.analytics.repository_aggregate_projection import (
     APPROVED_REPOSITORY_AGGREGATE_FIELD_NAMES,
 )
-from codestrata.telemetry.analytics.installation_identity import (
-    AnonymousInstallationIdentity,
-)
-
 
 _FORBIDDEN = (
     "repository_name",
@@ -56,9 +55,7 @@ def test_no_filesystem_traversal(tmp_path: Path) -> None:
     decoy = tmp_path / "repo"
     decoy.mkdir()
     (decoy / "secret.py").write_text("print('x')\n", encoding="utf-8")
-    identity = AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    identity = AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
     event = collect_repository_aggregate_analytics(
         home=home,
         identity=identity,
@@ -77,13 +74,7 @@ def test_no_filesystem_traversal(tmp_path: Path) -> None:
 
 
 def test_no_platform_imports() -> None:
-    root = (
-        Path(__file__).resolve().parents[2]
-        / "src"
-        / "codestrata"
-        / "telemetry"
-        / "analytics"
-    )
+    root = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry" / "analytics"
     for path in root.glob("repository_aggregate*.py"):
         text = path.read_text(encoding="utf-8")
         assert "boto3" not in text

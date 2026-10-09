@@ -218,8 +218,6 @@ def inspect_structural_facts(
         structural_counts=structural_counts,
         line_hints=tuple(line_hints),
         classification=classification_for_path(normalized),
-        provenance=_provenance(
-            normalized, configuration_fingerprint=configuration_fingerprint
-        ),
+        provenance=_provenance(normalized, configuration_fingerprint=configuration_fingerprint),
         metadata=metadata,
     )

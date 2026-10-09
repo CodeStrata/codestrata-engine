@@ -11,8 +11,8 @@ from typing import Any
 from codestrata.telemetry.projection import PrivacySafeTelemetryEvent
 from codestrata.telemetry.transport_models import (
     ENGINE_CLOUD_WIRE_MAPPING_CONTRACT_VERSION,
-    CommunityCloudTelemetryWireRequest,
     CloudWireValidationError,
+    CommunityCloudTelemetryWireRequest,
 )
 
 # Exact-safe Engine → Cloud duration mapping only. Non-exact buckets are omitted.

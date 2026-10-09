@@ -7,25 +7,6 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
-
-from codestrata.application.rules.technical_debt.helpers import is_production_complexity_subject
-from codestrata.application.rules.technical_debt.rules import LargeCallableRule
-from codestrata.domain.evidence.language.capabilities import SourceClassification
-from codestrata.domain.evidence.language.complexity.enums import ComplexityCallableKind
-from codestrata.domain.evidence.language.complexity.models import (
-    AggregatedComplexityEvidence,
-    CallableComplexityEvidence,
-    IntMetric,
-    SourceSpan,
-)
-from codestrata.domain.evidence.language.provenance import EvidenceProvenance
-from codestrata.domain.evidence.language.capabilities import EvidenceOrigin
-from codestrata.domain.rules.context import (
-    LanguageInventoryView,
-    RepositoryFactView,
-    RuleExecutionContext,
-)
-from codestrata.domain.rules.enums import RuleResultStatus
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.inventory import FactClassification, compute_precision_recall
 from validation.models import ExpectedResults, ValidationVerdict
@@ -42,6 +23,24 @@ from validation.technical_debt import (
     extract_technical_debt_findings,
     validate_technical_debt_precision,
 )
+
+from codestrata.application.rules.technical_debt.helpers import is_production_complexity_subject
+from codestrata.application.rules.technical_debt.rules import LargeCallableRule
+from codestrata.domain.evidence.language.capabilities import EvidenceOrigin, SourceClassification
+from codestrata.domain.evidence.language.complexity.enums import ComplexityCallableKind
+from codestrata.domain.evidence.language.complexity.models import (
+    AggregatedComplexityEvidence,
+    CallableComplexityEvidence,
+    IntMetric,
+    SourceSpan,
+)
+from codestrata.domain.evidence.language.provenance import EvidenceProvenance
+from codestrata.domain.rules.context import (
+    LanguageInventoryView,
+    RepositoryFactView,
+    RuleExecutionContext,
+)
+from codestrata.domain.rules.enums import RuleResultStatus
 
 
 def _prov() -> EvidenceProvenance:

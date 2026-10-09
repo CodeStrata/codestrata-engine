@@ -9,6 +9,51 @@ only — not wired into assess or AI execution.
 
 from __future__ import annotations
 
+from codestrata.telemetry.analytics.ai_analytics import (
+    collect_ai_analytics,
+    project_from_typed_input,
+)
+from codestrata.telemetry.analytics.ai_analytics_compatibility import (
+    AIAnalyticsCompatibilityError,
+    assert_ai_analytics_schema_compatible,
+    compatible_ai_analytics_schema_versions,
+)
+from codestrata.telemetry.analytics.ai_analytics_diagnostics import (
+    AIAnalyticsDiagnostics,
+    empty_ai_analytics_diagnostics,
+)
+from codestrata.telemetry.analytics.ai_analytics_input import (
+    AIAnalyticsInput,
+    build_ai_analytics_input,
+)
+from codestrata.telemetry.analytics.ai_analytics_mapping import (
+    canonicalize_capability,
+    map_model_id_to_family,
+    map_provider_to_family,
+)
+from codestrata.telemetry.analytics.ai_analytics_models import (
+    AIAnalyticsEvent,
+    build_ai_analytics_event,
+)
+from codestrata.telemetry.analytics.ai_analytics_policy import (
+    COMMUNITY_AI_ANALYTICS_POLICY_URN,
+    COMMUNITY_AI_ANALYTICS_SCHEMA_URN,
+    CommunityAIAnalyticsPolicy,
+    default_ai_analytics_policy,
+)
+from codestrata.telemetry.analytics.ai_analytics_projection import (
+    AIAnalyticsProjection,
+    project_ai_analytics_event,
+    project_ai_analytics_to_analytics_event,
+)
+from codestrata.telemetry.analytics.ai_analytics_serialization import (
+    ai_analytics_event_to_stable_json,
+    ai_analytics_policy_to_stable_json,
+)
+from codestrata.telemetry.analytics.ai_analytics_validation import (
+    validate_ai_analytics_event,
+    validate_ai_analytics_mapping,
+)
 from codestrata.telemetry.analytics.assessment_analytics import (
     AssessmentAnalyticsEvent,
     build_assessment_analytics_event,
@@ -42,50 +87,6 @@ from codestrata.telemetry.analytics.assessment_analytics_serialization import (
 from codestrata.telemetry.analytics.assessment_analytics_validation import (
     validate_assessment_analytics_event,
     validate_assessment_analytics_mapping,
-)
-from codestrata.telemetry.analytics.repository_aggregate import (
-    RepositoryAggregateAnalyticsEvent,
-    build_repository_aggregate_analytics_event,
-    collect_repository_aggregate_analytics,
-)
-from codestrata.telemetry.analytics.repository_aggregate_compatibility import (
-    RepositoryAggregateAnalyticsCompatibilityError,
-    assert_repository_aggregate_schema_compatible,
-    compatible_repository_aggregate_schema_versions,
-)
-from codestrata.telemetry.analytics.repository_aggregate_diagnostics import (
-    RepositoryAggregateAnalyticsDiagnostics,
-    empty_repository_aggregate_analytics_diagnostics,
-)
-from codestrata.telemetry.analytics.repository_aggregate_extractor import (
-    extract_repository_aggregate_input,
-)
-from codestrata.telemetry.analytics.repository_aggregate_input import (
-    RepositoryAggregateAnalyticsInput,
-    build_repository_aggregate_input,
-)
-from codestrata.telemetry.analytics.repository_aggregate_models import (
-    LanguageAggregate,
-    RuleExecutionAggregate,
-)
-from codestrata.telemetry.analytics.repository_aggregate_policy import (
-    COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_POLICY_URN,
-    COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_URN,
-    CommunityRepositoryAggregateAnalyticsPolicy,
-    default_repository_aggregate_analytics_policy,
-)
-from codestrata.telemetry.analytics.repository_aggregate_projection import (
-    RepositoryAggregateAnalyticsProjection,
-    project_repository_aggregate_analytics_event,
-    project_repository_aggregate_to_analytics_event,
-)
-from codestrata.telemetry.analytics.repository_aggregate_serialization import (
-    repository_aggregate_event_to_stable_json,
-    repository_aggregate_policy_to_stable_json,
-)
-from codestrata.telemetry.analytics.repository_aggregate_validation import (
-    validate_repository_aggregate_analytics_event,
-    validate_repository_aggregate_analytics_mapping,
 )
 from codestrata.telemetry.analytics.compatibility import (
     AnalyticsCompatibilityError,
@@ -158,6 +159,50 @@ from codestrata.telemetry.analytics.projection import (
     project_analytics_event,
     project_analytics_from_mapping,
 )
+from codestrata.telemetry.analytics.repository_aggregate import (
+    RepositoryAggregateAnalyticsEvent,
+    build_repository_aggregate_analytics_event,
+    collect_repository_aggregate_analytics,
+)
+from codestrata.telemetry.analytics.repository_aggregate_compatibility import (
+    RepositoryAggregateAnalyticsCompatibilityError,
+    assert_repository_aggregate_schema_compatible,
+    compatible_repository_aggregate_schema_versions,
+)
+from codestrata.telemetry.analytics.repository_aggregate_diagnostics import (
+    RepositoryAggregateAnalyticsDiagnostics,
+    empty_repository_aggregate_analytics_diagnostics,
+)
+from codestrata.telemetry.analytics.repository_aggregate_extractor import (
+    extract_repository_aggregate_input,
+)
+from codestrata.telemetry.analytics.repository_aggregate_input import (
+    RepositoryAggregateAnalyticsInput,
+    build_repository_aggregate_input,
+)
+from codestrata.telemetry.analytics.repository_aggregate_models import (
+    LanguageAggregate,
+    RuleExecutionAggregate,
+)
+from codestrata.telemetry.analytics.repository_aggregate_policy import (
+    COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_POLICY_URN,
+    COMMUNITY_REPOSITORY_AGGREGATE_ANALYTICS_SCHEMA_URN,
+    CommunityRepositoryAggregateAnalyticsPolicy,
+    default_repository_aggregate_analytics_policy,
+)
+from codestrata.telemetry.analytics.repository_aggregate_projection import (
+    RepositoryAggregateAnalyticsProjection,
+    project_repository_aggregate_analytics_event,
+    project_repository_aggregate_to_analytics_event,
+)
+from codestrata.telemetry.analytics.repository_aggregate_serialization import (
+    repository_aggregate_event_to_stable_json,
+    repository_aggregate_policy_to_stable_json,
+)
+from codestrata.telemetry.analytics.repository_aggregate_validation import (
+    validate_repository_aggregate_analytics_event,
+    validate_repository_aggregate_analytics_mapping,
+)
 from codestrata.telemetry.analytics.runtime_analytics import (
     COMMUNITY_RUNTIME_ANALYTICS_POLICY_URN,
     COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_URN,
@@ -196,51 +241,6 @@ from codestrata.telemetry.analytics.serialization import (
 from codestrata.telemetry.analytics.validation import (
     validate_analytics_event,
     validate_analytics_mapping,
-)
-from codestrata.telemetry.analytics.ai_analytics import (
-    collect_ai_analytics,
-    project_from_typed_input,
-)
-from codestrata.telemetry.analytics.ai_analytics_compatibility import (
-    AIAnalyticsCompatibilityError,
-    assert_ai_analytics_schema_compatible,
-    compatible_ai_analytics_schema_versions,
-)
-from codestrata.telemetry.analytics.ai_analytics_diagnostics import (
-    AIAnalyticsDiagnostics,
-    empty_ai_analytics_diagnostics,
-)
-from codestrata.telemetry.analytics.ai_analytics_input import (
-    AIAnalyticsInput,
-    build_ai_analytics_input,
-)
-from codestrata.telemetry.analytics.ai_analytics_mapping import (
-    canonicalize_capability,
-    map_model_id_to_family,
-    map_provider_to_family,
-)
-from codestrata.telemetry.analytics.ai_analytics_models import (
-    AIAnalyticsEvent,
-    build_ai_analytics_event,
-)
-from codestrata.telemetry.analytics.ai_analytics_policy import (
-    COMMUNITY_AI_ANALYTICS_POLICY_URN,
-    COMMUNITY_AI_ANALYTICS_SCHEMA_URN,
-    CommunityAIAnalyticsPolicy,
-    default_ai_analytics_policy,
-)
-from codestrata.telemetry.analytics.ai_analytics_projection import (
-    AIAnalyticsProjection,
-    project_ai_analytics_event,
-    project_ai_analytics_to_analytics_event,
-)
-from codestrata.telemetry.analytics.ai_analytics_serialization import (
-    ai_analytics_event_to_stable_json,
-    ai_analytics_policy_to_stable_json,
-)
-from codestrata.telemetry.analytics.ai_analytics_validation import (
-    validate_ai_analytics_event,
-    validate_ai_analytics_mapping,
 )
 
 __all__ = [

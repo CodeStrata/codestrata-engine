@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 
 import pytest
-
 from validation.models import ValidationVerdict
 from validation.registry import load_all_repositories
 from validation.remote import RemoteRepositoryError, _run
@@ -13,8 +13,14 @@ from validation.runner import run_repository_validation
 
 
 def test_network_git_timeout_raises_remote_unavailable() -> None:
+    """Timeout path must run on Windows, where Unix sleep is not a command."""
+
     with pytest.raises(RemoteRepositoryError, match="timed out"):
-        _run(["sleep", "30"], network_sensitive=True, timeout=1)
+        _run(
+            [sys.executable, "-c", "import time; time.sleep(30)"],
+            network_sensitive=True,
+            timeout=1,
+        )
 
 
 def test_clone_timeout_does_not_retry_fallback(

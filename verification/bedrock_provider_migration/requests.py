@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from codestrata.ai.prompts.models import PromptMessage
 from codestrata.ai.provider_adapters.bedrock import request_mapping
 from codestrata.ai.provider_adapters.bedrock.factory import build_bedrock_provider
 from codestrata.ai.provider_adapters.bedrock.legacy_bridge import (
@@ -11,12 +12,13 @@ from codestrata.ai.provider_adapters.bedrock.legacy_bridge import (
     build_provider_request,
     fold_prompt_messages,
 )
-from codestrata.ai.prompts.models import PromptMessage
 from codestrata.ai.provider_contracts.requests import ResponseExpectation
 from codestrata.ai.providers.bedrock import build_converse_request, split_prompt_for_converse
 from verification.bedrock_provider_migration import fixtures
 from verification.bedrock_provider_migration.contract import (
     DEVELOPER_PREFIX as EXPECTED_DEVELOPER_PREFIX,
+)
+from verification.bedrock_provider_migration.contract import (
     EXPECTED_CONVERSE_KWARG_NAMES,
     EXPECTED_INFERENCE_CONFIG_KEYS,
     EXPECTED_MESSAGE_ROLES,
@@ -89,11 +91,7 @@ def check_the_system_block_shape_is_unchanged() -> CheckResult:
     return CheckResult(
         name="the_system_block_is_a_single_text_entry",
         category="requests",
-        ok=(
-            isinstance(system, list)
-            and len(system) == 1
-            and set(system[0]) == {"text"}
-        ),
+        ok=(isinstance(system, list) and len(system) == 1 and set(system[0]) == {"text"}),
         detail=f"system_block_count={len(system) if isinstance(system, list) else 0}",
     )
 

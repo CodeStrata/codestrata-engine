@@ -70,10 +70,7 @@ def check_message_roles_and_order_are_unchanged() -> CheckResult:
 def check_developer_instructions_prefix_is_unchanged() -> CheckResult:
     messages = _migrated_messages(fixtures.prompt_request())
     system_content = messages[0]["content"]
-    ok = (
-        legacy_bridge.DEVELOPER_PREFIX == DEVELOPER_PREFIX
-        and DEVELOPER_PREFIX in system_content
-    )
+    ok = legacy_bridge.DEVELOPER_PREFIX == DEVELOPER_PREFIX and DEVELOPER_PREFIX in system_content
     return CheckResult(
         name="developer_messages_still_carry_the_developer_instructions_prefix",
         category="requests",
@@ -223,9 +220,7 @@ def run_request_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         "expected_chat_kwarg_names": list(EXPECTED_CHAT_KWARG_NAMES),
         "expected_message_roles": list(EXPECTED_MESSAGE_ROLES),
         "json_response_format": dict(JSON_RESPONSE_FORMAT),
-        "structured_json_request_shape": request_mapping.request_shape(
-            fixtures.provider_request()
-        ),
+        "structured_json_request_shape": request_mapping.request_shape(fixtures.provider_request()),
         "text_request_shape": request_mapping.request_shape(
             fixtures.provider_request(response_expectation=ResponseExpectation.TEXT)
         ),

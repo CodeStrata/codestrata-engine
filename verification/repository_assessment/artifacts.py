@@ -108,7 +108,9 @@ def enumerate_artifacts(repo_root: Path, output_relative: str = "reports") -> Ar
     if run_dir is None:
         for name in REQUIRED_ARTIFACT_NAMES:
             inventory.records.append(
-                ArtifactRecord(name=name, classification="missing", issues=("run_directory_missing",))
+                ArtifactRecord(
+                    name=name, classification="missing", issues=("run_directory_missing",)
+                )
             )
         return inventory
 

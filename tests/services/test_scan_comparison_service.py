@@ -686,3 +686,100 @@ def test_analyzer_version_difference_produces_comparison_note(
     assert comparison.notes == [
         "Some differences may result from analyzer or ruleset version changes."
     ]
+
+
+def test_comparison_service_m29_and_m30(tmp_path: Path) -> None:
+    baseline = _result(tmp_path)
+    current = _result(tmp_path)
+
+    node = type("Node", (), {"id": "n1", "type": "component", "attributes": {}})()
+    graph = type("Graph", (), {"nodes": [node], "edges": []})()
+
+    service = ScanComparisonService()
+    comparison = service.compare_results(
+        current=current,
+        baseline=baseline,
+        current_timestamp="current",
+        baseline_timestamp="baseline",
+        evaluate_lifecycle=True,
+        base_graph=graph,
+        candidate_graph=graph,
+        source_changed=True,
+    )
+
+    assert comparison.graph_delta is not None
+    assert comparison.blast_radius is not None
+    assert comparison.cause_attribution is not None
+    assert comparison.summary.overall_movement is not None
+
+    # compare_m29 helper
+    delta, radius, summary, concerns = service.compare_m29(
+        base_graph=graph,
+        candidate_graph=graph,
+    )
+    assert delta is not None
+    assert radius is not None
+    assert summary is not None
+
+    # compare_m30 helper
+    verdicts, overall = service.compare_m30(
+        compared_findings=[],
+        metric_deltas=[],
+    )
+    assert isinstance(verdicts, dict)
+    assert overall is not None
+
+
+def test_technology_identity_ignores_generated_ids_and_keeps_version_changes(
+    tmp_path: Path,
+) -> None:
+    from uuid import uuid4
+
+    from codestrata.models.enums import TechnologyCategory
+    from codestrata.models.technology import Technology
+
+    def stack(*, version: str, ident: object) -> Technology:
+        return Technology(
+            id=ident,  # type: ignore[arg-type]
+            name="FastAPI",
+            version=version,
+            category=TechnologyCategory.FRAMEWORK,
+            source="pyproject.toml",
+        )
+
+    baseline = _result(tmp_path, name="base")
+    baseline = baseline.model_copy(
+        update={"technologies": [stack(version=">=0.115,<1.0", ident=uuid4())]}
+    )
+    current = _result(tmp_path, name="current")
+    current = current.model_copy(
+        update={"technologies": [stack(version=">=0.115,<1.0", ident=uuid4())]}
+    )
+    same = ScanComparisonService().compare_results(
+        current=current,
+        baseline=baseline,
+        current_timestamp="current",
+        baseline_timestamp="baseline",
+    )
+    assert [
+        change.path
+        for change in same.fact_changes
+        if str(change.path).startswith("facts.technologies")
+    ] == []
+
+    changed = current.model_copy(
+        update={"technologies": [stack(version=">=0.116,<1.0", ident=uuid4())]}
+    )
+    different = ScanComparisonService().compare_results(
+        current=changed,
+        baseline=baseline,
+        current_timestamp="current",
+        baseline_timestamp="baseline",
+    )
+    technology_changes = [
+        change
+        for change in different.fact_changes
+        if str(change.path).startswith("facts.technologies")
+    ]
+    assert technology_changes
+    assert any("0.116" in change.summary for change in technology_changes)

@@ -52,9 +52,7 @@ class LanguageEvidenceService:
     ) -> None:
         self._registry = registry
         self._planner = planner or LanguageEvidenceProviderPlanner(registry)
-        self._executor = executor or LanguageEvidenceProviderExecutor(
-            registry, fail_fast=fail_fast
-        )
+        self._executor = executor or LanguageEvidenceProviderExecutor(registry, fail_fast=fail_fast)
         self._aggregator = aggregator or LanguageEvidenceAggregator()
 
     @property
@@ -69,9 +67,7 @@ class LanguageEvidenceService:
     ) -> tuple[dict[str, Any], ...]:
         return tuple(
             _metadata_dict(meta)
-            for meta in self._registry.list_providers(
-                language=language, capability=capability
-            )
+            for meta in self._registry.list_providers(language=language, capability=capability)
         )
 
     def inspect_provider(self, provider_id: str) -> dict[str, Any]:

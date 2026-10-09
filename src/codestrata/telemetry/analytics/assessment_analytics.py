@@ -21,12 +21,12 @@ from codestrata.telemetry.analytics.assessment_analytics_policy import (
 )
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 from codestrata.telemetry.analytics.events import (
-    AnalyticsCategory,
-    AnalyticsEvent,
-    AnalyticsLifecycle,
     _APPROVED_ASSESSMENT_HEADS,
     _APPROVED_DURATION_BUCKETS,
     _APPROVED_FAILURE_CATEGORIES,
+    AnalyticsCategory,
+    AnalyticsEvent,
+    AnalyticsLifecycle,
 )
 from codestrata.telemetry.analytics.installation_identity import (
     AnonymousInstallationIdentity,
@@ -260,9 +260,7 @@ def collect_assessment_analytics(
             raise AnalyticsError(AnalyticsErrorCode.INVALID_DURATION_BUCKET) from error
 
     bucket = (
-        duration_bucket
-        if duration_bucket is not None
-        else classify_duration_bucket_ms(duration_ms)
+        duration_bucket if duration_bucket is not None else classify_duration_bucket_ms(duration_ms)
     )
     if bucket not in _APPROVED_DURATION_BUCKETS:
         raise AnalyticsError(AnalyticsErrorCode.INVALID_DURATION_BUCKET)

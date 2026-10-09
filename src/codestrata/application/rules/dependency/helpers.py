@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from codestrata.application.rules.confidence_catalog import confidence_for_rule
 import re
 
+from codestrata.application.rules.confidence_catalog import confidence_for_rule
 from codestrata.application.rules.dependency.recommendations import recommendation_for
 from codestrata.domain.dependency.ids import PACK_ID, PACK_VERSION, RULE_VERSION
 from codestrata.domain.evidence.dependency.enums import (
@@ -19,8 +19,8 @@ from codestrata.domain.evidence.dependency.models import (
 )
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -28,8 +28,8 @@ from codestrata.domain.rules.enums import (
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
-from codestrata.domain.rules.rule_confidence import RuleConfidence
 from codestrata.domain.rules.results import RuleMatch
+from codestrata.domain.rules.rule_confidence import RuleConfidence
 
 # Mutable version syntax (bounded, documented). Ranges like >=1,<2 are NOT mutable.
 _MUTABLE_TOKENS = frozenset(
@@ -79,9 +79,7 @@ def make_metadata(
             "dimension:dependency",
         ),
         remediation_summary=remediation,
-        documentation_reference=(
-            "docs/analysis-intelligence/shared-rule-platform.md"
-        ),
+        documentation_reference=("docs/analysis-intelligence/shared-rule-platform.md"),
         enabled_by_default=True,
         experimental=False,
         requires_enterprise_context=False,
@@ -209,10 +207,7 @@ def has_proven_unresolved_version(item: DependencyDeclarationEvidence) -> bool:
 
     if is_local_or_direct_reference(item):
         return False
-    if (
-        item.version_resolution_status
-        is DependencyVersionResolutionStatus.PROVEN_UNRESOLVED
-    ):
+    if item.version_resolution_status is DependencyVersionResolutionStatus.PROVEN_UNRESOLVED:
         return bool((item.raw_version or "").strip())
     # Legacy/partial payloads without version_resolution_status semantics:
     # never infer proven absence from generic UNAVAILABLE alone.

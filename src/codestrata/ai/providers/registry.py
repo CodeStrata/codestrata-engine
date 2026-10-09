@@ -42,8 +42,7 @@ class AIProviderRegistry:
         key = name.strip().lower()
         if key not in self._embedding:
             raise ValueError(
-                f"unknown embedding provider {key!r}; "
-                f"registered: {sorted(self._embedding)}"
+                f"unknown embedding provider {key!r}; registered: {sorted(self._embedding)}"
             )
         return self._embedding[key](**kwargs)
 
@@ -52,10 +51,7 @@ class AIProviderRegistry:
         if key == "deterministic":
             key = "deterministic_extractive"
         if key not in self._answer:
-            raise ValueError(
-                f"unknown answer provider {key!r}; "
-                f"registered: {sorted(self._answer)}"
-            )
+            raise ValueError(f"unknown answer provider {key!r}; registered: {sorted(self._answer)}")
         return self._answer[key](**kwargs)
 
     def list_embedding_providers(self) -> tuple[str, ...]:

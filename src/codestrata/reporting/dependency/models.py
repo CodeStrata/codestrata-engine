@@ -248,9 +248,7 @@ class DependencyReportCoverageView(BaseModel):
     unsupported_resolution_count: int = Field(default=0, ge=0)
     diagnostic_total: int = Field(default=0, ge=0)
     diagnostic_samples: tuple[DependencyReportDiagnosticView, ...] = ()
-    note: str = (
-        "Diagnostics are coverage signals, not hygiene findings."
-    )
+    note: str = "Diagnostics are coverage signals, not hygiene findings."
 
     @field_validator("diagnostic_samples", mode="before")
     @classmethod
@@ -330,9 +328,7 @@ class DependencyReportProductionHealth(BaseModel):
     @classmethod
     def normalize_paths(cls, value: object) -> tuple[str, ...]:
         return tuple(
-            str(item).strip().replace("\\", "/")
-            for item in as_tuple(value)
-            if str(item).strip()
+            str(item).strip().replace("\\", "/") for item in as_tuple(value) if str(item).strip()
         )
 
 
@@ -344,9 +340,7 @@ class DependencyReportTestObservations(BaseModel):
     findings_displayed: int = Field(default=0, ge=0)
     findings_total: int = Field(default=0, ge=0)
     title: str = "No separate test/fixture observations"
-    summary: str = (
-        "No test/fixture dependency hygiene findings were recorded for this assessment."
-    )
+    summary: str = "No test/fixture dependency hygiene findings were recorded for this assessment."
     findings: tuple[DependencyReportFindingView, ...] = ()
     affected_manifests: tuple[str, ...] = ()
     conclusions: tuple[DependencyReportConclusionView, ...] = ()
@@ -371,9 +365,7 @@ class DependencyReportTestObservations(BaseModel):
     @classmethod
     def normalize_paths(cls, value: object) -> tuple[str, ...]:
         return tuple(
-            str(item).strip().replace("\\", "/")
-            for item in as_tuple(value)
-            if str(item).strip()
+            str(item).strip().replace("\\", "/") for item in as_tuple(value) if str(item).strip()
         )
 
 
@@ -413,9 +405,7 @@ class DependencyReportSection(BaseModel):
     recommendations: tuple[DependencyReportRecommendationView, ...] = ()
     conclusion_groups: tuple[DependencyReportAudienceGroup, ...] = ()
     recommendation_groups: tuple[DependencyReportAudienceGroup, ...] = ()
-    coverage: DependencyReportCoverageView = Field(
-        default_factory=DependencyReportCoverageView
-    )
+    coverage: DependencyReportCoverageView = Field(default_factory=DependencyReportCoverageView)
     diagnostics: tuple[DependencyReportDiagnosticView, ...] = ()
     diagnostics_total: int = Field(default=0, ge=0)
     limitations: tuple[DependencyReportLimitationView, ...] = ()

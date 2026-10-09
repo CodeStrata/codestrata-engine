@@ -204,9 +204,7 @@ def normalize_rule_execution_by_head(
         if item.assessment_head in seen:
             raise AnalyticsError(AnalyticsErrorCode.DUPLICATE_HEAD)
         seen.add(item.assessment_head)
-        normalized.append(
-            normalize_rule_execution_aggregate(item, max_count=max_count)
-        )
+        normalized.append(normalize_rule_execution_aggregate(item, max_count=max_count))
     return tuple(sorted(normalized, key=lambda row: row.assessment_head or ""))
 
 

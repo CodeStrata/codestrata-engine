@@ -102,7 +102,10 @@ def test_ci_expression_demotes_to_informational() -> None:
         normalized_key="env_github_token",
     )
     assert adjust_rule_severity(RuleSeverity.HIGH, decision) is RuleSeverity.INFORMATIONAL
-    assert adjust_rule_confidence(MatchEvidenceConfidence.HIGH, decision) is MatchEvidenceConfidence.MEDIUM
+    assert (
+        adjust_rule_confidence(MatchEvidenceConfidence.HIGH, decision)
+        is MatchEvidenceConfidence.MEDIUM
+    )
     assert adjust_phase1_severity(Severity.CRITICAL, decision) is Severity.INFO
 
 
@@ -114,7 +117,10 @@ def test_production_preserves_high_severity() -> None:
     )
     assert decision.context is SecurityEvidenceContext.PRODUCTION
     assert adjust_rule_severity(RuleSeverity.HIGH, decision) is RuleSeverity.HIGH
-    assert adjust_rule_confidence(MatchEvidenceConfidence.HIGH, decision) is MatchEvidenceConfidence.HIGH
+    assert (
+        adjust_rule_confidence(MatchEvidenceConfidence.HIGH, decision)
+        is MatchEvidenceConfidence.HIGH
+    )
 
 
 def test_gha_id_token_permission_with_redacted_preview() -> None:

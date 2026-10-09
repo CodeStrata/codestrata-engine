@@ -115,8 +115,7 @@ def check_artifact_contracts(
         CheckResult(
             name="schema_declaration_location",
             ok=all(
-                str(b.report.get("schema_version")) == ASSESSMENT_SCHEMA_VERSION
-                for b in bundles
+                str(b.report.get("schema_version")) == ASSESSMENT_SCHEMA_VERSION for b in bundles
             ),
             detail="schema_version at report root for all repositories",
         )

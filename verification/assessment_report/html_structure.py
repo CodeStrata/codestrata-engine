@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 from collections import Counter
 
+from codestrata.reporting.html_v2.r2_shell import PRINT_CONTROL_SCRIPT, script_source_hash
 from verification.assessment_report.contract import EXPECTED_SECTION_ORDER
 from verification.assessment_report.loaders import AssessmentRunArtifacts
 from verification.assessment_report.models import CheckResult
@@ -12,9 +13,29 @@ from verification.assessment_report.models import CheckResult
 # Do not match attribute suffixes such as data-evidence-id="...".
 _ID_RE = re.compile(r'(?<![\w-])id="([^"]+)"')
 _HREF_RE = re.compile(r'href="#([^"]+)"')
-_SECTION_ID_RE = re.compile(r'<section[^>]*(?<![\w-])id="([^"]+)"', re.IGNORECASE)
 _CCL_RE = re.compile(
     r'data-canonical="coverage-confidence-limitations"|class="[^"]*assessment-ccl[^"]*"'
+)
+_SCRIPT_RE = re.compile(r"<script\b([^>]*)>(.*?)</script>", re.IGNORECASE | re.DOTALL)
+_EVENT_HANDLER_RE = re.compile(r"<[^>]*\s(on[a-z]+)\s*=", re.IGNORECASE)
+_CSP_RE = re.compile(
+    r'http-equiv="Content-Security-Policy"[^>]*content="([^"]*)"',
+    re.IGNORECASE,
+)
+_HASH_TOKEN_RE = re.compile(r"^'sha256-[A-Za-z0-9+/]+=*'$")
+_APPROVED_SCRIPT_HASH = f"'sha256-{script_source_hash(PRINT_CONTROL_SCRIPT)}'"
+_UNSAFE_SCRIPT_TOKENS = frozenset(
+    {
+        "'unsafe-inline'",
+        "'unsafe-eval'",
+        "'self'",
+        "'strict-dynamic'",
+        "*",
+        "data:",
+        "blob:",
+        "http:",
+        "https:",
+    }
 )
 
 
@@ -48,8 +69,8 @@ def check_html_structure(run: AssessmentRunArtifacts) -> list[CheckResult]:
         ),
         CheckResult(
             name="html:no_external_script",
-            ok=not re.search(r"<script\b", html, flags=re.IGNORECASE),
-            detail="script tags absent",
+            ok=_scripts_are_approved(html),
+            detail=_script_detail(html),
             category="html",
         ),
         CheckResult(
@@ -60,8 +81,14 @@ def check_html_structure(run: AssessmentRunArtifacts) -> list[CheckResult]:
         ),
         CheckResult(
             name="html:csp_present",
-            ok="Content-Security-Policy" in html and "script-src 'none'" in html,
-            detail="CSP with script-src none",
+            ok=_csp_matches_scripts(html),
+            detail=_csp_detail(html),
+            category="html",
+        ),
+        CheckResult(
+            name="html:no_inline_event_handlers",
+            ok=_EVENT_HANDLER_RE.search(html) is None,
+            detail="no inline event handlers",
             category="html",
         ),
         CheckResult(
@@ -124,9 +151,6 @@ def check_html_structure(run: AssessmentRunArtifacts) -> list[CheckResult]:
     positions: list[tuple[int, str]] = []
     for section_id, _title in EXPECTED_SECTION_ORDER:
         idx = html.find(f'id="{section_id}"')
-        if idx < 0 and section_id == "phased-modernization-plan":
-            # Roadmap may be absent when empty — allowed
-            continue
         if idx < 0:
             checks.append(
                 CheckResult(
@@ -168,3 +192,73 @@ def check_html_structure(run: AssessmentRunArtifacts) -> list[CheckResult]:
         )
     )
     return checks
+
+
+def _script_bodies(html: str) -> list[tuple[str, str]]:
+    return [(attrs, body) for attrs, body in _SCRIPT_RE.findall(html)]
+
+
+def _has_external_source(attrs: str) -> bool:
+    return re.search(r"\bsrc\s*=", attrs, flags=re.IGNORECASE) is not None
+
+
+def _scripts_are_approved(html: str) -> bool:
+    """Allow only the static print script, or no script at all."""
+
+    bodies = _script_bodies(html)
+    if not bodies:
+        return True
+    for attrs, body in bodies:
+        if _has_external_source(attrs) or body != PRINT_CONTROL_SCRIPT:
+            return False
+    return True
+
+
+def _script_detail(html: str) -> str:
+    bodies = _script_bodies(html)
+    if not bodies:
+        return "no script"
+    external = sum(1 for attrs, _body in bodies if _has_external_source(attrs))
+    approved = sum(1 for _attrs, body in bodies if body == PRINT_CONTROL_SCRIPT)
+    return f"scripts={len(bodies)} approved={approved} external={external}"
+
+
+def _script_src_tokens(html: str) -> list[str] | None:
+    match = _CSP_RE.search(html)
+    if match is None:
+        return None
+    for part in match.group(1).split(";"):
+        tokens = part.strip().split()
+        if tokens and tokens[0] == "script-src":
+            return tokens[1:]
+    return None
+
+
+def _csp_matches_scripts(html: str) -> bool:
+    tokens = _script_src_tokens(html)
+    if tokens is None:
+        return False
+    if any(_unsafe_script_token(token) for token in tokens):
+        return False
+    if any(not _HASH_TOKEN_RE.match(token) and token != "'none'" for token in tokens):
+        return False
+    bodies = _script_bodies(html)
+    has_external = any(_has_external_source(attrs) for attrs, _body in bodies)
+    if has_external:
+        return False
+    if not bodies:
+        return tokens == ["'none'"]
+    if any(body != PRINT_CONTROL_SCRIPT for _attrs, body in bodies):
+        return False
+    return tokens == [_APPROVED_SCRIPT_HASH]
+
+
+def _unsafe_script_token(token: str) -> bool:
+    return token in _UNSAFE_SCRIPT_TOKENS or token.startswith(("http:", "https:"))
+
+
+def _csp_detail(html: str) -> str:
+    tokens = _script_src_tokens(html)
+    if tokens is None:
+        return "CSP script-src missing"
+    return "script-src " + " ".join(tokens)

@@ -87,9 +87,7 @@ def fold_prompt_request(prompt_request: PromptRequest) -> ModernizationAdvisorIn
         raise AIProviderConfigurationError(
             "PromptRequest must include at least one user message with analysis context"
         )
-    instruction_text = PARAGRAPH_SEPARATOR.join(
-        part for part in instruction_parts if part.strip()
-    )
+    instruction_text = PARAGRAPH_SEPARATOR.join(part for part in instruction_parts if part.strip())
     return ModernizationAdvisorInput(
         instruction_text=instruction_text or INSTRUCTION_TEXT_FALLBACK,
         context_payload_text=PARAGRAPH_SEPARATOR.join(

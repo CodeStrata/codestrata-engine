@@ -184,9 +184,7 @@ def evaluate_technical_debt_pack_for_context_detailed(
     findings = mapper.map_matches(platform_result.matches, category_by_rule=category_by_rule)
     evaluated = tuple(platform_result.plan.execution_order)
     skipped = tuple(
-        entry.rule_id
-        for entry in platform_result.plan.skipped
-        if entry.rule_id not in evaluated
+        entry.rule_id for entry in platform_result.plan.skipped if entry.rule_id not in evaluated
     )
     for record in platform_result.records:
         if record.status.value == "not_applicable" and record.rule_id not in skipped:

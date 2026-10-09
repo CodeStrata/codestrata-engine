@@ -21,7 +21,8 @@ rules_app = typer.Typer(
         "Lists and inspects registered production rules. The Architecture pack is "
         "discoverable here; assess merge requires "
         "`[rules] enabled` and `[rules.architecture] enabled`. "
-        "CLI rename to codestrata is deferred to a future rebranding milestone."
+        "Supported commands are list, inspect, and explain. "
+        "Custom-rule creation and loading are not a Community command."
     ),
     no_args_is_help=True,
 )

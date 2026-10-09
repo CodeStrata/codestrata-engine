@@ -109,9 +109,7 @@ _RULE_CONCLUSION: dict[str, tuple[DependencyConclusionKind, str]] = {
     ),
 }
 
-_RULE_RECOMMENDATION: dict[
-    str, tuple[DependencyRecommendationKind, str, str, str]
-] = {
+_RULE_RECOMMENDATION: dict[str, tuple[DependencyRecommendationKind, str, str, str]] = {
     RULE_UNRESOLVED_VERSION: (
         DependencyRecommendationKind.DEFINE_UNRESOLVED_LOCAL_VERSION,
         "define-unresolved-local-version",
@@ -211,9 +209,7 @@ def _make_conclusion(
         theme_ids=tuple(sorted(set(theme_ids))),
         finding_ids=tuple(sorted(set(finding_ids)))[:_FINDING_REF_LIMIT],
         hotspot_ids=tuple(sorted(set(hotspot_ids)))[:_HOTSPOT_REF_LIMIT],
-        manifest_inventory_ids=tuple(sorted(set(manifest_inventory_ids)))[
-            :_MANIFEST_REF_LIMIT
-        ],
+        manifest_inventory_ids=tuple(sorted(set(manifest_inventory_ids)))[:_MANIFEST_REF_LIMIT],
         diagnostic_ids=tuple(sorted(set(diagnostic_ids)))[:_DIAGNOSTIC_REF_LIMIT],
         concentration_fact_ids=tuple(sorted(set(concentration_fact_ids))),
         metadata=dict(metadata or {}),
@@ -282,14 +278,10 @@ def _rule_themes(
         finding_ids = tuple(sorted(item.finding_id for item in items))
         themes.append(
             DependencyTheme(
-                theme_id=build_theme_id(
-                    kind=kind.value, scope=scope.value, subject=rule_id
-                ),
+                theme_id=build_theme_id(kind=kind.value, scope=scope.value, subject=rule_id),
                 kind=kind,
                 title=_RULE_TITLES.get(rule_id, rule_id),
-                description=(
-                    f"{len(finding_ids)} {source_role.value} finding(s) for `{rule_id}`."
-                ),
+                description=(f"{len(finding_ids)} {source_role.value} finding(s) for `{rule_id}`."),
                 scope=scope,
                 source_role=source_role,
                 finding_ids=finding_ids,
@@ -363,8 +355,10 @@ def _manifest_distribution_theme(
         manifest_inventory_ids=tuple(
             item.manifest_inventory_id for item in manifest_inventory.entries
         )[:_MANIFEST_REF_LIMIT],
-        counts={**{f"type:{key}": value for key, value in sorted(by_type.items())},
-                **{f"role:{key}": value for key, value in sorted(by_role.items())}},
+        counts={
+            **{f"type:{key}": value for key, value in sorted(by_type.items())},
+            **{f"role:{key}": value for key, value in sorted(by_role.items())},
+        },
     )
 
 
@@ -462,9 +456,7 @@ def _test_fixture_theme(
         scope=DependencyThemeScope.TEST_OBSERVATION,
         source_role=DependencySourceRole.TEST,
         finding_ids=finding_ids,
-        hotspot_ids=tuple(item.hotspot_id for item in hotspot_inventory.test)[
-            :_HOTSPOT_REF_LIMIT
-        ],
+        hotspot_ids=tuple(item.hotspot_id for item in hotspot_inventory.test)[:_HOTSPOT_REF_LIMIT],
         rule_ids=tuple(sorted({item.rule_id for item in test_refs})),
         counts={"finding_count": len(finding_ids)},
     )
@@ -504,8 +496,8 @@ def _partial_ecosystem_theme(
         kind=DependencyThemeKind.PARTIAL_ECOSYSTEM_COVERAGE,
         title="Partial ecosystem coverage",
         description=(
-            "Repository evidence indicates npm/package.json relevance, but npm "
-            "collection is out of scope for this milestone."
+            "npm declarations are inventoried when package.json is present. "
+            "Dependency-role classification and registry freshness are not assessed."
         ),
         scope=DependencyThemeScope.COVERAGE,
         source_role=DependencySourceRole.UNKNOWN,
@@ -549,9 +541,7 @@ def _ecosystem_concentration_facts(
         share = round(item.count / total, 4)
         facts.append(
             DependencyConcentrationFact(
-                fact_id=build_concentration_fact_id(
-                    kind="ecosystem_share", subject=item.label
-                ),
+                fact_id=build_concentration_fact_id(kind="ecosystem_share", subject=item.label),
                 kind="ecosystem_share",
                 subject=item.label,
                 count=item.count,
@@ -598,9 +588,7 @@ def _manifest_finding_concentration(
     total = len(production_refs)
     if total <= 0:
         return ()
-    ordered = [
-        item for item in hotspot_inventory.production if item.hygiene_finding_count > 0
-    ]
+    ordered = [item for item in hotspot_inventory.production if item.hygiene_finding_count > 0]
     if not ordered:
         return ()
     top = ordered[:5]
@@ -620,13 +608,9 @@ def _manifest_finding_concentration(
             threshold=MANIFEST_FINDING_CONCENTRATION_MIN_SHARE,
             exceeds_threshold=share >= MANIFEST_FINDING_CONCENTRATION_MIN_SHARE,
             source_role=DependencySourceRole.PRODUCTION,
-            supporting_finding_ids=tuple(
-                sorted({fid for item in top for fid in item.finding_ids})
-            ),
+            supporting_finding_ids=tuple(sorted({fid for item in top for fid in item.finding_ids})),
             supporting_hotspot_ids=tuple(item.hotspot_id for item in top),
-            supporting_manifest_ids=tuple(
-                item.manifest_inventory_id for item in top
-            ),
+            supporting_manifest_ids=tuple(item.manifest_inventory_id for item in top),
         ),
     )
 
@@ -648,9 +632,7 @@ def synthesize_dependency(
     """Synthesize themes/conclusions/recommendations from inventory projections."""
 
     if not include_synthesis:
-        return DependencySynthesisResult(
-            status=DependencySynthesisStatus.NOT_REQUESTED
-        )
+        return DependencySynthesisResult(status=DependencySynthesisStatus.NOT_REQUESTED)
 
     if not pack_enabled or section_status is DependencyAssessmentStatus.DISABLED:
         conclusion = _make_conclusion(
@@ -679,8 +661,7 @@ def synthesize_dependency(
         DependencyAssessmentStatus.NOT_APPLICABLE,
         DependencyAssessmentStatus.FAILED,
     } or (
-        evidence_summary.manifests_supported == 0
-        and evidence_summary.declarations_collected == 0
+        evidence_summary.manifests_supported == 0 and evidence_summary.declarations_collected == 0
     ):
         conclusion = _make_conclusion(
             repository_id=repository_id,
@@ -708,25 +689,17 @@ def synthesize_dependency(
         )
 
     production_refs = [
-        item
-        for item in finding_summaries
-        if item.source_role is DependencySourceRole.PRODUCTION
+        item for item in finding_summaries if item.source_role is DependencySourceRole.PRODUCTION
     ]
     test_refs = [
-        item
-        for item in finding_summaries
-        if item.source_role is DependencySourceRole.TEST
+        item for item in finding_summaries if item.source_role is DependencySourceRole.TEST
     ]
     unknown_refs = [
-        item
-        for item in finding_summaries
-        if item.source_role is DependencySourceRole.UNKNOWN
+        item for item in finding_summaries if item.source_role is DependencySourceRole.UNKNOWN
     ]
 
     themes: list[DependencyTheme] = []
-    landscape = _landscape_theme(
-        evidence_summary, declaration_inventory, manifest_inventory
-    )
+    landscape = _landscape_theme(evidence_summary, declaration_inventory, manifest_inventory)
     if landscape is not None:
         themes.append(landscape)
     distribution = _manifest_distribution_theme(manifest_inventory)
@@ -853,8 +826,7 @@ def synthesize_dependency(
     gradle_diags = [
         item
         for item in diagnostics_summary.records
-        if item.diagnostic_code
-        in {"unsupported_gradle_resolution", "unsupported_dynamic_gradle"}
+        if item.diagnostic_code in {"unsupported_gradle_resolution", "unsupported_dynamic_gradle"}
     ]
     if gradle_diags or evidence_summary.unsupported_resolution_count > 0:
         diag_ids = tuple(item.diagnostic_id for item in gradle_diags)
@@ -884,9 +856,7 @@ def synthesize_dependency(
             theme_ids=theme_ids,
             diagnostic_ids=diag_ids,
             metadata={
-                "unsupported_resolution_count": str(
-                    evidence_summary.unsupported_resolution_count
-                ),
+                "unsupported_resolution_count": str(evidence_summary.unsupported_resolution_count),
                 "gradle_diagnostic_count": str(len(gradle_diags)),
             },
         )
@@ -929,8 +899,7 @@ def synthesize_dependency(
             and item.parse_status in {"failed", "partially_succeeded"}
         )
         if any(
-            item.source_role is DependencySourceRole.PRODUCTION
-            and item.parse_status == "failed"
+            item.source_role is DependencySourceRole.PRODUCTION and item.parse_status == "failed"
             for item in manifest_inventory.entries
         ):
             partial = _make_conclusion(
@@ -962,8 +931,9 @@ def synthesize_dependency(
             title="Unsupported ecosystem coverage",
             summary=partial_eco.description,
             technical_interpretation=(
-                "npm/package.json is out of scope for current collectors. This is a "
-                "coverage limitation, not a hygiene finding."
+                "Dependency Evidence does not parse package.json. Technology "
+                "inventory may still list declared npm versions. This is a coverage "
+                "limitation, not a hygiene finding."
             ),
             source_role=DependencySourceRole.UNKNOWN,
             theme_ids=(partial_eco.theme_id,),
@@ -1020,9 +990,7 @@ def synthesize_dependency(
                     "No production dependency hygiene findings require remediation "
                     "under the current rule pack and evidence contract."
                 ),
-                rationale=(
-                    "The production-primary finding inventory contains zero matches."
-                ),
+                rationale=("The production-primary finding inventory contains zero matches."),
                 conditional=False,
             )
         )
@@ -1091,8 +1059,7 @@ def synthesize_dependency(
                 title=f"Production theme: {theme.title}",
                 summary=theme.description,
                 technical_interpretation=(
-                    f"Theme `{theme.theme_id}` aggregates production matches for "
-                    f"`{rule_id}`."
+                    f"Theme `{theme.theme_id}` aggregates production matches for `{rule_id}`."
                 ),
                 source_role=DependencySourceRole.PRODUCTION,
                 theme_ids=(theme.theme_id,),
@@ -1133,9 +1100,7 @@ def synthesize_dependency(
                 "interpreted as production-health defects without separate review."
             ),
             source_role=DependencySourceRole.TEST,
-            theme_ids=(
-                (test_theme.theme_id,) if test_theme is not None else ()
-            ),
+            theme_ids=((test_theme.theme_id,) if test_theme is not None else ()),
             finding_ids=test_finding_ids,
             hotspot_ids=tuple(item.hotspot_id for item in hotspot_inventory.test)[
                 :_HOTSPOT_REF_LIMIT
@@ -1197,9 +1162,7 @@ def synthesize_dependency(
 
     status = (
         DependencySynthesisStatus.EMPTY
-        if not production_refs
-        and not test_refs
-        and evidence_summary.declarations_collected == 0
+        if not production_refs and not test_refs and evidence_summary.declarations_collected == 0
         else DependencySynthesisStatus.SUCCEEDED
     )
     return DependencySynthesisResult(

@@ -13,8 +13,9 @@ quality, confidence, assessment coverage, or a product-wide detection claim.
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping, Sequence
 from decimal import Decimal
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -194,15 +195,11 @@ def build_recall_metric(
     if true_positive_count < 0 or false_negative_count < 0:
         raise ValueError("TP and FN counts must be non-negative")
 
-    scope_enum = (
-        scope if isinstance(scope, QualityMetricScope) else QualityMetricScope(str(scope))
-    )
+    scope_enum = scope if isinstance(scope, QualityMetricScope) else QualityMetricScope(str(scope))
     normalized_scope_id = normalize_scope_id(scope_id)
     metric_id = build_recall_metric_id(scope=scope_enum, scope_id=normalized_scope_id)
     source_enum = (
-        source
-        if isinstance(source, QualityMetricSource)
-        else QualityMetricSource(str(source))
+        source if isinstance(source, QualityMetricSource) else QualityMetricSource(str(source))
     )
     sample_model = (
         sample

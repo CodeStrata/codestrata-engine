@@ -98,4 +98,11 @@ class Phase1RepositoryAdapter:
         """Prefer remote URL; never emit absolute local filesystem paths."""
 
         url = (repository.source_url or "").strip()
-        return url or None
+        if not url:
+            return None
+        from codestrata.domain.repository.identities import normalize_source_location
+
+        try:
+            return normalize_source_location(url)
+        except ValueError:
+            return None

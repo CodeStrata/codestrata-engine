@@ -19,7 +19,7 @@ from codestrata.application.agents.models import (
     ValidationSeverity,
 )
 from codestrata.cli import app
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store import FileKnowledgeStore
 
 runner = CliRunner()
 
@@ -59,7 +59,7 @@ def test_existing_assess_and_mcp_help_unchanged() -> None:
 
 def test_agent_review_success_and_json(tmp_path: Path) -> None:
     knowledge = tmp_path / "knowledge"
-    with SqliteKnowledgeStore(knowledge) as store:
+    with FileKnowledgeStore(knowledge) as store:
         seed_completed_assessment(store, display_name="demo")
     config = _config(tmp_path, knowledge)
 
@@ -82,7 +82,7 @@ def test_agent_review_success_and_json(tmp_path: Path) -> None:
 
 def test_agent_review_not_found(tmp_path: Path) -> None:
     knowledge = tmp_path / "knowledge"
-    with SqliteKnowledgeStore(knowledge):
+    with FileKnowledgeStore(knowledge):
         pass
     config = _config(tmp_path, knowledge)
     result = runner.invoke(
@@ -94,7 +94,7 @@ def test_agent_review_not_found(tmp_path: Path) -> None:
 
 def test_agent_validate_exit_codes(tmp_path: Path) -> None:
     knowledge = tmp_path / "knowledge"
-    with SqliteKnowledgeStore(knowledge) as store:
+    with FileKnowledgeStore(knowledge) as store:
         _repo_id, run_id, _, _, _ = seed_completed_assessment(store, display_name="demo")
     config = _config(tmp_path, knowledge)
 
@@ -141,7 +141,7 @@ def test_agent_validate_exit_codes(tmp_path: Path) -> None:
 
 def test_agent_invalid_dependency_depth(tmp_path: Path) -> None:
     knowledge = tmp_path / "knowledge"
-    with SqliteKnowledgeStore(knowledge) as store:
+    with FileKnowledgeStore(knowledge) as store:
         seed_completed_assessment(store, display_name="demo")
     config = _config(tmp_path, knowledge)
     result = runner.invoke(

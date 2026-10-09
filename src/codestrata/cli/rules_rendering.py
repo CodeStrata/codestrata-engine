@@ -12,9 +12,7 @@ def render_rules_table(rows: list[dict[str, Any]]) -> None:
         typer.echo("No production rules registered (Phase 4.1 platform only).")
         return
     for row in rows:
-        typer.echo(
-            f"{row['rule_id']}  v{row['version']}  [{row['category']}]  {row['title']}"
-        )
+        typer.echo(f"{row['rule_id']}  v{row['version']}  [{row['category']}]  {row['title']}")
 
 
 def render_rule_detail(row: dict[str, Any]) -> None:

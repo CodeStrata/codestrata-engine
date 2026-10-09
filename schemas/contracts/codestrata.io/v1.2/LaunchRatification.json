@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/LaunchRatification.json",
+  "title": "CodeStrata Engine E01.1 Launch Ratification",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ratification_id",
+    "package_revision",
+    "contract_version",
+    "proposed_by",
+    "independent_reviewer",
+    "reviewer_status",
+    "no_opaque_score",
+    "measurements",
+    "depth_matrix",
+    "feed",
+    "history",
+    "budgets",
+    "coverage_freshness_reasons",
+    "confidence_map",
+    "severity",
+    "rule_id_grammar",
+    "outcome_drivers",
+    "m22_roles",
+    "m29_predicate",
+    "formula_fixtures",
+    "retained_existing_rule_ids"
+  ],
+  "properties": {
+    "ratification_id": { "type": "string", "const": "e01.1-launch-ratification" },
+    "package_revision": { "type": "string", "const": "ENGINE-2026-09-15-R1" },
+    "contract_version": { "type": "string", "const": "1.2" },
+    "proposed_by": { "type": "string" },
+    "independent_reviewer": { "type": "string" },
+    "reviewer_status": {
+      "type": "string",
+      "enum": ["pending_independent_review", "accepted", "changes_requested"]
+    },
+    "no_opaque_score": { "type": "object" },
+    "measurements": {
+      "type": "array",
+      "minItems": 33,
+      "maxItems": 33
+    },
+    "depth_matrix": { "type": "array", "minItems": 1 },
+    "feed": { "type": "object" },
+    "history": { "type": "object" },
+    "budgets": { "type": "object" },
+    "coverage_freshness_reasons": { "type": "array" },
+    "confidence_map": { "type": "array" },
+    "severity": { "type": "object" },
+    "rule_id_grammar": { "type": "object" },
+    "outcome_drivers": { "type": "array" },
+    "m22_roles": { "type": "object" },
+    "m29_predicate": { "type": "object" },
+    "formula_fixtures": { "type": "array" },
+    "retained_existing_rule_ids": { "type": "array" },
+    "freshness_states": { "type": "array" }
+  }
+}

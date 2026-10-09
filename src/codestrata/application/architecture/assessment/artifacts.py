@@ -6,10 +6,10 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.domain.architecture.assessment.identifiers import ARCHITECTURE_ASSESSMENT_FILENAME
 from codestrata.domain.architecture.assessment.models import ArchitectureAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
-from codestrata.artifacts.heads import resolve_head_path
 
 ARCHITECTURE_ASSESSMENT_FILENAME_EXPORT = ARCHITECTURE_ASSESSMENT_FILENAME
 

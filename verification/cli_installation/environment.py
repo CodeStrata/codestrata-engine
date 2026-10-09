@@ -6,7 +6,6 @@ import os
 import sys
 from pathlib import Path
 
-
 # Variables that must not leak developer/monorepo context into the clean venv.
 _STRIP_PREFIXES = (
     "AWS_",

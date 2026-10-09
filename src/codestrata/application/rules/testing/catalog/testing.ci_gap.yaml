@@ -1,0 +1,47 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: testing.ci_gap
+  version: 1.0.0
+  title: Declared test or coverage tool has no static CI invocation
+  category: testing
+  owner: codestrata
+  measurement: M21
+  tags: [testing, ci, coverage, gap]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [testing.ci_gap, inventory.ci]
+select:
+  source: testing
+  ci_gap:
+    all:
+      - proven_absent_gt: 0
+      - full_scope_complete: true
+condition:
+  operator: testing.ci_gap
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Declared {{kind}} tool '{{tool}}' has no statically observed invocation
+        in complete supported CI ({{formula_version}}, scope={{checked_scope}}).
+        This is not a runtime pass/fail and a missing coverage report is not
+        0% code coverage.
+      bindings:
+        kind: {type: string, evidence: kind}
+        tool: {type: string, evidence: tool}
+        formula_version: {type: string, evidence: formula_version}
+        checked_scope: {type: string, evidence: checked_scope}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: testing_ci_gap_count
+    operation: count
+parameters:
+  unknown:
+    external_workflow: unknown
+    delegated_script: unknown
+    conditional_job: unknown
+    no_ci_applicability: not_applicable
+  coverage_percent: false

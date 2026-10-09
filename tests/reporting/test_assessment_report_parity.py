@@ -66,6 +66,7 @@ from codestrata.reporting import (
     build_assessment_json_document,
     write_modernization_assessment_reports,
 )
+from codestrata.security.redaction import redact_secrets
 from codestrata.static_analysis.models import StaticAnalysisResult, StaticAnalysisStatus
 
 
@@ -416,15 +417,18 @@ def test_executive_summary_metrics_html_and_json(tmp_path: Path) -> None:
     document = build_assessment_json_document(report_input)
     executive = document["assessment"]["executive_summary"]
 
-    assert "Executive Summary" in html
-    assert "Leadership Verdict" in html
+    assert "Current-code baseline" in html
+    assert html.count('id="executive-summary"') == 1
+    assert html.find('id="attention-first"') < html.find('id="executive-summary"')
+    assert 'href="#executive-summary"' not in html
+    assert "Leadership Verdict" not in html
     assert "Assessment Summary" in html
     # Canonical Slice 14.9 presentation titles (not pre-14.9 labels).
     assert "Priority Actions" in html
     assert "Technology Inventory" in html
     assert "severity-critical" in html
     assert "Findings" in html
-    assert "Should I care?" in html
+    assert "Should I care?" not in html
     assert executive["finding_count"] == 3
     assert executive["recommendation_count"] == 3
     assert executive["file_count"] == 3
@@ -621,7 +625,38 @@ def test_security_sanitization_and_csp(tmp_path: Path) -> None:
     assert str(tmp_path) not in text
     assert "SYSTEM PROMPT" not in html
     assert "raw_model_response" not in text
-    assert "AKIA" not in html
+    assert not re.search(r"\bAKIA[0-9A-Z]{16}\b", html)
+    assert "AKIAIOSFODNN7EXAMPLE" not in html
+    planted = "token AKIAIOSFODNN7EXAMPLE remains"
+    assert "AKIAIOSFODNN7EXAMPLE" not in redact_secrets(planted)
+
+
+def test_engineering_health_headline_parity(tmp_path: Path) -> None:
+    from codestrata.reporting.html_v2 import build_html_report_view_model
+    from codestrata.reporting.html_v2.assessment_heads import (
+        APPENDIX_ASSESSMENT_HEADS,
+        ENGINEERING_HEALTH_HEADLINES,
+        SUPPORTING_ASSESSMENT_HEADS,
+        AssessmentHead,
+    )
+
+    document = build_html_report_view_model(_report_input(tmp_path))
+    assert len(document.headline_outcomes) == 4
+    assert tuple(item.head for item in document.headline_outcomes) == tuple(
+        head.value for head in ENGINEERING_HEALTH_HEADLINES
+    )
+    assert any(
+        item.head == AssessmentHead.QUALITY_INTELLIGENCE.value
+        for item in document.headline_outcomes
+    )
+    legacy = {head.value for head in (*SUPPORTING_ASSESSMENT_HEADS, *APPENDIX_ASSESSMENT_HEADS)}
+    assert {item.head for item in document.headline_outcomes}.isdisjoint(legacy)
+    finding_ids = [item.finding_id for item in document.findings]
+    assert finding_ids
+    assert all(item.finding_id for item in document.findings)
+    assert document.priority_actions
+    json_document = build_assessment_json_document(_report_input(tmp_path))
+    assert [item["id"] for item in json_document["assessment"]["findings"]]
 
 
 def test_atomic_dual_write_parity_artifacts(tmp_path: Path) -> None:

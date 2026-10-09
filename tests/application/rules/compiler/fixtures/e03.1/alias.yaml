@@ -1,0 +1,4 @@
+kind: Rule
+anchor: &x cycle
+condition:
+  operator: *x

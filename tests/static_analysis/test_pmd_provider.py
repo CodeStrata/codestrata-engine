@@ -150,8 +150,8 @@ def test_main_and_test_java_sources_are_included(tmp_path: Path) -> None:
     assert result.status == StaticAnalysisStatus.COMPLETED
     assert result.eligible_file_count == 2
     assert result.files_analyzed == 2
-    assert any(path.endswith("src/main/java") for path in seen_dirs)
-    assert any(path.endswith("src/test/java") for path in seen_dirs)
+    assert any(path.replace("\\", "/").endswith("src/main/java") for path in seen_dirs)
+    assert any(path.replace("\\", "/").endswith("src/test/java") for path in seen_dirs)
     assert result.command_metadata["source_roots"] == [
         "src/main/java",
         "src/test/java",

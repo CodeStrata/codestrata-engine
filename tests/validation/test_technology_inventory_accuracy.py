@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from validation.actual import load_emitted_assessment, run_real_assessment
 from validation.matrix import ACTIVE_VALIDATION_SET
 from validation.models import ValidationVerdict
@@ -24,7 +23,9 @@ def test_all_repositories_have_technology_inventory_expectations() -> None:
         assert inv is not None, definition.repository_id
         assert inv.evidence_notes, definition.repository_id
         # Every repo must declare at least one forbidden language/framework signal.
-        assert inv.forbidden_languages or inv.forbidden_frameworks or inv.forbidden_libraries, definition.repository_id
+        assert inv.forbidden_languages or inv.forbidden_frameworks or inv.forbidden_libraries, (
+            definition.repository_id
+        )
         # Required facts must be intentional (may be empty only for cloud-signals languages).
         has_required = any(
             [
@@ -77,11 +78,7 @@ def test_controlled_fixtures_inventory_accuracy(tmp_path_factory) -> None:
         _report, document = load_emitted_assessment(run.artifact_dir)
         techs = (document.get("assessment") or {}).get("technologies") or []
         # ACTIVE_0_2_0: only repository-manifest languages are persisted.
-        names = {
-            item["name"]
-            for item in techs
-            if isinstance(item, dict) and item.get("name")
-        }
+        names = {item["name"] for item in techs if isinstance(item, dict) and item.get("name")}
         forbidden = set(expected.technology_inventory.forbidden_languages)
         assert names.isdisjoint(forbidden), definition.repository_id
         inventory_results.append(definition.repository_id)
@@ -97,9 +94,7 @@ def test_no_primary_language_false_positives_on_fixtures(
         repository_path=test_fixtures_root / "sample-js-app",
         output_directory=tmp_path / "js",
     )
-    languages = set(actual.technologies_by_category.get("languages", ())) | set(
-        actual.technologies
-    )
+    languages = set(actual.technologies_by_category.get("languages", ())) | set(actual.technologies)
     assert "JavaScript" in languages
     assert "TypeScript" not in languages
     assert "Python" not in languages
@@ -115,9 +110,7 @@ def test_openai_detected_as_library_not_framework(tmp_path: Path) -> None:
     )
     # ACTIVE_0_2_0: categorized library/framework inventory is not persisted.
     # Authoritative AI-integration evidence is findings + AI-readiness sidecars.
-    languages = set(actual.technologies_by_category.get("languages", ())) | set(
-        actual.technologies
-    )
+    languages = set(actual.technologies_by_category.get("languages", ())) | set(actual.technologies)
     assert "OpenAI" not in languages
     openai_signal = any(
         "openai" in f"{item.family_id} {item.signal_kind}".lower()
@@ -145,9 +138,7 @@ def test_petclinic_inventory_when_clone_present(tmp_path: Path) -> None:
         repository_path=clone,
         output_directory=tmp_path / "petclinic",
     )
-    languages = set(actual.technologies_by_category.get("languages", ())) | set(
-        actual.technologies
-    )
+    languages = set(actual.technologies_by_category.get("languages", ())) | set(actual.technologies)
     assert "Java" in languages
     for name in ("Python", "JavaScript", "OpenAI", "Flask"):
         assert name not in languages

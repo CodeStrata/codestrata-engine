@@ -6,8 +6,6 @@ import json
 import sys
 from pathlib import Path
 
-import pytest
-
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "validation" / "repository-catalog"))
 
@@ -54,20 +52,14 @@ def test_full_sha_and_floating_rules() -> None:
 
 
 def test_reject_abbreviated_and_floating_commit() -> None:
-    issues = validate_qualified_revision(
-        {"type": "commit", "value": "abc1234"}, repository_id="x"
-    )
+    issues = validate_qualified_revision({"type": "commit", "value": "abc1234"}, repository_id="x")
     assert any(i.code == "commit_sha_invalid" for i in issues)
-    issues = validate_qualified_revision(
-        {"type": "commit", "value": "main"}, repository_id="x"
-    )
+    issues = validate_qualified_revision({"type": "commit", "value": "main"}, repository_id="x")
     assert any(i.code == "floating_revision_forbidden" for i in issues)
 
 
 def test_safe_github_urls() -> None:
-    assert validate_github_https_url(
-        "https://github.com/org/repo", "org/repo"
-    ) == []
+    assert validate_github_https_url("https://github.com/org/repo", "org/repo") == []
     assert "credentials_in_url_forbidden" in validate_github_https_url(
         "https://user:pass@github.com/org/repo", "org/repo"
     )

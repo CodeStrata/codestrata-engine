@@ -87,11 +87,7 @@ def _current_provider_label(settings: CodestrataSettings) -> str:
     overview = next((item for item in report.providers if item.name == active), None)
     if overview is None:
         return active
-    status = (
-        "Configured"
-        if overview.status is ConfigStatus.CONFIGURED
-        else "Not Configured"
-    )
+    status = "Configured" if overview.status is ConfigStatus.CONFIGURED else "Not Configured"
     return f"{active} ({status})"
 
 
@@ -114,10 +110,7 @@ def _print_onboarding(settings: CodestrataSettings) -> None:
     typer.echo("  • OpenRouter (explicit; optional)")
     typer.echo("")
     typer.echo("CodeStrata Platform is separate (graph upload / commercial) —")
-    typer.echo(
-        "not an AI provider. See: "
-        f"{DOCS_HOME}/community/vs-platform"
-    )
+    typer.echo(f"not an AI provider. See: {DOCS_HOME}/community/vs-platform")
     typer.echo("")
     typer.echo(f"Current provider:  {_current_provider_label(settings)}")
     typer.echo("")
@@ -258,8 +251,7 @@ def _print_doctor(settings: CodestrataSettings) -> int:
 
     if not report.active_supported:
         tip(
-            "Set [ai].provider to bedrock, openai, or openrouter, "
-            "then re-run: codestrata ai doctor"
+            "Set [ai].provider to bedrock, openai, or openrouter, then re-run: codestrata ai doctor"
         )
         return 1
 

@@ -65,9 +65,7 @@ def build_staged_assessment_artifacts(
             artifact_kind=KnowledgeArtifactKind.REPOSITORY_MANIFEST,
             schema_version=result.manifest.manifest_version,
             payload=repository_manifest_payload(result.manifest),
-            source_fingerprint=(
-                f"{_fingerprint_algorithm(result)}:{_fingerprint_digest(result)}"
-            ),
+            source_fingerprint=(f"{_fingerprint_algorithm(result)}:{_fingerprint_digest(result)}"),
             snapshot_id=snapshot_id,
         ),
         StagedKnowledgeArtifact(
@@ -88,8 +86,7 @@ def build_staged_assessment_artifacts(
         ),
         StagedKnowledgeArtifact(
             artifact_kind=KnowledgeArtifactKind.KNOWLEDGE_BINDINGS,
-            schema_version=result.binding_result.result_version
-            or KNOWLEDGE_BINDING_RESULT_VERSION,
+            schema_version=result.binding_result.result_version or KNOWLEDGE_BINDING_RESULT_VERSION,
             payload=knowledge_bindings_payload(result),
             source_fingerprint=result.binding_result.repository_source_fingerprint,
             snapshot_id=snapshot_id,

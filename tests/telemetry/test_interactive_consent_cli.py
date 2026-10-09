@@ -24,9 +24,7 @@ def test_W_cli_help_unchanged_no_flags() -> None:
 def test_help_and_version_do_not_prompt() -> None:
     reset_telemetry_singletons()
     runner = CliRunner()
-    with patch(
-        "codestrata.telemetry.interactive_consent.run_interactive_consent_prompt"
-    ) as prompt:
+    with patch("codestrata.telemetry.interactive_consent.run_interactive_consent_prompt") as prompt:
         assert runner.invoke(app, ["--help"]).exit_code == 0
         assert runner.invoke(app, ["version"]).exit_code == 0
         assert runner.invoke(app, ["telemetry", "status"]).exit_code == 0
@@ -67,10 +65,13 @@ def test_assess_simulated_interactive_yes_no_network(tmp_path: Path, monkeypatch
     reset_telemetry_singletons()
     from codestrata.telemetry.service import ensure_interactive_product_telemetry
 
-    with patch(
-        "codestrata.telemetry.product_transport.try_create_production_http_transport",
-        return_value=None,
-    ), patch("codestrata.telemetry.transport.send_payload") as send:
+    with (
+        patch(
+            "codestrata.telemetry.product_transport.try_create_production_http_transport",
+            return_value=None,
+        ),
+        patch("codestrata.telemetry.transport.send_payload") as send,
+    ):
         telemetry = ensure_interactive_product_telemetry(
             command="assess",
             stdin_interactive=True,

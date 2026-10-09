@@ -67,6 +67,38 @@ class ArchitectureAnalyzer:
         "graphql",
     }
 
+    # UI structure. These are not controllers: a component folder is not an API layer.
+    _PRESENTATION_DIRECTORY_MARKERS = {
+        "component",
+        "components",
+        "view",
+        "views",
+        "page",
+        "pages",
+        "hook",
+        "hooks",
+        "directive",
+        "directives",
+        "pipe",
+        "pipes",
+        "layout",
+        "layouts",
+        "screen",
+        "screens",
+        "widget",
+        "widgets",
+    }
+
+    _STATE_DIRECTORY_MARKERS = {
+        "store",
+        "stores",
+        "state",
+        "redux",
+        "ngrx",
+        "pinia",
+        "vuex",
+    }
+
     _TEST_DIRECTORY_MARKERS = {
         "test",
         "tests",
@@ -96,7 +128,12 @@ class ArchitectureAnalyzer:
         ".php",
         ".go",
         ".cs",
+        ".cshtml",
+        ".razor",
         ".rb",
+        ".rs",
+        ".svelte",
+        ".vue",
     }
 
     _CONTROLLER_STEM_SUFFIXES = (
@@ -113,6 +150,16 @@ class ArchitectureAnalyzer:
         "daos",
         "entity",
         "entities",
+    )
+
+    _PRESENTATION_STEM_SUFFIXES = (
+        "component",
+        "directive",
+        "hook",
+        "layout",
+        "page",
+        "pipe",
+        "view",
     )
 
     _EXCLUDED_DIRECTORY_TOKENS = {
@@ -141,6 +188,8 @@ class ArchitectureAnalyzer:
             "domain": [],
             "configuration": [],
             "apis": [],
+            "presentation": [],
+            "state": [],
             "tests": [],
         }
 
@@ -169,6 +218,7 @@ class ArchitectureAnalyzer:
 
         findings.extend(self._detect_layered_architecture(component_paths))
         findings.extend(self._detect_api_layer(component_paths))
+        findings.extend(self._detect_presentation_layer(component_paths))
         findings.extend(self._detect_persistence_layer(component_paths))
         findings.extend(self._detect_test_structure(component_paths))
         findings.extend(
@@ -179,7 +229,9 @@ class ArchitectureAnalyzer:
         )
 
         has_api_layer = bool(component_paths["controllers"] or component_paths["apis"])
+        has_presentation_layer = bool(component_paths["presentation"])
         has_service_layer = bool(component_paths["services"])
+        has_state_layer = bool(component_paths["state"])
         has_persistence_layer = bool(component_paths["repositories"])
         has_domain_layer = bool(component_paths["domain"])
         has_tests = bool(component_paths["tests"])
@@ -196,7 +248,9 @@ class ArchitectureAnalyzer:
             layer
             for layer, present in (
                 ("api", has_api_layer),
+                ("presentation", has_presentation_layer),
                 ("service", has_service_layer),
+                ("state", has_state_layer),
                 ("persistence", has_persistence_layer),
                 ("domain", has_domain_layer),
                 ("tests", has_tests),
@@ -214,7 +268,9 @@ class ArchitectureAnalyzer:
                 ),
                 architecture=ArchitectureFacts(
                     has_api_layer=has_api_layer,
+                    has_presentation_layer=has_presentation_layer,
                     has_service_layer=has_service_layer,
+                    has_state_layer=has_state_layer,
                     has_persistence_layer=has_persistence_layer,
                     has_domain_layer=has_domain_layer,
                     is_multi_application=is_multi_application,
@@ -235,7 +291,9 @@ class ArchitectureAnalyzer:
         stem = PurePosixPath(file_name).stem
         is_source = self._is_source_file(file_name)
         in_excluded_assets = bool(directory_tokens & self._EXCLUDED_DIRECTORY_TOKENS)
-        in_test = bool(directory_tokens & self._TEST_DIRECTORY_MARKERS)
+        in_test = bool(directory_tokens & self._TEST_DIRECTORY_MARKERS) or self._is_test_file(
+            file_name
+        )
 
         if in_test:
             component_paths["tests"].append(relative_path)
@@ -248,7 +306,7 @@ class ArchitectureAnalyzer:
             ):
                 component_paths["controllers"].append(relative_path)
 
-            if directory_tokens & self._API_DIRECTORY_MARKERS:
+            if self._api_directory_is_boundary(path_parts):
                 component_paths["apis"].append(relative_path)
 
             if (directory_tokens & self._REPOSITORY_DIRECTORY_MARKERS) or self._stem_matches(
@@ -263,6 +321,15 @@ class ArchitectureAnalyzer:
             if directory_tokens & self._DOMAIN_DIRECTORY_MARKERS:
                 component_paths["domain"].append(relative_path)
 
+            if (directory_tokens & self._PRESENTATION_DIRECTORY_MARKERS) or self._stem_matches(
+                stem,
+                self._PRESENTATION_STEM_SUFFIXES,
+            ):
+                component_paths["presentation"].append(relative_path)
+
+            if directory_tokens & self._STATE_DIRECTORY_MARKERS:
+                component_paths["state"].append(relative_path)
+
         if directory_tokens & self._CONFIG_DIRECTORY_MARKERS:
             component_paths["configuration"].append(relative_path)
 
@@ -270,6 +337,37 @@ class ArchitectureAnalyzer:
         """Return whether a file looks like application source code."""
 
         return PurePosixPath(file_name).suffix.lower() in self._SOURCE_SUFFIXES
+
+    def _is_test_file(self, file_name: str) -> bool:
+        """Return whether a file name is a unit spec rather than production source."""
+
+        lower = file_name.lower()
+        return lower.endswith(
+            (
+                ".spec.ts",
+                ".spec.tsx",
+                ".spec.js",
+                ".spec.jsx",
+                ".test.ts",
+                ".test.tsx",
+                ".test.js",
+                ".test.jsx",
+            )
+        )
+
+    def _api_directory_is_boundary(self, path_parts: list[str]) -> bool:
+        """Return whether an api/rest/graphql folder is a boundary, not a model group.
+
+        ``src/app/models/api`` is a model package. ``src/app/api`` is a boundary.
+        """
+
+        seen_domain = False
+        for part in path_parts[:-1]:
+            if part in self._DOMAIN_DIRECTORY_MARKERS:
+                seen_domain = True
+            elif part in self._API_DIRECTORY_MARKERS and not seen_domain:
+                return True
+        return False
 
     def _stem_matches(self, stem: str, suffixes: tuple[str, ...]) -> bool:
         """Return whether a file stem ends with a known architectural suffix."""
@@ -296,6 +394,8 @@ class ArchitectureAnalyzer:
                 "controllers",
                 "services",
                 "repositories",
+                "presentation",
+                "state",
             )
             if component_paths[layer]
         }
@@ -303,11 +403,7 @@ class ArchitectureAnalyzer:
         if len(layers) < 2:
             return []
 
-        complete_layered = layers == {
-            "controllers",
-            "services",
-            "repositories",
-        }
+        complete_layered = {"controllers", "services", "repositories"} <= layers
         title = (
             "Layered application architecture detected"
             if complete_layered
@@ -326,6 +422,8 @@ class ArchitectureAnalyzer:
                     "controller_count": len(component_paths["controllers"]),
                     "service_count": len(component_paths["services"]),
                     "repository_count": len(component_paths["repositories"]),
+                    "presentation_count": len(component_paths["presentation"]),
+                    "state_count": len(component_paths["state"]),
                 },
             )
         ]
@@ -355,6 +453,29 @@ class ArchitectureAnalyzer:
                 metadata={
                     "file_count": len(api_paths),
                     "sample_paths": api_paths[:10],
+                },
+            )
+        ]
+
+    def _detect_presentation_layer(
+        self,
+        component_paths: dict[str, list[str]],
+    ) -> list[Finding]:
+        """Detect UI components, pages, views, and hooks."""
+
+        presentation_paths = component_paths["presentation"]
+        if not presentation_paths:
+            return []
+
+        return [
+            self._finding(
+                rule_id="ARCH008",
+                title="Presentation structure detected",
+                severity=Severity.INFO,
+                evidence=(f"Detected {len(presentation_paths)} presentation-related files"),
+                metadata={
+                    "file_count": len(presentation_paths),
+                    "sample_paths": presentation_paths[:10],
                 },
             )
         ]
@@ -439,6 +560,8 @@ class ArchitectureAnalyzer:
                 "services",
                 "repositories",
                 "domain",
+                "presentation",
+                "state",
             )
         )
 

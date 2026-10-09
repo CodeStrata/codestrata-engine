@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/CandidateRunResult.json",
+  "title": "CodeStrata Engine Candidate Run Result (E04.3)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "purpose",
+    "production_promotion_allowed",
+    "candidate_digest",
+    "selector_digest",
+    "effective_setting_digest",
+    "input_digest",
+    "engine_digest",
+    "dsl_digest",
+    "outcomes",
+    "validation"
+  ],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.candidate-run-result.v1" },
+    "schema_version": { "type": "string" },
+    "purpose": { "type": "string", "enum": ["preview", "candidate_validation"] },
+    "production_promotion_allowed": { "type": "boolean", "const": false },
+    "candidate_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "selector_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "effective_setting_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "input_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "engine_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "dsl_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "outcomes": { "type": "array", "minItems": 1 },
+    "validation": { "type": "object" },
+    "typed_diagnostics": { "type": "array" }
+  }
+}

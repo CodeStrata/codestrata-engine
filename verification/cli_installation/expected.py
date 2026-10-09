@@ -27,7 +27,7 @@ def version_flag_ok(result: CommandResultView) -> tuple[bool, str]:
 def help_ok(result: CommandResultView) -> tuple[bool, str]:
     if result.exit_code != 0:
         return False, f"--help exited {result.exit_code}"
-    text = result.stdout
+    text = result.combined
     for marker in ("Primary workflow", "init", "doctor", "assess"):
         if marker not in text:
             return False, f"--help missing marker: {marker}"

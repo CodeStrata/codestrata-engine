@@ -7,9 +7,10 @@ then the pre-transport privacy gate, then the configured transport port
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Callable
+from typing import Any
 
 from codestrata.telemetry.decisions import TelemetryDecision
 from codestrata.telemetry.diagnostics import (

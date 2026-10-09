@@ -5,12 +5,6 @@ from __future__ import annotations
 from decimal import Decimal
 
 import pytest
-
-from codestrata.domain.quality_metrics.precision import (
-    QualityMetricAvailability,
-    QualityMetricScope,
-    build_precision_metric,
-)
 from validation.compare import pack_precision_from_result
 from validation.inventory import compute_precision_recall
 from validation.models import PackPrecisionRecord, ValidationVerdict
@@ -30,6 +24,12 @@ from validation.summary_from_records import (
     build_summary_artifact,
     render_summary_markdown,
     validate_repository_record,
+)
+
+from codestrata.domain.quality_metrics.precision import (
+    QualityMetricAvailability,
+    QualityMetricScope,
+    build_precision_metric,
 )
 
 
@@ -69,12 +69,8 @@ def test_pack_precision_from_result_projects_canonical_metric() -> None:
     assert record.ambiguous == 2
     assert record.precision == 1.0
     assert record.recall == pytest.approx(0.8)
-    assert record.precision_metric_id == (
-        "precision:repository:local-security-hygiene:security"
-    )
-    assert record.recall_metric_id == (
-        "recall:repository:local-security-hygiene:security"
-    )
+    assert record.precision_metric_id == ("precision:repository:local-security-hygiene:security")
+    assert record.recall_metric_id == ("recall:repository:local-security-hygiene:security")
     assert record.precision_availability is not None
     assert record.precision_metric is not None
     assert Decimal(str(record.precision_metric["value"])) == Decimal("1")

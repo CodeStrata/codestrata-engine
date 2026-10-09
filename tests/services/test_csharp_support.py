@@ -172,6 +172,5 @@ public class ItemsController {}
     )
     assert bundle.ecosystem is DependencyEcosystem.NUGET
     assert any(
-        item.normalized_identity == "microsoft.entityframeworkcore"
-        for item in bundle.declarations
+        item.normalized_identity == "microsoft.entityframeworkcore" for item in bundle.declarations
     )

@@ -8,11 +8,6 @@ from typing import Any
 
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 from codestrata.telemetry.analytics.events import (
-    APPROVED_ANALYTICS_CATEGORIES,
-    APPROVED_ANALYTICS_FIELD_NAMES,
-    FORBIDDEN_ANALYTICS_FIELD_NAMES,
-    AnalyticsEvent,
-    AnalyticsLifecycle,
     _APPROVED_AI_CAPABILITIES,
     _APPROVED_AI_MODEL_FAMILIES,
     _APPROVED_AI_PROVIDER_FAMILIES,
@@ -25,6 +20,11 @@ from codestrata.telemetry.analytics.events import (
     _APPROVED_OPERATION_CATEGORIES,
     _APPROVED_OS_FAMILIES,
     _APPROVED_RESULTS,
+    APPROVED_ANALYTICS_CATEGORIES,
+    APPROVED_ANALYTICS_FIELD_NAMES,
+    FORBIDDEN_ANALYTICS_FIELD_NAMES,
+    AnalyticsEvent,
+    AnalyticsLifecycle,
 )
 from codestrata.telemetry.analytics.policy import (
     COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_VERSION,
@@ -32,9 +32,7 @@ from codestrata.telemetry.analytics.policy import (
     default_analytics_policy,
 )
 
-_BOOL_FIELDS = frozenset(
-    {"offline_mode", "ai_used", "ai_requested", "privacy_projection_applied"}
-)
+_BOOL_FIELDS = frozenset({"offline_mode", "ai_used", "ai_requested", "privacy_projection_applied"})
 _ENUM_FIELDS: dict[str, frozenset[str]] = {
     "category": APPROVED_ANALYTICS_CATEGORIES,
     "lifecycle": frozenset(item.value for item in AnalyticsLifecycle),
@@ -238,8 +236,10 @@ def _normalize(key: str, value: Any, policy: CommunityAnonymousAnalyticsPolicy) 
             raise AnalyticsError(AnalyticsErrorCode.UNSAFE_VALUE)
         return value
     if key in {"event_type", "schema_version", "policy_version"} | _VERSIONISH_FIELDS:
-        if not isinstance(value, str) or not value or _looks_unsafe(
-            value, max_string_length=policy.max_string_length
+        if (
+            not isinstance(value, str)
+            or not value
+            or _looks_unsafe(value, max_string_length=policy.max_string_length)
         ):
             raise AnalyticsError(AnalyticsErrorCode.UNSAFE_VALUE)
         if len(value) > policy.max_string_length:

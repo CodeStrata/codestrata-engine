@@ -1,0 +1,9 @@
+{
+  "kind": "fake",
+  "advertised_schemas": [
+    "codestrata.evidence-export.v1"
+  ],
+  "receipts_supported": true,
+  "live_v2_calls": false,
+  "server_ready": false
+}

@@ -7,13 +7,13 @@ from unittest.mock import patch
 
 import pytest
 
-from codestrata.models import AnalysisResult, Repository
-from codestrata.reporters.html_file_reporter import HtmlFileReporter
-from codestrata.reporters.json_file_reporter import JsonFileReporter
 from codestrata.artifacts.manifest import (
     ASSESSMENT_HTML_BASENAME,
     ASSESSMENT_JSON_BASENAME,
 )
+from codestrata.models import AnalysisResult, Repository
+from codestrata.reporters.html_file_reporter import HtmlFileReporter
+from codestrata.reporters.json_file_reporter import JsonFileReporter
 from codestrata.reporters.report_paths import (
     DEFAULT_RETAINED_RUN_COUNT,
     ReportRetentionError,
@@ -67,9 +67,7 @@ def test_create_report_paths_uses_timestamped_run_directories(
         create_directory=True,
     )
 
-    assert report_paths.directory == (
-        tmp_path / "reports" / ".staging" / "sample-20260721-153045"
-    )
+    assert report_paths.directory == (tmp_path / "reports" / ".staging" / "sample-20260721-153045")
     assert report_paths.repository_name == "sample"
     assert report_paths.run_directory == report_paths.directory
     assert report_paths.run_timestamp == "20260721-153045"
@@ -237,7 +235,10 @@ def test_symlink_run_directories_are_not_followed_or_deleted(tmp_path: Path) -> 
     ]:
         _create_run_directory(repository_directory, timestamp)
     symlink = repository_directory / "20260101-010101"
-    symlink.symlink_to(outside, target_is_directory=True)
+    try:
+        symlink.symlink_to(outside, target_is_directory=True)
+    except (OSError, NotImplementedError):
+        pytest.skip("symlink creation is not permitted on this host")
 
     retain_recent_reports(repository_directory, keep=3)
 

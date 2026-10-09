@@ -31,8 +31,7 @@ def main(argv: list[str] | None = None) -> int:
         write_markdown=not args.no_markdown,
     )
     print(
-        "SV.11.5 Provider Usage Metadata and Capability Discovery verification: "
-        f"{report.verdict}"
+        f"SV.11.5 Provider Usage Metadata and Capability Discovery verification: {report.verdict}"
     )
     print(f"checks={report.check_counts} scenarios={len(report.negative_scenarios)}")
     out = args.output_dir or (

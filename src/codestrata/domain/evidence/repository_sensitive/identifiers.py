@@ -9,9 +9,7 @@ from codestrata.domain.evidence.language.identifiers import stable_evidence_id
 REPOSITORY_SENSITIVE_EVIDENCE_SCHEMA_NAME = "repository-sensitive-evidence"
 REPOSITORY_SENSITIVE_EVIDENCE_SCHEMA_VERSION = "1.1.0"
 REPOSITORY_SENSITIVE_EVIDENCE_ARTIFACT_FILENAME = "repository-sensitive-evidence.json"
-REPOSITORY_SENSITIVE_EVIDENCE_ARTIFACT_SCHEMA_ID = (
-    "codestrata.repository_sensitive_evidence"
-)
+REPOSITORY_SENSITIVE_EVIDENCE_ARTIFACT_SCHEMA_ID = "codestrata.repository_sensitive_evidence"
 
 ARTIFACT_PROVIDER_ID = "repository_sensitive.artifact.discovery"
 ARTIFACT_PROVIDER_VERSION = "1.0.0"

@@ -6,6 +6,7 @@ literals. Not owned by Security Intelligence.
 
 from codestrata.application.evidence.repository_sensitive.artifacts import (
     RepositorySensitiveEvidenceArtifactWriteResult,
+    assert_redacted_payload,
     repository_sensitive_evidence_payload,
     write_repository_sensitive_evidence_artifact,
 )
@@ -18,6 +19,7 @@ from codestrata.application.evidence.repository_sensitive.service import (
 __all__ = [
     "RepositorySensitiveEvidenceArtifactWriteResult",
     "RepositorySensitiveEvidenceService",
+    "assert_redacted_payload",
     "create_repository_sensitive_evidence_service",
     "repository_sensitive_evidence_collection_enabled",
     "repository_sensitive_evidence_payload",

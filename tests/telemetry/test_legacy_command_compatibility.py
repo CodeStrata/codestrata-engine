@@ -21,9 +21,7 @@ def test_Y_cli_command_names_unchanged() -> None:
     assert "--telemetry-deny" not in result.stdout
 
 
-def test_legacy_enable_cli_does_not_call_send_payload(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_legacy_enable_cli_does_not_call_send_payload(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))

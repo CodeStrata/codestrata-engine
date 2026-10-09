@@ -7,6 +7,18 @@ from dataclasses import replace
 from pathlib import Path
 
 import pytest
+from tests.telemetry.privacy_canaries import (
+    FIXTURE_ROOT,
+    MANDATORY_CANARIES,
+    REPO_NAME,
+    SECRET,
+    assert_amd_1_1_allowlist,
+    assert_no_canaries,
+    assert_no_forbidden_fields,
+    canary_findings_artifact,
+    canary_rich_projection_source,
+    canonical_json,
+)
 from typer.testing import CliRunner
 
 from codestrata.cli import app
@@ -36,7 +48,10 @@ from codestrata.telemetry.disabled_service import DisabledTelemetryFacade
 from codestrata.telemetry.event_identity import TelemetryTransportCredential
 from codestrata.telemetry.identity import read_installation_id, write_installation_id
 from codestrata.telemetry.infrastructure.capture_transport import CaptureTelemetryTransport
-from codestrata.telemetry.infrastructure.http_client import FakeTelemetryHttpClient, FakeTelemetryHttpResponse
+from codestrata.telemetry.infrastructure.http_client import (
+    FakeTelemetryHttpClient,
+    FakeTelemetryHttpResponse,
+)
 from codestrata.telemetry.persisted_consent import (
     assessment_metadata_policy_for_session,
     decline_v2_upgrade,
@@ -48,19 +63,6 @@ from codestrata.telemetry.prompt_runtime_factory import (
 )
 from codestrata.telemetry.runtime_factory import create_session_telemetry_runtime
 from codestrata.telemetry.service import reset_telemetry_singletons
-
-from tests.telemetry.privacy_canaries import (
-    FIXTURE_ROOT,
-    MANDATORY_CANARIES,
-    REPO_NAME,
-    SECRET,
-    assert_amd_1_1_allowlist,
-    assert_no_canaries,
-    assert_no_forbidden_fields,
-    canary_findings_artifact,
-    canary_rich_projection_source,
-    canonical_json,
-)
 
 _INSTALL = "11111111-1111-4111-8111-111111111111"
 _TOKEN = "cscc_v1_" + ("a" * 32)
@@ -89,9 +91,7 @@ class _OkResult:
 
 class _FailingPrimary:
     def __call__(self) -> None:
-        raise TimeoutError(
-            f"Assess failed under {FIXTURE_ROOT} secret={SECRET} path leak"
-        )
+        raise TimeoutError(f"Assess failed under {FIXTURE_ROOT} secret={SECRET} path leak")
 
 
 def _facade(*, allow: bool = True, life: CaptureTelemetryTransport | None = None):
@@ -372,9 +372,12 @@ def test_e2e10_undecided_noninteractive_no_prompt_no_collection(tmp_path: Path) 
     )
     assert result.prompted is False
     assert facade.runtime.session.consent.transmission_authorized is False
-    assert assessment_metadata_policy_for_session(
-        path=pref, transmission_authorized=False
-    ).emission_enabled is False
+    assert (
+        assessment_metadata_policy_for_session(
+            path=pref, transmission_authorized=False
+        ).emission_enabled
+        is False
+    )
 
 
 def test_e2e_full_payload_canary_and_allowlist() -> None:
@@ -386,9 +389,7 @@ def test_e2e_full_payload_canary_and_allowlist() -> None:
     assert_no_forbidden_fields(payload)
     assert_no_canaries(payload)
     rows = payload["finding_aggregates"]
-    assert rows == sorted(
-        rows, key=lambda r: (r["rule_id"], r["severity"], r["category"])
-    )
+    assert rows == sorted(rows, key=lambda r: (r["rule_id"], r["severity"], r["category"]))
     arch = [
         r
         for r in rows
@@ -398,14 +399,10 @@ def test_e2e_full_payload_canary_and_allowlist() -> None:
     ]
     assert len(arch) == 1 and arch[0]["count"] == 2
     sec_med = [
-        r
-        for r in rows
-        if r["rule_id"] == "security.debug-enabled" and r["severity"] == "medium"
+        r for r in rows if r["rule_id"] == "security.debug-enabled" and r["severity"] == "medium"
     ]
     sec_high = [
-        r
-        for r in rows
-        if r["rule_id"] == "security.debug-enabled" and r["severity"] == "high"
+        r for r in rows if r["rule_id"] == "security.debug-enabled" and r["severity"] == "high"
     ]
     assert len(sec_med) == 1 and sec_med[0]["count"] == 1
     assert len(sec_high) == 1 and sec_high[0]["count"] == 1
@@ -424,9 +421,7 @@ def test_e2e_findings_artifact_projection_strips_canaries() -> None:
     rows = finding_rows_from_artifact(canary_findings_artifact())
     assert rows
     source = replace(
-        canary_rich_projection_source(
-            assessment_id=new_assessment_id(), installation_id=_INSTALL
-        ),
+        canary_rich_projection_source(assessment_id=new_assessment_id(), installation_id=_INSTALL),
         findings=rows,
     )
     payload = project_assessment_metadata(source).to_stable_dict()
@@ -434,9 +429,7 @@ def test_e2e_findings_artifact_projection_strips_canaries() -> None:
     assert_no_forbidden_fields(payload)
 
 
-def test_e2e11_failure_path_privacy(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_e2e11_failure_path_privacy(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
@@ -546,16 +539,9 @@ def test_e2e14_15_16_report_independence_from_amd() -> None:
     from codestrata.telemetry.session import TelemetrySession
 
     assert telemetry_eligible_for_publish(None) is True
-    assert (
-        telemetry_eligible_for_publish(
-            TelemetrySession(consent=deny_session_consent())
-        )
-        is True
-    )
+    assert telemetry_eligible_for_publish(TelemetrySession(consent=deny_session_consent())) is True
     payload = project_assessment_metadata(
-        canary_rich_projection_source(
-            assessment_id=new_assessment_id(), installation_id=_INSTALL
-        )
+        canary_rich_projection_source(assessment_id=new_assessment_id(), installation_id=_INSTALL)
     ).to_stable_dict()
     assert "report_id" not in payload
     assert "report_url" not in payload
@@ -605,9 +591,7 @@ def test_e2e18_installation_continuity_and_opaque_assessment_ids(
 
 def test_schema_allowlist_snapshot_guard() -> None:
     payload = project_assessment_metadata(
-        canary_rich_projection_source(
-            assessment_id=new_assessment_id(), installation_id=_INSTALL
-        )
+        canary_rich_projection_source(assessment_id=new_assessment_id(), installation_id=_INSTALL)
     ).to_stable_dict()
     assert set(payload.keys()) == {
         "assessment",
@@ -627,9 +611,7 @@ def test_schema_allowlist_snapshot_guard() -> None:
 
 def test_amd_request_has_no_client_timestamp_fields() -> None:
     payload = project_assessment_metadata(
-        canary_rich_projection_source(
-            assessment_id=new_assessment_id(), installation_id=_INSTALL
-        )
+        canary_rich_projection_source(assessment_id=new_assessment_id(), installation_id=_INSTALL)
     ).to_stable_dict()
     blob = canonical_json(payload)
     for token in ("occurred_at", "client_timestamp", "executed_at"):

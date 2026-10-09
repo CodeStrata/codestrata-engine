@@ -7,8 +7,9 @@ Product code must never serialize these into Community outbound payloads.
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Mapping
 from pathlib import Path
-from typing import Any, Iterable, Mapping
+from typing import Any
 
 from codestrata.telemetry.assessment_metadata.models import (
     AssessmentMetadataProjectionSource,
@@ -42,7 +43,7 @@ EXTRA_CANARIES: tuple[str, ...] = (
     "Recommendation: rotate TEST_SECRET_DO_NOT_TRANSMIT immediately",
     "graph-node:AcmeInternalSettlementEngine",
     "edge→https://internal.acme.example/private",
-    "Traceback: File \"/Users/private/AcmeSecretProject/payments/run.py\"",
+    'Traceback: File "/Users/private/AcmeSecretProject/payments/run.py"',
     "cscc_v1_SYNTHETIC_CREDENTIAL_CANARY_DO_NOT_TRANSMIT",
     "AWS_SECRET_ACCESS_KEY=AKIA_CANARY_DO_NOT_TRANSMIT",
 )

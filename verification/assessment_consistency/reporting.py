@@ -13,8 +13,10 @@ from verification.assessment_consistency.models import (
     DefectCandidate,
     RepositoryBundle,
 )
-from verification.assessment_consistency.platform_ingestion_adapter import (
-    validate_with_platform_ingestion_safety,
+
+PLATFORM_INGESTION_NOT_EVALUATED = (
+    "not_evaluated: Platform validate_report_document belongs to "
+    "platform/verification/assessment_ingestion and is not a PASS in this command"
 )
 
 
@@ -39,11 +41,11 @@ def stable_report_digest(report: dict[str, Any]) -> str:
 def check_engineering_intelligence_input_ready(
     bundles: list[RepositoryBundle],
 ) -> tuple[dict[str, bool], list[CheckResult], list[DefectCandidate]]:
-    """EI readiness: schema + identity + Platform ingestion safety authority.
+    """Engine-owned EI input shape: schema, identity, maps, and customer-safe projection.
 
-    Applies the Engine customer-safe report projection, then invokes the same
-    ``validate_report_document`` gate used by production EI ingestion. Does not
-    duplicate Platform secret detectors.
+    Does not import Platform or insert a sibling checkout on ``sys.path``.
+    Platform ``validate_report_document`` is a separate check. This command
+    records that check as not evaluated, not as PASS.
     """
 
     ready: dict[str, bool] = {}
@@ -68,10 +70,6 @@ def check_engineering_intelligence_input_ready(
             reasons.append("unsafe_source")
 
         safe_doc = ensure_customer_safe_report_document(bundle.report)
-        ok_platform, platform_reason = validate_with_platform_ingestion_safety(safe_doc)
-        if not ok_platform:
-            reasons.append(platform_reason or "platform_validation_error")
-
         _ = stable_report_digest(safe_doc)
         ok = not reasons
         ready[bundle.repository_id] = ok
@@ -81,10 +79,7 @@ def check_engineering_intelligence_input_ready(
                     classification="engineering_intelligence_input",
                     repository_ids=[bundle.repository_id],
                     entity_id="ei_input",
-                    expected=(
-                        "schema 1.2 + identity + head maps + Platform "
-                        "validate_report_document acceptance"
-                    ),
+                    expected="schema 1.2 + identity + head maps + customer-safe projection",
                     actual=",".join(reasons),
                     release_impact="blocks_sv12_input",
                     handling="product_defect_for_sv13",
@@ -97,8 +92,15 @@ def check_engineering_intelligence_input_ready(
             ok=all(ready.values()) and len(ready) == len(bundles),
             detail=(
                 f"{sum(1 for v in ready.values() if v)}/{len(bundles)} ready "
-                "(Platform ingestion safety)"
+                "(Engine input shape)"
             ),
+        )
+    )
+    checks.append(
+        CheckResult(
+            name="platform_ingestion_safety",
+            ok=False,
+            detail=PLATFORM_INGESTION_NOT_EVALUATED,
         )
     )
     return ready, checks, defects

@@ -152,9 +152,7 @@ def test_adapter_zero_findings_succeeded() -> None:
 
 
 def test_adapter_disabled_and_insufficient() -> None:
-    disabled = ArchitectureAssessmentAssembler().assemble_disabled(
-        repository_id="repo:x"
-    )
+    disabled = ArchitectureAssessmentAssembler().assemble_disabled(repository_id="repo:x")
     disabled_report = ArchitectureReportAdapter().adapt(disabled)
     assert disabled_report.status == "disabled"
     assert "disabled" in disabled_report.executive_summary.lower()
@@ -225,10 +223,7 @@ def test_report_json_and_html_include_architecture_when_present(tmp_path: Path) 
     document = build_assessment_json_document(report_input)
     assert document["schema_version"] == "1.2"
     assert "architecture" in document["assessment"]
-    assert (
-        document["assessment"]["architecture"]["section_id"]
-        == ARCHITECTURE_REPORT_SECTION_ID
-    )
+    assert document["assessment"]["architecture"]["section_id"] == ARCHITECTURE_REPORT_SECTION_ID
     assert (
         document["assessment"]["architecture"]["section_version"]
         == ARCHITECTURE_REPORT_SECTION_VERSION

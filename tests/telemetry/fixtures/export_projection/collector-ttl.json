@@ -1,0 +1,10 @@
+{
+  "kind": "fake",
+  "advertised_schemas": [
+    "codestrata.evidence-export.v1",
+    "codestrata.graph-export.v1"
+  ],
+  "receipts_supported": true,
+  "now_unix": 1700000000,
+  "receipt_ttl_seconds": 60
+}

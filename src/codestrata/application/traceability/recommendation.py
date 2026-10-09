@@ -7,6 +7,7 @@ uses calibrated severity → Finding Confidence → rule_id → finding ID.
 from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
+from typing import cast
 
 from codestrata.domain.findings import Finding
 from codestrata.domain.findings.enums import FindingSeverity
@@ -39,16 +40,8 @@ def select_primary_finding_id(
     Changing primary_finding_id does not change Recommendation ID.
     """
 
-    allowed = (
-        {str(item) for item in candidate_ids}
-        if candidate_ids is not None
-        else None
-    )
-    candidates = [
-        item
-        for item in findings
-        if allowed is None or item.id in allowed
-    ]
+    allowed = {str(item) for item in candidate_ids} if candidate_ids is not None else None
+    candidates = [item for item in findings if allowed is None or item.id in allowed]
     if not candidates:
         if candidate_ids:
             ordered = tuple(sorted({str(item) for item in candidate_ids if str(item).strip()}))
@@ -179,7 +172,8 @@ def attach_recommendation_traceability(
         }
     )
     with_confidence = apply_recommendation_confidence(updated, findings=findings)
-    return apply_recommendation_priority(with_confidence, findings=findings)
+    prioritized = apply_recommendation_priority(with_confidence, findings=findings)
+    return cast(Recommendation, prioritized)
 
 
 def merge_recommendation_traceability(
@@ -231,7 +225,10 @@ def merge_recommendation_traceability(
         limitations=(*preferred.limitations, *other.limitations),
     )
     # Prefer COMPLETE when either side already had complete coverage of the union.
-    if preferred.evidence_completeness is EvidenceCompleteness.COMPLETE and other.evidence_completeness is EvidenceCompleteness.COMPLETE:
+    if (
+        preferred.evidence_completeness is EvidenceCompleteness.COMPLETE
+        and other.evidence_completeness is EvidenceCompleteness.COMPLETE
+    ):
         completeness = EvidenceCompleteness.COMPLETE
     updated = preferred.model_copy(
         update={
@@ -245,7 +242,8 @@ def merge_recommendation_traceability(
         }
     )
     with_confidence = apply_recommendation_confidence(updated, findings=findings)
-    return apply_recommendation_priority(with_confidence, findings=findings)
+    prioritized = apply_recommendation_priority(with_confidence, findings=findings)
+    return cast(Recommendation, prioritized)
 
 
 def findings_lookup(findings: Sequence[Finding]) -> Mapping[str, Finding]:

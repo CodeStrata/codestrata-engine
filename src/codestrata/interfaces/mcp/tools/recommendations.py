@@ -44,8 +44,7 @@ def register_recommendation_tools(
             filtered = [
                 item
                 for item in items
-                if priority_filter is None
-                or item.priority.lower() == priority_filter.lower()
+                if priority_filter is None or item.priority.lower() == priority_filter.lower()
             ]
             truncated = len(filtered) > capped
             return bounded_list(filtered[:capped], limit=capped, truncated=truncated)

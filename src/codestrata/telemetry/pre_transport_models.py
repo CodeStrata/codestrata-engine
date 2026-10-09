@@ -31,9 +31,7 @@ class PreTransportPrivacyResult:
     accepted_event: PrivacySafeTelemetryEvent | None = None
 
     def __post_init__(self) -> None:
-        object.__setattr__(
-            self, "limitation_codes", tuple(sorted(set(self.limitation_codes)))
-        )
+        object.__setattr__(self, "limitation_codes", tuple(sorted(set(self.limitation_codes))))
         if self.accepted and self.accepted_event is None:
             raise ValueError("accepted result requires accepted_event")
         if not self.accepted and self.accepted_event is not None:

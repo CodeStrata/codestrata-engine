@@ -20,10 +20,10 @@ from codestrata.interfaces.mcp.tools.architecture_conclusions import (
 from codestrata.interfaces.mcp.tools.architecture_report import (
     register_architecture_report_tools,
 )
+from codestrata.interfaces.mcp.tools.artifacts import register_artifact_tools
 from codestrata.interfaces.mcp.tools.assessment_report import (
     register_assessment_report_tools,
 )
-from codestrata.interfaces.mcp.tools.artifacts import register_artifact_tools
 from codestrata.interfaces.mcp.tools.assessments import register_assessment_tools
 from codestrata.interfaces.mcp.tools.components import register_component_tools
 from codestrata.interfaces.mcp.tools.evidence import register_evidence_tools

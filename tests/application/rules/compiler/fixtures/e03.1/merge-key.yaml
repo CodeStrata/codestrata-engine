@@ -1,0 +1,4 @@
+kind: Rule
+select:
+  <<:
+    source: repository_graph

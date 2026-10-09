@@ -79,9 +79,10 @@ def test_https_token_clone_uses_askpass_without_embedding_token(
             helper_paths.append(str(helper))
             helper_paths.append(str(helper.parent))
             assert helper.exists()
-            mode = helper.stat().st_mode
-            assert mode & stat.S_IRWXU == stat.S_IRWXU
-            assert mode & (stat.S_IRWXG | stat.S_IRWXO) == 0
+            if os.name != "nt":
+                mode = helper.stat().st_mode
+                assert mode & stat.S_IRWXU == stat.S_IRWXU
+                assert mode & (stat.S_IRWXG | stat.S_IRWXO) == 0
             assert not str(helper).startswith(str(clone_directory))
             return _completed()
 

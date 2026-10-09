@@ -111,9 +111,7 @@ def classify_security_context(
     source_class = classify_source_path(normalized_path)
 
     # Content/value heuristics (override path when clearly non-literal secrets).
-    value_text = " ".join(
-        part for part in (value or "", redacted_preview or "") if part
-    ).strip()
+    value_text = " ".join(part for part in (value or "", redacted_preview or "") if part).strip()
     if value_text:
         if _GHA_SECRETS_RE.search(value_text) or _PIPELINE_MACRO_RE.search(value_text):
             reasons.append("ci-secret-expression")

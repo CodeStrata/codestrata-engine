@@ -63,11 +63,7 @@ def apply_onboarding_settings(
         report = report.model_copy(
             update={
                 "sections": report.sections.model_copy(
-                    update={
-                        "roadmap": report.sections.roadmap.model_copy(
-                            update={"enabled": True}
-                        )
-                    }
+                    update={"roadmap": report.sections.roadmap.model_copy(update={"enabled": True})}
                 )
             }
         )

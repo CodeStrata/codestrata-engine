@@ -13,7 +13,7 @@ first-time Community journeys.
 | [`repository_assessment/`](./repository_assessment/) | **SV.4** — repository assessment end-to-end verification |
 | [`assessment_report/`](./assessment_report/) | **SV.5** — assessment report quality/integrity verification |
 | [`curated_repository_validation/`](./curated_repository_validation/) | **SV.10** — validate 22 curated OSS repositories |
-| [`assessment_consistency/`](./assessment_consistency/) | **SV.11** — assessment consistency across the 22 SV.10 outputs |
+| [`assessment_consistency/`](./assessment_consistency/) | **SV.11** — assessment consistency across the 22 SV.10 outputs. Engine input shape only; Platform `validate_report_document` is `platform/verification/assessment_ingestion` and is not a PASS here |
 | [`ai_provider_baseline/`](./ai_provider_baseline/) | **Epic 11, Slice 11.1** — existing AI provider (Bedrock/OpenAI) architecture and compatibility baseline (characterization only; no Slice 11.2 platform work) |
 | [`ai_provider_contracts/`](./ai_provider_contracts/) | **Epic 11, Slice 11.2** — new, unwired Common AI Provider Contracts (`codestrata.ai.provider_contracts`); dependency boundary, Slice 11.1 CR-1..CR-6 compatibility, privacy, determinism (no provider migration, no runtime wiring) |
 | [`ai_provider_configuration/`](./ai_provider_configuration/) | **Epic 11, Slice 11.3** — new, unwired Standardized Provider and Model Configuration (`codestrata.ai.provider_contracts.configuration_*`); dependency boundary, Slice 11.1 CR-1..CR-6 compatibility, provider/model resolution correctness, privacy, determinism (no provider migration, no runtime wiring, no default/precedence change) |
@@ -27,6 +27,17 @@ first-time Community journeys.
 | [`openrouter_doctor_integration/`](./openrouter_doctor_integration/) | **Epic 11, Slice 11.11** — OpenRouter doctor local readiness + mocked E2E integration; no live provider calls |
 | [`ai_provider_privacy_boundaries/`](./ai_provider_privacy_boundaries/) | **Epic 11, Slice 11.12** — provider privacy, failure-isolation, and architecture boundary verification across bedrock/openai/openrouter |
 | [`ai_provider_platform_completion/`](./ai_provider_platform_completion/) | **Epic 11, Slice 11.13** — Epic 11 completion verification (13/13); Decision B retained; Bedrock default; Epic 12 not started |
+| [`engine_scope/`](./engine_scope/) | **E00.2** — Engine-only scope guard (working tree, index, untracked, rename, delete, cumulative diff vs baseline) |
+| [`quality_commands/`](./quality_commands/) | **E00.2** — executable lint/type/test/coverage/security command manifest; baseline failures stay FAIL |
+| [`live_release_baseline/`](./live_release_baseline/) | **E00.1** — live PyPI/container/mirror identities and R01 publisher inventory (no workflow edits) |
+| [`call_path_inventory/`](./call_path_inventory/) | **E02.1** — trace CLI/assess/compare/MCP/factory SQLite composition, hosted ingest and portfolio/EIR paths; classify retain/adapt/deprecate/quarantine |
+| [`release_isolation/`](./release_isolation/) | **E00.3** — integration (`release/engine-next`), short story branches, one maintenance lane, candidate namespaces; ordinary merges do not publish or move tags |
+| [`validation/`](./validation/) | **E15.1** — three-tier corpus manifests, 50 large remote pins, independent flagship/adversarial labels (no remote clone in default tests) |
+| [`validation/regression/`](./validation/regression/) | **E15.2** — lint/type/coverage floor, three-repeat semantic digests, adversarial/tamper/escape/no-egress harnesses (planted artifacts; remotes stay opt-in) |
+| [`validation/release_gate/`](./validation/release_gate/) | **E15.3** — cumulative gate ledgers, three-tier corpus inventory, M33 envelope, M15 confusion, exception list (remote assess opt-in) |
+| [`release_verification/`](./release_verification/) | **E14.1** — public Sigstore + private offline self-managed-key fixture verification (offline, no live Fulcio/Rekor) |
+| [`release_build/`](./release_build/) | **E14.2** — standalone wheel/sdist build verifier (`python -m verification.release_build`) |
+| [`publication_preflight/`](./publication_preflight/) | **E14.4** — candidate artifacts + offline public signing rehearsal + R01 inventory (no publish) |
 
 Platform-owned SV packages (EI, website export, Community Cloud, SV.13 defect
 fixes, SV.14 cross-schema compatibility, **SV.15 deterministic outputs**) live
@@ -68,7 +79,7 @@ python validation/repository-catalog/validate_catalog.py
 python validation/repository-catalog/validate_catalog.py --write-readiness-report --write-import-template
 ```
 
-See [`validation/repository-catalog/README.md`](../../validation/repository-catalog/README.md)
+See `validation/repository-catalog/README.md` (not included in this export)
 for qualification, roles/tiers, execution batches, and how to add or retire
 repositories.
 
@@ -94,4 +105,9 @@ python -m verification.openrouter_provider
 python -m verification.openrouter_configuration
 python -m verification.openrouter_doctor_integration
 python -m verification.ai_provider_privacy_boundaries
+python -m verification.engine_scope --json --baseline origin/main
+python -m verification.quality_commands --dry-run
+python -m verification.live_release_baseline --json
+python -m verification.call_path_inventory --json --write-docs
+python -m verification.release_isolation --json --write-docs
 ```

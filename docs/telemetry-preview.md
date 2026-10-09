@@ -114,6 +114,6 @@ Cloud mapping is independently versioned — see
 - [telemetry-event-catalog.md](telemetry-event-catalog.md)
 - [telemetry-runtime.md](telemetry-runtime.md)
 - [telemetry.md](telemetry.md)
-- Cross-client verification (Slice 9.14): [`../../verification/privacy_first_telemetry/README.md`](../../verification/privacy_first_telemetry/README.md)
-- Epic 9 completion (Slice 9.15): [`../../verification/privacy_first_telemetry_completion/README.md`](../../verification/privacy_first_telemetry_completion/README.md)
+- Cross-client verification (Slice 9.14): `verification/privacy_first_telemetry/README.md` (not included in this export)
+- Epic 9 completion (Slice 9.15): `verification/privacy_first_telemetry_completion/README.md` (not included in this export)
 - [../PRIVACY.md](../PRIVACY.md)

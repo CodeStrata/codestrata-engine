@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import contextvars
-import resource
 from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from time import perf_counter
 
 from codestrata.application.runtime_performance.metrics import peak_rss_mb
+from codestrata.application.runtime_performance.posix_rusage import posix_resource_module
 
 _active: contextvars.ContextVar[BenchmarkRecorder | None] = contextvars.ContextVar(
     "codestrata_benchmark_recorder",
@@ -99,6 +99,9 @@ class BenchmarkRecorder:
 
     def cpu_time_ms(self) -> float | None:
         if not self.enabled:
+            return None
+        resource = posix_resource_module()
+        if resource is None:
             return None
         try:
             usage = resource.getrusage(resource.RUSAGE_SELF)

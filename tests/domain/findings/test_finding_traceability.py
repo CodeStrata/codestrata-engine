@@ -16,8 +16,8 @@ from codestrata.domain.traceability import (
     EvidenceCompleteness,
     EvidenceLocation,
     EvidenceRef,
-    SnippetRedactionLevel,
     RedactedSnippet,
+    SnippetRedactionLevel,
 )
 
 

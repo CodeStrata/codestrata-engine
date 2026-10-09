@@ -1,0 +1,10 @@
+# CodeStrata Engine runtime lock inputs (E14.2).
+# Reproducible constraint pins for standalone wheel/sdist SBOM generation.
+# Version: codestrata 0.2.1 | package revision ENGINE-2026-09-15-R1
+
+certifi>=2024.0,<2027.0
+cryptography>=50.0,<51.0
+pydantic>=2.10,<3.0
+PyYAML>=6.0,<7.0
+rich>=13.9,<15.0
+typer>=0.15,<1.0

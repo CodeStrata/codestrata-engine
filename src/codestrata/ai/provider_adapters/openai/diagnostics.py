@@ -74,8 +74,7 @@ def error_category_matrix() -> dict[str, str]:
     """Return the stable diagnostic-code -> error-category mapping this adapter uses."""
 
     return {
-        code: str(category)
-        for code, category in sorted(error_mapping.CATEGORY_BY_CODE.items())
+        code: str(category) for code, category in sorted(error_mapping.CATEGORY_BY_CODE.items())
     }
 
 

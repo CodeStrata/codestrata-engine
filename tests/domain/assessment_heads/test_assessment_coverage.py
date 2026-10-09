@@ -18,12 +18,8 @@ from codestrata.application.assessment_heads.coverage import (
 from codestrata.domain.assessment_heads.assessment_coverage import (
     AreaClaimState,
     AreaEvaluationState,
-    AreaSupportState,
-    AssessmentAreaCoverage,
     AssessmentCoverage,
-    AssessmentCoverageScope,
     AssessmentCoverageTotals,
-    CoverageDerivationStatus,
     CoverageMetric,
     CoverageMetricId,
     CoverageStatus,
@@ -84,9 +80,7 @@ def test_not_claimed_excluded_from_denominator() -> None:
         },
     )
     assert coverage.totals.applicable_area_count >= 2
-    duplication = next(
-        item for item in coverage.areas if item.area_id == "duplication_coverage"
-    )
+    duplication = next(item for item in coverage.areas if item.area_id == "duplication_coverage")
     assert duplication.claim_state is AreaClaimState.NOT_CLAIMED
     assert duplication.evaluation_state is AreaEvaluationState.NOT_APPLICABLE
     area_metric = next(
@@ -180,9 +174,7 @@ def test_candidate_and_rule_metrics() -> None:
     assert CoverageMetricId.CANDIDATE_PROCESSING in ids
     assert CoverageMetricId.RULE_EXECUTION in ids
     candidate = next(
-        item
-        for item in coverage.metrics
-        if item.metric_id is CoverageMetricId.CANDIDATE_PROCESSING
+        item for item in coverage.metrics if item.metric_id is CoverageMetricId.CANDIDATE_PROCESSING
     )
     assert candidate.numerator == 11
     assert candidate.denominator == 12
@@ -226,9 +218,7 @@ def test_modernization_bounded_by_contributors() -> None:
         pack_section={"initiatives_total": 3},
     )
     assert modernization.status is CoverageStatus.PARTIAL
-    assert "cannot exceed contributing head coverage" in " ".join(
-        modernization.limitations
-    ).lower()
+    assert "cannot exceed contributing head coverage" in " ".join(modernization.limitations).lower()
 
 
 def test_coverage_map_and_json_stable() -> None:

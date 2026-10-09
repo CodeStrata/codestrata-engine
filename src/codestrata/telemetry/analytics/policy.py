@@ -12,15 +12,13 @@ from typing import Any
 COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_ID = "community-anonymous-analytics-policy"
 COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_VERSION = "1.0"
 COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_URN = (
-    f"{COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_ID}:"
-    f"{COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_VERSION}"
+    f"{COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_ID}:{COMMUNITY_ANONYMOUS_ANALYTICS_POLICY_VERSION}"
 )
 
 COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_ID = "community-anonymous-analytics-schema"
 COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_VERSION = "1.0"
 COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_URN = (
-    f"{COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_ID}:"
-    f"{COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_VERSION}"
+    f"{COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_ID}:{COMMUNITY_ANONYMOUS_ANALYTICS_SCHEMA_VERSION}"
 )
 
 DEFAULT_MAX_EVENT_SIZE_BYTES = 4096
@@ -109,21 +107,13 @@ class CommunityAnonymousAnalyticsPolicy:
         if not self.requires_prior_privacy_projection:
             raise AnalyticsPolicyError("requires_prior_privacy_projection must be true")
         if not self.requires_validation_before_persistence:
-            raise AnalyticsPolicyError(
-                "requires_validation_before_persistence must be true"
-            )
+            raise AnalyticsPolicyError("requires_validation_before_persistence must be true")
         if not self.requires_validation_before_transmission:
-            raise AnalyticsPolicyError(
-                "requires_validation_before_transmission must be true"
-            )
+            raise AnalyticsPolicyError("requires_validation_before_transmission must be true")
         if not self.independent_from_telemetry_runtime_policy:
-            raise AnalyticsPolicyError(
-                "independent_from_telemetry_runtime_policy must be true"
-            )
+            raise AnalyticsPolicyError("independent_from_telemetry_runtime_policy must be true")
         if not self.independent_from_telemetry_event_schema:
-            raise AnalyticsPolicyError(
-                "independent_from_telemetry_event_schema must be true"
-            )
+            raise AnalyticsPolicyError("independent_from_telemetry_event_schema must be true")
         if not self.fail_silent:
             raise AnalyticsPolicyError("fail_silent must be true")
         if self.max_event_size_bytes <= 0 or self.max_property_count <= 0:
@@ -151,9 +141,7 @@ class CommunityAnonymousAnalyticsPolicy:
             "policy_token": self.policy_token,
             "policy_version": self.policy_version,
             "requires_prior_privacy_projection": self.requires_prior_privacy_projection,
-            "requires_validation_before_persistence": (
-                self.requires_validation_before_persistence
-            ),
+            "requires_validation_before_persistence": (self.requires_validation_before_persistence),
             "requires_validation_before_transmission": (
                 self.requires_validation_before_transmission
             ),

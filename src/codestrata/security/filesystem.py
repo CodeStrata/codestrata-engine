@@ -65,9 +65,7 @@ def assert_path_within_root(candidate: Path, root: Path) -> Path:
     try:
         resolved.relative_to(resolved_root)
     except ValueError as error:
-        raise ValueError(
-            f"path escapes allowed root {resolved_root}: {candidate}"
-        ) from error
+        raise ValueError(f"path escapes allowed root {resolved_root}: {candidate}") from error
     return resolved
 
 

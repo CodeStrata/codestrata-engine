@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from codestrata.application.rules.finding_mapper import RuleFindingMapper
 from codestrata.domain.findings.enums import FindingSeverity
-from codestrata.domain.rules.enums import RuleCategory, MatchEvidenceConfidence, RuleEvidenceKind
+from codestrata.domain.rules.enums import MatchEvidenceConfidence, RuleCategory, RuleEvidenceKind
 from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleVersion

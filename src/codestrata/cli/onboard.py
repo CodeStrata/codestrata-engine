@@ -107,8 +107,7 @@ def register_onboard_command(app: typer.Typer) -> None:
             raise typer.Exit(code=1) from error
         except Exception as error:  # noqa: BLE001 - CLI boundary
             typer.secho(
-                f"Onboarding failed: {error}\n\n"
-                "Fix: re-run with --verbose for details.",
+                f"Onboarding failed: {error}\n\nFix: re-run with --verbose for details.",
                 fg=typer.colors.RED,
                 err=True,
             )

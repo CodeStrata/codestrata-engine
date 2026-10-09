@@ -8,8 +8,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Mapping
 from enum import StrEnum
-from typing import Any, Mapping
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -131,9 +132,7 @@ def build_correlation_id(
         if isinstance(correlation_type, FindingCorrelationType)
         else str(correlation_type)
     )
-    dir_value = (
-        direction.value if isinstance(direction, CorrelationDirection) else str(direction)
-    )
+    dir_value = direction.value if isinstance(direction, CorrelationDirection) else str(direction)
     ids = tuple(require_nonblank(str(item), label="finding_id") for item in finding_ids)
     if dir_value == CorrelationDirection.UNDIRECTED.value:
         ordered = tuple(sorted(ids))
@@ -242,10 +241,9 @@ class FindingCorrelation(BaseModel):
             raise ValueError("finding_ids must be unique")
         if not self.basis:
             raise ValueError("correlation requires at least one basis")
-        if (
-            self.confidence.level is CorrelationConfidenceLevel.HIGH
-            and not set(self.basis).intersection(_HIGH_BASES)
-        ):
+        if self.confidence.level is CorrelationConfidenceLevel.HIGH and not set(
+            self.basis
+        ).intersection(_HIGH_BASES):
             raise ValueError(
                 "High Correlation Confidence requires exact identity or explicit policy basis"
             )

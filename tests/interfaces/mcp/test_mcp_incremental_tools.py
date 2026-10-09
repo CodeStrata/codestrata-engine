@@ -30,7 +30,7 @@ from codestrata.application.incremental.rollout import (
 )
 from codestrata.application.incremental.service import IncrementalPlanningService
 from codestrata.application.knowledge.queries import KnowledgeQueryService
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from codestrata.interfaces.mcp import create_mcp_server
 from codestrata.interfaces.mcp.tools.incremental import register_incremental_tools
 from codestrata.interfaces.mcp.tools.incremental_mapping import (

@@ -53,6 +53,4 @@ def _enabled_rule_ids(testing: TestingRulesSettings) -> frozenset[str]:
         RULE_COVERAGE_WITHOUT_CI_INVOCATION: testing.test_005.enabled,
     }
     # Preserve catalog order for deterministic registration.
-    return frozenset(
-        rule_id for rule_id in HYGIENE_RULE_IDS if mapping.get(rule_id, True)
-    )
+    return frozenset(rule_id for rule_id in HYGIENE_RULE_IDS if mapping.get(rule_id, True))

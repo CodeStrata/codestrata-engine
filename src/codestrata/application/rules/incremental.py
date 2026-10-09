@@ -56,15 +56,9 @@ def should_invalidate(
         and incremental.dependency_changed
     ):
         return True
-    if (
-        RuleIncrementalBehavior.AFFECTED_BY_BUILD_CHANGES in behaviors
-        and incremental.build_changed
-    ):
+    if RuleIncrementalBehavior.AFFECTED_BY_BUILD_CHANGES in behaviors and incremental.build_changed:
         return True
-    if (
-        RuleIncrementalBehavior.AFFECTED_BY_GRAPH_CHANGES in behaviors
-        and incremental.graph_changed
-    ):
+    if RuleIncrementalBehavior.AFFECTED_BY_GRAPH_CHANGES in behaviors and incremental.graph_changed:
         return True
     if (
         RuleIncrementalBehavior.AFFECTED_BY_ENTERPRISE_CONTEXT_CHANGES in behaviors

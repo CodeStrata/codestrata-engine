@@ -90,7 +90,9 @@ def check_the_executor_never_sleeps() -> CheckResult:
 
     delays: list[float] = []
     executor = build_bedrock_executor(
-        build_bedrock_provider(client=fixtures.Client(fixtures.client_error("ThrottlingException"))),
+        build_bedrock_provider(
+            client=fixtures.Client(fixtures.client_error("ThrottlingException"))
+        ),
         sleeper=delays.append,
     )
     executor.execute(fixtures.provider_request())

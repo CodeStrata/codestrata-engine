@@ -67,7 +67,9 @@ def check_traceability(run: AssessmentRunArtifacts) -> list[CheckResult]:
     rec_ids = {str(item.get("id")) for item in recs if item.get("id")}
     dangling_pa = 0
     for action in pas:
-        for rid in action.get("recommendation_ids") or action.get("related_recommendation_ids") or []:
+        for rid in (
+            action.get("recommendation_ids") or action.get("related_recommendation_ids") or []
+        ):
             if rec_ids and str(rid) not in rec_ids:
                 dangling_pa += 1
     checks.append(

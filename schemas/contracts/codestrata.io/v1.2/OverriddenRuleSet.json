@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/OverriddenRuleSet.json",
+  "title": "CodeStrata Engine Overridden RuleSet (E04.2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_name",
+    "schema_version",
+    "overlay_digest",
+    "composition_digest",
+    "ruleset_id",
+    "ruleset_version",
+    "rules",
+    "resolver_version",
+    "dsl_version",
+    "capability_version"
+  ],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.overridden-ruleset.v1" },
+    "schema_version": { "type": "string" },
+    "overlay_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "composition_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "ruleset_id": { "type": "string" },
+    "ruleset_version": { "type": "string" },
+    "rules": { "type": "array", "minItems": 1 },
+    "resolver_version": { "type": "string" },
+    "dsl_version": { "type": "string" },
+    "capability_version": { "type": "string" }
+  }
+}

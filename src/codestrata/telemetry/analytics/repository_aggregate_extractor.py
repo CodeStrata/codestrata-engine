@@ -44,14 +44,11 @@ def extract_language_mix_from_label_counts(
         group = map_language_label_to_group(str(label))
         totals[group] += count
     items = [
-        LanguageAggregate(language_group=group, count=count)
-        for group, count in totals.items()
+        LanguageAggregate(language_group=group, count=count) for group, count in totals.items()
     ]
     return build_repository_aggregate_input(
         language_mix=items,
-        rule_execution=RuleExecutionAggregate(
-            attempted=0, completed=0, skipped=0, failed=0
-        ),
+        rule_execution=RuleExecutionAggregate(attempted=0, completed=0, skipped=0, failed=0),
         policy=active,
     ).language_mix
 
@@ -76,9 +73,7 @@ def extract_repository_aggregate_input(
         raise AnalyticsError(AnalyticsErrorCode.VALIDATION_FAILED)
 
     if language_label_counts is not None:
-        languages = extract_language_mix_from_label_counts(
-            language_label_counts, policy=active
-        )
+        languages = extract_language_mix_from_label_counts(language_label_counts, policy=active)
     else:
         languages = tuple(language_mix or ())
 

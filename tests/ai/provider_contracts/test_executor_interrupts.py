@@ -43,9 +43,7 @@ def test_unexpected_exception_is_converted_to_a_failed_result_not_raised() -> No
 
 
 def test_unexpected_exception_result_uses_the_fixed_safe_code_never_the_message() -> None:
-    provider = FakeRaisingProvider(
-        exception_factory=lambda: ValueError(f"leaked: {_SECRET_TOKEN}")
-    )
+    provider = FakeRaisingProvider(exception_factory=lambda: ValueError(f"leaked: {_SECRET_TOKEN}"))
     executor = AIProviderExecutor(provider)
     result = executor.execute(_request())
     assert result.provider_result is not None

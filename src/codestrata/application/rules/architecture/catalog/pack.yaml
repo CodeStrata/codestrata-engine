@@ -1,0 +1,34 @@
+api_version: codestrata.io/ruleset/v1
+kind: RuleSet
+metadata:
+  id: codestrata.architecture.launch
+  version: 1.0.0
+  title: Architecture launch catalog
+  owner: codestrata
+rules:
+  architecture.cycles:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  architecture.fan-out:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  architecture.boundary:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  architecture.concentration:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  architecture.invalid-dependency-direction:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+  architecture.framework-leakage:
+    revision: 1.0.0
+    default_enabled: true
+    adoption: recommended
+deferred_rule_ids:
+  - architecture.service-dependency-cycle

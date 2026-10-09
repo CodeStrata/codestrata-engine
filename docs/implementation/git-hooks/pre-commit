@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+# pre-commit — blocks a commit if the configured git identity looks like an
+# AI/bot identity rather than a human engineer. This is a technical control,
+# not a reminder: an engineer whose identity trips this hook cannot commit
+# until it's fixed, whether the trip was Cursor's default, a leftover CI
+# identity, or anything else matching the pattern below.
+#
+# Install: copied and activated automatically by Kickoff Steps Phase 2 as
+# part of setting up engine/docs/implementation/. If setting up by hand:
+#   git config --local core.hooksPath engine/docs/implementation/git-hooks
+# (that's the repo-relative path after Phase 2's copy — not this file's
+# current location inside the extracted package). Check for an existing
+# core.hooksPath before overwriting it if set up manually.
+#
+# This hook checks identity only. It cannot verify a human actually reviewed
+# what's being committed — that's still the different-engineer PR review.
+
+set -euo pipefail
+
+name="$(git config user.name || true)"
+email="$(git config user.email || true)"
+
+if [ -z "$name" ] || [ -z "$email" ]; then
+  echo "BLOCKED: git user.name/user.email is not set." >&2
+  echo "  git config user.name  \"Your Name\"" >&2
+  echo "  git config user.email \"you@company\"" >&2
+  echo "See G00-preflight-and-branch-setup.md section 3." >&2
+  exit 1
+fi
+
+# Heuristic pattern for known AI-tool identities. Deliberately narrow: an
+# earlier version also matched a bare "bot@" or "no-reply@" substring, which
+# blocked real engineers with names like "Talbot" or "Claude" (a real human
+# first name, and also this project's own planning-assistant name) purely by
+# coincidental substring collision. Tested against both before narrowing.
+# Still not foolproof — no substring match can be — see the bypass below.
+bad_pattern='(cursor|copilot|chatgpt|gpt-|openai|anthropic\.com|codex)'
+
+if printf '%s %s' "$name" "$email" | grep -Eqi "$bad_pattern"; then
+  echo "BLOCKED: git identity '$name <$email>' matches a known AI/bot pattern," >&2
+  echo "not a human engineer. Set your own identity before committing:" >&2
+  echo "  git config user.name  \"Your Name\"" >&2
+  echo "  git config user.email \"you@company\"" >&2
+  echo "See G00-preflight-and-branch-setup.md section 3." >&2
+  echo "" >&2
+  echo "If this is a false positive — your real name or email genuinely" >&2
+  echo "contains one of these words — bypass with: git commit --no-verify" >&2
+  echo "Confirm with your reviewer that the resulting commit author is" >&2
+  echo "actually you before pushing." >&2
+  exit 1
+fi
+
+exit 0

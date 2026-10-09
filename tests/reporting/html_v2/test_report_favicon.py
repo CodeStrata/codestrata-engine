@@ -7,6 +7,7 @@ import inspect
 import re
 from pathlib import Path
 
+import pytest
 from tests.reporting.html_v2.test_html_report_v2 import _report_input
 
 from codestrata.community_cloud import report_publishing
@@ -17,7 +18,6 @@ from codestrata.reporting.branding import (
     brand_favicon_link_tag,
 )
 from codestrata.reporting.html_v2 import HtmlReportRenderer, build_html_report_view_model
-
 
 _FORBIDDEN_PATH_MARKERS = (
     "/Users/",
@@ -53,7 +53,7 @@ def test_report_favicon_02_no_developer_local_or_private_path(tmp_path: Path) ->
     tag_lower = tag.lower()
     for marker in _FORBIDDEN_PATH_MARKERS:
         assert marker.lower() not in tag_lower
-    assert "href=\"data:image/png;base64," in tag
+    assert 'href="data:image/png;base64,' in tag
     assert "http://" not in tag
     assert "https://" not in tag
     # Syntactically valid bounded base64 payload.
@@ -82,20 +82,26 @@ def test_report_favicon_03_packaged_asset_resolves_via_importlib(tmp_path: Path)
 
 
 def test_report_favicon_04_public_publish_uploads_raw_html_bytes(tmp_path: Path) -> None:
-    """REPORT-FAVICON-04 — publish path does not strip favicon from assessment.html."""
+    """REPORT-FAVICON-04 — hosted publish is removed; local HTML bytes stay intact."""
 
     html = _render(tmp_path)
     current = tmp_path / "current"
     current.mkdir()
     html_path = current / "assessment.html"
     json_path = current / "assessment.json"
-    html_path.write_text(html, encoding="utf-8")
-    json_path.write_text("{}", encoding="utf-8")
+    html_path.write_text(html, encoding="utf-8", newline="\n")
+    json_path.write_text("{}", encoding="utf-8", newline="\n")
 
-    # Contract: publish reads assessment.html bytes verbatim (no HTML rewrite).
     src = inspect.getsource(report_publishing.publish_local_assessment)
-    assert 'html_path.read_bytes()' in src
-    assert "assessment.html" in src
+    assert "COMMUNITY_CLOUD_PUBLISH_REMOVED" in src
+    assert "html_path.read_bytes()" not in src
+    with pytest.raises(report_publishing.ReportPublishError, match="deprecated"):
+        report_publishing.publish_local_assessment(
+            current_dir=current,
+            logical_repository_id="local-demo",
+            private_repository_acknowledged=True,
+            confirm_public_publish=True,
+        )
     raw = html_path.read_bytes()
     assert b'rel="icon"' in raw
     assert b"data:image/png;base64," in raw

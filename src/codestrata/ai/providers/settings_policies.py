@@ -52,9 +52,7 @@ def provider_timeout_seconds(
         else:
             value = float(settings.ai.bedrock.timeout_seconds)
     if not (0 < value <= MAX_TIMEOUT_SECONDS):
-        raise ValueError(
-            f"timeout_seconds must be within (0, {MAX_TIMEOUT_SECONDS}], got {value}"
-        )
+        raise ValueError(f"timeout_seconds must be within (0, {MAX_TIMEOUT_SECONDS}], got {value}")
     return value
 
 
@@ -98,9 +96,7 @@ def assess_timeout_policy(
     explicit: float | None = None,
 ) -> TimeoutPolicy:
     return TimeoutPolicy(
-        timeout_seconds=provider_timeout_seconds(
-            settings, provider=provider, explicit=explicit
-        )
+        timeout_seconds=provider_timeout_seconds(settings, provider=provider, explicit=explicit)
     )
 
 

@@ -48,7 +48,7 @@ def test_doctor_passes_with_valid_config(tmp_path: Path) -> None:
     (tmp_path / "src").mkdir()
     # Point path at tmp_path itself
     config.write_text(
-        config.read_text(encoding="utf-8").replace('path = "."', f'path = "{tmp_path}"'),
+        config.read_text(encoding="utf-8").replace('path = "."', f'path = "{tmp_path.as_posix()}"'),
         encoding="utf-8",
     )
     checks = run_doctor_checks(config_path=config, output_directory=tmp_path / "reports")

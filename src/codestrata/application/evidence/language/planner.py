@@ -70,9 +70,7 @@ class LanguageEvidenceProviderPlanner:
         self._precedence = tuple(precedence or PROVIDER_PRECEDENCE)
 
     def plan(self, context: LanguageEvidenceContext) -> LanguageEvidencePlan:
-        detected = context.detected_languages or detect_languages_from_paths(
-            context.relative_paths
-        )
+        detected = context.detected_languages or detect_languages_from_paths(context.relative_paths)
         skipped: list[PlannedProvider] = []
         candidates: list[str] = []
         applicable: list[str] = []
@@ -123,9 +121,7 @@ class LanguageEvidenceProviderPlanner:
                 capability_owners.setdefault(cap, []).append(provider_id)
         for capability, owners in sorted(capability_owners.items()):
             if len(owners) > 1:
-                conflicts.append(
-                    f"capability:{capability}:providers={','.join(sorted(owners))}"
-                )
+                conflicts.append(f"capability:{capability}:providers={','.join(sorted(owners))}")
 
         order = _order_providers(applicable, precedence=self._precedence)
         notes = [
@@ -138,9 +134,7 @@ class LanguageEvidenceProviderPlanner:
             detected_languages=tuple(sorted(detected)),
             candidate_provider_ids=tuple(sorted(candidates)),
             applicable_provider_ids=tuple(order),
-            skipped=tuple(
-                sorted(skipped, key=lambda item: (item.provider_id, item.status))
-            ),
+            skipped=tuple(sorted(skipped, key=lambda item: (item.provider_id, item.status))),
             execution_order=tuple(order),
             conflicts=tuple(sorted(conflicts)),
             notes=tuple(notes),

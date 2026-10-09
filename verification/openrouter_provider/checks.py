@@ -6,7 +6,6 @@ import ast
 from pathlib import Path
 from typing import Any
 
-from codestrata.ai.provider_adapters.openrouter.adapter import OpenRouterProvider
 from codestrata.ai.provider_adapters.openrouter.diagnostics import diagnostic_view_of_adapter
 from codestrata.ai.provider_adapters.openrouter.factory import (
     OPENROUTER_RETRY_POLICY,
@@ -40,7 +39,12 @@ from verification.openrouter_provider.contract import (
     PROVIDER_ID,
     TEST_ONLY_MODEL_REFERENCE,
 )
-from verification.openrouter_provider.fixtures import Client, Response, provider_request, sdk_exception
+from verification.openrouter_provider.fixtures import (
+    Client,
+    Response,
+    provider_request,
+    sdk_exception,
+)
 from verification.openrouter_provider.models import CheckResult
 
 
@@ -296,8 +300,9 @@ def run_execution_checks() -> tuple[list[CheckResult], dict[str, Any]]:
     return checks, {"maximum_attempts": EXPECTED_MAXIMUM_ATTEMPTS}
 
 
-def run_registration_and_runtime_checks(engine_root: Path) -> tuple[list[CheckResult], dict[str, Any]]:
-    from codestrata.ai.providers.openrouter_provider import OpenRouterAIModelProvider
+def run_registration_and_runtime_checks(
+    engine_root: Path,
+) -> tuple[list[CheckResult], dict[str, Any]]:
 
     reset_assess_ai_provider_registry_for_tests()
     try:
@@ -450,7 +455,9 @@ def run_dependency_boundary_checks(engine_root: Path) -> tuple[list[CheckResult]
     return checks, {}
 
 
-def run_privacy_checks(report_payload: dict[str, Any] | None = None) -> tuple[list[CheckResult], dict[str, Any]]:
+def run_privacy_checks(
+    report_payload: dict[str, Any] | None = None,
+) -> tuple[list[CheckResult], dict[str, Any]]:
     provider = build_openrouter_provider(client=Client())
     diag = str(diagnostic_view_of_adapter(provider))
     forbidden_local = (

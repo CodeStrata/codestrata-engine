@@ -51,9 +51,7 @@ def collect_legacy_evidence_bundle(
             )
         )
     remapped_deps = [
-        dep.model_copy(
-            update={"provenance": _legacy_provenance(dep.provenance.source_path)}
-        )
+        dep.model_copy(update={"provenance": _legacy_provenance(dep.provenance.source_path)})
         for dep in bundle.dependencies
     ]
     remapped_fw = [
@@ -65,9 +63,7 @@ def collect_legacy_evidence_bundle(
             "source_units": tuple(remapped_units),
             "dependencies": tuple(remapped_deps),
             "framework_usages": tuple(remapped_fw),
-            "diagnostics": tuple(
-                sorted(set(bundle.diagnostics) | {"legacy_evidence_adapter"})
-            ),
+            "diagnostics": tuple(sorted(set(bundle.diagnostics) | {"legacy_evidence_adapter"})),
         }
     )
 

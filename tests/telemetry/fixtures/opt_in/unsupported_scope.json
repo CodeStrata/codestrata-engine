@@ -1,0 +1,8 @@
+{
+  "schema_version": "1.0.0",
+  "enabled": true,
+  "decision_made": true,
+  "consent_scope": 99,
+  "v2_upgrade_declined": false,
+  "local_counters": {}
+}

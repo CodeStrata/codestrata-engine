@@ -10,8 +10,6 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from codestrata.application.assessment.service import AssessmentCommandError
 from codestrata.telemetry.analytics.errors import AnalyticsError, AnalyticsErrorCode
 

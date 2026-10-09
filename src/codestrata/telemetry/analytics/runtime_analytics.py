@@ -15,11 +15,11 @@ from typing import Any
 
 from codestrata.package_metadata import get_package_version
 from codestrata.telemetry.analytics.events import (
+    _APPROVED_ARCHITECTURES,
+    _APPROVED_OS_FAMILIES,
     AnalyticsCategory,
     AnalyticsEvent,
     AnalyticsLifecycle,
-    _APPROVED_ARCHITECTURES,
-    _APPROVED_OS_FAMILIES,
 )
 from codestrata.telemetry.analytics.installation_identity import (
     AnonymousInstallationIdentity,
@@ -34,15 +34,13 @@ from codestrata.telemetry.analytics.policy import (
 COMMUNITY_RUNTIME_ANALYTICS_POLICY_ID = "community-runtime-analytics-policy"
 COMMUNITY_RUNTIME_ANALYTICS_POLICY_VERSION = "1.0"
 COMMUNITY_RUNTIME_ANALYTICS_POLICY_URN = (
-    f"{COMMUNITY_RUNTIME_ANALYTICS_POLICY_ID}:"
-    f"{COMMUNITY_RUNTIME_ANALYTICS_POLICY_VERSION}"
+    f"{COMMUNITY_RUNTIME_ANALYTICS_POLICY_ID}:{COMMUNITY_RUNTIME_ANALYTICS_POLICY_VERSION}"
 )
 
 COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_ID = "community-runtime-analytics-schema"
 COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_VERSION = "1.0"
 COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_URN = (
-    f"{COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_ID}:"
-    f"{COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_VERSION}"
+    f"{COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_ID}:{COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_VERSION}"
 )
 
 RUNTIME_ANALYTICS_EVENT_TYPE = "analytics_runtime_collected"
@@ -108,15 +106,11 @@ class CommunityRuntimeAnalyticsPolicy:
         if self.policy_id != COMMUNITY_RUNTIME_ANALYTICS_POLICY_ID:
             raise RuntimeAnalyticsPolicyError("unsupported runtime analytics policy id")
         if self.policy_version != COMMUNITY_RUNTIME_ANALYTICS_POLICY_VERSION:
-            raise RuntimeAnalyticsPolicyError(
-                "unsupported runtime analytics policy version"
-            )
+            raise RuntimeAnalyticsPolicyError("unsupported runtime analytics policy version")
         if self.schema_id != COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_ID:
             raise RuntimeAnalyticsPolicyError("unsupported runtime analytics schema id")
         if self.schema_version != COMMUNITY_RUNTIME_ANALYTICS_SCHEMA_VERSION:
-            raise RuntimeAnalyticsPolicyError(
-                "unsupported runtime analytics schema version"
-            )
+            raise RuntimeAnalyticsPolicyError("unsupported runtime analytics schema version")
         if self.review_status != _REVIEW_STATUS:
             raise RuntimeAnalyticsPolicyError("unsupported runtime analytics review_status")
         if not self.local_collection_allowed:
@@ -128,13 +122,9 @@ class CommunityRuntimeAnalyticsPolicy:
         if not self.installation_id_required:
             raise RuntimeAnalyticsPolicyError("installation_id_required must be true")
         if not self.installation_id_only_identifier:
-            raise RuntimeAnalyticsPolicyError(
-                "installation_id_only_identifier must be true"
-            )
+            raise RuntimeAnalyticsPolicyError("installation_id_only_identifier must be true")
         if not self.requires_prior_privacy_projection:
-            raise RuntimeAnalyticsPolicyError(
-                "requires_prior_privacy_projection must be true"
-            )
+            raise RuntimeAnalyticsPolicyError("requires_prior_privacy_projection must be true")
         if not self.category_runtime_only:
             raise RuntimeAnalyticsPolicyError("category_runtime_only must be true")
 
@@ -305,9 +295,7 @@ def build_runtime_analytics_event(
     privacy_projection_applied: bool = True,
 ) -> RuntimeAnalyticsEvent:
     adoption = (
-        release_adoption
-        if release_adoption is not None
-        else classify_release_adoption(cli_version)
+        release_adoption if release_adoption is not None else classify_release_adoption(cli_version)
     )
     return RuntimeAnalyticsEvent(
         installation_id=identity.installation_id,
@@ -353,14 +341,10 @@ def collect_runtime_analytics(
     resolved_cli = (cli_version if cli_version is not None else get_package_version()).strip()
     resolved_os = classify_os_family(os_family) if os_family is not None else classify_os_family()
     resolved_arch = (
-        classify_architecture(architecture)
-        if architecture is not None
-        else classify_architecture()
+        classify_architecture(architecture) if architecture is not None else classify_architecture()
     )
     resolved_runtime = (
-        runtime_version
-        if runtime_version is not None
-        else classify_runtime_version()
+        runtime_version if runtime_version is not None else classify_runtime_version()
     )
     event = build_runtime_analytics_event(
         identity=identity,

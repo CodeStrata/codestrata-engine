@@ -1,0 +1,49 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: architecture.fan-out
+  version: 1.0.0
+  title: Module fan_out must stay within the configured threshold
+  category: architecture
+  owner: codestrata
+applies_to:
+  languages:
+    - java
+    - python
+    - javascript
+    - typescript
+    - php
+    - csharp
+  facts:
+    - metric.value
+    - graph.imports
+    - graph.depends_on
+select:
+  source: repository_graph
+  nodes:
+    all:
+      - type: module
+condition:
+  operator: threshold
+  fact: metric.value
+  value: 10
+finding:
+  default_severity: medium
+  message_template: Module fan_out exceeds the configured threshold
+  bindings:
+    - name: max_fan_out
+      type: string
+      evidence: max_fan_out
+  documentation_url: https://docs.codestrata.ai/rules/architecture/fan-out
+metric:
+  name: module_max_fan_out
+  operation: max
+evidence_include:
+  - source_location
+  - dependency_path
+parameter_schema:
+  - name: max_fan_out
+    value_type: integer
+    minimum: 1
+    maximum: 10000
+    default: 10

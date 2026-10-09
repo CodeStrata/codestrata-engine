@@ -2,14 +2,18 @@
 
 from __future__ import annotations
 
-import resource
 from dataclasses import dataclass, field
 from time import perf_counter
+
+from codestrata.application.runtime_performance.posix_rusage import posix_resource_module
 
 
 def peak_rss_mb() -> float | None:
     """Return peak resident set size in MiB when available (POSIX)."""
 
+    resource = posix_resource_module()
+    if resource is None:
+        return None
     try:
         usage = resource.getrusage(resource.RUSAGE_SELF)
     except (AttributeError, ValueError, OSError):

@@ -1,0 +1,43 @@
+{
+  "scenario": "mixed_inputs_without_rerun",
+  "description": "Source and vulnerability feed both differ without a controlled paired rerun; attribution must be mixed/undetermined and never guess dominant cause.",
+  "base": {
+    "source_digest": "sha256:source_v1",
+    "feed_digest": "sha256:feed_v1",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "cve-2025-1001",
+        "identity_key": "cve::cve-2025-1001::pkg-a",
+        "title": "SQL Injection in pkg-a",
+        "category": "security",
+        "severity": "high"
+      }
+    ]
+  },
+  "candidate": {
+    "source_digest": "sha256:source_v2",
+    "feed_digest": "sha256:feed_v2",
+    "config_digest": "sha256:config_standard",
+    "coverage_status": "pass",
+    "findings": [
+      {
+        "rule_id": "cve-2026-9999",
+        "identity_key": "cve::cve-2026-9999::pkg-b",
+        "title": "Denial of Service in pkg-b",
+        "category": "security",
+        "severity": "high"
+      }
+    ]
+  },
+  "expected": {
+    "attribution": "mixed",
+    "label": "mixed",
+    "is_feed_driven": false,
+    "customer_code_deterioration": false,
+    "changed_dimensions": ["source", "feed"],
+    "controlled_rerun_performed": false,
+    "evidence_note": "multiple_dimensions_differ_without_controlled_rerun"
+  }
+}

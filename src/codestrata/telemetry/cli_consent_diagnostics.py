@@ -66,9 +66,7 @@ def diagnostics_from_cli_selection(
         persisted=False,
         prompt_skipped=not selection.prompt_required,
         prompt_attempts=0,
-        transmission_authorized=(
-            False if consent is None else consent.transmission_authorized
-        ),
+        transmission_authorized=(False if consent is None else consent.transmission_authorized),
         limitation_codes=selection.limitation_codes,
     )
 

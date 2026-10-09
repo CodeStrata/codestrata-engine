@@ -245,9 +245,7 @@ def register_assess_command(app: typer.Typer) -> None:
             bool,
             typer.Option(
                 "--telemetry-deny",
-                help=(
-                    "Deny telemetry for this command only. The decision is not saved."
-                ),
+                help=("Deny telemetry for this command only. The decision is not saved."),
             ),
         ] = False,
     ) -> None:
@@ -263,6 +261,7 @@ def register_assess_command(app: typer.Typer) -> None:
 
         configure_logging(level="DEBUG" if verbose else "WARNING")
 
+        from codestrata.cli.community_contract import collection_opt_in_required
         from codestrata.cli.ux import (
             format_actionable_error,
             maybe_notify_update,
@@ -273,6 +272,8 @@ def register_assess_command(app: typer.Typer) -> None:
         )
         from codestrata.telemetry.service import ensure_interactive_product_telemetry
 
+        # Collection opt-in is not required. Skip the interactive consent prompt.
+        prompt_stdin = None if collection_opt_in_required("assess") else False
         try:
             telemetry = ensure_interactive_product_telemetry(
                 command="assess",
@@ -280,6 +281,7 @@ def register_assess_command(app: typer.Typer) -> None:
                 json_output=json_summary,
                 telemetry_allow=telemetry_allow,
                 telemetry_deny=telemetry_deny,
+                stdin_interactive=prompt_stdin,
             )
         except CliTelemetryConsentConflict:
             typer.secho(
@@ -329,12 +331,10 @@ def register_assess_command(app: typer.Typer) -> None:
         )
 
         amd_policy = assessment_metadata_policy_for_session(
-            transmission_authorized=bool(
-                telemetry.runtime.session.consent.transmission_authorized
-            ),
+            transmission_authorized=bool(telemetry.runtime.session.consent.transmission_authorized),
         )
 
-        def _run_primary():
+        def _run_primary() -> AssessmentCommandResult:
             return run_assessment(
                 repo=repo,
                 output_directory=output,

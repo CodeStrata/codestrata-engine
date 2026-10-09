@@ -92,16 +92,12 @@ class OpenRouterConfigurationVerificationReport:
             "check_counts": dict(sorted(self.check_counts.items())),
             "checks": [c.to_dict() for c in self.checks],
             "cli_status": self.status_fields.get("cli", "not_run"),
-            "client_construction_status": self.status_fields.get(
-                "client_construction", "not_run"
-            ),
+            "client_construction_status": self.status_fields.get("client_construction", "not_run"),
             "configuration_contract_status": self.status_fields.get("configuration", "not_run"),
             "credential_status": self.status_fields.get("credentials", "not_run"),
             "base_url_status": self.status_fields.get("base_url", "not_run"),
             "defects": defects,
-            "dependency_boundary_status": self.status_fields.get(
-                "dependency_boundary", "not_run"
-            ),
+            "dependency_boundary_status": self.status_fields.get("dependency_boundary", "not_run"),
             "doctor_status": self.status_fields.get("doctor", "not_run"),
             "epic": self.epic,
             "fail_soft_status": self.status_fields.get("fail_soft", "not_run"),
@@ -113,9 +109,7 @@ class OpenRouterConfigurationVerificationReport:
             "openai_regression_status": self.status_fields.get("openai_regression", "not_run"),
             "optional_header_status": self.status_fields.get("headers", "not_run"),
             "privacy_status": self.status_fields.get("privacy", "not_run"),
-            "provider_selection_status": self.status_fields.get(
-                "provider_selection", "not_run"
-            ),
+            "provider_selection_status": self.status_fields.get("provider_selection", "not_run"),
             "runtime_wiring_status": self.status_fields.get("runtime_wiring", "not_run"),
             "schema_name": self.schema_name,
             "schema_version": self.schema_version,
@@ -130,7 +124,9 @@ class OpenRouterConfigurationVerificationReport:
 
     def write_json(self, path: Path) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        path.write_text(
+            json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
         return path
 
     def write_markdown(self, path: Path) -> Path:

@@ -96,89 +96,88 @@ def build_assessment_json_document(
     technologies = sorted_technologies(analysis.technologies)
 
     assessment: dict[str, Any] = {
-            "mode": report_input.assessment_mode.value,
-            "generated_at": _format_timestamp(report_input.generated_at_utc),
-            "report_title": report_input.report_title,
-            "organization_name": report_input.organization_name,
-            "repository": {
-                "name": analysis.repository.name,
-                "reference": repository_reference,
-                "source_type": ("github" if analysis.repository.source_url else "local"),
-                "default_branch": analysis.repository.default_branch,
-                "file_count": analysis.repository.total_files or len(analysis.repository.files),
-            },
-            "summary": {
-                "technology_count": len(technologies),
-                "finding_count": len(customer_findings),
-                "deterministic_recommendation_count": len(customer_recommendations),
-                "recommendation_count": len(customer_recommendations),
-                "priority_action_count": len(priority_actions),
-                "evidence_count": len(evidence_payload),
-                "ai_recommendation_count": ai_block["recommendation_count"],
-                "phase_count": ai_block["phase_count"],
-                "ai_executed": report_input.ai_executed,
-                "static_analysis_status": static_analysis["status"],
-                "findings_by_severity": executive["findings_by_severity"],
-                "recommendations_by_priority": executive["recommendations_by_priority"],
-                "critical_high_finding_count": executive["critical_high_finding_count"],
-                "tests_detected": executive["tests_detected"],
-                "ci_detected": executive["ci_detected"],
-                "cloud_capabilities": executive["cloud_capabilities"],
-                "summary_text": executive["summary_text"],
-            },
-            "executive_summary": executive,
-            "technologies": [_technology_payload(item) for item in technologies],
-            "repository_facts": _facts_payload(analysis),
-            "evidence": evidence_payload,
-            "findings": [customer_finding_json(item) for item in customer_findings],
-            "finding_correlations": _finding_correlations_payload(report_input),
-            "deterministic_recommendations": [
-                customer_recommendation_json(item) for item in customer_recommendations
-            ],
-            "priority_actions": priority_actions_payload,
-            "comparison": comparison,
-            "warnings": list(report_input.warnings),
-            "static_analysis": static_analysis,
-            "ai": {
-                "executed": report_input.ai_executed,
-                "status": ai_block.get("status"),
-                "result_included": ai_block.get("result_included"),
-                "provider_invoked": ai_block.get("provider_invoked"),
-                "fallback_used": ai_block.get("fallback_used"),
-                "stages_completed": ai_block.get("stages_completed"),
-                "model_id": ai_block["model_id"],
-                "provider": ai_block["provider"],
-                "input_tokens": ai_block["input_tokens"],
-                "output_tokens": ai_block["output_tokens"],
-                "total_tokens": ai_block["total_tokens"],
-                "latency_ms": ai_block["latency_ms"],
-                "stop_reason": ai_block.get("stop_reason"),
-                "executive_summary": ai_block["executive_summary"],
-                "overall_assessment": ai_block["overall_assessment"],
-                "key_risks": ai_block["key_risks"],
-                "recommendations": ai_block["recommendations"],
-                "phases": ai_block["phases"],
-                "limitations": ai_block["limitations"],
-                "evidence_coverage": ai_block["evidence_coverage"],
-                "candidate_finding_count": ai_block.get("candidate_finding_count"),
-                "included_finding_count": ai_block.get("included_finding_count"),
-                "omitted_informational_count": ai_block.get("omitted_informational_count"),
-                "static_analysis_profile": ai_block.get("static_analysis_profile"),
-                "estimated_input_tokens": ai_block.get("estimated_input_tokens"),
-                "failure_code": ai_block.get("failure_code"),
-                "failure_message": ai_block.get("failure_message"),
-                "failure_detail": ai_block.get("failure_detail"),
-                "internal_execution_artifact": ai_block.get("internal_execution_artifact"),
-            },
-            "ai_enrichment": _ai_enrichment_payload(report_input),
-            "timing": timing,
-            "coverage": {
-                "deterministic_analysis": "completed",
-                "static_analysis": static_analysis["status"],
-                "ai_interpretation": ai_block.get("status")
-                or AIExecutionStatus.NOT_REQUESTED.value,
-            },
-        }
+        "mode": report_input.assessment_mode.value,
+        "generated_at": _format_timestamp(report_input.generated_at_utc),
+        "report_title": report_input.report_title,
+        "organization_name": report_input.organization_name,
+        "repository": {
+            "name": analysis.repository.name,
+            "reference": repository_reference,
+            "source_type": ("github" if analysis.repository.source_url else "local"),
+            "default_branch": analysis.repository.default_branch,
+            "file_count": analysis.repository.total_files or len(analysis.repository.files),
+        },
+        "summary": {
+            "technology_count": len(technologies),
+            "finding_count": len(customer_findings),
+            "deterministic_recommendation_count": len(customer_recommendations),
+            "recommendation_count": len(customer_recommendations),
+            "priority_action_count": len(priority_actions),
+            "evidence_count": len(evidence_payload),
+            "ai_recommendation_count": ai_block["recommendation_count"],
+            "phase_count": ai_block["phase_count"],
+            "ai_executed": report_input.ai_executed,
+            "static_analysis_status": static_analysis["status"],
+            "findings_by_severity": executive["findings_by_severity"],
+            "recommendations_by_priority": executive["recommendations_by_priority"],
+            "critical_high_finding_count": executive["critical_high_finding_count"],
+            "tests_detected": executive["tests_detected"],
+            "ci_detected": executive["ci_detected"],
+            "cloud_capabilities": executive["cloud_capabilities"],
+            "summary_text": executive["summary_text"],
+        },
+        "executive_summary": executive,
+        "technologies": [_technology_payload(item) for item in technologies],
+        "repository_facts": _facts_payload(analysis),
+        "evidence": evidence_payload,
+        "findings": [customer_finding_json(item) for item in customer_findings],
+        "finding_correlations": _finding_correlations_payload(report_input),
+        "deterministic_recommendations": [
+            customer_recommendation_json(item) for item in customer_recommendations
+        ],
+        "priority_actions": priority_actions_payload,
+        "comparison": comparison,
+        "warnings": list(report_input.warnings),
+        "static_analysis": static_analysis,
+        "ai": {
+            "executed": report_input.ai_executed,
+            "status": ai_block.get("status"),
+            "result_included": ai_block.get("result_included"),
+            "provider_invoked": ai_block.get("provider_invoked"),
+            "fallback_used": ai_block.get("fallback_used"),
+            "stages_completed": ai_block.get("stages_completed"),
+            "model_id": ai_block["model_id"],
+            "provider": ai_block["provider"],
+            "input_tokens": ai_block["input_tokens"],
+            "output_tokens": ai_block["output_tokens"],
+            "total_tokens": ai_block["total_tokens"],
+            "latency_ms": ai_block["latency_ms"],
+            "stop_reason": ai_block.get("stop_reason"),
+            "executive_summary": ai_block["executive_summary"],
+            "overall_assessment": ai_block["overall_assessment"],
+            "key_risks": ai_block["key_risks"],
+            "recommendations": ai_block["recommendations"],
+            "phases": ai_block["phases"],
+            "limitations": ai_block["limitations"],
+            "evidence_coverage": ai_block["evidence_coverage"],
+            "candidate_finding_count": ai_block.get("candidate_finding_count"),
+            "included_finding_count": ai_block.get("included_finding_count"),
+            "omitted_informational_count": ai_block.get("omitted_informational_count"),
+            "static_analysis_profile": ai_block.get("static_analysis_profile"),
+            "estimated_input_tokens": ai_block.get("estimated_input_tokens"),
+            "failure_code": ai_block.get("failure_code"),
+            "failure_message": ai_block.get("failure_message"),
+            "failure_detail": ai_block.get("failure_detail"),
+            "internal_execution_artifact": ai_block.get("internal_execution_artifact"),
+        },
+        "ai_enrichment": _ai_enrichment_payload(report_input),
+        "timing": timing,
+        "coverage": {
+            "deterministic_analysis": "completed",
+            "static_analysis": static_analysis["status"],
+            "ai_interpretation": ai_block.get("status") or AIExecutionStatus.NOT_REQUESTED.value,
+        },
+    }
     if report_input.assessment_activation is not None:
         assessment["activation"] = report_input.assessment_activation
     _attach_optional_section(assessment, "architecture", report_input.architecture_report)
@@ -234,9 +233,7 @@ def build_assessment_json_document(
         "roadmap": assessment.get("roadmap"),
     }
     activation_payload = (
-        assessment.get("activation")
-        if isinstance(assessment.get("activation"), dict)
-        else None
+        assessment.get("activation") if isinstance(assessment.get("activation"), dict) else None
     )
     assessment["assessment_coverage"] = build_assessment_coverage_map(
         pack_sections=pack_sections,
@@ -389,9 +386,7 @@ def _align_roadmap_references(assessment: dict[str, Any]) -> None:
             ]
 
     known_ids = {
-        str(item.get("initiative_id"))
-        for item in aligned_items
-        if item.get("initiative_id")
+        str(item.get("initiative_id")) for item in aligned_items if item.get("initiative_id")
     }
     for item in aligned_items:
         deps = item.get("depends_on_initiative_ids") or []
@@ -452,9 +447,7 @@ def _executive_summary_metrics(
     structure = analysis.facts.structure
     cicd = analysis.facts.cicd
     cloud = analysis.facts.cloud
-    critical_high = sum(
-        1 for item in findings if item.severity.lower() in {"critical", "high"}
-    )
+    critical_high = sum(1 for item in findings if item.severity.lower() in {"critical", "high"})
     tests_detected = structure.has_tests if structure is not None else None
     ci_detected = cicd.has_ci if cicd is not None else None
     cloud_capabilities = list(cloud.cloud_capabilities) if cloud is not None else []
@@ -463,9 +456,7 @@ def _executive_summary_metrics(
     recommendation_count = len(recommendations)
     critical_findings = sum(1 for item in findings if item.severity.lower() == "critical")
     high_recommendations = sum(
-        1
-        for item in recommendations
-        if item.priority.lower() in {"critical", "high", "immediate"}
+        1 for item in recommendations if item.priority.lower() in {"critical", "high", "immediate"}
     )
     parts = [
         (
@@ -864,9 +855,7 @@ def _finding_payload(finding: Finding) -> dict[str, Any]:
         "category": str(getattr(finding.category, "value", finding.category)),
         "severity": normalize_severity(finding.severity),
         "source": str(getattr(finding.source, "value", finding.source)),
-        "affected_technologies": sorted(
-            {str(item) for item in finding.affected_technologies}
-        ),
+        "affected_technologies": sorted({str(item) for item in finding.affected_technologies}),
         "evidence": deduped_evidence,
         "provider_name": finding.metadata.get("provider_name"),
         "customer_visibility": finding.metadata.get("customer_visibility"),
@@ -885,9 +874,7 @@ def _recommendation_payload(
     finding_id_map: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     id_map = finding_id_map or {}
-    related = list(
-        remap_related_finding_ids(recommendation.related_finding_ids, id_map)
-    )
+    related = list(remap_related_finding_ids(recommendation.related_finding_ids, id_map))
     return {
         "id": stable_recommendation_id(recommendation),
         "rule_id": recommendation.rule_id,

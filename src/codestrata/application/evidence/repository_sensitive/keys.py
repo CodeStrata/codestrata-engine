@@ -147,9 +147,7 @@ def classify_key_family(key: str) -> ConfigurationKeyFamily:
     ):
         return ConfigurationKeyFamily.TLS_VERIFICATION
 
-    if tokens & _CORS_TOKENS or (
-        "cors" in tokens and ("origin" in tokens or "origins" in tokens)
-    ):
+    if tokens & _CORS_TOKENS or ("cors" in tokens and ("origin" in tokens or "origins" in tokens)):
         return ConfigurationKeyFamily.CORS_ORIGIN
 
     if "debug" in tokens:

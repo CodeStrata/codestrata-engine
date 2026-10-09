@@ -135,9 +135,7 @@ def check_the_detail_never_carries_the_exception_text() -> CheckResult:
     secret = "synthetic-exception-body-0123456789"
     offenders: list[str] = []
     for class_name in sorted(error_mapping.SDK_EXCEPTION_NAME_TO_CODE):
-        mapped = error_mapping.classify_sdk_exception(
-            fixtures.sdk_exception(class_name, secret)
-        )
+        mapped = error_mapping.classify_sdk_exception(fixtures.sdk_exception(class_name, secret))
         if secret in mapped.error.detail or secret in mapped.error.code:
             offenders.append(class_name)
     return CheckResult(

@@ -7,6 +7,25 @@ from pathlib import Path
 
 import pytest
 from pydantic import ValidationError
+from validation.actual import load_emitted_assessment, run_real_assessment
+from validation.dependency import (
+    DependencyExpectation,
+    DependencyFindingActual,
+    DependencyFindingExpectation,
+    DependencyForbiddenManifestExpectation,
+    DependencyManifestActual,
+    DependencyManifestExpectation,
+    aggregate_dependency_results,
+    extract_dependency_findings,
+    extract_dependency_manifests,
+    validate_dependency_precision,
+)
+from validation.inventory import FactClassification, compute_precision_recall
+from validation.models import ExpectedResults, ValidationVerdict
+from validation.paths import VALIDATION_ROOT
+from validation.registry import load_all_repositories, resolve_expected_results
+from validation.runner import run_validation_suite
+from validation.summary import build_validation_summary
 
 from codestrata.application.rules.dependency.helpers import (
     is_exact_version,
@@ -43,25 +62,6 @@ from codestrata.domain.rules.context import (
     RuleExecutionContext,
 )
 from codestrata.domain.rules.enums import RuleResultStatus
-from validation.actual import load_emitted_assessment, run_real_assessment
-from validation.dependency import (
-    DependencyExpectation,
-    DependencyFindingActual,
-    DependencyFindingExpectation,
-    DependencyForbiddenManifestExpectation,
-    DependencyManifestActual,
-    DependencyManifestExpectation,
-    aggregate_dependency_results,
-    extract_dependency_findings,
-    extract_dependency_manifests,
-    validate_dependency_precision,
-)
-from validation.inventory import FactClassification, compute_precision_recall
-from validation.models import ExpectedResults, ValidationVerdict
-from validation.paths import VALIDATION_ROOT
-from validation.registry import load_all_repositories, resolve_expected_results
-from validation.runner import run_validation_suite
-from validation.summary import build_validation_summary
 
 
 def _prov(path: str = "pom.xml") -> EvidenceProvenance:
@@ -132,9 +132,7 @@ def test_contradictory_dependency_expectations_rejected() -> None:
         )
     with pytest.raises(ValidationError, match="contradictory"):
         DependencyExpectation(
-            required_manifests=(
-                DependencyManifestExpectation(path="pom.xml", ecosystem="maven"),
-            ),
+            required_manifests=(DependencyManifestExpectation(path="pom.xml", ecosystem="maven"),),
             forbidden_manifests=(
                 DependencyForbiddenManifestExpectation(path_pattern=r"pom\.xml$"),
             ),
@@ -530,7 +528,9 @@ def test_negative_control_repositories_dependency(tmp_path_factory) -> None:
         include_remote=False,
     )
     summary = build_validation_summary(results)
-    assert summary.failed == 0, [(r.repository_id, r.mismatches) for r in results if r.verdict != ValidationVerdict.PASS]
+    assert summary.failed == 0, [
+        (r.repository_id, r.mismatches) for r in results if r.verdict != ValidationVerdict.PASS
+    ]
     assert summary.errors == 0
 
     dep_results = []

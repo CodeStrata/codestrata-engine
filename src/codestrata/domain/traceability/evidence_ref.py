@@ -162,8 +162,7 @@ class EvidenceRef(BaseModel):
             sum(
                 1
                 for name in _IDENTITY_FIELDS
-                if name not in {"kind", "production_mode"}
-                and getattr(self, name) is not None
+                if name not in {"kind", "production_mode"} and getattr(self, name) is not None
             ),
         )
 
@@ -199,8 +198,10 @@ def _identity_conflicts(left: EvidenceRef, right: EvidenceRef) -> list[str]:
 
 def _merge_evidence_refs(preferred: EvidenceRef, other: EvidenceRef) -> EvidenceRef:
     conflicts = _identity_conflicts(preferred, other)
-    # Multiple rules may cite the same evidence_id; keep preferred.rule_id.
-    fatal_conflicts = [name for name in conflicts if name != "rule_id"]
+    # The same evidence_id can be cited by more than one rule, and a one-item
+    # match records it as direct while a multi-item match records it as
+    # aggregated. Keep the preferred envelope's rule and production mode.
+    fatal_conflicts = [name for name in conflicts if name not in {"rule_id", "production_mode"}]
     if fatal_conflicts:
         raise TraceabilityValidationError(
             "contradictory EvidenceRef fields for evidence_id="

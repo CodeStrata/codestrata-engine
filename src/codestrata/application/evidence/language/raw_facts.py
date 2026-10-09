@@ -80,8 +80,7 @@ def merge_raw_package_facts(parts: Sequence[RawPackageFacts]) -> RawPackageFacts
         merged.package_files[package_id] = sorted(set(paths))
     merged.framework_hits = sorted(
         {
-            (hit.unit_id, hit.framework, hit.symbol, hit.path): hit
-            for hit in merged.framework_hits
+            (hit.unit_id, hit.framework, hit.symbol, hit.path): hit for hit in merged.framework_hits
         }.values(),
         key=lambda item: (item.unit_id, item.symbol, item.path),
     )

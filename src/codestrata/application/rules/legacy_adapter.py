@@ -12,8 +12,8 @@ from codestrata.domain.findings import Finding
 from codestrata.domain.rules.applicability import RuleApplicability
 from codestrata.domain.rules.context import RuleExecutionContext
 from codestrata.domain.rules.enums import (
-    RuleCategory,
     MatchEvidenceConfidence,
+    RuleCategory,
     RuleEvidenceKind,
     RuleIncrementalBehavior,
     RuleSeverity,
@@ -23,13 +23,13 @@ from codestrata.domain.rules.evidence import RuleEvidence
 from codestrata.domain.rules.identifiers import RuleId
 from codestrata.domain.rules.metadata import RuleMetadata, RuleVersion
 from codestrata.domain.rules.models import Rule, RuleContext, RuleResult
+from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 from codestrata.domain.rules.rule_confidence import (
     RuleConfidence,
     RuleConfidenceBasis,
     RuleConfidenceCalibrationStatus,
     RuleConfidenceLevel,
 )
-from codestrata.domain.rules.results import RuleMatch, SharedRuleEvaluationResult
 
 _LEGACY_CONFIDENCE = RuleConfidence(
     level=RuleConfidenceLevel.UNAVAILABLE,

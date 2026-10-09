@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import pytest
-
 from validation.matrix import ACTIVE_VALIDATION_SET, VALIDATION_MATRIX
 from validation.models import RepositorySourceType
 from validation.paths import EXPECTATIONS_DIR, REPOSITORIES_DIR, VALIDATION_ROOT, resolve_local_path
@@ -77,9 +75,7 @@ def test_matrix_covers_required_dimensions() -> None:
 
     def _has(tag_fragment: str) -> bool:
         return any(
-            tag_fragment in ",".join(item.tags)
-            for item in load_all_repositories()
-            if item.enabled
+            tag_fragment in ",".join(item.tags) for item in load_all_repositories() if item.enabled
         )
 
     assert _has("tests-present")
@@ -90,8 +86,7 @@ def test_matrix_covers_required_dimensions() -> None:
     )
     assert _has("architecture")
     assert _has("technical-debt") or any(
-        "measurable" in VALIDATION_MATRIX[rid]["td_coverage"]
-        for rid in ACTIVE_VALIDATION_SET
+        "measurable" in VALIDATION_MATRIX[rid]["td_coverage"] for rid in ACTIVE_VALIDATION_SET
     )
     assert _has("security")
     assert _has("cloud")

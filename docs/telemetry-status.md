@@ -113,5 +113,5 @@ Assessment lifecycle isolation is documented in
 - [telemetry-disabled-default.md](telemetry-disabled-default.md)
 - [telemetry-runtime.md](telemetry-runtime.md)
 - [telemetry.md](telemetry.md)
-- Epic 9 completion: [`../../verification/privacy_first_telemetry_completion/README.md`](../../verification/privacy_first_telemetry_completion/README.md)
+- Epic 9 completion: `verification/privacy_first_telemetry_completion/README.md` (not included in this export)
 - [../PRIVACY.md](../PRIVACY.md)

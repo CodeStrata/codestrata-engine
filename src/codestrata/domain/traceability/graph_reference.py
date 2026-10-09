@@ -107,13 +107,9 @@ class GraphReference(BaseModel):
         if kind is GraphReferenceKind.PATH and not self.path_node_ids:
             raise TraceabilityValidationError("path references require path_node_ids")
         if kind is GraphReferenceKind.CYCLE and self.cycle_id is None and not self.node_ids:
-            raise TraceabilityValidationError(
-                "cycle references require cycle_id and/or node_ids"
-            )
+            raise TraceabilityValidationError("cycle references require cycle_id and/or node_ids")
         if kind is GraphReferenceKind.RELATIONSHIP and self.relationship_type is None:
-            raise TraceabilityValidationError(
-                "relationship references require relationship_type"
-            )
+            raise TraceabilityValidationError("relationship references require relationship_type")
         # Forbid accidental full-graph payload smuggling via unbounded collections.
         if (
             len(self.node_ids)
@@ -122,7 +118,5 @@ class GraphReference(BaseModel):
             + len(self.path_edge_ids)
             > 256
         ):
-            raise TraceabilityValidationError(
-                "GraphReference collections exceed envelope bounds"
-            )
+            raise TraceabilityValidationError("GraphReference collections exceed envelope bounds")
         return self

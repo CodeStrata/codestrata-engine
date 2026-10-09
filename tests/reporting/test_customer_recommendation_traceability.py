@@ -31,9 +31,7 @@ def test_phase3_customer_projection_preserves_supporting_and_related() -> None:
         recommendation_type=RecommendationType.FINDING_BACKED,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
         limitations=("note",),
-        actions=(
-            RecommendationAction(order=1, title="Draft", description="Write README"),
-        ),
+        actions=(RecommendationAction(order=1, title="Draft", description="Write README"),),
         subject_keys=("repo",),
     )
     result = RecommendationResult.from_recommendations(

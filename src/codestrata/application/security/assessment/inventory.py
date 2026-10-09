@@ -213,9 +213,7 @@ def build_finding_references(
     findings: Sequence[Finding],
 ) -> tuple[SecurityFindingReference, ...]:
     refs = [enrich_finding_reference(finding) for finding in findings]
-    return tuple(
-        sorted(refs, key=lambda item: (item.rule_id, item.finding_id, item.title))
-    )
+    return tuple(sorted(refs, key=lambda item: (item.rule_id, item.finding_id, item.title)))
 
 
 def _role_finding_inventory(
@@ -228,13 +226,9 @@ def _role_finding_inventory(
         finding_ids=tuple(item.finding_id for item in subset),
         finding_count=len(subset),
         rule_counts=dict(sorted(Counter(item.rule_id for item in subset).items())),
-        severity_counts=dict(
-            sorted(Counter(item.severity for item in subset).items())
-        ),
+        severity_counts=dict(sorted(Counter(item.severity for item in subset).items())),
         category_counts=dict(
-            sorted(
-                Counter(item.security_category.value for item in subset).items()
-            )
+            sorted(Counter(item.security_category.value for item in subset).items())
         ),
     )
 
@@ -270,20 +264,16 @@ def build_evidence_summary(
     certificates = sum(
         1
         for item in evidence.artifacts
-        if ContentClassification.PUBLIC_CERTIFICATE_MATERIAL
-        in item.content_classifications
+        if ContentClassification.PUBLIC_CERTIFICATE_MATERIAL in item.content_classifications
         or item.kind is SensitiveArtifactKind.PUBLIC_CERTIFICATE
     )
     metadata_only = sum(
-        1
-        for item in evidence.artifacts
-        if item.inspection_status is InspectionStatus.METADATA_ONLY
+        1 for item in evidence.artifacts if item.inspection_status is InspectionStatus.METADATA_ONLY
     )
     credential_facts = sum(
         1
         for item in evidence.configuration_facts
-        if item.key_family
-        in {ConfigurationKeyFamily.CREDENTIAL, ConfigurationKeyFamily.SECRET}
+        if item.key_family in {ConfigurationKeyFamily.CREDENTIAL, ConfigurationKeyFamily.SECRET}
     )
     env_refs = sum(
         1
@@ -298,16 +288,14 @@ def build_evidence_summary(
         or item.placeholder_status is PlaceholderStatus.PLACEHOLDER_LITERAL
     )
     roles = {
-        map_source_role(item.classification, path=item.path).value
-        for item in evidence.artifacts
+        map_source_role(item.classification, path=item.path).value for item in evidence.artifacts
     }
     roles |= {
         map_source_role(item.classification, path=item.path).value
         for item in evidence.configuration_facts
     }
     return SecurityEvidenceSummary(
-        evidence_schema_name=evidence.schema_name
-        or REPOSITORY_SENSITIVE_EVIDENCE_SCHEMA_NAME,
+        evidence_schema_name=evidence.schema_name or REPOSITORY_SENSITIVE_EVIDENCE_SCHEMA_NAME,
         evidence_schema_version=evidence.schema_version
         or REPOSITORY_SENSITIVE_EVIDENCE_SCHEMA_VERSION,
         evidence_fingerprint=evidence.evidence_fingerprint,
@@ -343,14 +331,12 @@ def build_evidence_type_inventory(
         private_key_material=sum(
             1
             for item in evidence.artifacts
-            if ContentClassification.PRIVATE_KEY_MATERIAL
-            in item.content_classifications
+            if ContentClassification.PRIVATE_KEY_MATERIAL in item.content_classifications
         ),
         certificates=sum(
             1
             for item in evidence.artifacts
-            if ContentClassification.PUBLIC_CERTIFICATE_MATERIAL
-            in item.content_classifications
+            if ContentClassification.PUBLIC_CERTIFICATE_MATERIAL in item.content_classifications
         ),
         metadata_only_keystores=sum(
             1
@@ -365,8 +351,7 @@ def build_evidence_type_inventory(
         credential_configuration_facts=sum(
             1
             for item in facts
-            if item.key_family
-            in {ConfigurationKeyFamily.CREDENTIAL, ConfigurationKeyFamily.SECRET}
+            if item.key_family in {ConfigurationKeyFamily.CREDENTIAL, ConfigurationKeyFamily.SECRET}
         ),
         transport_configuration_facts=sum(
             1
@@ -378,19 +363,13 @@ def build_evidence_type_inventory(
             }
         ),
         authentication_configuration_facts=sum(
-            1
-            for item in facts
-            if item.key_family is ConfigurationKeyFamily.AUTHENTICATION
+            1 for item in facts if item.key_family is ConfigurationKeyFamily.AUTHENTICATION
         ),
         cors_configuration_facts=sum(
-            1
-            for item in facts
-            if item.key_family is ConfigurationKeyFamily.CORS_ORIGIN
+            1 for item in facts if item.key_family is ConfigurationKeyFamily.CORS_ORIGIN
         ),
         debug_configuration_facts=sum(
-            1
-            for item in facts
-            if item.key_family is ConfigurationKeyFamily.DEBUG
+            1 for item in facts if item.key_family is ConfigurationKeyFamily.DEBUG
         ),
         placeholders=sum(
             1
@@ -436,23 +415,15 @@ def build_rule_inventory(
                 evaluation_status=status,
                 finding_count=len(subset),
                 production_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.PRODUCTION
+                    1 for item in subset if item.source_role is SecuritySourceRole.PRODUCTION
                 ),
                 test_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.TEST
+                    1 for item in subset if item.source_role is SecuritySourceRole.TEST
                 ),
                 unknown_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.UNKNOWN
+                    1 for item in subset if item.source_role is SecuritySourceRole.UNKNOWN
                 ),
-                diagnostic_count=(
-                    len(fact.diagnostic_messages) if fact is not None else 0
-                ),
+                diagnostic_count=(len(fact.diagnostic_messages) if fact is not None else 0),
             )
         )
     for rule_id in sorted(by_rule):
@@ -465,39 +436,26 @@ def build_rule_inventory(
                 rule_id=rule_id,
                 enabled=True,
                 executed=bool(fact.executed) if fact is not None else True,
-                evaluation_status=(
-                    fact.evaluation_status if fact is not None else "matched"
-                ),
+                evaluation_status=(fact.evaluation_status if fact is not None else "matched"),
                 finding_count=len(subset),
                 production_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.PRODUCTION
+                    1 for item in subset if item.source_role is SecuritySourceRole.PRODUCTION
                 ),
                 test_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.TEST
+                    1 for item in subset if item.source_role is SecuritySourceRole.TEST
                 ),
                 unknown_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.UNKNOWN
+                    1 for item in subset if item.source_role is SecuritySourceRole.UNKNOWN
                 ),
-                diagnostic_count=(
-                    len(fact.diagnostic_messages) if fact is not None else 0
-                ),
+                diagnostic_count=(len(fact.diagnostic_messages) if fact is not None else 0),
             )
         )
-    return SecurityRuleInventory(
-        entries=tuple(sorted(entries, key=lambda item: item.rule_id))
-    )
+    return SecurityRuleInventory(entries=tuple(sorted(entries, key=lambda item: item.rule_id)))
 
 
 def _count_buckets(counter: Counter[str]) -> tuple[SecurityCountBucket, ...]:
     return tuple(
-        SecurityCountBucket(key=key, count=count)
-        for key, count in sorted(counter.items())
+        SecurityCountBucket(key=key, count=count) for key, count in sorted(counter.items())
     )
 
 
@@ -505,9 +463,7 @@ def build_category_inventory(
     refs: Sequence[SecurityFindingReference],
 ) -> SecurityCategoryInventory:
     return SecurityCategoryInventory(
-        buckets=_count_buckets(
-            Counter(item.security_category.value for item in refs)
-        )
+        buckets=_count_buckets(Counter(item.security_category.value for item in refs))
     )
 
 
@@ -555,9 +511,7 @@ def build_hotspot_inventory(
     for path, subset in by_path.items():
         finding_ids = tuple(
             item.finding_id
-            for item in sorted(
-                subset, key=lambda item: (item.rule_id, item.finding_id)
-            )
+            for item in sorted(subset, key=lambda item: (item.rule_id, item.finding_id))
         )[:MAX_HOTSPOT_FINDING_REFS]
         hotspots.append(
             SecurityHotspot(
@@ -566,27 +520,17 @@ def build_hotspot_inventory(
                 label="Security finding hotspot",
                 total_finding_count=len(subset),
                 production_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.PRODUCTION
+                    1 for item in subset if item.source_role is SecuritySourceRole.PRODUCTION
                 ),
                 test_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.TEST
+                    1 for item in subset if item.source_role is SecuritySourceRole.TEST
                 ),
                 unknown_finding_count=sum(
-                    1
-                    for item in subset
-                    if item.source_role is SecuritySourceRole.UNKNOWN
+                    1 for item in subset if item.source_role is SecuritySourceRole.UNKNOWN
                 ),
                 rule_ids=tuple(sorted({item.rule_id for item in subset})),
-                categories=tuple(
-                    sorted({item.security_category.value for item in subset})
-                ),
-                highest_severity=_highest_severity(
-                    [item.severity for item in subset]
-                ),
+                categories=tuple(sorted({item.security_category.value for item in subset})),
+                highest_severity=_highest_severity([item.severity for item in subset]),
                 finding_ids=finding_ids,
             )
         )
@@ -606,9 +550,7 @@ def build_diagnostics_summary(
             evidence_records.append(
                 SecurityDiagnosticRecord(
                     diagnostic_id=item.diagnostic_id
-                    or build_diagnostic_id(
-                        code=item.diagnostic_code, message=item.message
-                    ),
+                    or build_diagnostic_id(code=item.diagnostic_code, message=item.message),
                     diagnostic_code=item.diagnostic_code,
                     message=item.message[:400],
                     origin="evidence",
@@ -748,13 +690,9 @@ def build_inventory_traceability(
                 target_id=hotspot_id,
             )
         )
-    unique: dict[str, SecurityTraceabilityEdge] = {
-        edge.edge_id: edge for edge in edges
-    }
+    unique: dict[str, SecurityTraceabilityEdge] = {edge.edge_id: edge for edge in edges}
     ordered = tuple(sorted(unique.values(), key=lambda item: item.edge_id))
-    return SecurityTraceabilityIndex(
-        edges=ordered[: max(MAX_TRACEABILITY_ENTRIES * 3, 36)]
-    )
+    return SecurityTraceabilityIndex(edges=ordered[: max(MAX_TRACEABILITY_ENTRIES * 3, 36)])
 
 
 def findings_by_rule_counts(
@@ -769,9 +707,7 @@ def count_failed_rules(execution_facts: Sequence[SecurityRuleExecutionFact]) -> 
 
 def count_succeeded_rules(execution_facts: Sequence[SecurityRuleExecutionFact]) -> int:
     return sum(
-        1
-        for item in execution_facts
-        if item.executed and item.evaluation_status != "failed"
+        1 for item in execution_facts if item.executed and item.evaluation_status != "failed"
     )
 
 

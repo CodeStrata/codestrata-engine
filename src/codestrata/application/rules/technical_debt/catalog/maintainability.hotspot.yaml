@@ -1,0 +1,60 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: maintainability.hotspot
+  version: 1.0.0
+  title: Churn-weighted complexity hotspot
+  category: maintainability
+  owner: codestrata
+  measurement: M22
+  tags: [maintainability, hotspot, informational]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [quality.function, history.churn, component.mapping]
+select:
+  source: maintainability
+  complete_hotspots:
+    all:
+      - ranking_value_gt: 0
+condition:
+  operator: maintainability.hotspot
+emit:
+  finding:
+    default_severity: informational
+    message:
+      template: >-
+        Component '{{subject_id}}' ranking_value={{ranking_value}}
+        (complexity={{complexity}} × changed_lines={{changed_lines}},
+        {{formula_version}}, window={{history_window}}). This is not a health
+        score, cost-to-fix, or runtime failure probability.
+        {{priority_explanation}}
+      bindings:
+        subject_id: {type: string, evidence: subject_id}
+        ranking_value: {type: string, evidence: ranking_value}
+        complexity: {type: string, evidence: complexity}
+        changed_lines: {type: string, evidence: changed_lines}
+        formula_version: {type: string, evidence: formula_version}
+        history_window: {type: string, evidence: history_window}
+        priority_explanation: {type: string, evidence: priority_explanation}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: maintainability_hotspot_ranking_value
+    operation: value
+evidence:
+  include:
+    - record_id
+    - complexity_subjects
+    - commit_file_churn
+    - component_mapping
+    - priority_explanation
+parameters:
+  optional_min_ranking_value: {type: integer, default: 0, exclusive_min: true}
+  ranking_contributors: [complexity, churn]
+  context_only: [centrality, reach, ownership, active_findings]
+  unknown:
+    missing_history: unknown
+    missing_structure: unknown
+    partial_inputs: unranked
+    no_opaque_score: true
+    no_runtime_failure_probability: true

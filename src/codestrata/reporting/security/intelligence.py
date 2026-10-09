@@ -154,9 +154,7 @@ def build_security_intelligence(
         if str(getattr(item, "finding_id", "") or "").strip()
     }
     sec_recs = tuple(
-        item
-        for item in recommendations
-        if _is_security_recommendation(item, sec_finding_ids)
+        item for item in recommendations if _is_security_recommendation(item, sec_finding_ids)
     )
 
     finding_links = _finding_links(sec_findings, report)
@@ -243,14 +241,11 @@ def _finding_links(
                 severity=item.severity,
                 confidence=_finding_confidence_label(item),
                 evidence_ids=_evidence_ids(item),
-                recommendation_ids=tuple(
-                    getattr(item, "driven_recommendation_ids", ()) or ()
-                ),
+                recommendation_ids=tuple(getattr(item, "driven_recommendation_ids", ()) or ()),
                 path=_finding_path(item),
                 rule_id=str(getattr(item, "rule_id", "") or "security.unknown"),
                 evidence_completeness=(
-                    str(getattr(item, "evidence_completeness", "") or "").strip()
-                    or None
+                    str(getattr(item, "evidence_completeness", "") or "").strip() or None
                 ),
             )
             for item in findings
@@ -271,9 +266,7 @@ def _finding_links(
     elif report.finding_summary.additional_observations and not findings:
         # Include additional only when HTML findings empty and production alone
         # would under-represent the assessed set.
-        report_findings = report_findings + tuple(
-            report.finding_summary.additional_observations
-        )
+        report_findings = report_findings + tuple(report.finding_summary.additional_observations)
     if not report_findings:
         return ()
     rows = [
@@ -291,9 +284,7 @@ def _finding_links(
         for item in report_findings
         if _is_security_finding(item)
     ]
-    rows.sort(
-        key=lambda row: (row.severity.lower(), row.title.lower(), row.finding_id)
-    )
+    rows.sort(key=lambda row: (row.severity.lower(), row.title.lower(), row.finding_id))
     return tuple(rows)
 
 
@@ -321,9 +312,7 @@ def _evidence_ids(item: Any) -> tuple[str, ...]:
     refs = getattr(item, "evidence_refs", None)
     if refs:
         return tuple(
-            getattr(ref, "evidence_id", "")
-            for ref in refs
-            if getattr(ref, "evidence_id", None)
+            getattr(ref, "evidence_id", "") for ref in refs if getattr(ref, "evidence_id", None)
         )
     ids = getattr(item, "evidence_ids", None)
     if ids:
@@ -694,13 +683,10 @@ def _limitations(
     cov = report.coverage_summary
     if cov.malformed_files > 0 or cov.skipped_files > 0:
         notes.append(
-            "Some files were malformed or skipped; security hygiene coverage "
-            "may be incomplete."
+            "Some files were malformed or skipped; security hygiene coverage may be incomplete."
         )
     if not finding_links:
-        notes.append(
-            "No security findings were produced within the assessed repository scope."
-        )
+        notes.append("No security findings were produced within the assessed repository scope.")
     seen: set[str] = set()
     out: list[str] = []
     for note in notes:

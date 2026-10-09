@@ -1,0 +1,11 @@
+representatives:
+- role: supported_java
+  repository_id: doris
+- role: supported_js_ts
+  repository_id: typescript
+- role: mixed_build_monorepo
+  repository_id: vscode
+- role: retained_lower_depth
+  repository_id: django
+- role: partial_unsupported
+  repository_id: rust

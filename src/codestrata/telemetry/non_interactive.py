@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import os
 import sys
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any, Mapping
+from typing import Any
 
 from codestrata.telemetry.consent import (
     TelemetrySessionConsent,
@@ -95,9 +96,7 @@ class NonInteractiveTelemetryDecision:
     stdin_interactive: bool
     output_mode: str
     automation_detected: bool
-    non_interactive_policy_version: str = (
-        COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_VERSION
-    )
+    non_interactive_policy_version: str = COMMUNITY_TELEMETRY_NON_INTERACTIVE_POLICY_VERSION
     limitation_codes: tuple[str, ...] = ()
 
     def to_stable_dict(self) -> dict[str, Any]:
@@ -200,9 +199,7 @@ def evaluate_non_interactive_decision(
 
     try:
         automation = (
-            detect_automation()
-            if automation_detected is None
-            else bool(automation_detected)
+            detect_automation() if automation_detected is None else bool(automation_detected)
         )
     except Exception:
         automation = True
@@ -222,9 +219,7 @@ def evaluate_non_interactive_decision(
         stdin_ok = bool(stdin_interactive)
 
     # Explicit internal consent (future flags / test injection) skips prompting.
-    if decision_already_explicit or (
-        explicit_consent is not None and explicit_consent.explicit
-    ):
+    if decision_already_explicit or (explicit_consent is not None and explicit_consent.explicit):
         consent = explicit_consent or default_session_consent()
         return NonInteractiveTelemetryDecision(
             interactive_eligible=False,
@@ -386,9 +381,7 @@ def _suppressed(
     else:
         use_non_interactive = use_non_interactive_consent
     consent = (
-        non_interactive_session_consent()
-        if use_non_interactive
-        else default_session_consent()
+        non_interactive_session_consent() if use_non_interactive else default_session_consent()
     )
     return NonInteractiveTelemetryDecision(
         interactive_eligible=False,

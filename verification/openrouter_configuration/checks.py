@@ -27,15 +27,17 @@ from codestrata.ai.provider_adapters.openrouter.factory import (
 from codestrata.ai.provider_contracts.errors import ErrorCategory, ProviderContractValidationError
 from codestrata.ai.provider_contracts.identifiers import CapabilityId, ProviderModelReference
 from codestrata.ai.provider_contracts.retry_policy import DEFAULT_RETRY_POLICY
+from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 
 # Import factory before assess_ai to keep load order stable.
 from codestrata.ai.providers.factory import (  # noqa: I001
     CODESTRATA_OPENROUTER_MODEL_ID_ENV as FACTORY_OPENROUTER_MODEL_ENV,
+)
+from codestrata.ai.providers.factory import (
     create_assess_ai_provider,
     resolve_assess_model_id,
     supported_assess_ai_providers,
 )
-from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 from codestrata.ai.providers.openrouter_provider import OpenRouterAIModelProvider
 from codestrata.config.profiles import OPENROUTER_MODEL_ENV_VAR, apply_environment_overlays
 from codestrata.config.settings import AiSettings, CodestrataSettings, OpenRouterSettings
@@ -219,9 +221,7 @@ def run_configuration_checks() -> tuple[list[CheckResult], dict[str, Any]]:
     dumped = settings.model_dump(mode="json")
     openrouter_dump = dumped.get("ai", {}).get("openrouter", {})
     serialized = json.dumps(dumped, sort_keys=True)
-    redacted = build_runtime_configuration(
-        openrouter_settings=settings.ai.openrouter
-    ).redacted()
+    redacted = build_runtime_configuration(openrouter_settings=settings.ai.openrouter).redacted()
 
     checks = [
         CheckResult(
@@ -308,9 +308,7 @@ def run_model_resolution_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         {"ai": {"openrouter": {"model": ""}}},
         environ={OPENROUTER_MODEL_ENV_VAR: "profile-overlay-model"},
     )
-    overlay_ok = (
-        overlay.get("ai", {}).get("openrouter", {}).get("model") == "profile-overlay-model"
-    )
+    overlay_ok = overlay.get("ai", {}).get("openrouter", {}).get("model") == "profile-overlay-model"
 
     checks = [
         CheckResult(
@@ -545,8 +543,7 @@ def run_header_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         CheckResult(
             name="site_url_not_derived_from_repository_path",
             category="headers",
-            ok=derived.client_inputs.site_url is None
-            and derived.client_inputs.app_name is None,
+            ok=derived.client_inputs.site_url is None and derived.client_inputs.app_name is None,
             detail="no repository or customer derivation",
         ),
     ]
@@ -766,8 +763,7 @@ def run_regression_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         CheckResult(
             name="bedrock_default_model_and_provider_unchanged",
             category="bedrock_regression",
-            ok=bedrock_model == BEDROCK_DEFAULT_MODEL
-            and AiSettings().provider == DEFAULT_PROVIDER,
+            ok=bedrock_model == BEDROCK_DEFAULT_MODEL and AiSettings().provider == DEFAULT_PROVIDER,
             detail="bedrock default preserved",
         ),
         CheckResult(

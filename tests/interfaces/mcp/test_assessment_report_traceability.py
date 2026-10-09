@@ -12,6 +12,7 @@ from codestrata.interfaces.mcp.tools.assessment_report import (
 )
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 from codestrata.reporting.traceability.preservation import (
+    CanonicalReportLoadError,
     assert_traceability_equivalent,
     extract_assessment,
     load_report_document,
@@ -110,9 +111,7 @@ def test_mcp_full_report_access_preserves_collections(tmp_path: Path) -> None:
     assert validate_canonical_assessment(assessment) == "complete"
     assert len(assessment["evidence"]) == 1
     assert len(assessment["priority_actions"]) == 1
-    assert assessment["roadmap"]["initiatives"][0]["supporting_priority_action_ids"] == [
-        "rec:1"
-    ]
+    assert assessment["roadmap"]["initiatives"][0]["supporting_priority_action_ids"] == ["rec:1"]
 
 
 def schema_unchanged(document: dict) -> bool:
@@ -152,7 +151,7 @@ def test_mcp_rejects_unknown_evidence_reference() -> None:
     broken["assessment"]["findings"][0]["evidence_refs"] = [{"evidence_id": "ev:missing"}]
     broken["assessment"]["findings"][0]["primary_evidence_id"] = "ev:missing"
     broken["assessment"]["findings"][0]["synthesized_from_evidence_ids"] = ["ev:missing"]
-    with pytest.raises(Exception):
+    with pytest.raises(CanonicalReportLoadError):
         validate_canonical_assessment(broken["assessment"], require_full_chain=True)
 
 

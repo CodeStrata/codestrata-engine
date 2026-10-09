@@ -1,0 +1,42 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: security.permissive-cors-origin
+  version: 1.0.0
+  title: Permissive CORS origin
+  category: security
+  owner: codestrata
+  measurement: M11
+  tags: [security, hygiene, configuration]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_sensitive.configuration_facts]
+select:
+  source: repository_sensitive
+  configuration_facts:
+    all:
+      - key_family: cors_origin
+      - is_wildcard_origin: true
+condition:
+  operator: security.permissive_cors_origin
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        CORS origin control '{{normalized_key}}' in '{{path}}' is set to an
+        explicit wildcard. This is a static configuration observation only.
+      bindings:
+        normalized_key: {type: string, evidence: normalized_key}
+        path: {type: string, evidence: path}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: insecure_permissive_cors_origin_count
+    operation: count
+evidence:
+  include:
+    - source_location
+    - value_classification
+    - security_context
+parameters: {}

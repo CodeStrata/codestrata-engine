@@ -104,25 +104,17 @@ class AIProviderPrivacyBoundaryVerificationReport:
             ),
             "credential_privacy_status": self.status_fields.get("credential_privacy", "not_run"),
             "cursor_boundary_status": self.status_fields.get("cursor_boundary", "not_run"),
-            "data_lake_boundary_status": self.status_fields.get(
-                "data_lake_boundary", "not_run"
-            ),
+            "data_lake_boundary_status": self.status_fields.get("data_lake_boundary", "not_run"),
             "defects": defects,
-            "dependency_boundary_status": self.status_fields.get(
-                "dependency_boundary", "not_run"
-            ),
+            "dependency_boundary_status": self.status_fields.get("dependency_boundary", "not_run"),
             "deterministic_status": self.status_fields.get("determinism", "not_run"),
             "diagnostics_status": self.status_fields.get("diagnostics", "not_run"),
             "doctor_boundary_status": self.status_fields.get("doctor_boundary", "not_run"),
             "epic": self.epic,
             "error_privacy_status": self.status_fields.get("error_privacy", "not_run"),
-            "execution_boundary_status": self.status_fields.get(
-                "execution_boundary", "not_run"
-            ),
+            "execution_boundary_status": self.status_fields.get("execution_boundary", "not_run"),
             "failed_checks": self.check_counts.get("failed", 0),
-            "failure_isolation_status": self.status_fields.get(
-                "failure_isolation", "not_run"
-            ),
+            "failure_isolation_status": self.status_fields.get("failure_isolation", "not_run"),
             "limitations": list(self.limitations),
             "logging_status": self.status_fields.get("logging", "not_run"),
             "model_privacy_status": self.status_fields.get("model_privacy", "not_run"),
@@ -130,9 +122,7 @@ class AIProviderPrivacyBoundaryVerificationReport:
             "negative_scenarios": [s.to_dict() for s in self.negative_scenarios],
             "notes": list(self.notes),
             "packaging_status": self.status_fields.get("packaging", "not_run"),
-            "platform_boundary_status": self.status_fields.get(
-                "platform_boundary", "not_run"
-            ),
+            "platform_boundary_status": self.status_fields.get("platform_boundary", "not_run"),
             "prompt_privacy_status": self.status_fields.get("prompt_privacy", "not_run"),
             "provider_matrix": self.provider_matrix,
             "providers": list(self.providers),
@@ -140,17 +130,13 @@ class AIProviderPrivacyBoundaryVerificationReport:
             "registry_decision": self.registry_decision,
             "registry_decision_label": self.registry_decision_label,
             "registry_status": self.status_fields.get("registry", "not_run"),
-            "reporting_boundary_status": self.status_fields.get(
-                "reporting_boundary", "not_run"
-            ),
+            "reporting_boundary_status": self.status_fields.get("reporting_boundary", "not_run"),
             "response_privacy_status": self.status_fields.get("response_privacy", "not_run"),
             "retry_safety_status": self.status_fields.get("retry_safety", "not_run"),
             "schema_name": self.schema_name,
             "schema_version": self.schema_version,
             "slice_id": self.slice_id,
-            "telemetry_boundary_status": self.status_fields.get(
-                "telemetry_boundary", "not_run"
-            ),
+            "telemetry_boundary_status": self.status_fields.get("telemetry_boundary", "not_run"),
             "total_checks": self.check_counts.get("total", 0),
             "verdict": self.verdict,
             "verification_id": self.verification_id,

@@ -18,6 +18,21 @@ class BoundedListResponse(BaseModel):
     limit: int = Field(ge=1)
 
 
+class PaginatedListResponse(BaseModel):
+    """Collection response with explicit pagination and budgeting metadata."""
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
+
+    items: list[Any]
+    total_count: int = Field(ge=0)
+    returned_count: int = Field(ge=0)
+    offset: int = Field(ge=0)
+    limit: int = Field(ge=1)
+    has_more: bool
+    truncated: bool = False
+    budget_remaining: int | None = None
+
+
 class AbsentArtifactResponse(BaseModel):
     """Clear absent result for optional AI artifacts."""
 

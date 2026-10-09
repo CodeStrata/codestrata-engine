@@ -27,9 +27,7 @@ from codestrata.telemetry.analytics.installation_identity import (
 
 
 def _identity() -> AnonymousInstallationIdentity:
-    return AnonymousInstallationIdentity(
-        installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"
-    )
+    return AnonymousInstallationIdentity(installation_id="aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee")
 
 
 def _event(**overrides: object) -> AssessmentAnalyticsEvent:
@@ -53,9 +51,7 @@ def _event(**overrides: object) -> AssessmentAnalyticsEvent:
         offline_mode=bool(data.get("offline_mode", True)),
         ai_requested=bool(data.get("ai_requested", False)),
         ai_used=bool(data.get("ai_used", False)),
-        failure_category=(
-            str(data["failure_category"]) if data.get("failure_category") else None
-        ),
+        failure_category=(str(data["failure_category"]) if data.get("failure_category") else None),
         privacy_projection_applied=bool(data.get("privacy_projection_applied", True)),
         schema_version=str(data.get("schema_version", "1.0")),
         policy_version=str(data.get("policy_version", "1.0")),

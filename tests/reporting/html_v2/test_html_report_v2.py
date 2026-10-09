@@ -284,25 +284,31 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     assert isinstance(document, CustomerReportDocument)
     assert 3 <= len(document.key_takeaways) <= 5
     assert document.outline
-    assert document.outline[0].section_id == "leadership-verdict"
+    assert document.outline[0].section_id == "attention-first"
     outline_ids = {entry.section_id for entry in document.outline}
-    assert "executive-summary" in outline_ids
-    assert "engineering-intelligence-summary" in outline_ids
+    assert "attention-first" in outline_ids
     assert "assessment-results" in outline_ids
-    assert "technology-inventory" in outline_ids
+    assert "architecture-map" in outline_ids
+    assert "engineering-hotspots" in outline_ids
+    assert "ownership-concentration" in outline_ids
+    assert "temporal-co-change" in outline_ids
+    assert "coverage-and-trust" in outline_ids
+    assert "architecture-intelligence" in outline_ids
     assert "security-intelligence" in outline_ids
-    assert "engineering-risks" in outline_ids
+    assert "quality-intelligence" in outline_ids
+    assert "technology-inventory" not in outline_ids
+    assert "cloud-readiness" not in outline_ids
+    assert "ai-readiness" not in outline_ids
+    assert "modernization-assessment" not in outline_ids
+    assert "engineering-risks" not in outline_ids
     assert "priority-actions" in outline_ids
     assert "assessment-scope" not in outline_ids
-    # Ordering: Leadership → Executive Summary → Assessment Overview
     ordered = [entry.section_id for entry in document.outline]
-    assert ordered.index("leadership-verdict") < ordered.index("executive-summary")
-    assert ordered.index("executive-summary") < ordered.index(
-        "engineering-intelligence-summary"
-    )
-    assert ordered.index("engineering-intelligence-summary") < ordered.index(
-        "key-takeaways"
-    )
+    assert ordered.index("attention-first") < ordered.index("assessment-results")
+    assert ordered.index("assessment-results") < ordered.index("architecture-map")
+    assert ordered.index("architecture-map") < ordered.index("engineering-hotspots")
+    assert ordered.index("engineering-hotspots") < ordered.index("priority-actions")
+    assert ordered.index("priority-actions") < ordered.index("coverage-and-trust")
     assert document.assessment_scope is not None
     assert "Security" in document.assessment_scope.assessed_packs
     assert document.metadata.report_version == REPORT_HTML_VERSION
@@ -312,21 +318,24 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     assert document.leadership_verdict
     assert document.executive_summary is not None
     assert document.priority_actions
-    assert len(document.assessment_heads) == 8
+    assert len(document.headline_outcomes) == 4
+    assert len(document.assessment_heads) == 9
 
     html = HtmlReportRenderer().render(document)
     assert 'id="cover"' in html
     assert 'id="contents"' in html
-    assert "Leadership Verdict" in html
-    assert "Executive Summary" in html
-    assert "Key Takeaways" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
+    assert html.count('id="executive-summary"') == 1
+    assert html.find('id="attention-first"') < html.find('id="executive-summary"')
+    assert 'href="#executive-summary"' not in html
+    assert "Key Takeaways" not in html
     assert "Assessment Overview" in html
-    assert "Should I care?" in html
-    assert 'id="executive-summary"' in html
+    assert "Should I care?" not in html
     assert 'id="engineering-intelligence-summary"' in html
-    exec_idx = html.find('id="executive-summary"')
+    attention_idx = html.find('id="attention-first"')
     eis_idx = html.find('id="engineering-intelligence-summary"')
-    assert 0 <= exec_idx < eis_idx
+    assert 0 <= attention_idx < eis_idx
     assert document.engineering_intelligence is not None
     assert "Overall assessment status" in html
     assert "Assessment heads assessed" in html
@@ -364,7 +373,9 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     assert 'rel="icon"' in html
     assert "data:image/png;base64," in html
     assert html.lower().count("<link ") == 1
-    assert "<script" not in html
+    assert "<script src" not in html
+    assert html.lower().count("<script") == 1
+    assert "script-src 'sha256-" in html
 
 
 def test_ai_enrichment_present_and_absent(tmp_path: Path) -> None:
@@ -385,11 +396,12 @@ def test_ai_enrichment_present_and_absent(tmp_path: Path) -> None:
     assert view.ai_enrichment.prompt_version == "1.1.0"
     assert "Advisor version" in with_ai
     assert "Prompt version" in with_ai
-    # Leadership narrative is present; methodology jargon is not in the Advisor body.
-    assert "Leadership Verdict" in with_ai
+    assert "Current-code baseline" in with_ai
+    assert "Leadership Verdict" not in with_ai
     advisor_start = with_ai.lower().find('id="modernization-advisor"')
     assert advisor_start >= 0
-    advisor_html = with_ai.lower()[advisor_start:]
+    advisor_end = with_ai.lower().find('id="assessment-results"', advisor_start)
+    advisor_html = with_ai.lower()[advisor_start : advisor_end if advisor_end >= 0 else None]
     assert "deterministic findings" not in advisor_html
     assert "deterministic recommendations" not in advisor_html
 
@@ -477,12 +489,11 @@ def test_artifact_write_keeps_phase3_artifacts(tmp_path: Path) -> None:
     findings_payload = json.loads(findings_text)
     recommendations_payload = json.loads(recommendations_text)
     assert str(manifest["schema"]).startswith("codestrata-assessment-manifest")
-    assert findings_payload["finding_count"] == document["assessment"]["summary"][
-        "finding_count"
-    ]
-    assert recommendations_payload["recommendation_count"] == document["assessment"][
-        "summary"
-    ]["recommendation_count"]
+    assert findings_payload["finding_count"] == document["assessment"]["summary"]["finding_count"]
+    assert (
+        recommendations_payload["recommendation_count"]
+        == document["assessment"]["summary"]["recommendation_count"]
+    )
     assert findings_payload["finding_count"] == len(document["assessment"]["findings"])
     assert recommendations_payload["recommendation_count"] == len(
         document["assessment"]["deterministic_recommendations"]
@@ -559,7 +570,8 @@ def test_java_and_javascript_samples(tmp_path: Path, kind: str) -> None:
     )
     html = HtmlReportRenderer().render(build_html_report_view_model(report_input))
     assert "Assessment Overview" in html
-    assert "Leadership Verdict" in html
+    assert "Current-code baseline" in html
+    assert "Leadership Verdict" not in html
     assert "Assessment Results" in html
     assert "Priority Actions" in html
     assert repository.name in html

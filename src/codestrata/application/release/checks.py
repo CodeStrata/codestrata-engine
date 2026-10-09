@@ -213,6 +213,39 @@ def check_build_artifacts(dist_directory: Path) -> ReleaseCheckItem:
     )
 
 
+def check_verification_profiles() -> ReleaseCheckItem:
+    """Validate packaged public Sigstore and private offline profiles."""
+
+    from codestrata.application.release.verification import load_packaged_verification_policy
+
+    try:
+        policy = load_packaged_verification_policy()
+    except Exception as error:  # noqa: BLE001
+        return ReleaseCheckItem(
+            name="verification_profiles",
+            ok=False,
+            detail=str(error),
+        )
+    public = policy.public_sigstore
+    private = policy.private_offline
+    distinct = public.signer_role != private.signer_role
+    ok = distinct and (not private.instant_revocation) and private.transparency_log_forbidden
+    return ReleaseCheckItem(
+        name="verification_profiles",
+        ok=ok,
+        detail=policy.policy_token if ok else "profile role or revocation policy invalid",
+        metadata={
+            "policy_token": policy.policy_token,
+            "public_profile": public.profile_id,
+            "private_profile": private.profile_id,
+            "public_role": public.signer_role,
+            "private_role": private.signer_role,
+            "instant_revocation": private.instant_revocation,
+            "revocation_max_age_seconds": private.revocation_max_age_seconds,
+        },
+    )
+
+
 def check_mcp_optional() -> ReleaseCheckItem:
     """Report whether the MCP optional extra is importable."""
 

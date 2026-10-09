@@ -145,9 +145,7 @@ def run_model_resolution_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         check_cli_model_id_wins_over_everything_for_both_providers(),
         check_bedrock_env_var_is_both_overlaid_and_read_at_resolution_time(),
     ]
-    matrix = {
-        "env_vars_checked": [CODESTRATA_BEDROCK_MODEL_ID_ENV, CODESTRATA_OPENAI_MODEL_ID_ENV]
-    }
+    matrix = {"env_vars_checked": [CODESTRATA_BEDROCK_MODEL_ID_ENV, CODESTRATA_OPENAI_MODEL_ID_ENV]}
     return checks, matrix
 
 

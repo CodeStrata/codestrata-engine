@@ -84,9 +84,7 @@ def evaluate_security_pack_for_context_detailed(
         diagnostics.append("repository_sensitive_evidence_unavailable")
     else:
         evidence_pipeline = "repository_sensitive"
-        evidence_fingerprint = evidence.evidence_fingerprint or _fingerprint_evidence(
-            evidence
-        )
+        evidence_fingerprint = evidence.evidence_fingerprint or _fingerprint_evidence(evidence)
         artifacts_discovered = evidence.coverage.candidate_files_discovered
         configuration_facts_collected = evidence.coverage.configuration_facts_collected
 
@@ -104,9 +102,7 @@ def evaluate_security_pack_for_context_detailed(
             "configuration_facts": {
                 **shared_context.configuration_facts,
                 "security_enabled": "true",
-                "repository_sensitive_evidence_present": str(
-                    evidence is not None
-                ).lower(),
+                "repository_sensitive_evidence_present": str(evidence is not None).lower(),
             },
         }
     )
@@ -126,14 +122,10 @@ def evaluate_security_pack_for_context_detailed(
         str(record.rule_id): record.category or RuleCategory.SECURITY
         for record in platform_result.records
     }
-    findings = mapper.map_matches(
-        platform_result.matches, category_by_rule=category_by_rule
-    )
+    findings = mapper.map_matches(platform_result.matches, category_by_rule=category_by_rule)
     evaluated = tuple(platform_result.plan.execution_order)
     skipped = tuple(
-        entry.rule_id
-        for entry in platform_result.plan.skipped
-        if entry.rule_id not in evaluated
+        entry.rule_id for entry in platform_result.plan.skipped if entry.rule_id not in evaluated
     )
     for record in platform_result.records:
         if record.status.value == "not_applicable" and record.rule_id not in skipped:
@@ -144,9 +136,7 @@ def evaluate_security_pack_for_context_detailed(
         rules_skipped=tuple(sorted(set(skipped))),
     )
     rule_facts = _rule_execution_facts(platform_result.records)
-    failed = sum(
-        1 for item in rule_facts if item.evaluation_status == "failed"
-    )
+    failed = sum(1 for item in rule_facts if item.evaluation_status == "failed")
     return SecurityPackExecutionResult(
         evaluation=evaluation,
         repository_sensitive_evidence=evidence,

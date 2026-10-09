@@ -162,9 +162,9 @@ def merge_customer_findings(
 
     if evaluation is not None:
         consolidated = consolidate_findings(evaluation.findings)
-        correlated = correlate_findings(consolidated.findings)  # type: ignore[arg-type]
+        correlated = correlate_findings(consolidated.findings)
         for finding in correlated.findings:
-            customer = _from_phase3_finding(finding)  # type: ignore[arg-type]
+            customer = _from_phase3_finding(finding)
             # Surface member aliases for recommendation remapping.
             members = str((customer.metadata or {}).get("duplicate_member_finding_ids") or "")
             if members:
@@ -221,9 +221,7 @@ def _merge_customer_finding_evidence(
     confidence = preferred.finding_confidence
     other_conf = other.finding_confidence
     if confidence is not None and other_conf is not None:
-        pref_unavailable = getattr(
-            getattr(confidence, "level", None), "value", ""
-        ) == "unavailable"
+        pref_unavailable = getattr(getattr(confidence, "level", None), "value", "") == "unavailable"
         if pref_unavailable:
             confidence = other_conf
     return replace(
@@ -311,9 +309,7 @@ def resolve_customer_recommendations(
     aligned = tuple(
         _apply_customer_recommendation_priority(
             _apply_customer_recommendation_confidence(
-                _align_customer_recommendation_findings(
-                    item, allowed_finding_ids, aliases
-                ),
+                _align_customer_recommendation_findings(item, allowed_finding_ids, aliases),
                 findings_by_id=findings_by_id,
             ),
             findings_by_id=findings_by_id,
@@ -420,11 +416,12 @@ def _apply_customer_recommendation_priority(
 ) -> CustomerRecommendation:
     """Calibrate customer recommendation priority after confidence is known."""
 
+    from types import SimpleNamespace
+
     from codestrata.application.recommendations.priority_calibration import (
         calibrate_recommendation_priority,
     )
     from codestrata.domain.recommendations.enums import RecommendationPriority
-    from types import SimpleNamespace
 
     provider_id = item.provider_id
     if not provider_id and item.rule_id and str(item.rule_id).startswith("provider:"):
@@ -455,9 +452,7 @@ def _apply_customer_recommendation_priority(
     assessment = calibrate_recommendation_priority(
         proxy,
         findings=tuple(
-            findings_by_id[fid]
-            for fid in proxy.supporting_finding_ids
-            if fid in findings_by_id
+            findings_by_id[fid] for fid in proxy.supporting_finding_ids if fid in findings_by_id
         ),
     )
     # Project Immediate → customer-facing critical for Priority Action / JSON parity.
@@ -498,7 +493,7 @@ def _related_finding_aliases(
         for member_id, canonical_id in consolidated.original_to_canonical.items():
             aliases[member_id] = canonical_id
         for phase3_finding in consolidated.findings:
-            customer = _from_phase3_finding(phase3_finding)  # type: ignore[arg-type]
+            customer = _from_phase3_finding(phase3_finding)
             survivor = by_key.get(_finding_dedupe_key(customer))
             if survivor is None:
                 continue
@@ -603,8 +598,7 @@ def customer_finding_json(item: CustomerFinding) -> dict[str, Any]:
         "source": item.source,
         "evidence": deduped_evidence,
         "evidence_refs": [
-            {"evidence_id": str(getattr(ref, "evidence_id", ref))}
-            for ref in item.evidence_refs
+            {"evidence_id": str(getattr(ref, "evidence_id", ref))} for ref in item.evidence_refs
         ],
         "primary_evidence_id": item.primary_evidence_id,
         "synthesized_from_evidence_ids": list(item.synthesized_from_evidence_ids),
@@ -644,9 +638,7 @@ def customer_finding_json(item: CustomerFinding) -> dict[str, Any]:
         )
 
         if isinstance(item.finding_confidence, FindingConfidence):
-            payload["finding_confidence"] = finding_confidence_to_json(
-                item.finding_confidence
-            )
+            payload["finding_confidence"] = finding_confidence_to_json(item.finding_confidence)
         elif isinstance(item.finding_confidence, dict):
             payload["finding_confidence"] = dict(
                 sorted(item.finding_confidence.items(), key=lambda pair: str(pair[0]))
@@ -664,7 +656,7 @@ def customer_recommendation_json(item: CustomerRecommendation) -> dict[str, Any]
         merged = sorted(set(supporting) | set(related))
         supporting = merged
         related = merged
-    payload = {
+    payload: dict[str, Any] = {
         "id": item.id,
         "rule_id": item.rule_id,
         "title": sanitize_customer_text(item.title),
@@ -712,9 +704,7 @@ def customer_recommendation_json(item: CustomerRecommendation) -> dict[str, Any]
         )
 
         if isinstance(item.priority_assessment, RecommendationPriorityAssessment):
-            payload["priority_assessment"] = priority_assessment_to_json(
-                item.priority_assessment
-            )
+            payload["priority_assessment"] = priority_assessment_to_json(item.priority_assessment)
         elif isinstance(item.priority_assessment, dict):
             payload["priority_assessment"] = dict(
                 sorted(
@@ -789,9 +779,7 @@ def _from_phase1_finding(finding: Phase1Finding) -> CustomerFinding:
         metadata=dict(finding.metadata),
         phase1=finding,
         finding_confidence=FindingConfidence.unavailable(
-            limitations=(
-                "Phase-1 finding lacks Shared Rule Confidence and Evidence Confidence.",
-            ),
+            limitations=("Phase-1 finding lacks Shared Rule Confidence and Evidence Confidence.",),
         ),
     )
 
@@ -841,7 +829,9 @@ def _from_phase3_finding(finding: Phase3Finding) -> CustomerFinding:
         finding_confidence=finding.finding_confidence,
         correlation_ids=corr_ids,
         correlated_finding_ids=related_ids,
-        base_severity=base_sev.value if base_sev is not None else finding.metadata.get("base_severity"),
+        base_severity=base_sev.value
+        if base_sev is not None
+        else finding.metadata.get("base_severity"),
         severity_assessment=assessment_payload,
     )
 
@@ -891,9 +881,7 @@ def _from_phase3_recommendation(
         rule_id = f"provider:{recommendation.provider_id}"
     supporting = tuple(
         str(item)
-        for item in (
-            recommendation.supporting_finding_ids or recommendation.related_finding_ids
-        )
+        for item in (recommendation.supporting_finding_ids or recommendation.related_finding_ids)
     )
     related = tuple(str(item) for item in recommendation.related_finding_ids) or supporting
     return CustomerRecommendation(

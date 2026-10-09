@@ -25,9 +25,7 @@ class TelemetryStatusDiagnostics:
     def to_stable_dict(self) -> dict[str, Any]:
         return {
             "installation_identity_used": self.installation_identity_used,
-            "legacy_preference_authorizes_runtime": (
-                self.legacy_preference_authorizes_runtime
-            ),
+            "legacy_preference_authorizes_runtime": (self.legacy_preference_authorizes_runtime),
             "limitation_codes": list(self.limitation_codes),
             "runtime_state": self.runtime_state,
             "schema_name": self.schema_name,

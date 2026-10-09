@@ -163,8 +163,7 @@ class CrossProviderVerificationReport:
             "",
             f"- Verdict: **{self.verdict}**",
             f"- Providers: {', '.join(self.providers)}",
-            f"- Registry decision: **{self.registry_decision}** "
-            f"({self.registry_decision_label})",
+            f"- Registry decision: **{self.registry_decision}** ({self.registry_decision_label})",
             "- Compatibility requirements checked: "
             f"{', '.join(self.compatibility_requirement_ids)}",
             f"- Negative scenarios: {len(self.negative_scenarios)}",

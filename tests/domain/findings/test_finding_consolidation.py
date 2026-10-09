@@ -103,9 +103,7 @@ def test_condition_key_differs_by_rule_path_symbol_measurement_graph() -> None:
     graph_b = graph_a.model_copy(
         update={"metadata": {**graph_a.metadata, "graph_edge_id": "edge:2"}}
     )
-    assert canonical_finding_condition_key(graph_a) != canonical_finding_condition_key(
-        graph_b
-    )
+    assert canonical_finding_condition_key(graph_a) != canonical_finding_condition_key(graph_b)
 
 
 def test_exact_duplicate_merges_and_recomputes_confidence() -> None:

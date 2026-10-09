@@ -7,9 +7,9 @@ from codestrata.telemetry.catalog_policy import (
     PRIVACY_FIRST_TELEMETRY_CATALOG_ID,
     PRIVACY_FIRST_TELEMETRY_CATALOG_SCHEMA_VERSION,
 )
-from codestrata.telemetry.privacy import APPROVED_FIELD_NAMES, FORBIDDEN_FIELD_NAMES
 from codestrata.telemetry.preview_models import PrivacyFirstTelemetryPreview
 from codestrata.telemetry.preview_policy import PreviewPolicyError
+from codestrata.telemetry.privacy import APPROVED_FIELD_NAMES, FORBIDDEN_FIELD_NAMES
 from codestrata.telemetry.runtime_policy import PRIVACY_SAFE_RUNTIME_EVENT_SCHEMA_VERSION
 
 
@@ -67,13 +67,9 @@ def reconcile_preview_against_catalog(
     if tuple(preview.omitted_optional_fields) != expected_omitted:
         raise PreviewReconciliationError("omitted_optional_fields mismatch")
 
-    enum_map = {
-        enum.name: {value.value for value in enum.values} for enum in catalog.enums
-    }
+    enum_map = {enum.name: {value.value for value in enum.values} for enum in catalog.enums}
     field_enum = {
-        field.name: field.enum_ref
-        for field in catalog.shared_fields
-        if field.enum_ref is not None
+        field.name: field.enum_ref for field in catalog.shared_fields if field.enum_ref is not None
     }
     for key, value in (preview.event or {}).items():
         enum_ref = field_enum.get(key)

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://codestrata.io/schemas/contracts/v1.2/SignedPackageManifest.json",
+  "title": "CodeStrata Engine Signed Package Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_name", "schema_version", "body", "body_digest", "operational"],
+  "properties": {
+    "schema_name": { "type": "string", "const": "codestrata.signed-package-manifest.v1" },
+    "schema_version": { "type": "string" },
+    "body": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_name", "schema_version", "package_id", "package_version", "effective_ruleset_digest", "payload_digests", "execution_purpose", "compatibility", "preview_cannot_authorize_production"],
+      "properties": {
+        "schema_name": { "type": "string" },
+        "schema_version": { "type": "string" },
+        "package_id": { "type": "string" },
+        "package_version": { "type": "string" },
+        "effective_ruleset_digest": { "type": "string" },
+        "payload_digests": { "type": "array", "minItems": 1 },
+        "execution_purpose": { "type": "string", "enum": ["production", "preview"] },
+        "compatibility": { "type": "object", "additionalProperties": false },
+        "validity_not_before": { "type": ["string", "null"] },
+        "validity_not_after": { "type": ["string", "null"] },
+        "preview_cannot_authorize_production": { "type": "boolean", "const": true }
+      }
+    },
+    "body_digest": { "type": "string", "minLength": 64, "maxLength": 64 },
+    "operational": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "signature": { "type": ["string", "null"] },
+        "signed_at": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

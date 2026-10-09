@@ -8,9 +8,7 @@ from pydantic import RootModel, field_validator
 
 # Shared platform: category.kebab-case-name
 # Underscores allowed in namespace (e.g. technical_debt.*).
-_SHARED_RULE_ID_PATTERN = re.compile(
-    r"^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_-]*)+$"
-)
+_SHARED_RULE_ID_PATTERN = re.compile(r"^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_-]*)+$")
 # Legacy Assessment Graph rules: codestrata-rule-*
 _LEGACY_RULE_ID_PATTERN = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)+$")
 

@@ -6,15 +6,10 @@ import json
 from pathlib import Path
 
 import pytest
-
-from codestrata.domain.quality_metrics.false_positives import (
-    FalsePositiveClassification,
-    FalsePositiveStatus,
-)
 from validation.false_positives.adjudication import (
     FalsePositiveAdjudication,
-    apply_adjudication,
     adjudication_path,
+    apply_adjudication,
 )
 from validation.false_positives.candidates import candidates_from_pack_result
 from validation.false_positives.cli import main as fp_cli_main
@@ -27,13 +22,22 @@ from validation.recording import (
     build_repository_validation_record,
     write_repository_validation_record,
 )
-from validation.summary_artifact import DISCLAIMER, SUMMARY_SCHEMA_VERSION
+from validation.summary_artifact import (
+    DISCLAIMER,
+    SUMMARY_SCHEMA_VERSION,
+    SourceRecordRef,
+    SummaryScope,
+)
 from validation.summary_from_records import (
     aggregate_false_positive_tracking,
     build_summary_artifact,
     render_summary_markdown,
 )
-from validation.summary_artifact import SourceRecordRef, SummaryScope
+
+from codestrata.domain.quality_metrics.false_positives import (
+    FalsePositiveClassification,
+    FalsePositiveStatus,
+)
 
 
 class _Fact:
@@ -156,9 +160,7 @@ def test_skip_error_do_not_resolve() -> None:
             ),
         ),
     )
-    historical = candidates_from_pack_result(
-        "security", result, run_id="20260801T120000Z"
-    )
+    historical = candidates_from_pack_result("security", result, run_id="20260801T120000Z")
     merged = apply_run_history(
         (),
         historical,
@@ -173,9 +175,7 @@ def test_record_additive_fields(tmp_path: Path) -> None:
     from validation.models import ComparisonOutcome, PackPrecisionRecord
 
     outcome = ComparisonOutcome(
-        pack_precision=(
-            PackPrecisionRecord(pack="security", true_positives=0, false_positives=1),
-        ),
+        pack_precision=(PackPrecisionRecord(pack="security", true_positives=0, false_positives=1),),
         false_positives=tuple(
             item.canonical_dict()
             for item in candidates_from_pack_result(

@@ -7,8 +7,9 @@ from __future__ import annotations
 
 import json
 import platform
+from collections.abc import Mapping, Sequence
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 from uuid import uuid4
 
 from codestrata.package_metadata import get_package_version
@@ -118,9 +119,7 @@ def head_confidence_rows_from_map(
         cloud_head = canonicalize_cloud_head(str(head))
         if cloud_head is None or not level:
             continue
-        rows.append(
-            HeadConfidenceProjectionRow(head=cloud_head, confidence_level=level.lower())
-        )
+        rows.append(HeadConfidenceProjectionRow(head=cloud_head, confidence_level=level.lower()))
     rows.sort(key=lambda item: item.head)
     return tuple(rows)
 
@@ -225,11 +224,7 @@ def build_success_projection_source(
         success=True,
         assessment_mode=map_assessment_mode(
             ai_used=ai_used,
-            mode_value=(
-                "deterministic_with_ai"
-                if ai_used
-                else "deterministic"
-            ),
+            mode_value=("deterministic_with_ai" if ai_used else "deterministic"),
         ),
         executed_heads=executed_heads_from_assessment_result(result),
         findings=findings,

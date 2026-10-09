@@ -36,9 +36,7 @@ from validate_catalog import (  # noqa: E402
 
 def _catalog() -> dict:
     return json.loads(
-        (REPO / "validation" / "repository-catalog" / "catalog.json").read_text(
-            encoding="utf-8"
-        )
+        (REPO / "validation" / "repository-catalog" / "catalog.json").read_text(encoding="utf-8")
     )
 
 
@@ -104,9 +102,7 @@ def test_bookstack_replacement_metadata() -> None:
     assert bookstack["project_shape"] == "web_application"
     assert bookstack["visibility"] == "public"
     assert bookstack["license"] == "MIT"
-    assert bookstack["qualified_revision"]["value"] == (
-        "4e406c41c4c8060a5795e74c66fb96362e54f400"
-    )
+    assert bookstack["qualified_revision"]["value"] == ("4e406c41c4c8060a5795e74c66fb96362e54f400")
     assert bookstack["expected_runtime_tier"] == "tier3"
     assert bookstack["enabled_for"]["release_validation"] is True
     assert bookstack["enabled_for"]["engineering_intelligence"] is True
@@ -209,9 +205,7 @@ def test_no_invented_repositories_beyond_approved_replacement() -> None:
 def test_eshop_pin_unchanged() -> None:
     data = _catalog()
     eshop = next(item for item in data["repositories"] if item["id"] == "eshop")
-    assert eshop["qualified_revision"]["value"] == (
-        "9b4f9434f46fdc5c1a6e9e936af2868340cdbc48"
-    )
+    assert eshop["qualified_revision"]["value"] == ("9b4f9434f46fdc5c1a6e9e936af2868340cdbc48")
 
 
 def test_sv10_enabled_without_pin_fails_validation() -> None:

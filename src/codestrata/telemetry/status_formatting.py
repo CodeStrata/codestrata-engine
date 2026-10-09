@@ -20,10 +20,7 @@ def format_privacy_first_telemetry_status(
         "Consent saved: No",
         "Prior consent reused: No",
         f"Interactive prompt: {prompt_cmds} only, when eligible (default No)",
-        (
-            "Explicit flags: `--telemetry-allow` / `--telemetry-deny` "
-            f"on {flag_cmds}"
-        ),
+        (f"Explicit flags: `--telemetry-allow` / `--telemetry-deny` on {flag_cmds}"),
         "Non-interactive behavior: Prompt suppressed",
         "Privacy filtering: Required",
         "Transport: Unavailable",
@@ -47,7 +44,11 @@ def format_privacy_first_telemetry_status(
         ),
         (
             f"Pre-transport privacy gate: "
-            f"{'Required / Available' if status.privacy_gate_available and status.privacy_gate_required else 'Unavailable'} "
+            f"{
+                'Required / Available'
+                if status.privacy_gate_available and status.privacy_gate_required
+                else 'Unavailable'
+            } "
             f"(policy {status.privacy_policy_version})"
         ),
         "",

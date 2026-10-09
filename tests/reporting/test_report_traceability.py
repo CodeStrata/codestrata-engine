@@ -29,6 +29,7 @@ from codestrata.domain.traceability import (
     dedupe_evidence_refs,
 )
 from codestrata.domain.traceability.enums import EvidenceProductionMode
+from codestrata.domain.traceability.validators import TraceabilityValidationError
 from codestrata.models import (
     AnalysisResult,
     Repository,
@@ -115,9 +116,7 @@ def _report_with_traceability(tmp_path: Path) -> ModernizationReportInput:
         supporting_finding_ids=(finding.id,),
         primary_finding_id=finding.id,
         evidence_completeness=EvidenceCompleteness.COMPLETE,
-        actions=(
-            RecommendationAction(order=1, title="Rotate", description="Rotate secret"),
-        ),
+        actions=(RecommendationAction(order=1, title="Rotate", description="Rotate secret"),),
         subject_keys=("repo",),
     )
     return ModernizationReportInput(
@@ -160,8 +159,7 @@ def test_evidence_collected_from_findings_deduped_ordered() -> None:
     payload = serialize_evidence_index(refs)
     assert all("evidence_id" in item for item in payload)
     assert all(
-        not str((item.get("location") or {}).get("path", "")).startswith("/")
-        for item in payload
+        not str((item.get("location") or {}).get("path", "")).startswith("/") for item in payload
     )
 
 
@@ -173,7 +171,7 @@ def test_contradictory_duplicate_evidence_rejected() -> None:
         production_mode=EvidenceProductionMode.DIRECT,
         location=EvidenceLocation(path="a.py"),
     )
-    with pytest.raises(Exception):
+    with pytest.raises(TraceabilityValidationError):
         dedupe_evidence_refs((a, b))
 
 
@@ -232,9 +230,7 @@ def test_full_chain_in_report_json(tmp_path: Path) -> None:
     assert assessment["priority_actions"]
     assert assessment["roadmap"]
     assert assessment["summary"]["evidence_count"] == len(assessment["evidence"])
-    assert assessment["summary"]["priority_action_count"] == len(
-        assessment["priority_actions"]
-    )
+    assert assessment["summary"]["priority_action_count"] == len(assessment["priority_actions"])
     assert assessment["summary"]["finding_count"] == len(assessment["findings"])
     assert assessment["summary"]["recommendation_count"] == len(
         assessment["deterministic_recommendations"]
@@ -270,9 +266,9 @@ def test_repeat_run_stable_ids(tmp_path: Path) -> None:
     assert [a["action_id"] for a in first["assessment"]["priority_actions"]] == [
         a["action_id"] for a in second["assessment"]["priority_actions"]
     ]
-    assert [
-        i["initiative_id"] for i in first["assessment"]["roadmap"]["initiatives"]
-    ] == [i["initiative_id"] for i in second["assessment"]["roadmap"]["initiatives"]]
+    assert [i["initiative_id"] for i in first["assessment"]["roadmap"]["initiatives"]] == [
+        i["initiative_id"] for i in second["assessment"]["roadmap"]["initiatives"]
+    ]
 
 
 def test_companion_artifacts_align(tmp_path: Path) -> None:
@@ -289,9 +285,10 @@ def test_companion_artifacts_align(tmp_path: Path) -> None:
     assert [f["id"] for f in findings_doc["findings"]] == [
         f["id"] for f in document["assessment"]["findings"]
     ]
-    assert recs_doc["recommendation_count"] == document["assessment"]["summary"][
-        "recommendation_count"
-    ]
+    assert (
+        recs_doc["recommendation_count"]
+        == document["assessment"]["summary"]["recommendation_count"]
+    )
     assert [r["id"] for r in recs_doc["recommendations"]] == [
         r["id"] for r in document["assessment"]["deterministic_recommendations"]
     ]

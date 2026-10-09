@@ -58,9 +58,7 @@ SYNTHETIC_EXCEPTION = (
 )
 SYNTHETIC_CONTEXT = '{"synthetic_privacy_context":"1112"}'
 SYNTHETIC_ENRICHMENT_RESPONSE = (
-    '{"executive_summary":{"overview":"'
-    + SYNTHETIC_RESPONSE
-    + '"},"themes":[],"priorities":[]}'
+    '{"executive_summary":{"overview":"' + SYNTHETIC_RESPONSE + '"},"themes":[],"priorities":[]}'
 )
 
 ALL_FORBIDDEN_MARKERS: tuple[str, ...] = (
@@ -141,9 +139,7 @@ class OpenAIStyleClient:
     """Mock OpenAI/OpenRouter surface: ``chat.completions.create``."""
 
     def __init__(self, outcome: Any | None = None) -> None:
-        self._completions = _Completions(
-            OpenAIStyleResponse() if outcome is None else outcome
-        )
+        self._completions = _Completions(OpenAIStyleResponse() if outcome is None else outcome)
         self.chat = type("_Chat", (), {"completions": self._completions})()
 
     @property

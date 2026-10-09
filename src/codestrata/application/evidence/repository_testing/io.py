@@ -88,8 +88,7 @@ def load_repository_testing_inputs(
     texts: dict[str, str] = {}
     errors: dict[str, str] = {}
     file_candidates_meta = [
-        (path, role, bases, language_hint)
-        for path, role, bases, language_hint in candidates
+        (path, role, bases, language_hint) for path, role, bases, language_hint in candidates
     ]
 
     if reader is None:

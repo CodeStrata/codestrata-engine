@@ -72,9 +72,7 @@ def test_assemble_disabled_and_empty_are_valid() -> None:
 
 
 def test_artifact_write_round_trip(tmp_path: Path) -> None:
-    section = TechnicalDebtAssessmentAssembler().assemble_empty(
-        repository_id="repo:demo"
-    )
+    section = TechnicalDebtAssessmentAssembler().assemble_empty(repository_id="repo:demo")
     written = write_technical_debt_assessment_artifact(section, tmp_path)
     assert written.path == resolve_head_path(
         tmp_path, legacy_filename=TECHNICAL_DEBT_ASSESSMENT_FILENAME

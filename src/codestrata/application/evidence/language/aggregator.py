@@ -22,9 +22,7 @@ class LanguageEvidenceAggregator:
         repository_id: str,
         bundles: Sequence[LanguageEvidenceBundle],
     ) -> AggregatedLanguageEvidence:
-        ordered = tuple(
-            sorted(bundles, key=lambda item: (item.provider_id, item.language))
-        )
+        ordered = tuple(sorted(bundles, key=lambda item: (item.provider_id, item.language)))
         units: dict[str, SourceUnitEvidence] = {}
         deps: dict[str, DependencyEvidence] = {}
         frameworks: dict[str, FrameworkUsageEvidence] = {}
@@ -41,38 +39,30 @@ class LanguageEvidenceAggregator:
                 if existing_unit is None:
                     units[unit_key] = unit
                     continue
-                if (
-                    existing_unit.layer_hint != unit.layer_hint
-                    and unit.layer_hint != "unknown"
-                ):
+                if existing_unit.layer_hint != unit.layer_hint and unit.layer_hint != "unknown":
                     if existing_unit.layer_hint == "unknown":
                         units[unit_key] = unit
                     else:
                         conflicts.append(
-                            "unit_layer:"
-                            f"{unit_key}:{existing_unit.layer_hint}!={unit.layer_hint}"
+                            f"unit_layer:{unit_key}:{existing_unit.layer_hint}!={unit.layer_hint}"
                         )
                         units[unit_key] = _merge_unit_provenance(existing_unit, unit)
                 else:
                     units[unit_key] = _merge_unit_provenance(existing_unit, unit)
 
             for dep in bundle.dependencies:
-                dep_key = (
-                    f"{dep.source_unit_id}->{dep.target_unit_id}:{dep.semantics.value}"
-                )
+                dep_key = f"{dep.source_unit_id}->{dep.target_unit_id}:{dep.semantics.value}"
                 existing_dep = deps.get(dep_key)
                 if existing_dep is None:
                     deps[dep_key] = dep
                     continue
                 if existing_dep.semantics != dep.semantics:
                     conflicts.append(
-                        "dependency_semantics:"
-                        f"{dep_key}:{existing_dep.semantics}!={dep.semantics}"
+                        f"dependency_semantics:{dep_key}:{existing_dep.semantics}!={dep.semantics}"
                     )
                     winner = (
                         dep
-                        if _semantics_rank(dep.semantics)
-                        > _semantics_rank(existing_dep.semantics)
+                        if _semantics_rank(dep.semantics) > _semantics_rank(existing_dep.semantics)
                         else existing_dep
                     )
                     other = existing_dep if winner is dep else dep
@@ -136,9 +126,7 @@ def _merge_unit_provenance(
         )
     )
     notes = tuple(
-        sorted(
-            set(left.provenance.notes) | set(right.provenance.notes) | {"multi_provider"}
-        )
+        sorted(set(left.provenance.notes) | set(right.provenance.notes) | {"multi_provider"})
     )
     provenance = EvidenceProvenance(
         provider_id=left.provenance.provider_id,
@@ -173,9 +161,7 @@ def _merge_dep_provenance(
         )
     )
     notes = tuple(
-        sorted(
-            set(left.provenance.notes) | set(right.provenance.notes) | {"multi_provider"}
-        )
+        sorted(set(left.provenance.notes) | set(right.provenance.notes) | {"multi_provider"})
     )
     provenance = EvidenceProvenance(
         provider_id=left.provenance.provider_id,
@@ -190,9 +176,7 @@ def _merge_dep_provenance(
     )
     return left.model_copy(
         update={
-            "evidence_paths": tuple(
-                sorted(set(left.evidence_paths) | set(right.evidence_paths))
-            ),
+            "evidence_paths": tuple(sorted(set(left.evidence_paths) | set(right.evidence_paths))),
             "symbols": tuple(sorted(set(left.symbols) | set(right.symbols))),
             "provenance": provenance,
         }

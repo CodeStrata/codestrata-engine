@@ -186,9 +186,7 @@ def test_presentation_adapter_preserves_leadership_ids_and_order() -> None:
 def test_initiative_id_stable_with_traceability_fields() -> None:
     action = _action(action_id="rec-1", title="Add LICENSE", category="governance")
     first = initiative_from_priority_action(action)
-    second = initiative_from_priority_action(
-        action.model_copy(update={"limitations": ("note",)})
-    )
+    second = initiative_from_priority_action(action.model_copy(update={"limitations": ("note",)}))
     assert first.initiative_id == second.initiative_id
 
 

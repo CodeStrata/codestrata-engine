@@ -9,8 +9,8 @@ from typing import Any
 
 from verification.ai_provider_platform_completion.contract import (
     ADAPTER_PACKAGES,
-    ASSESSMENT_SCHEMA_VERSION,
     ASSESS_REGISTERED_PROVIDERS,
+    ASSESSMENT_SCHEMA_VERSION,
     BEDROCK_DEFAULT_MODEL,
     CLI_FORBIDDEN_FLAG_TOKENS,
     COMPATIBILITY_REQUIREMENT_IDS,
@@ -145,7 +145,9 @@ def run_slice_matrix_checks(
                     f"slice_{sid}_complete",
                     "slice_matrix",
                     bool(row["complete"]),
-                    detail="self package/tests/contract" if treat_self_complete else "pending_write",
+                    detail="self package/tests/contract"
+                    if treat_self_complete
+                    else "pending_write",
                 )
             )
             continue
@@ -210,6 +212,8 @@ def run_slice_matrix_checks(
 
 
 def run_provider_registry_checks() -> tuple[list[CheckResult], dict[str, Any]]:
+    from codestrata.ai.providers.exceptions import AIProviderConfigurationError
+    from codestrata.ai.providers.factory import resolve_assess_model_id
     from codestrata.config.settings import (
         DEFAULT_BEDROCK_MODEL_ID,
         AiSettings,
@@ -218,8 +222,6 @@ def run_provider_registry_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         OpenRouterSettings,
     )
     from codestrata.extensions.assess_ai import get_assess_ai_provider_registry
-    from codestrata.ai.providers.factory import resolve_assess_model_id
-    from codestrata.ai.providers.exceptions import AIProviderConfigurationError
 
     def _settings(**ai_updates: object) -> CodestrataSettings:
         payload: dict[str, object] = {"repository": {"path": "."}}
@@ -276,16 +278,12 @@ def run_provider_registry_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         get_assess_ai_provider_registry().create("aws_bedrock", _settings())
     except AIProviderConfigurationError:
         rejected = True
-    checks.append(
-        _ok("aws_bedrock_rejected_as_provider_id", "provider_registry", rejected)
-    )
+    checks.append(_ok("aws_bedrock_rejected_as_provider_id", "provider_registry", rejected))
 
     # OpenRouter requires explicit model
     raised = False
     try:
-        resolve_assess_model_id(
-            cli_model_id=None, settings=_settings(provider="openrouter")
-        )
+        resolve_assess_model_id(cli_model_id=None, settings=_settings(provider="openrouter"))
     except AIProviderConfigurationError:
         raised = True
     except Exception:  # noqa: BLE001 — any raise proves no silent default
@@ -395,7 +393,8 @@ def run_schema_registry_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         _ok(
             "product_contract_ids_are_1_0",
             "schema_registry",
-            set(PRODUCT_CONTRACT_IDS) == {
+            set(PRODUCT_CONTRACT_IDS)
+            == {
                 schemas["contract"],
                 schemas["configuration"],
                 schemas["execution"],
@@ -407,8 +406,7 @@ def run_schema_registry_checks() -> tuple[list[CheckResult], dict[str, Any]]:
         _ok(
             "compatibility_requirements_cr1_cr6",
             "schema_registry",
-            COMPATIBILITY_REQUIREMENT_IDS
-            == ("CR-1", "CR-2", "CR-3", "CR-4", "CR-5", "CR-6"),
+            COMPATIBILITY_REQUIREMENT_IDS == ("CR-1", "CR-2", "CR-3", "CR-4", "CR-5", "CR-6"),
         ),
     ]
     return checks, {"schema_registry": dict(sorted(schemas.items()))}
@@ -452,9 +450,7 @@ def run_configuration_checks(engine_root: Path) -> tuple[list[CheckResult], dict
 def run_execution_checks(engine_root: Path) -> tuple[list[CheckResult], dict[str, Any]]:
     from codestrata.ai.provider_contracts.retry_policy import DEFAULT_RETRY_POLICY
 
-    executor_path = (
-        engine_root / "src/codestrata/ai/provider_contracts/executor.py"
-    )
+    executor_path = engine_root / "src/codestrata/ai/provider_contracts/executor.py"
     checks = [
         _ok(
             "default_retry_maximum_attempts_is_1",
@@ -655,10 +651,7 @@ def run_failure_isolation_checks(engine_root: Path) -> tuple[list[CheckResult], 
     ok = (
         payload is not None
         and payload.get("verdict") in {"pass", "pass_with_limitations"}
-        and (
-            payload.get("failed_checks", payload.get("check_counts", {}).get("failed"))
-            == 0
-        )
+        and (payload.get("failed_checks", payload.get("check_counts", {}).get("failed")) == 0)
     )
     checks = [
         _ok(
@@ -735,9 +728,7 @@ def run_public_export_checks(engine_root: Path) -> tuple[list[CheckResult], dict
     packaging, matrix = run_packaging_checks(engine_root)
     remapped = [
         CheckResult(
-            name=c.name.replace("packaging", "public_export")
-            if "packaging" in c.name
-            else c.name,
+            name=c.name.replace("packaging", "public_export") if "packaging" in c.name else c.name,
             category="public_export",
             ok=c.ok,
             detail=c.detail,

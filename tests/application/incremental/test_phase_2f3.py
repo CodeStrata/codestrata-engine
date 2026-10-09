@@ -257,7 +257,9 @@ def test_operations_blocks_when_rollout_off() -> None:
         rollout=IncrementalRolloutPolicy(mode=IncrementalRolloutMode.OFF),
     )
     with pytest.raises(IncrementalRolloutDisabledError):
-        ops.create_plan(IncrementalPlanningRequest(repository_identifier="test-fixtures/sample-js-app"))
+        ops.create_plan(
+            IncrementalPlanningRequest(repository_identifier="test-fixtures/sample-js-app")
+        )
 
 
 def test_settings_rollout_defaults(tmp_path: Path) -> None:

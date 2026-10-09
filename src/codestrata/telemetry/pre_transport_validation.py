@@ -104,13 +104,9 @@ def reconcile_payload_with_catalog(
         # Present non-required fields must be cataloged as optional for this event.
         raise PreTransportValidationFailure(PreTransportReasonCode.CATALOG_MISMATCH)
 
-    enum_map = {
-        enum.name: {value.value for value in enum.values} for enum in active.enums
-    }
+    enum_map = {enum.name: {value.value for value in enum.values} for enum in active.enums}
     field_enum = {
-        field.name: field.enum_ref
-        for field in active.shared_fields
-        if field.enum_ref is not None
+        field.name: field.enum_ref for field in active.shared_fields if field.enum_ref is not None
     }
     for key, value in payload.items():
         enum_ref = field_enum.get(key)

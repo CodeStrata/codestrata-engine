@@ -18,9 +18,7 @@ from typing import Any, Literal
 
 SCHEMA = "public-report-urls-manifest:1.1"
 ENV_MANIFEST = "CODESTRATA_PUBLIC_REPORT_URLS_MANIFEST"
-DEFAULT_RELATIVE = (
-    ".codestrata-artifacts/validation/suites/release-v0.2.0/public-report-urls.json"
-)
+DEFAULT_RELATIVE = ".codestrata-artifacts/validation/suites/release-v0.2.0/public-report-urls.json"
 
 ReportType = Literal["assessment", "engineering_intelligence"]
 
@@ -33,13 +31,13 @@ def resolve_manifest_path(*, start: Path | None = None) -> Path | None:
     for candidate in [here, *here.parents]:
         path = candidate / DEFAULT_RELATIVE
         if path.is_file() or (candidate / ".codestrata-artifacts").is_dir():
-            if path.parent.is_dir() or path.is_file() or (
-                candidate / ".codestrata-artifacts"
-            ).is_dir():
+            if (
+                path.parent.is_dir()
+                or path.is_file()
+                or (candidate / ".codestrata-artifacts").is_dir()
+            ):
                 # Prefer writing into monorepo artifacts when present.
-                if (candidate / ".git").exists() or (
-                    candidate / ".codestrata-artifacts"
-                ).is_dir():
+                if (candidate / ".git").exists() or (candidate / ".codestrata-artifacts").is_dir():
                     return path
     return None
 
@@ -120,9 +118,7 @@ def record_published_url(
     if path is None:
         return None
     doc = _load(path)
-    bucket = (
-        "assessments" if report_type == "assessment" else "engineering_intelligence"
-    )
+    bucket = "assessments" if report_type == "assessment" else "engineering_intelligence"
     id_key = "repository_id" if report_type == "assessment" else "portfolio_id"
     entries = list(doc.get(bucket) or [])
     found: dict[str, Any] | None = None

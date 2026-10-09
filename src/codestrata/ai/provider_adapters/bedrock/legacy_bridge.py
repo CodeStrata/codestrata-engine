@@ -95,14 +95,10 @@ def fold_prompt_messages(messages: Sequence[PromptMessage]) -> ModernizationAdvi
         raise AIProviderConfigurationError(
             "PromptRequest must include at least one user message with analysis context"
         )
-    context_payload_text = PARAGRAPH_SEPARATOR.join(
-        part for part in context_parts if part.strip()
-    )
+    context_payload_text = PARAGRAPH_SEPARATOR.join(part for part in context_parts if part.strip())
     if not context_payload_text.strip():
         raise AIProviderConfigurationError("PromptRequest user message must be nonempty")
-    instruction_text = PARAGRAPH_SEPARATOR.join(
-        part for part in instruction_parts if part.strip()
-    )
+    instruction_text = PARAGRAPH_SEPARATOR.join(part for part in instruction_parts if part.strip())
     return ModernizationAdvisorInput(
         instruction_text=instruction_text or INSTRUCTION_TEXT_FALLBACK,
         context_payload_text=context_payload_text,
@@ -186,17 +182,13 @@ _LEGACY_MESSAGES: dict[str, str] = {
     error_mapping.CODE_MODEL_TIMEOUT: "Bedrock temporary service failure: {detail}",
     error_mapping.CODE_RATE_LIMITED: "Bedrock temporary service failure: {detail}",
     error_mapping.CODE_PROVIDER_UNAVAILABLE: "Bedrock temporary service failure: {detail}",
-    error_mapping.CODE_INVALID_MODEL: (
-        "Bedrock invalid model or request configuration: {detail}"
-    ),
+    error_mapping.CODE_INVALID_MODEL: ("Bedrock invalid model or request configuration: {detail}"),
     error_mapping.CODE_INVALID_REQUEST: (
         "Bedrock invalid model or request configuration: {detail}"
     ),
     error_mapping.CODE_SERVICE_ERROR: "Bedrock service error ({label}): {detail}",
     error_mapping.CODE_RESPONSE_NOT_A_MAPPING: "Bedrock Converse response must be a mapping",
-    error_mapping.CODE_RESPONSE_MISSING_OUTPUT: (
-        "Bedrock Converse response is missing output"
-    ),
+    error_mapping.CODE_RESPONSE_MISSING_OUTPUT: ("Bedrock Converse response is missing output"),
     error_mapping.CODE_RESPONSE_MISSING_MESSAGE: (
         "Bedrock Converse response is missing output.message"
     ),
@@ -206,9 +198,7 @@ _LEGACY_MESSAGES: dict[str, str] = {
     error_mapping.CODE_EMPTY_RESPONSE: (
         "Bedrock Converse response did not include assistant text content"
     ),
-    error_mapping.CODE_UNREADABLE_RESPONSE: (
-        "Failed to read Bedrock Converse response: {detail}"
-    ),
+    error_mapping.CODE_UNREADABLE_RESPONSE: ("Failed to read Bedrock Converse response: {detail}"),
     error_mapping.CODE_PARSING_FAILED: (
         "Unexpected failure while parsing Bedrock response: {detail}"
     ),

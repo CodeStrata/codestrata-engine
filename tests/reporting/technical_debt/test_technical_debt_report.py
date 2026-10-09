@@ -130,9 +130,7 @@ def test_adapter_succeeded_preserves_ids_and_bounds() -> None:
     assert int(report.metadata["test_finding_count"]) == 1
     assert len(report.top_production_hotspots) <= TOP_PRODUCTION_HOTSPOTS
     assert report.top_production_hotspots[0].presentation_order == 1
-    assert all(
-        item.source_role == "production" for item in report.significant_themes
-    )
+    assert all(item.source_role == "production" for item in report.significant_themes)
     assert all(
         item.audience != TechnicalDebtConclusionAudience.TEST_OBSERVATION.value
         for item in report.conclusions
@@ -154,9 +152,7 @@ def test_adapter_succeeded_preserves_ids_and_bounds() -> None:
 
 
 def test_adapter_disabled_and_not_requested() -> None:
-    disabled = TechnicalDebtAssessmentAssembler().assemble_disabled(
-        repository_id="repo:x"
-    )
+    disabled = TechnicalDebtAssessmentAssembler().assemble_disabled(repository_id="repo:x")
     disabled_report = TechnicalDebtReportAdapter().adapt(disabled)
     assert disabled_report.status == "disabled"
     assert "disabled" in disabled_report.executive_summary.lower()
@@ -233,9 +229,7 @@ def test_hotspot_bound_and_deterministic_order() -> None:
             rule_id=RULE_LARGE_CALLABLE,
             path=f"src/pkg/file_{index:02d}.py",
             symbol=f"fn_{index}#0@1",
-            severity=(
-                FindingSeverity.HIGH if index < 3 else FindingSeverity.MEDIUM
-            ),
+            severity=(FindingSeverity.HIGH if index < 3 else FindingSeverity.MEDIUM),
             value=str(100 - index),
         )
         for index in range(25)
@@ -253,9 +247,7 @@ def test_hotspot_bound_and_deterministic_order() -> None:
     orders = [item.presentation_order for item in report.top_production_hotspots]
     assert orders == list(range(1, 21))
     ids = [item.hotspot_id for item in report.top_production_hotspots]
-    assert ids == [
-        item.hotspot_id for item in assessment.hotspot_inventory.production[:20]
-    ]
+    assert ids == [item.hotspot_id for item in assessment.hotspot_inventory.production[:20]]
 
 
 def test_traceability_sample_is_bounded() -> None:
@@ -321,8 +313,10 @@ def test_report_json_and_html_include_technical_debt_when_present(
     assert "no significant" not in html.lower()
     assert "production-facing debt signals" not in html.lower()
     assert "/Users/" not in html
-    assert "financial" in html.lower() or "composite" in html.lower() or (
-        "zero findings do not" in html.lower()
+    assert (
+        "financial" in html.lower()
+        or "composite" in html.lower()
+        or ("zero findings do not" in html.lower())
     )
     escaped = HtmlReportRenderer().render(
         build_html_report_view_model(
@@ -375,9 +369,7 @@ def test_adapter_failure_isolation_pattern() -> None:
     technical_debt_report_status = None
     try:
         with patch.object(TechnicalDebtReportAdapter, "adapt", _boom):
-            technical_debt_report_section = TechnicalDebtReportAdapter().adapt(
-                assessment
-            )
+            technical_debt_report_section = TechnicalDebtReportAdapter().adapt(assessment)
     except Exception:  # noqa: BLE001 - mirrors assessment service isolation
         technical_debt_report_section = None
         technical_debt_report_status = "failed"

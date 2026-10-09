@@ -326,14 +326,10 @@ class SqliteRepositoryRegistry:
             owner = str(existing["repository_id"])
             if owner == repository_id:
                 return
-            if (
-                skip_legacy_conflicts
-                and alias_type is RepositoryAliasType.LEGACY_REPOSITORY_KEY
-            ):
+            if skip_legacy_conflicts and alias_type is RepositoryAliasType.LEGACY_REPOSITORY_KEY:
                 return
             raise RepositoryAliasConflictError(
-                f"Alias {alias_type.value}={alias_value!r} is already bound to "
-                f"repository {owner}"
+                f"Alias {alias_type.value}={alias_value!r} is already bound to repository {owner}"
             )
         self._connection.execute(
             """

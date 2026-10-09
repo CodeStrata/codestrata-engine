@@ -717,6 +717,133 @@
           "unsupported_area_count": 0
         }
       },
+      "quality_intelligence": {
+        "areas": [
+          {
+            "area_id": "quality_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Quality capability"
+          },
+          {
+            "area_id": "testing_capability_requested",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing capability"
+          },
+          {
+            "area_id": "testing_evidence_availability",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing evidence"
+          },
+          {
+            "area_id": "testing_inventory_complete",
+            "candidate_count": null,
+            "claim_state": "partial",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [
+              "Area is only partially claimed by methodology."
+            ],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing inventory"
+          },
+          {
+            "area_id": "testing_rules_enabled",
+            "candidate_count": null,
+            "claim_state": "claimed",
+            "eligible_rule_count": null,
+            "evaluation_state": "disabled",
+            "evidence_available": null,
+            "executed_rule_count": null,
+            "failed_count": null,
+            "limitations": [],
+            "partial_count": null,
+            "processed_count": null,
+            "skipped_count": null,
+            "support_state": "unavailable",
+            "title": "Testing rules"
+          }
+        ],
+        "derivation_status": "unavailable",
+        "limitations": [
+          "One or more methodology areas are only partially claimed.",
+          "Repository observation coverage does not imply live runtime, organizational, or external service coverage."
+        ],
+        "metrics": [
+          {
+            "availability": "available",
+            "denominator": 5,
+            "limitations": [],
+            "metric_id": "assessment.area_coverage",
+            "numerator": 0,
+            "ratio": "0.0000"
+          }
+        ],
+        "scope": {
+          "activated": false,
+          "head_id": "quality_intelligence",
+          "pack_id": "testing",
+          "support_summary": "disabled"
+        },
+        "status": "disabled",
+        "totals": {
+          "applicable_area_count": 5,
+          "candidate_count": null,
+          "declared_area_count": 5,
+          "eligible_rule_count": null,
+          "evaluated_area_count": 0,
+          "executed_rule_count": null,
+          "failed_count": null,
+          "inspected_candidate_count": null,
+          "partially_evaluated_area_count": 0,
+          "partially_processed_count": null,
+          "partially_supported_area_count": 1,
+          "skipped_count": null,
+          "successfully_processed_count": null,
+          "supported_area_count": 0,
+          "unavailable_rule_count": null,
+          "unevaluated_area_count": 5,
+          "unsupported_area_count": 0
+        }
+      },
       "security_intelligence": {
         "areas": [
           {
@@ -1296,6 +1423,31 @@
         "level": "unavailable",
         "limitations": [
           "This assessment head is unavailable for the repository run."
+        ]
+      },
+      "quality_intelligence": {
+        "basis": [
+          "legacy_findings",
+          "unavailable_head"
+        ],
+        "component_summary": {
+          "activated": true,
+          "assessment_status": "assessed",
+          "coverage_state": "unavailable",
+          "evidence_completeness": "legacy",
+          "finding_count": 1,
+          "high_finding_count": 0,
+          "limitations_count": 1,
+          "limited_finding_count": 0,
+          "moderate_finding_count": 0,
+          "unavailable_finding_count": 1,
+          "weakest_material_finding_confidence": "unavailable"
+        },
+        "derivation_status": "unavailable",
+        "level": "unavailable",
+        "limitations": [
+          "EvidenceRef mapping for this assessment head is deferred; Finding Confidence remains Unavailable.",
+          "One or more material findings have Unavailable Finding Confidence."
         ]
       },
       "security_intelligence": {

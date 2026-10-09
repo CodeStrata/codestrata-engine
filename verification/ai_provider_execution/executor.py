@@ -230,9 +230,7 @@ def check_executor_does_not_retry_a_non_retryable_category() -> CheckResult:
 
 def check_executor_stops_at_maximum_attempts_even_when_retryable() -> CheckResult:
     provider = _FakeAlwaysFailingProvider(category=ErrorCategory.TIMEOUT)
-    executor = AIProviderExecutor(
-        provider, retry_policy=AIProviderRetryPolicy(maximum_attempts=3)
-    )
+    executor = AIProviderExecutor(provider, retry_policy=AIProviderRetryPolicy(maximum_attempts=3))
     result = executor.execute(_request())
     ok = provider.call_count == 3 and result.attempts == 3 and result.retry_count == 2
     return CheckResult(

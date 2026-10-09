@@ -16,24 +16,17 @@ from codestrata.telemetry.service import (
 from codestrata.telemetry.status import build_privacy_first_telemetry_status
 from codestrata.telemetry.status_formatting import format_privacy_first_telemetry_status
 
-
-TELEMETRY_ROOT = (
-    Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
-)
+TELEMETRY_ROOT = Path(__file__).resolve().parents[2] / "src" / "codestrata" / "telemetry"
 
 
 def test_determinism_model_and_text() -> None:
     a = build_privacy_first_telemetry_status()
     b = build_privacy_first_telemetry_status()
     assert a.to_stable_json() == b.to_stable_json()
-    assert format_privacy_first_telemetry_status(a) == format_privacy_first_telemetry_status(
-        b
-    )
+    assert format_privacy_first_telemetry_status(a) == format_privacy_first_telemetry_status(b)
     versions = [item["name"] for item in a.to_stable_dict()["policy_versions"]]
     assert versions == sorted(versions)
-    assert a.to_stable_dict()["limitation_codes"] == sorted(
-        a.to_stable_dict()["limitation_codes"]
-    )
+    assert a.to_stable_dict()["limitation_codes"] == sorted(a.to_stable_dict()["limitation_codes"])
 
 
 def test_cli_status_deterministic_output() -> None:
@@ -74,7 +67,14 @@ def test_status_then_allow(tmp_path: Path, monkeypatch) -> None:
 
 
 def test_no_platform_datalake_imports() -> None:
-    forbidden = ("codestrata_platform", "codestrata_platform.community_cloud","community_cloud_api", "boto3", "fastapi", "data_lake")
+    forbidden = (
+        "codestrata_platform",
+        "codestrata_platform.community_cloud",
+        "community_cloud_api",
+        "boto3",
+        "fastapi",
+        "data_lake",
+    )
     for path in TELEMETRY_ROOT.rglob("*.py"):
         if not path.name.startswith("status"):
             continue

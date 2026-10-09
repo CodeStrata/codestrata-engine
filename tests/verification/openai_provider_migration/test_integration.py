@@ -155,9 +155,7 @@ def test_the_default_output_location_is_the_slice_directory() -> None:
     engine = runner.engine_root_from_package()
 
     assert (engine / "pyproject.toml").is_file()
-    assert runner._default_output_dir(engine) == (
-        engine / "reports" / "verification" / "sv11-6"
-    )
+    assert runner._default_output_dir(engine) == (engine / "reports" / "verification" / "sv11-6")
 
 
 def test_every_allowed_verdict_is_accepted() -> None:

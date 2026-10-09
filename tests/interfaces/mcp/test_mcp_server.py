@@ -15,7 +15,7 @@ from codestrata.application.assessment import AssessmentApplicationService
 from codestrata.application.knowledge.queries import KnowledgeQueryService
 from codestrata.cli.assess import run_assessment
 from codestrata.config import CodestrataSettings
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 from codestrata.interfaces.mcp import CODESSTRATA_MCP_NAME, create_mcp_server
 from codestrata.reporting import AssessmentMode
 from tests.application.knowledge.queries.conftest_helpers import (

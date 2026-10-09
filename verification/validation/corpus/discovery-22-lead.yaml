@@ -1,0 +1,28 @@
+source: validation/repository-catalog/catalog.json (outside Engine; copied as a lead)
+repository_count: 22
+meets_fifty_large_bar: false
+reason: The v0.2.0 22-repository catalog mixes Small/Medium/Known-Issues entries.
+  It is a discovery lead, not evidence that the 50-large-repository bar is met.
+ids:
+- aspnetcore
+- bagisto
+- bookstack
+- cleanarchitecture
+- django
+- doris
+- dubbo
+- eshop
+- express
+- flask
+- gradio
+- juice-shop
+- laravel-io
+- moodle
+- nodegoat
+- product-integrator-mi
+- slim
+- spring-petclinic
+- typescript
+- verademo
+- vite
+- vulnerable-app-nodejs-express

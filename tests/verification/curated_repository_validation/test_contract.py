@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
-import pytest
-
+from verification.cli_installation.environment import engine_root_from_package
 from verification.curated_repository_validation.batches import (
     resolve_batches,
     select_determinism_sample,
@@ -28,8 +25,6 @@ from verification.curated_repository_validation.timeouts import (
     assessment_timeout_for_tier,
     is_timeout_exit,
 )
-from verification.cli_installation.environment import engine_root_from_package
-
 
 ENGINE = engine_root_from_package()
 

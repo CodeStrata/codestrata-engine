@@ -41,13 +41,7 @@ def _observation_key(raw: str) -> str:
     Display labels such as ``C#`` are normalized by stripping ``#``.
     """
 
-    compact = (
-        raw.strip()
-        .replace("@", "")
-        .replace("#", "")
-        .replace("/", "-")
-        .replace("\\", "-")
-    )
+    compact = raw.strip().replace("@", "").replace("#", "").replace("/", "-").replace("\\", "-")
     return normalize_canonical_key(compact)
 
 

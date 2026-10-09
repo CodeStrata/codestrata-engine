@@ -10,9 +10,6 @@ from codestrata.ai.provider_adapters.openrouter.factory import (
     OPENROUTER_RETRY_POLICY,
     build_openrouter_provider,
 )
-
-# Import factory before assess_ai to keep load order stable.
-from codestrata.ai.providers.factory import create_assess_ai_provider, resolve_assess_model_id
 from codestrata.ai.providers.bedrock import BedrockAIModelProvider
 from codestrata.ai.providers.doctor import (
     ConfigStatus,
@@ -20,20 +17,22 @@ from codestrata.ai.providers.doctor import (
     build_ai_configuration_report,
     evaluate_openrouter_readiness,
 )
-from codestrata.ai.providers.exceptions import AIProviderConfigurationError
+
+# Import factory before assess_ai to keep load order stable.
+from codestrata.ai.providers.factory import create_assess_ai_provider, resolve_assess_model_id
 from codestrata.ai.providers.openai_provider import OpenAIAIModelProvider
 from codestrata.ai.providers.openrouter_provider import OpenRouterAIModelProvider
 from codestrata.config.settings import AiSettings, OpenRouterSettings
 from codestrata.reporting.contract.constants import ASSESSMENT_JSON_SCHEMA_VERSION
 from verification.openrouter_doctor_integration.contract import (
     ASSESSMENT_SCHEMA_VERSION,
+    BEDROCK_DEFAULT_MODEL,
     DEFAULT_API_KEY_ENV,
     DEFAULT_PROVIDER,
     DOCTOR_FORBIDDEN_ADAPTER_IMPORT,
     DOCTOR_FORBIDDEN_CALL_TOKENS,
     NEGATIVE_SCENARIO_COUNT_MIN,
     OPENAI_DEFAULT_MODEL,
-    BEDROCK_DEFAULT_MODEL,
     TEST_ONLY_MODEL,
 )
 from verification.openrouter_doctor_integration.fixtures import (
@@ -129,7 +128,9 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         "E",
         "doctor prints API-key prefix or length",
         "key prefix or key length diagnostics appear",
-        "sk-" in redacted_blob or "key_length" in redacted_blob or "api_key_prefix" in redacted_blob,
+        "sk-" in redacted_blob
+        or "key_length" in redacted_blob
+        or "api_key_prefix" in redacted_blob,
     )
     add(
         "F",
@@ -315,12 +316,9 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
     mapped = build_openrouter_provider(
         client=Client(sdk_exception("AuthenticationError", "upstream rejected credentials"))
     ).execute(provider_request())
-    raw_in_mapped = (
-        mapped.error is not None
-        and (
-            "AuthenticationError" in (mapped.error.detail or "")
-            or "upstream rejected credentials" in (mapped.error.detail or "")
-        )
+    raw_in_mapped = mapped.error is not None and (
+        "AuthenticationError" in (mapped.error.detail or "")
+        or "upstream rejected credentials" in (mapped.error.detail or "")
     )
     add(
         "V",
@@ -334,15 +332,18 @@ def run_negative_scenarios(engine_root: Path) -> list[ScenarioResult]:
         / "src/codestrata/resources/schemas/assessment/codestrata.io/v1.2/AssessmentReport.json"
     )
     schema_text = schema_path.read_text(encoding="utf-8") if schema_path.is_file() else ""
-    doctor_in_assessment = any(
-        token in schema_text
-        for token in (
-            "openrouter_readiness",
-            "evaluate_openrouter_readiness",
-            "OpenRouterDoctorReadiness",
-            "credential_present",
+    doctor_in_assessment = (
+        any(
+            token in schema_text
+            for token in (
+                "openrouter_readiness",
+                "evaluate_openrouter_readiness",
+                "OpenRouterDoctorReadiness",
+                "credential_present",
+            )
         )
-    ) or ASSESSMENT_JSON_SCHEMA_VERSION != ASSESSMENT_SCHEMA_VERSION
+        or ASSESSMENT_JSON_SCHEMA_VERSION != ASSESSMENT_SCHEMA_VERSION
+    )
     add(
         "W",
         "doctor results enter assessment report",

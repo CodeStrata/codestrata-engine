@@ -71,9 +71,7 @@ class FailureCategory(StrEnum):
     UNKNOWN = "unknown"
 
 
-APPROVED_RUNTIME_EVENT_TYPES: frozenset[str] = frozenset(
-    item.value for item in RuntimeEventType
-)
+APPROVED_RUNTIME_EVENT_TYPES: frozenset[str] = frozenset(item.value for item in RuntimeEventType)
 
 
 @dataclass(frozen=True, slots=True)

@@ -1,24 +1,14 @@
-"""Fail-soft publisher that synchronizes Engine assessment metadata to Platform."""
+"""Fail-soft publisher. Community Engine does not submit to Platform."""
 
 from __future__ import annotations
 
-import logging
 from dataclasses import dataclass
 from pathlib import Path
 
 from codestrata.integration.commercial.client import PlatformClient
 from codestrata.integration.commercial.configuration import PlatformClientConfig
-from codestrata.integration.commercial.errors import PlatformIntegrationError
-from codestrata.integration.commercial.mapper import (
-    new_engine_assessment_id,
-    resolve_repository_url,
-    to_complete_assessment_request,
-    to_register_assessment_request,
-    to_register_repository_request,
-)
+from codestrata.integration.community_runtime import HOSTED_SUBMISSION_REMOVED
 from codestrata.models import Repository
-
-logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,80 +31,14 @@ def publish_assessment_to_platform(
     html_report_path: Path | None,
     json_report_path: Path | None,
 ) -> PlatformPublishResult:
-    """Register repository + assessment lifecycle with Platform.
+    """Never performs Platform HTTP. Hosted submission is removed from Community."""
 
-    Never raises — Platform failures become a failed publish result.
-    """
-
-    if not config.enabled:
-        return PlatformPublishResult(status="disabled", message="Platform integration disabled")
-
-    if not config.organization_id.strip() or not config.workspace_id.strip():
-        return PlatformPublishResult(
-            status="failed",
-            message="platform.organization_id and platform.workspace_id are required",
-        )
-
-    repository_url = resolve_repository_url(repository, configured_repository_url)
-    if repository_url is None:
-        return PlatformPublishResult(
-            status="failed",
-            message="No HTTP(S) repository URL available for Platform registration",
-        )
-
-    engine_assessment_id = new_engine_assessment_id()
-    try:
-        existing = client.lookup_repository(
-            workspace_id=config.workspace_id,
-            repository_url=repository_url,
-        )
-        if existing is None:
-            repo_ref = client.register_repository(
-                to_register_repository_request(
-                    organization_id=config.organization_id,
-                    workspace_id=config.workspace_id,
-                    repository=repository,
-                    repository_url=repository_url,
-                )
-            )
-        else:
-            repo_ref = existing
-
-        assessment_ref = client.register_assessment(
-            to_register_assessment_request(
-                repository_id=repo_ref.repository_id,
-                workspace_id=config.workspace_id,
-                engine_assessment_id=engine_assessment_id,
-                repository=repository,
-            )
-        )
-        assessment_ref = client.start_assessment(assessment_ref.assessment_id)
-        assessment_ref = client.complete_assessment(
-            to_complete_assessment_request(
-                assessment_id=assessment_ref.assessment_id,
-                html_report_path=html_report_path,
-                json_report_path=json_report_path,
-            )
-        )
-        return PlatformPublishResult(
-            status="succeeded",
-            engine_assessment_id=engine_assessment_id,
-            organization_id=repo_ref.organization_id,
-            workspace_id=repo_ref.workspace_id,
-            repository_id=repo_ref.repository_id,
-            assessment_id=assessment_ref.assessment_id,
-        )
-    except PlatformIntegrationError as error:
-        logger.warning("Platform ingestion failed: %s", error)
-        return PlatformPublishResult(
-            status="failed",
-            engine_assessment_id=engine_assessment_id,
-            message=str(error),
-        )
-    except Exception as error:  # noqa: BLE001 - never break Engine reporting
-        logger.warning("Platform ingestion unexpected failure: %s", error)
-        return PlatformPublishResult(
-            status="failed",
-            engine_assessment_id=engine_assessment_id,
-            message=str(error),
-        )
+    _ = (
+        client,
+        config,
+        repository,
+        configured_repository_url,
+        html_report_path,
+        json_report_path,
+    )
+    return PlatformPublishResult(status="removed", message=HOSTED_SUBMISSION_REMOVED)

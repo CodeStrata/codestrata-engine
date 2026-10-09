@@ -39,9 +39,7 @@ def wrapper_class() -> type:
 
 
 def check_the_wrapper_keeps_its_public_surface() -> CheckResult:
-    missing = sorted(
-        name for name in WRAPPER_REQUIRED_EXPORTS if not hasattr(wrapper_module, name)
-    )
+    missing = sorted(name for name in WRAPPER_REQUIRED_EXPORTS if not hasattr(wrapper_module, name))
     return CheckResult(
         name="the_bedrock_module_still_exports_its_pre_migration_public_surface",
         category="baseline_compatibility",

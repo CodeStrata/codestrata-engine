@@ -15,8 +15,7 @@ from verification.openai_provider_migration.runner import (
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
-            "SV.11.6 OpenAI Provider Migration verification "
-            "(CodeStrata v0.2.0 Epic 11, Slice 11.6)"
+            "SV.11.6 OpenAI Provider Migration verification (CodeStrata v0.2.0 Epic 11, Slice 11.6)"
         ),
     )
     parser.add_argument("--engine-root", type=Path, default=None)

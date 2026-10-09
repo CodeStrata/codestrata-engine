@@ -15,10 +15,10 @@ from verification.assessment_consistency.contract import (
     DATASET_DISCLAIMER,
     QUALITY_COMPARISON_GUARD,
     RELEASE_VALIDATION_TARGET,
+    REPORT_FILENAME,
     SCHEMA_NAME,
     SCHEMA_VERSION,
     SV11_OUTPUT_RELATIVE,
-    REPORT_FILENAME,
     default_contract,
 )
 from verification.assessment_consistency.coverage import check_coverage
@@ -158,7 +158,8 @@ def _verdict(
     soft = [
         d
         for d in defects
-        if d.handling in {"repository_specific_limitation", "expected_variation", "documentation_only"}
+        if d.handling
+        in {"repository_specific_limitation", "expected_variation", "documentation_only"}
         or d.release_impact == "investigate"
     ]
     if hard:
@@ -299,9 +300,7 @@ def run_assessment_consistency(
             }
         )
     ]
-    has_limitations = any(
-        b.record.get("verdict") == "PASS_WITH_LIMITATIONS" for b in bundles
-    )
+    has_limitations = any(b.record.get("verdict") == "PASS_WITH_LIMITATIONS" for b in bundles)
 
     if len(bundles) != RELEASE_VALIDATION_TARGET or release_blocking or hard_product:
         verdict = "FAIL"
@@ -323,7 +322,11 @@ def run_assessment_consistency(
     limitations = [
         "Uses preserved SV.10 artifacts only; repositories are not reassessed by default.",
         "Outliers are informational unless contract_violation is true.",
-        "SV.10 repository-scoped limitations (Known Issues demos, submodules, BookStack runtime) remain expected variation.",
+        "SV.10 repository-scoped limitations (Known Issues demos, submodules, "
+        "BookStack runtime) remain expected variation.",
+        "Platform validate_report_document is not evaluated by this Engine "
+        "command and is not recorded as PASS. That check is "
+        "platform/verification/assessment_ingestion.",
     ]
 
     report = ConsistencyReport(

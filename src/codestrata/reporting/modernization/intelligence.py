@@ -244,9 +244,7 @@ def build_modernization_intelligence(
         finding_heads=finding_heads,
         rec_heads=rec_heads,
     )
-    phases, initiative_count, roadmap_is_legacy, uses_canonical = _roadmap_phases(
-        roadmap_report
-    )
+    phases, initiative_count, roadmap_is_legacy, uses_canonical = _roadmap_phases(roadmap_report)
     contributing = _contributing_heads(
         findings=findings,
         recommendations=recommendations,
@@ -354,9 +352,7 @@ def _normalize_category(category: str | None) -> str:
 
 
 def _classify_finding_head(item: Any) -> tuple[str, str, str] | None:
-    category_head = _CATEGORY_TO_HEAD.get(
-        _normalize_category(getattr(item, "category", None))
-    )
+    category_head = _CATEGORY_TO_HEAD.get(_normalize_category(getattr(item, "category", None)))
     if category_head is not None:
         return category_head
     rid = (getattr(item, "rule_id", None) or "").strip().lower()
@@ -371,9 +367,7 @@ def _classify_recommendation_head(
     *,
     finding_heads: dict[str, tuple[str, str, str] | None],
 ) -> tuple[str, str, str] | None:
-    category_head = _CATEGORY_TO_HEAD.get(
-        _normalize_category(getattr(item, "category", None))
-    )
+    category_head = _CATEGORY_TO_HEAD.get(_normalize_category(getattr(item, "category", None)))
     if category_head is not None:
         return category_head
     primary = getattr(item, "primary_finding_id", None)
@@ -395,9 +389,7 @@ def _priority_action_links(
     rows: list[ModernizationPriorityActionLink] = []
     for item in priority_actions:
         action_id = str(
-            getattr(item, "recommendation_id", None)
-            or getattr(item, "action_id", None)
-            or ""
+            getattr(item, "recommendation_id", None) or getattr(item, "action_id", None) or ""
         ).strip()
         title = str(getattr(item, "title", "") or "").strip()
         if not action_id or not title:
@@ -419,16 +411,16 @@ def _priority_action_links(
             if str(rid).strip()
         )
         # Canonical PA often equals its supporting recommendation id.
-        rec_count = len(supporting_recs) if supporting_recs else (
-            1 if getattr(item, "action_type", None) else 0
+        rec_count = (
+            len(supporting_recs)
+            if supporting_recs
+            else (1 if getattr(item, "action_type", None) else 0)
         )
         effort = getattr(item, "effort", None)
         effort_text = str(effort).strip() if effort is not None else None
         if effort_text and effort_text.lower() in {"unknown", "none", ""}:
             effort_text = None
-        completeness = str(
-            getattr(item, "evidence_completeness", "") or ""
-        ).strip() or None
+        completeness = str(getattr(item, "evidence_completeness", "") or "").strip() or None
         limitations = tuple(
             str(note).strip()
             for note in (getattr(item, "limitations", ()) or ())
@@ -507,9 +499,9 @@ def _roadmap_phases(
         initiative_links: list[ModernizationInitiativeLink] = []
         phase_has_legacy = False
         for item in initiatives_raw:
-            initiative_type = str(
-                getattr(item, "initiative_type", "legacy") or "legacy"
-            ).strip().lower()
+            initiative_type = (
+                str(getattr(item, "initiative_type", "legacy") or "legacy").strip().lower()
+            )
             is_legacy = initiative_type == "legacy"
             if is_legacy:
                 phase_has_legacy = True
@@ -542,8 +534,7 @@ def _roadmap_phases(
                         if str(dep).strip()
                     ),
                     evidence_completeness=(
-                        str(getattr(item, "evidence_completeness", "") or "").strip()
-                        or None
+                        str(getattr(item, "evidence_completeness", "") or "").strip() or None
                     ),
                     limitations=tuple(
                         str(note).strip()
@@ -628,15 +619,12 @@ def _contributing_heads(
     for item in recommendations:
         rid = str(getattr(item, "recommendation_id", "") or "")
         _bump(
-            rec_heads.get(rid)
-            or _classify_recommendation_head(item, finding_heads=finding_heads),
+            rec_heads.get(rid) or _classify_recommendation_head(item, finding_heads=finding_heads),
             "recommendation_count",
         )
     for item in priority_actions:
         action_id = str(
-            getattr(item, "recommendation_id", None)
-            or getattr(item, "action_id", None)
-            or ""
+            getattr(item, "recommendation_id", None) or getattr(item, "action_id", None) or ""
         ).strip()
         head = rec_heads.get(action_id)
         if head is None:
@@ -644,9 +632,7 @@ def _contributing_heads(
         _bump(head, "priority_action_count")
 
     rows: list[ModernizationContributingHead] = []
-    ordered = list(_THEME_HEAD_ORDER) + [
-        key for key in counts if key not in _THEME_HEAD_ORDER
-    ]
+    ordered = list(_THEME_HEAD_ORDER) + [key for key in counts if key not in _THEME_HEAD_ORDER]
     for head_id in ordered:
         if head_id not in counts:
             continue
@@ -701,9 +687,7 @@ def _themes(
 
     for item in priority_actions:
         action_id = str(
-            getattr(item, "recommendation_id", None)
-            or getattr(item, "action_id", None)
-            or ""
+            getattr(item, "recommendation_id", None) or getattr(item, "action_id", None) or ""
         ).strip()
         head = rec_heads.get(action_id)
         if head is None:
@@ -737,9 +721,10 @@ def _themes(
 
     rows: list[ModernizationThemeSummary] = []
     for head_id in _THEME_HEAD_ORDER:
-        bucket = by_head.get(head_id)
-        if not bucket:
+        found = by_head.get(head_id)
+        if not found:
             continue
+        bucket = found
         if bucket["pa_count"] == 0 and bucket["rec_count"] == 0:
             continue
         # Deduplicate titles preserving order; take top 3.
@@ -803,9 +788,7 @@ def _supporting_recommendation_ids(
                 ids.add(text)
         # PA id often equals supporting recommendation id.
         action_id = str(
-            getattr(item, "recommendation_id", None)
-            or getattr(item, "action_id", None)
-            or ""
+            getattr(item, "recommendation_id", None) or getattr(item, "action_id", None) or ""
         ).strip()
         if action_id and getattr(item, "action_type", None):
             ids.add(action_id)
@@ -840,8 +823,7 @@ def _overview(
             label="Priority Actions",
             value=str(priority_action_count),
             note=(
-                "Absence of Priority Actions does not establish absence of "
-                "modernization need"
+                "Absence of Priority Actions does not establish absence of modernization need"
                 if priority_action_count == 0
                 else "Canonical Priority Actions only"
             ),
@@ -953,15 +935,11 @@ def _limitations(
                 continue
             notes.append(summary)
     if not contributing:
-        notes.append(
-            "Coverage depends on which assessment heads were enabled and supported."
-        )
+        notes.append("Coverage depends on which assessment heads were enabled and supported.")
     if priority_action_count == 0:
         notes.append(_EMPTY_ACTIONS_MESSAGE)
     if roadmap_is_legacy:
-        notes.append(
-            "Legacy roadmap items are visibly marked and may have limited traceability."
-        )
+        notes.append("Legacy roadmap items are visibly marked and may have limited traceability.")
 
     seen: set[str] = set()
     out: list[str] = []
@@ -984,9 +962,7 @@ def _confidence(
 ) -> tuple[str, str]:
     ranks: list[int] = []
     for item in priority_actions:
-        completeness = str(
-            getattr(item, "evidence_completeness", "") or ""
-        ).strip().lower()
+        completeness = str(getattr(item, "evidence_completeness", "") or "").strip().lower()
         if completeness == "complete":
             ranks.append(3)
         elif completeness in {"partial", "incomplete"}:
@@ -998,9 +974,7 @@ def _confidence(
         else:
             ranks.append(_CONFIDENCE_RANK.get(completeness, 0))
 
-    finding_by_id = {
-        str(getattr(item, "finding_id", "") or ""): item for item in findings
-    }
+    finding_by_id = {str(getattr(item, "finding_id", "") or ""): item for item in findings}
     for fid in supporting_finding_ids:
         item = finding_by_id.get(fid)
         if item is None:
@@ -1011,9 +985,7 @@ def _confidence(
             mapped = _CONFIDENCE_RANK[direct]
             ranks.append(3 if mapped == 3 else mapped)
             continue
-        completeness = str(
-            getattr(item, "evidence_completeness", "") or ""
-        ).strip().lower()
+        completeness = str(getattr(item, "evidence_completeness", "") or "").strip().lower()
         if completeness == "complete":
             ranks.append(3)
         elif completeness in {"partial", "incomplete"}:

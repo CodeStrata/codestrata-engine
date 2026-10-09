@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from validation.models import RepositorySourceType, ValidationRepository
 from validation.registry import (
     RegistryError,

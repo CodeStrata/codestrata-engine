@@ -28,9 +28,7 @@ def compare_assessment_results(
         if isinstance(full_result, CompleteAssessmentArtifacts)
         else artifacts_from_assessment_result(full_result)
     )
-    return AssessmentSemanticComparator(max_differences=max_differences).compare(
-        left, right
-    )
+    return AssessmentSemanticComparator(max_differences=max_differences).compare(left, right)
 
 
 def assert_semantically_equivalent(

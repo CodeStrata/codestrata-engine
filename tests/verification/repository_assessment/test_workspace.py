@@ -5,7 +5,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from verification.repository_assessment.workspace import (
     assert_outside_codestrata_tree,
     capture_inventory,

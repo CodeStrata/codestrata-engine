@@ -58,9 +58,7 @@ class PrivacyFirstTelemetryPreview:
             "omitted_optional_fields",
             tuple(sorted(set(self.omitted_optional_fields))),
         )
-        object.__setattr__(
-            self, "limitations", tuple(sorted(set(self.limitations)))
-        )
+        object.__setattr__(self, "limitations", tuple(sorted(set(self.limitations))))
 
     def to_stable_dict(self) -> dict[str, Any]:
         return {

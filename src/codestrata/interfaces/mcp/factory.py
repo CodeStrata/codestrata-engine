@@ -150,3 +150,67 @@ def open_default_knowledge_store(settings: CodestrataSettings) -> KnowledgeStore
     store = create_knowledge_store(settings=settings)
     store.open()
     return cast(KnowledgeStore, store)
+
+
+def create_artifact_mcp_server(
+    root_path: Path | str | None = None,
+    *,
+    evidence_service: Any | None = None,
+    settings: CodestrataSettings | None = None,
+    config_path: Path | None = None,
+) -> FastMCP:
+    """Create a CodeStrata FastMCP server serving bounded local evidence queries from artifacts.
+
+    Zero database, no mutations, no assessment execution, no rule activation,
+    no shell, no hosted calls, no portfolio query, no GraphRAG.
+    """
+    resolved_settings = settings
+    if resolved_settings is None and config_path is not None:
+        resolved_settings = load_settings(config_path)
+
+    chosen_root = root_path
+    if chosen_root is None:
+        if resolved_settings is not None and resolved_settings.repository.path:
+            chosen_root = resolved_settings.repository.path
+        else:
+            chosen_root = "."
+
+    from codestrata.application.knowledge.artifact_evidence import (
+        LocalArtifactEvidenceService,
+    )
+    from codestrata.interfaces.mcp.server import build_artifact_mcp_server
+
+    service = evidence_service or LocalArtifactEvidenceService(allowed_root=chosen_root)
+
+    return build_artifact_mcp_server(
+        evidence_service=service,
+        local_root=chosen_root,
+        settings=resolved_settings,
+    )
+
+
+def create_local_explanation_mcp_server(
+    *,
+    explanation_path: Any | None = None,
+    evidence_service: Any | None = None,
+    settings: CodestrataSettings | None = None,
+    config_path: Path | None = None,
+) -> FastMCP:
+    """Create the optional local/BYO explanation server.
+
+    This server is separate from artifact evidence queries and from assessment
+    execution. AI stays disabled until a tool call sets ``enabled`` and
+    ``prompt_evidence_egress_enabled``.
+    """
+
+    resolved_settings = settings
+    if resolved_settings is None and config_path is not None:
+        resolved_settings = load_settings(config_path)
+
+    from codestrata.interfaces.mcp.server import build_local_explanation_mcp_server
+
+    return build_local_explanation_mcp_server(
+        explanation_path=explanation_path,
+        evidence_service=evidence_service,
+        settings=resolved_settings,
+    )

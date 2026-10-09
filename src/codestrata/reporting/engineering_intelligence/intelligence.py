@@ -9,7 +9,7 @@ recommendations, Priority Actions, scores, or maturity claims.
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Sequence
+from collections.abc import Iterable, Sequence
 from typing import Any
 
 from codestrata.reporting.engineering_intelligence.intelligence_models import (
@@ -51,8 +51,7 @@ _SOFT_CLAIM_FRAGMENTS = (
 )
 
 _SAFE_STATUS_SUMMARY = (
-    "The assessment summarizes deterministic observations from the enabled "
-    "assessment heads."
+    "The assessment summarizes deterministic observations from the enabled assessment heads."
 )
 
 _CONFIDENCE_RANK = {
@@ -111,16 +110,12 @@ def build_engineering_intelligence(
         else len(tuple(priority_actions))
     )
     priority_rows = _count_rows(
-        (
-            str(getattr(item, "priority", "") or "unknown").strip() or "unknown"
-            for item in priority_actions
-        )
+        str(getattr(item, "priority", "") or "unknown").strip() or "unknown"
+        for item in priority_actions
     )
     horizon_rows = _count_rows(
-        (
-            str(getattr(item, "presentation_bucket", "") or "future").strip() or "future"
-            for item in priority_actions
-        )
+        str(getattr(item, "presentation_bucket", "") or "future").strip() or "future"
+        for item in priority_actions
     )
 
     total_findings = _summary_int(assessment_summary, "findings_count")
@@ -134,10 +129,14 @@ def build_engineering_intelligence(
     contributing = tuple(
         item
         for item in head_summaries
-        if item.finding_count
-        or item.recommendation_count
-        or item.priority_action_count
-        or item.status in {"assessed", "partially_assessed", "legacy_assessment"}
+        if item.coverage != "Disabled"
+        and (
+            item.finding_count > 0
+            or item.recommendation_count > 0
+            or item.priority_action_count > 0
+            or item.status == "assessed"
+            or getattr(item, "head", None) == "technology_inventory"
+        )
     )
 
     overview = _overview(
@@ -302,7 +301,7 @@ def _roadmap_counts(roadmap_report: Any | None) -> tuple[int, int]:
     return phase_with_items, initiatives
 
 
-def _count_rows(values) -> tuple[EngineeringCountRow, ...]:
+def _count_rows(values: Iterable[object]) -> tuple[EngineeringCountRow, ...]:
     counter: Counter[str] = Counter()
     for value in values:
         key = str(value or "").strip() or "unknown"
@@ -325,23 +324,23 @@ def _overview(
     assessed = sum(
         1
         for item in head_summaries
-        if item.status in {"assessed", "partially_assessed", "legacy_assessment"}
+        if item.coverage != "Disabled"
+        and item.status in {"assessed", "partially_assessed", "legacy_assessment"}
+        and (
+            item.finding_count > 0
+            or item.recommendation_count > 0
+            or item.status == "assessed"
+            or getattr(item, "head", None) == "technology_inventory"
+        )
     )
-    coverage_complete = sum(
-        1 for item in head_summaries if item.coverage == "Complete coverage"
-    )
-    coverage_partial = sum(
-        1 for item in head_summaries if item.coverage == "Partial coverage"
-    )
+    coverage_complete = sum(1 for item in head_summaries if item.coverage == "Complete coverage")
+    coverage_partial = sum(1 for item in head_summaries if item.coverage == "Partial coverage")
     coverage_unavailable = sum(
         1
         for item in head_summaries
-        if item.coverage
-        in {"Coverage unavailable", "Insufficient evidence", "Not applicable"}
+        if item.coverage in {"Coverage unavailable", "Insufficient evidence", "Not applicable"}
     )
-    coverage_disabled = sum(
-        1 for item in head_summaries if item.coverage == "Disabled"
-    )
+    coverage_disabled = sum(1 for item in head_summaries if item.coverage == "Disabled")
     facts: list[EngineeringOverviewFact] = [
         EngineeringOverviewFact(
             label="Assessment heads with results",
@@ -408,26 +407,27 @@ def _observations(
         1
         for item in head_summaries
         if item.status not in {"not_available", "not_enabled"}
+        and item.coverage != "Disabled"
+        and (
+            item.finding_count > 0
+            or item.recommendation_count > 0
+            or item.status == "assessed"
+            or getattr(item, "head", None) == "technology_inventory"
+        )
     )
     notes.append(
-        f"{enabled} assessment head(s) contributed deterministic results within "
-        "the assessed scope."
+        f"{enabled} assessment head(s) contributed deterministic results within the assessed scope."
     )
     notes.append(
         f"{total_findings} finding(s) and {total_recommendations} recommendation(s) "
         "were produced across enabled assessment heads."
     )
-    notes.append(
-        f"{pa_total} Priority Action(s) were produced from grounded recommendations."
-    )
+    notes.append(f"{pa_total} Priority Action(s) were produced from grounded recommendations.")
     if highest_finding_severity:
-        notes.append(
-            f"Highest finding severity observed: {highest_finding_severity}."
-        )
+        notes.append(f"Highest finding severity observed: {highest_finding_severity}.")
     if phase_count:
         notes.append(
-            f"{phase_count} roadmap phase(s) are represented in the Priority "
-            "Action-backed plan."
+            f"{phase_count} roadmap phase(s) are represented in the Priority Action-backed plan."
         )
     by_sev = tuple(getattr(assessment_summary, "findings_by_severity", ()) or ())
     if by_sev:
@@ -457,18 +457,10 @@ def _cross_head(
 ) -> tuple[EngineeringOverviewFact, ...]:
     return (
         EngineeringOverviewFact(label="Total findings", value=str(total_findings)),
-        EngineeringOverviewFact(
-            label="Total recommendations", value=str(total_recommendations)
-        ),
-        EngineeringOverviewFact(
-            label="Total Priority Actions", value=str(pa_total)
-        ),
-        EngineeringOverviewFact(
-            label="Roadmap phases", value=str(phase_count)
-        ),
-        EngineeringOverviewFact(
-            label="Roadmap initiatives", value=str(initiative_count)
-        ),
+        EngineeringOverviewFact(label="Total recommendations", value=str(total_recommendations)),
+        EngineeringOverviewFact(label="Total Priority Actions", value=str(pa_total)),
+        EngineeringOverviewFact(label="Roadmap phases", value=str(phase_count)),
+        EngineeringOverviewFact(label="Roadmap initiatives", value=str(initiative_count)),
         EngineeringOverviewFact(
             label="Contributing assessment heads",
             value=str(contributing_count),
@@ -522,13 +514,11 @@ def _limitations(
     disabled = [
         item
         for item in assessment_heads
-        if str(getattr(item, "status", "") or "").strip()
-        in {"not_enabled", "not_available"}
+        if str(getattr(item, "status", "") or "").strip() in {"not_enabled", "not_available"}
     ]
     if disabled:
         notes.append(
-            "Some assessment heads were not enabled or not available, which "
-            "reduces completeness."
+            "Some assessment heads were not enabled or not available, which reduces completeness."
         )
     notes.extend(aggregate_head_limitations(assessment_heads))
     if has_unclassified and unclassified_limitation:
@@ -598,9 +588,7 @@ def _status(
     if not head_summaries:
         return "not_available", "Not available"
     active = [
-        item
-        for item in head_summaries
-        if item.status not in {"not_enabled", "not_available"}
+        item for item in head_summaries if item.status not in {"not_enabled", "not_available"}
     ]
     if not active:
         return "not_available", "Not available"

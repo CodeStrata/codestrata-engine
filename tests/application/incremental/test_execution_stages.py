@@ -39,9 +39,7 @@ def _pipeline_result() -> GraphAssessmentPipelineResult:
     knowledge_graph = load_builtin_engineering_knowledge_catalog()
     bindings = KnowledgePipeline().bind(repository_graph, knowledge_graph)
     module_node = next(
-        node
-        for node in repository_graph.nodes
-        if node.properties.get("name") == "module-a"
+        node for node in repository_graph.nodes if node.properties.get("name") == "module-a"
     )
     assessment_payload = build_assessment_graph_payload(module_node)
     assessment_graph = AssessmentGraph(GraphSnapshot.model_validate(assessment_payload))

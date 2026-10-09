@@ -245,7 +245,7 @@ def test_successful_ai_result_status(tmp_path: Path) -> None:
     assert document["assessment"]["ai"]["status"] == "succeeded"
     assert document["assessment"]["ai"]["executed"] is True
     assert document["assessment"]["ai"]["result_included"] is True
-    assert "Leadership Verdict" in html
+    assert "Current-code baseline" in html
     assert "Modernization Advisor" in html or "AI status" in html
     assert 'id="ai-enrichment"' not in html
 

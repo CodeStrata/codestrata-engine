@@ -4,9 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from codestrata.cli.init_cmd import write_minimal_config
 from verification.cli_installation.artifacts import validate_init_artifacts
 from verification.cli_installation.environment import scrub_environ
+
+from codestrata.cli.init_cmd import write_minimal_config
 
 
 def test_scrub_environ_removes_pythonpath_and_secrets() -> None:

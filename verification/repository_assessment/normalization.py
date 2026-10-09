@@ -54,7 +54,9 @@ def normalize_report(document: dict[str, Any]) -> dict[str, Any]:
 
 
 def extract_id_sets(document: dict[str, Any]) -> dict[str, list[str]]:
-    assessment = document.get("assessment") if isinstance(document.get("assessment"), dict) else document
+    assessment = (
+        document.get("assessment") if isinstance(document.get("assessment"), dict) else document
+    )
 
     def ids(key: str) -> list[str]:
         items = assessment.get(key) or document.get(key) or []
@@ -76,7 +78,9 @@ def extract_id_sets(document: dict[str, Any]) -> dict[str, list[str]]:
     )
 
     packs = []
-    activation = assessment.get("activation") if isinstance(assessment.get("activation"), dict) else {}
+    activation = (
+        assessment.get("activation") if isinstance(assessment.get("activation"), dict) else {}
+    )
     for pack in activation.get("packs") or []:
         if isinstance(pack, dict) and pack.get("pack_id") is not None:
             packs.append(f"{pack.get('pack_id')}:{pack.get('enabled')}")
@@ -137,7 +141,11 @@ def compare_normalized(
                 return str(doc.get("schema_version"))
             assessment = doc.get("assessment")
             if isinstance(assessment, dict):
-                return str(assessment.get("schema_version")) if assessment.get("schema_version") else None
+                return (
+                    str(assessment.get("schema_version"))
+                    if assessment.get("schema_version")
+                    else None
+                )
             return None
 
         if schema(left) != schema(right):

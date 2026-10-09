@@ -6,7 +6,7 @@ No title matching. No Precision/Recall/FP/FN inputs.
 
 from __future__ import annotations
 
-from typing import Mapping
+from collections.abc import Mapping
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
@@ -72,7 +72,9 @@ class RecommendationPriorityPolicy(BaseModel):
     @field_validator("supported_rule_ids", mode="before")
     @classmethod
     def normalize_rules(cls, value: object) -> tuple[str, ...]:
-        return tuple(sorted({require_nonblank(str(item), label="rule_id") for item in as_tuple(value)}))
+        return tuple(
+            sorted({require_nonblank(str(item), label="rule_id") for item in as_tuple(value)})
+        )
 
     @field_validator("allowed_priorities", mode="before")
     @classmethod
@@ -89,16 +91,29 @@ class RecommendationPriorityPolicy(BaseModel):
 
     @model_validator(mode="after")
     def validate_policy(self) -> RecommendationPriorityPolicy:
-        if self.allows_immediate and RecommendationPriority.IMMEDIATE not in self.allowed_priorities:
-            raise ValueError(f"{self.policy_id}: allows_immediate requires IMMEDIATE in allowed_priorities")
+        if (
+            self.allows_immediate
+            and RecommendationPriority.IMMEDIATE not in self.allowed_priorities
+        ):
+            raise ValueError(
+                f"{self.policy_id}: allows_immediate requires IMMEDIATE in allowed_priorities"
+            )
         if self.correlation_aware and self.correlation_adjustment_max <= 0:
-            raise ValueError(f"{self.policy_id}: correlation-aware policy needs positive correlation_adjustment_max")
-        if not self.allows_immediate and RecommendationPriority.IMMEDIATE in self.allowed_priorities:
+            raise ValueError(
+                f"{self.policy_id}: correlation-aware policy needs "
+                "positive correlation_adjustment_max"
+            )
+        if (
+            not self.allows_immediate
+            and RecommendationPriority.IMMEDIATE in self.allowed_priorities
+        ):
             # Strip Immediate from allowed when policy forbids it.
             object.__setattr__(
                 self,
                 "allowed_priorities",
-                tuple(p for p in self.allowed_priorities if p is not RecommendationPriority.IMMEDIATE),
+                tuple(
+                    p for p in self.allowed_priorities if p is not RecommendationPriority.IMMEDIATE
+                ),
             )
         return self
 
@@ -191,9 +206,7 @@ _BUILTIN_POLICIES: tuple[RecommendationPriorityPolicy, ...] = (
         # still cannot be Immediate (no allows_immediate).
         limited_confidence_max_priority=RecommendationPriority.HIGH,
         preferred_phase="stabilize",
-        limitations=(
-            "Absence-based testing action; static inventory may be incomplete.",
-        ),
+        limitations=("Absence-based testing action; static inventory may be incomplete.",),
     ),
     _policy(
         policy_id="priority.build.missing-ci",
@@ -308,9 +321,7 @@ _BUILTIN_POLICIES: tuple[RecommendationPriorityPolicy, ...] = (
         limited_confidence_max_priority=RecommendationPriority.HIGH,
         preferred_phase="stabilize",
         calibration_status=PriorityCalibrationStatus.PROVISIONAL,
-        limitations=(
-            "Finding-backed compatibility policy; no dedicated provider policy.",
-        ),
+        limitations=("Finding-backed compatibility policy; no dedicated provider policy.",),
     ),
     _policy(
         policy_id="priority.legacy.compatibility",
@@ -376,7 +387,9 @@ from codestrata.services.recommendations.providers.builtin import (  # noqa: E40
     builtin_recommendation_providers,
 )
 
-assert_builtin_providers_covered({p.id() for p in builtin_recommendation_providers()})
+assert_builtin_providers_covered(
+    {str(provider.id()) for provider in builtin_recommendation_providers()}
+)
 
 # Score band helpers re-exported for diagnostics.
 __all__ = [

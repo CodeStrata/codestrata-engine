@@ -65,9 +65,7 @@ def _decl(
     path: str,
     kind: DependencyDeclarationKind = DependencyDeclarationKind.RUNTIME,
     classification: SourceClassification = SourceClassification.SOURCE,
-    resolution: DependencyVersionResolutionStatus = (
-        DependencyVersionResolutionStatus.RESOLVED
-    ),
+    resolution: DependencyVersionResolutionStatus = (DependencyVersionResolutionStatus.RESOLVED),
     ecosystem: DependencyEcosystem = DependencyEcosystem.MAVEN,
     manifest_type: DependencyManifestType = DependencyManifestType.POM_XML,
     raw_version: str | None = "1.0.0",
@@ -127,9 +125,7 @@ def _evidence(
             manifests_discovered=len(manifests),
             manifests_supported=len(manifests),
             manifests_parsed=sum(
-                1
-                for item in manifests
-                if item.parse_status is DependencyParseStatus.SUCCEEDED
+                1 for item in manifests if item.parse_status is DependencyParseStatus.SUCCEEDED
             ),
             manifests_partially_parsed=sum(
                 1
@@ -137,9 +133,7 @@ def _evidence(
                 if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
             ),
             declarations_collected=len(declarations),
-            unsupported_construct_count=sum(
-                len(item.unsupported_constructs) for item in manifests
-            ),
+            unsupported_construct_count=sum(len(item.unsupported_constructs) for item in manifests),
         ),
         evidence_fingerprint="fp-synth",
     )
@@ -204,9 +198,7 @@ def test_synthesis_gate_disabled_and_not_requested() -> None:
     )
     assert disabled.status is DependencyAssessmentStatus.DISABLED
     assert disabled.synthesis.status is DependencySynthesisStatus.DISABLED
-    assert any(
-        item.kind is DependencyConclusionKind.DISABLED for item in disabled.conclusions
-    )
+    assert any(item.kind is DependencyConclusionKind.DISABLED for item in disabled.conclusions)
 
 
 def test_no_production_findings_and_test_observations() -> None:
@@ -279,8 +271,7 @@ def test_no_production_findings_and_test_observations() -> None:
         if item.audience is DependencyConclusionAudience.PRODUCTION_HEALTH
     ]
     assert all(
-        item.kind is DependencyConclusionKind.NO_PRODUCTION_HYGIENE_FINDINGS
-        for item in prod_health
+        item.kind is DependencyConclusionKind.NO_PRODUCTION_HYGIENE_FINDINGS for item in prod_health
     )
     test_recs = [
         item
@@ -348,12 +339,10 @@ def test_production_findings_present_and_rule_themes() -> None:
         assert rec.conclusion_ids
         assert all(cid in section.conclusion_ids for cid in rec.conclusion_ids)
     assert any(
-        edge.relation.value == "recommendation_to_conclusion"
-        for edge in section.traceability.edges
+        edge.relation.value == "recommendation_to_conclusion" for edge in section.traceability.edges
     )
     assert any(
-        edge.relation.value == "conclusion_to_finding"
-        for edge in section.traceability.edges
+        edge.relation.value == "conclusion_to_finding" for edge in section.traceability.edges
     )
 
 
@@ -417,9 +406,7 @@ def test_insufficient_evidence_and_determinism(tmp_path: Path) -> None:
     empty = AggregatedDependencyEvidence(
         repository_id="repo:empty",
         status=DependencyParseStatus.NOT_APPLICABLE,
-        coverage=DependencyEvidenceCoverage(
-            manifests_discovered=0, manifests_supported=0
-        ),
+        coverage=DependencyEvidenceCoverage(manifests_discovered=0, manifests_supported=0),
         evidence_fingerprint="fp-empty",
     )
     section = DependencyAssessmentAssembler().assemble(
@@ -432,8 +419,7 @@ def test_insufficient_evidence_and_determinism(tmp_path: Path) -> None:
     assert section.status is DependencyAssessmentStatus.INSUFFICIENT_EVIDENCE
     assert section.synthesis.status is DependencySynthesisStatus.INSUFFICIENT_EVIDENCE
     assert any(
-        item.kind is DependencyConclusionKind.INSUFFICIENT_EVIDENCE
-        for item in section.conclusions
+        item.kind is DependencyConclusionKind.INSUFFICIENT_EVIDENCE for item in section.conclusions
     )
 
     findings = (
@@ -478,9 +464,7 @@ def test_insufficient_evidence_and_determinism(tmp_path: Path) -> None:
     assert dumps_stable_json(dependency_assessment_payload(left)) == dumps_stable_json(
         dependency_assessment_payload(right)
     )
-    text = write_dependency_assessment_artifact(left, tmp_path).path.read_text(
-        encoding="utf-8"
-    )
+    text = write_dependency_assessment_artifact(left, tmp_path).path.read_text(encoding="utf-8")
     assert "/Users/" not in text
     assert '"vulnerabilities"' not in text
     assert '"licenses"' not in text

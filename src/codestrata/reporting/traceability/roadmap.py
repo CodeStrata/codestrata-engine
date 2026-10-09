@@ -31,9 +31,7 @@ def serialize_initiative_for_assessment(item: RoadmapInitiative) -> dict[str, An
     else:
         initiative_type_value = str(initiative_type)
     completeness = item.evidence_completeness
-    completeness_value = (
-        completeness.value if hasattr(completeness, "value") else str(completeness)
-    )
+    completeness_value = completeness.value if hasattr(completeness, "value") else str(completeness)
     return {
         "initiative_id": item.initiative_id,
         "title": item.title,

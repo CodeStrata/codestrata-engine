@@ -141,9 +141,7 @@ def test_allowed_consent_cannot_bypass_gate() -> None:
         return bad
 
     with patch.object(runtime_mod, "project_runtime_event", side_effect=_project):
-        result = runtime.record(
-            RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-        )
+        result = runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert result.status is TelemetryRecordStatus.PRIVACY_REJECTED
     assert capture.captured == []
     assert runtime.session.counters.privacy_gate_rejected >= 1
@@ -156,9 +154,7 @@ def test_capture_receives_only_gated_accepted_events() -> None:
         consent=allow_session_consent(),
         transport=capture,
     )
-    result = runtime.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_COMPLETED)
-    )
+    result = runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_COMPLETED))
     assert result.status is TelemetryRecordStatus.TRANSPORT_RESULT
     assert len(capture.captured) == 1
     gate = validate_event_before_transport(capture.captured[0])
@@ -172,9 +168,7 @@ def test_denied_session_skips_gate_and_transport() -> None:
         consent=deny_session_consent(),
         transport=capture,
     )
-    result = runtime.record(
-        RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED)
-    )
+    result = runtime.record(RuntimeTelemetryEvent(event_type=RuntimeEventType.FEATURE_INVOKED))
     assert result.status is TelemetryRecordStatus.DROPPED_DENIED
     assert capture.captured == []
     assert runtime.session.counters.privacy_gate_attempts == 0

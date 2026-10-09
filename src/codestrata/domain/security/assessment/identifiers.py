@@ -22,7 +22,6 @@ def build_hotspot_id(*, path: str, source_role: str = "aggregate") -> str:
     return f"sec-hotspot:{digest}"
 
 
-
 def build_assessment_id(
     *,
     repository_id: str,
@@ -80,10 +79,7 @@ def build_empty_section_fingerprint(
 def sorted_mapping(values: Mapping[str, str] | None) -> dict[str, str]:
     if not values:
         return {}
-    return {
-        str(key): str(item)
-        for key, item in sorted(values.items(), key=lambda pair: pair[0])
-    }
+    return {str(key): str(item) for key, item in sorted(values.items(), key=lambda pair: pair[0])}
 
 
 def sorted_ids(values: Sequence[str] | None) -> tuple[str, ...]:

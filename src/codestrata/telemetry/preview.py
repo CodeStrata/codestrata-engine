@@ -87,11 +87,7 @@ def preview_runtime_event(
     active_consent = (
         consent
         if consent is not None
-        else (
-            session.consent
-            if session is not None
-            else default_session_consent()
-        )
+        else (session.consent if session is not None else default_session_consent())
     )
     if decision is not None and decision is not active_consent.decision:
         # Decision override only for narrow tests; consent fields still from consent.
@@ -122,9 +118,7 @@ def preview_privacy_safe_event(
     active_consent = consent or default_session_consent()
     active_decision = decision if decision is not None else active_consent.decision
     stable = event.to_stable_dict()
-    omitted = tuple(
-        sorted(field for field in _OPTIONAL_FIELDS if field not in stable)
-    )
+    omitted = tuple(sorted(field for field in _OPTIONAL_FIELDS if field not in stable))
     return TelemetryPreview(
         telemetry_enabled=active_decision is TelemetryDecision.ALLOWED_FOR_SESSION,
         decision=active_decision.value,

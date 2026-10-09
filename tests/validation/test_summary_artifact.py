@@ -6,7 +6,6 @@ import json
 from pathlib import Path
 
 import pytest
-
 from validation.generate_summary import main as generate_summary_main
 from validation.models import (
     ComparisonMismatch,
@@ -331,9 +330,7 @@ def test_malformed_record_fail_closed(tmp_path: Path) -> None:
         load_records_for_summary(records_root=tmp_path)
 
 
-def test_cli_json_only_and_no_assessment(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_cli_json_only_and_no_assessment(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     write_repository_validation_record(
         _record("cli-repo", packs=(_pack("architecture", tp=1),)),
         records_root=tmp_path,

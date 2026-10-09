@@ -141,9 +141,7 @@ orchestrator = create_agent_orchestrator(
     assessment_service=assessment_service,  # optional for review-only
     policy=None,  # or AgentExecutionPolicy(...)
 )
-result = orchestrator.review_repository(
-    RepositoryReviewRequest(repository_identifier=repo_id)
-)
+result = orchestrator.review_repository(RepositoryReviewRequest(repository_identifier=repo_id))
 ```
 
 Tests should inject fake services. Importing `codestrata.application.agents`

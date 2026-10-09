@@ -22,9 +22,7 @@ from codestrata.domain.evidence.repository_sensitive.models import (
 class RepositorySensitiveEvidenceService:
     """Collect deterministic repository-visible security-relevant evidence."""
 
-    def __init__(
-        self, settings: RepositorySensitiveEvidenceSettings | None = None
-    ) -> None:
+    def __init__(self, settings: RepositorySensitiveEvidenceSettings | None = None) -> None:
         self._settings = settings or RepositorySensitiveEvidenceSettings()
 
     @property
@@ -50,9 +48,7 @@ class RepositorySensitiveEvidenceService:
                 evidence_fingerprint="",
             )
 
-        ignore = (
-            tuple(self._settings.ignore_path_markers) or DEFAULT_IGNORE_MARKERS
-        )
+        ignore = tuple(self._settings.ignore_path_markers) or DEFAULT_IGNORE_MARKERS
         return collect_repository_sensitive_evidence(
             repository_id=repository_id,
             relative_paths=relative_paths,

@@ -44,7 +44,9 @@ def _write(tmp_path: Path) -> object:
         },
     }
     (root / "report.json").write_text(json.dumps(report), encoding="utf-8")
-    (root / "findings.json").write_text(json.dumps({"finding_count": 0, "findings": []}), encoding="utf-8")
+    (root / "findings.json").write_text(
+        json.dumps({"finding_count": 0, "findings": []}), encoding="utf-8"
+    )
     (root / "recommendations.json").write_text(
         json.dumps({"recommendation_count": 0, "recommendations": []}), encoding="utf-8"
     )

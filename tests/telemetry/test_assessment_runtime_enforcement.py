@@ -21,9 +21,7 @@ def test_assessment_hooks_disabled_no_fs_mutation(tmp_path: Path, monkeypatch) -
     )
     queue = home / "telemetry-queue.jsonl"
     queue.write_text("{}\n", encoding="utf-8")
-    before_files = {
-        p.name: p.read_bytes() for p in home.iterdir() if p.is_file()
-    }
+    before_files = {p.name: p.read_bytes() for p in home.iterdir() if p.is_file()}
     monkeypatch.setenv("CODESTRATA_HOME", str(home))
     monkeypatch.setenv("CODESTRATA_TELEMETRY_ENDPOINT", "https://example.invalid/t")
     reset_telemetry_singletons()
@@ -46,9 +44,7 @@ def test_assessment_hooks_disabled_no_fs_mutation(tmp_path: Path, monkeypatch) -
     assert after_files == before_files
 
 
-def test_M_unwritable_home_does_not_break_assessment_hooks(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_M_unwritable_home_does_not_break_assessment_hooks(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "ro-home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))

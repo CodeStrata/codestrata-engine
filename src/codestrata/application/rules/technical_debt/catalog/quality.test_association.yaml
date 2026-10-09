@@ -1,0 +1,54 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: quality.test_association
+  version: 1.0.0
+  title: Static test association is incomplete
+  category: quality
+  owner: codestrata
+  measurement: M19
+  tags: [quality, testing, association, advisory]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [testing.association]
+select:
+  source: testing
+  association:
+    all:
+      - unassociated_gt: 0
+      - full_scope_complete: true
+condition:
+  operator: quality.test_association
+emit:
+  finding:
+    default_severity: low
+    message:
+      template: >-
+        Static test association {{serialized}} ({{associated}}/{{eligible}}
+        eligible production units, {{formula_version}}) is advisory only and
+        is not measured runtime test coverage. Unassociated units remain
+        visible. Full-scope status={{full_scope_status}}.
+      bindings:
+        serialized: {type: string, evidence: serialized}
+        associated: {type: string, evidence: associated}
+        eligible: {type: string, evidence: eligible}
+        formula_version: {type: string, evidence: formula_version}
+        full_scope_status: {type: string, evidence: full_scope_status}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: quality_test_association_ratio
+    operation: ratio
+evidence:
+  include:
+    - production_path
+    - test_path
+    - association_method
+    - association_confidence
+parameters:
+  advisory: true
+  runtime_coverage: false
+  unknown:
+    unsupported_framework: unknown
+    generated_tests: unknown
+    no_eligible_production: not_applicable

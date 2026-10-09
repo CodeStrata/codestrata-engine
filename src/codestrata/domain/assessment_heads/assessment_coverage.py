@@ -254,8 +254,7 @@ class CoverageMetric(BaseModel):
                 denominator=0,
                 ratio=None,
                 availability=CoverageMetricAvailability.UNAVAILABLE,
-                limitations=limitations
-                or ("Coverage metric denominator is zero.",),
+                limitations=limitations or ("Coverage metric denominator is zero.",),
             )
         ratio = (Decimal(numerator) / Decimal(denominator)).quantize(Decimal("0.0001"))
         return cls(
@@ -318,9 +317,7 @@ class AssessmentCoverage(BaseModel):
         pack_id: str | None = None,
         activated: bool = False,
         status: CoverageStatus = CoverageStatus.UNAVAILABLE,
-        limitations: tuple[str, ...] = (
-            "Assessment coverage could not be measured.",
-        ),
+        limitations: tuple[str, ...] = ("Assessment coverage could not be measured.",),
     ) -> AssessmentCoverage:
         return cls(
             status=status,
@@ -343,7 +340,10 @@ def assessment_coverage_to_json(coverage: AssessmentCoverage) -> dict[str, Any]:
     for metric in payload.get("metrics") or []:
         if isinstance(metric, dict) and metric.get("ratio") is not None:
             metric["ratio"] = format(Decimal(str(metric["ratio"])), "f")
-    return json.loads(json.dumps(payload, sort_keys=True))
+    loaded = json.loads(json.dumps(payload, sort_keys=True))
+    if not isinstance(loaded, dict):
+        raise TypeError("JSON projection must be an object")
+    return loaded
 
 
 def coverage_status_to_confidence_coverage_state(status: CoverageStatus) -> str:

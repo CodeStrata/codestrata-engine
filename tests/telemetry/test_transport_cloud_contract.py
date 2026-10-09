@@ -5,6 +5,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from tests.telemetry.transport_test_helpers import FIXED_EVENT_ID, gated_event
+
 from codestrata.telemetry.transport_mapping import map_privacy_safe_event_to_cloud_request
 from codestrata.telemetry.transport_models import (
     CLOUD_DURATION_BUCKETS,
@@ -12,7 +14,6 @@ from codestrata.telemetry.transport_models import (
     CLOUD_OUTCOMES,
     CLOUD_PROPERTY_KEYS,
 )
-from tests.telemetry.transport_test_helpers import FIXED_EVENT_ID, gated_event
 
 _DOCUMENTED_EVENT_TYPES = frozenset(
     {
@@ -47,9 +48,7 @@ def test_engine_vocab_matches_documented_cloud_contract() -> None:
 
 
 def test_mapped_request_keys_are_cloud_allowlisted() -> None:
-    wire = map_privacy_safe_event_to_cloud_request(
-        gated_event(), event_id=FIXED_EVENT_ID
-    )
+    wire = map_privacy_safe_event_to_cloud_request(gated_event(), event_id=FIXED_EVENT_ID)
     payload = wire.to_stable_dict()
     assert set(payload.keys()).issubset(
         {"schema_version", "event_id", "event_type", "client", "properties"}
@@ -78,8 +77,6 @@ def test_platform_docs_fixture_present() -> None:
 
 
 def test_wire_json_is_object_not_array() -> None:
-    wire = map_privacy_safe_event_to_cloud_request(
-        gated_event(), event_id=FIXED_EVENT_ID
-    )
+    wire = map_privacy_safe_event_to_cloud_request(gated_event(), event_id=FIXED_EVENT_ID)
     parsed = json.loads(wire.to_canonical_bytes())
     assert isinstance(parsed, dict)

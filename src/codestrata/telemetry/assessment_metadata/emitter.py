@@ -117,9 +117,7 @@ def emit_assessment_metadata_safely(
                 )
 
         wire = project_assessment_metadata(source, policy=active_policy)
-        active_transport = transport or HttpAssessmentMetadataTransport(
-            policy=active_policy
-        )
+        active_transport = transport or HttpAssessmentMetadataTransport(policy=active_policy)
         transport_result = _send_once(active_transport, wire)
         if transport_result.kind == "sent":
             diag.record_success(status_category=transport_result.status_category)

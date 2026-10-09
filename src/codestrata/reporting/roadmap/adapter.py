@@ -53,18 +53,12 @@ class RoadmapReportAdapter:
                 objective=phase.objective,
                 sequence=phase.sequence,
                 initiative_ids=phase.initiative_ids,
-                initiatives=tuple(
-                    by_id[iid] for iid in phase.initiative_ids if iid in by_id
-                ),
+                initiatives=tuple(by_id[iid] for iid in phase.initiative_ids if iid in by_id),
             )
             for phase in section.phases
         )
         assumptions = section.assumptions if include_assumptions else ()
-        limitations = (
-            section.limitations[:LIMITATION_DISPLAY_LIMIT]
-            if include_limitations
-            else ()
-        )
+        limitations = section.limitations[:LIMITATION_DISPLAY_LIMIT] if include_limitations else ()
         status = (
             section.status
             if isinstance(section.status, RoadmapStatus)
@@ -94,8 +88,10 @@ class RoadmapReportAdapter:
         *,
         include_evidence: bool,
     ) -> RoadmapReportInitiativeView:
-        phase = item.phase if isinstance(item.phase, RoadmapPhaseName) else RoadmapPhaseName(
-            str(item.phase)
+        phase = (
+            item.phase
+            if isinstance(item.phase, RoadmapPhaseName)
+            else RoadmapPhaseName(str(item.phase))
         )
         evidence: tuple[RoadmapReportEvidenceView, ...] = ()
         if include_evidence:
@@ -110,9 +106,7 @@ class RoadmapReportAdapter:
             )
         initiative_type = item.initiative_type
         initiative_type_value = (
-            initiative_type.value
-            if hasattr(initiative_type, "value")
-            else str(initiative_type)
+            initiative_type.value if hasattr(initiative_type, "value") else str(initiative_type)
         )
         completeness = item.evidence_completeness
         completeness_value = (

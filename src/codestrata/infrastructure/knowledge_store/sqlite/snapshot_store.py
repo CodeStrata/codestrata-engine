@@ -128,9 +128,7 @@ class SqliteSnapshotStore:
                 (repository_id, branch_key, fingerprint),
             ).fetchone()
             if row is None:
-                raise KnowledgeStoreError(
-                    "Snapshot insert conflict without reusable row"
-                ) from None
+                raise KnowledgeStoreError("Snapshot insert conflict without reusable row") from None
             return self._row_to_record(row)
         except sqlite3.Error as error:
             self._connection.execute("ROLLBACK")

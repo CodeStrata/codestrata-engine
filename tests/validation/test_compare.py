@@ -115,3 +115,34 @@ def test_deterministic_mismatch_ordering() -> None:
         actual=actual,
     ).mismatches
     assert [m.diagnostic for m in first] == [m.diagnostic for m in second]
+
+
+def test_required_series_comparison_pairs_are_complete() -> None:
+    expected = ExpectedResults(
+        technology_facts_expected=("s1-s2", "s2-s3", "s3-s4", "s4-s5", "s1-s5"),
+        expected_finding_rule_ids=("s1-s2", "s4-s5", "s1-s5"),
+    )
+    intact = ActualAssessmentResult(
+        technologies=("s1-s2", "s2-s3", "s3-s4", "s4-s5", "s1-s5"),
+        finding_rule_ids=("s1-s2", "s4-s5", "s1-s5"),
+        findings_count=3,
+    )
+    missing_middle = ActualAssessmentResult(
+        technologies=("s1-s2", "s4-s5", "s1-s5"),
+        finding_rule_ids=("s1-s2", "s4-s5", "s1-s5"),
+        findings_count=3,
+    )
+    assert compare_actual_to_expected(
+        repository_id="trend-series",
+        expected=expected,
+        actual=intact,
+    ).mismatches == ()
+    outcome = compare_actual_to_expected(
+        repository_id="trend-series",
+        expected=expected,
+        actual=missing_middle,
+    )
+    assert any(
+        "s2-s3" in item.diagnostic or "s2-s3" in item.expectation
+        for item in outcome.mismatches
+    )

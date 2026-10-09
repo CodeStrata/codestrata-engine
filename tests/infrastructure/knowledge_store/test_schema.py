@@ -8,12 +8,12 @@ from pathlib import Path
 import pytest
 
 from codestrata.application.knowledge import KnowledgeStoreVersionError
-from codestrata.infrastructure.knowledge_store import SqliteKnowledgeStore
 from codestrata.infrastructure.knowledge_store.defaults import (
     CURRENT_SCHEMA_VERSION,
     SCHEMA_VERSION_KEY,
 )
 from codestrata.infrastructure.knowledge_store.sqlite import migrations as migrations_module
+from codestrata.infrastructure.knowledge_store.sqlite.store import SqliteKnowledgeStore
 
 
 def test_empty_directory_initializes_current_schema(tmp_path: Path) -> None:

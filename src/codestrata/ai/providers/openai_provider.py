@@ -185,9 +185,7 @@ class OpenAIAIModelProvider(AIModelProvider):
         provider_result = execution.provider_result
         error = provider_result.error if provider_result is not None else None
         if error is None:
-            return AIProviderInvocationError(
-                "OpenAI invocation did not produce a usable response"
-            )
+            return AIProviderInvocationError("OpenAI invocation did not produce a usable response")
         return legacy_bridge.legacy_error_for(
             error,
             api_key_env_name=adapter.configuration.api_key_env_name,

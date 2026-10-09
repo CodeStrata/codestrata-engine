@@ -86,12 +86,7 @@ class RuleMatch(BaseModel):
     @classmethod
     def normalize_sequences(cls, value: object) -> tuple[str, ...]:
         return tuple(
-            sorted(
-                {
-                    require_nonblank(str(item), label="subject")
-                    for item in as_tuple(value)
-                }
-            )
+            sorted({require_nonblank(str(item), label="subject") for item in as_tuple(value)})
         )
 
     @field_validator("severity_basis", mode="before")
@@ -205,7 +200,5 @@ class SharedRuleEvaluationResult(BaseModel):
         return cls(
             status=RuleResultStatus.FAILED,
             failure_message=require_nonblank(message, label="failure_message"),
-            diagnostics=(
-                RuleDiagnostic(code="rule_failed", message=message, rule_id=rule_id),
-            ),
+            diagnostics=(RuleDiagnostic(code="rule_failed", message=message, rule_id=rule_id),),
         )

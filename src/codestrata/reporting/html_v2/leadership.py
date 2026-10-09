@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from codestrata.domain.priority_actions import PriorityAction
 from codestrata.reporting.html_v2.models import (
     DashboardMetrics,
     ExecutiveSummaryNarrative,
@@ -64,30 +65,20 @@ _PACK_LABELS: dict[str, str] = {
 
 # Engineer titles → leadership wording (keep meaning; improve readability).
 _CUSTOMER_TITLES: dict[str, str] = {
-    "framework symbol in domain boundary": (
-        "Framework concerns are leaking into the domain model"
-    ),
+    "framework symbol in domain boundary": ("Framework concerns are leaking into the domain model"),
     "excessive branching": "Complex branching is increasing change risk",
     "large callable": "Oversized methods are hard to change safely",
     "disabled or skipped tests detected": (
         "Skipped or disabled tests are weakening delivery confidence"
     ),
-    "dependency locking is not configured": (
-        "Dependencies are not locked for reproducible builds"
-    ),
-    "dependency uses a dynamic version": (
-        "Dynamic dependency versions risk inconsistent builds"
-    ),
+    "dependency locking is not configured": ("Dependencies are not locked for reproducible builds"),
+    "dependency uses a dynamic version": ("Dynamic dependency versions risk inconsistent builds"),
     "npm lockfile missing": "An npm lockfile is missing",
     "missing license": "No LICENSE file is present",
     "missing tests": "No automated tests were detected",
     "missing ci workflow": "No CI workflow was detected",
-    "no conventional test structure detected": (
-        "No conventional test layout was detected"
-    ),
-    "no cloud deployment assets detected": (
-        "No cloud deployment assets were detected"
-    ),
+    "no conventional test structure detected": ("No conventional test layout was detected"),
+    "no cloud deployment assets detected": ("No cloud deployment assets were detected"),
     "cloud deployment assets without runtime platform evidence": (
         "Deployment assets exist without clear runtime platform evidence"
     ),
@@ -149,6 +140,66 @@ def pack_display_label(pack_id: str) -> str:
     return _PACK_LABELS.get(key, pack_id.replace("_", " ").strip().title())
 
 
+def _ranked_medium_plus(findings: tuple[FindingView, ...]) -> tuple[FindingView, ...]:
+    """Medium-or-higher leadership signals, highest severity first."""
+
+    medium_plus = [
+        item
+        for item in findings
+        if is_leadership_signal_finding(item)
+        and item.severity.lower() in {"critical", "high", "medium"}
+    ]
+    medium_plus.sort(key=lambda item: severity_rank(item.severity))
+    return tuple(medium_plus)
+
+
+def _action_covers_risk(action: RecommendationView, risk: FindingView) -> bool:
+    risk_title = customer_title(risk.title).strip().lower()
+    if risk.finding_id and risk.finding_id in action.related_finding_ids:
+        return True
+    if action.primary_finding_id and risk.finding_id == action.primary_finding_id:
+        return True
+    if risk_title and risk_title in action.title.strip().lower():
+        return True
+    for title in action.related_finding_titles:
+        if customer_title(title).strip().lower() == risk_title:
+            return True
+    return False
+
+
+def _horizon_recommendation_prefix(action: RecommendationView | None) -> str:
+    """Name the calibrated presentation horizon for one action.
+
+    ``presentation_bucket`` is authoritative. A source priority of critical
+    does not make the horizon Immediate when the calibrated bucket is future.
+    """
+
+    bucket = (action.presentation_bucket or "").strip().lower() if action is not None else ""
+    if bucket == "immediate":
+        return "Immediate recommendation"
+    if bucket == "near_term":
+        return "Near-term recommendation"
+    if bucket == "future":
+        return "Future-horizon recommendation"
+    return "Recommendation"
+
+
+def _highest_risk_follow_up(
+    risk: FindingView | None,
+    actions: tuple[RecommendationView, ...],
+) -> str | None:
+    """Lead sentence when the first action does not address the highest risk."""
+
+    if risk is None or not actions or _action_covers_risk(actions[0], risk):
+        return None
+    risk_title = customer_title(risk.title).strip()
+    follow = actions[0].title.strip()
+    if not risk_title or not follow:
+        return None
+    prefix = _horizon_recommendation_prefix(actions[0])
+    return f"address the highest risk first: {risk_title}. {prefix}: {follow}"
+
+
 def build_leadership_verdict(
     *,
     findings: tuple[FindingView, ...],
@@ -158,15 +209,14 @@ def build_leadership_verdict(
 ) -> str:
     """Compose a 2–3 sentence VP-facing verdict. No methodology language."""
 
-    signal = tuple(item for item in findings if is_leadership_signal_finding(item))
-    medium_plus = tuple(
-        item
-        for item in signal
-        if item.severity.lower() in {"critical", "high", "medium"}
-    )
+    medium_plus = _ranked_medium_plus(findings)
     severity = (highest_severity or "None Detected").strip()
     top_action = priority_actions[0].title if priority_actions else None
     primary_risk = customer_title(medium_plus[0].title) if medium_plus else None
+    risk_follow_up = _highest_risk_follow_up(
+        medium_plus[0] if medium_plus else None,
+        priority_actions,
+    )
 
     if not medium_plus:
         health = (
@@ -182,8 +232,7 @@ def build_leadership_verdict(
 
     if severity.lower() in {"critical", "high"}:
         health = (
-            f"Overall assessment signals require attention "
-            f"(highest finding severity: {severity})."
+            f"Overall assessment signals require attention (highest finding severity: {severity})."
         )
     else:
         health = (
@@ -209,17 +258,16 @@ def build_leadership_verdict(
         "—",
         "-",
     }
-    if top_action:
-        next_line = f"Immediate recommendation: {top_action}."
+    cited = priority_actions[0] if priority_actions else None
+    if risk_follow_up:
+        next_line = f"{risk_follow_up[0].upper()}{risk_follow_up[1:]}."
+    elif cited is not None and top_action:
+        next_line = f"{_horizon_recommendation_prefix(cited)}: {cited.title.strip()}."
     elif delivery_gap:
-        next_line = (
-            "Immediate recommendation: close delivery-readiness gaps before broader "
-            "modernization."
-        )
+        next_line = "Recommendation: close delivery-readiness gaps before broader modernization."
     else:
         next_line = (
-            "Immediate recommendation: address the highest-severity risks before "
-            "expanding platform work."
+            "Recommendation: address the highest-severity risks before expanding platform work."
         )
     return f"{health} {risk_line} {next_line}"
 
@@ -234,18 +282,18 @@ def build_executive_summary_narrative(
 ) -> ExecutiveSummaryNarrative:
     """Answer Should I care? / Why now? / What next? in leadership language."""
 
-    signal = tuple(item for item in findings if is_leadership_signal_finding(item))
-    medium_plus = tuple(
-        item
-        for item in signal
-        if item.severity.lower() in {"critical", "high", "medium"}
-    )
+    medium_plus = _ranked_medium_plus(findings)
     tech_phrase = ", ".join(technologies[:4]) if technologies else "this codebase"
     top = priority_actions[0] if priority_actions else None
     near_term = tuple(
         item
         for item in priority_actions
         if (item.presentation_bucket or "").lower() in {"immediate", "near_term"}
+    )
+    action_source = near_term or priority_actions
+    risk_follow_up = _highest_risk_follow_up(
+        medium_plus[0] if medium_plus else None,
+        action_source,
     )
 
     if not medium_plus and not near_term:
@@ -271,7 +319,11 @@ def build_executive_summary_narrative(
             f"There are {len(medium_plus)} medium-or-higher engineering risk signal(s) "
             "that can slow delivery or increase change risk if left unaddressed."
         )
-        nxt = _next_steps_sentence(near_term or priority_actions)
+        nxt = (
+            f"Have the team {risk_follow_up}."
+            if risk_follow_up
+            else _next_steps_sentence(action_source)
+        )
     else:
         care = (
             f"Yes, with measured urgency—{tech_phrase} has medium-severity engineering "
@@ -281,7 +333,11 @@ def build_executive_summary_narrative(
             "Addressing them now protects delivery confidence and avoids carrying "
             "avoidable debt into modernization work."
         )
-        nxt = _next_steps_sentence(near_term or priority_actions)
+        nxt = (
+            f"Have the team {risk_follow_up}."
+            if risk_follow_up
+            else _next_steps_sentence(action_source)
+        )
 
     return ExecutiveSummaryNarrative(
         should_i_care=care,
@@ -298,10 +354,8 @@ def _next_steps_sentence(actions: tuple[RecommendationView, ...]) -> str:
         return f"Have the team prioritize: {titles[0]}."
     if len(titles) == 2:
         return f"Have the team prioritize: {titles[0]}; then {titles[1]}."
-    return (
-        f"Have the team prioritize: {titles[0]}; then {titles[1]}; "
-        f"then {titles[2]}"
-        + ("." if len(actions) <= 3 else f" (+{len(actions) - 3} more).")
+    return f"Have the team prioritize: {titles[0]}; then {titles[1]}; then {titles[2]}" + (
+        "." if len(actions) <= 3 else f" (+{len(actions) - 3} more)."
     )
 
 
@@ -310,7 +364,7 @@ def build_leadership_priority_actions(
     findings: tuple[FindingView, ...],
     recommendations: tuple[RecommendationView, ...],
     max_actions: int = 8,
-) -> tuple["PriorityAction", ...]:
+) -> tuple[PriorityAction, ...]:
     """Return canonical Priority Actions for leadership surfaces (Slice 2.4/2.5/2.7).
 
     Near-duplicate titles are merged (unioning recommendation/finding refs) instead
@@ -323,7 +377,6 @@ def build_leadership_priority_actions(
         merge_priority_actions,
         priority_action_to_recommendation_view,
     )
-    from codestrata.domain.priority_actions import PriorityAction
 
     grounded_views = tuple(item for item in recommendations if item.related_finding_ids)
     polished = tuple(_polish_recommendation(item, findings) for item in grounded_views)
@@ -337,9 +390,7 @@ def build_leadership_priority_actions(
     order: list[str] = []
     for action in actions:
         titles = tuple(
-            customer_title(finding_by_id[fid].title)
-            if fid in finding_by_id
-            else fid
+            customer_title(finding_by_id[fid].title) if fid in finding_by_id else fid
             for fid in action.supporting_finding_ids
         )
         source = next(
@@ -397,9 +448,7 @@ def build_priority_actions_for_leadership(
     )
     finding_by_id = {item.finding_id: item for item in findings}
     polished_by_id = {
-        item.recommendation_id: item
-        for item in recommendations
-        if item.related_finding_ids
+        item.recommendation_id: item for item in recommendations if item.related_finding_ids
     }
     projected: list[RecommendationView] = []
     for action in actions:
@@ -410,9 +459,7 @@ def build_priority_actions_for_leadership(
             source.related_finding_titles
             if source is not None and source.related_finding_titles
             else tuple(
-                customer_title(finding_by_id[fid].title)
-                if fid in finding_by_id
-                else fid
+                customer_title(finding_by_id[fid].title) if fid in finding_by_id else fid
                 for fid in action.supporting_finding_ids
             )
         )
@@ -519,9 +566,7 @@ def _polish_recommendation(
 ) -> RecommendationView:
     finding_by_id = {f.finding_id: f for f in findings}
     titles = tuple(
-        customer_title(finding_by_id[fid].title)
-        if fid in finding_by_id
-        else customer_title(title)
+        customer_title(finding_by_id[fid].title) if fid in finding_by_id else customer_title(title)
         for fid, title in _zip_related(item)
     )
     if not titles and item.related_finding_titles:
@@ -606,9 +651,7 @@ def build_leadership_roadmap(
 
     actions: tuple[PriorityAction, ...]
     if canonical_actions is not None:
-        actions = tuple(
-            item for item in canonical_actions if isinstance(item, PriorityAction)
-        )
+        actions = tuple(item for item in canonical_actions if isinstance(item, PriorityAction))
     else:
         # Compatibility: reconstruct from presentation views that already encode
         # action_id == recommendation_id (Slice 2.4). Not a Finding→Roadmap path.
@@ -618,9 +661,7 @@ def build_leadership_roadmap(
                 continue
             if not item.related_finding_ids:
                 continue
-            rebuilt.append(
-                priority_action_from_recommendation(_RecommendationViewAdapter(item))
-            )
+            rebuilt.append(priority_action_from_recommendation(_RecommendationViewAdapter(item)))
         actions = tuple(rebuilt)
 
     if not actions:
@@ -651,16 +692,12 @@ def build_leadership_key_takeaways(
     bullets: list[str] = []
     signal_findings = tuple(item for item in findings if is_leadership_signal_finding(item))
     medium_plus = tuple(
-        item
-        for item in signal_findings
-        if item.severity.lower() in {"critical", "high", "medium"}
+        item for item in signal_findings if item.severity.lower() in {"critical", "high", "medium"}
     )
 
     if medium_plus:
         lead = medium_plus[0]
-        bullets.append(
-            f"Highest engineering risk: {customer_title(lead.title)} ({lead.severity})."
-        )
+        bullets.append(f"Highest engineering risk: {customer_title(lead.title)} ({lead.severity}).")
     elif signal_findings:
         bullets.append(
             f"Assessment recorded {len(signal_findings)} lower-severity signal(s); "

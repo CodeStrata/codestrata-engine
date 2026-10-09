@@ -103,9 +103,7 @@ def test_assemble_disabled_not_requested_empty_insufficient() -> None:
 
 
 def test_artifact_write_round_trip(tmp_path: Path) -> None:
-    section = DependencyAssessmentAssembler().assemble_empty(
-        repository_id="repo:demo"
-    )
+    section = DependencyAssessmentAssembler().assemble_empty(repository_id="repo:demo")
     written = write_dependency_assessment_artifact(section, tmp_path)
     assert written.path == resolve_head_path(
         tmp_path, legacy_filename=DEPENDENCY_ASSESSMENT_FILENAME

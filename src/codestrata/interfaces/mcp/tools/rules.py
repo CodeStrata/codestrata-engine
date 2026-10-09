@@ -61,9 +61,7 @@ def register_rules_tools(
                     "Rule analysis service is not configured",
                     reason_code="rules_service_missing",
                 )
-            view = rule_analysis_service.inspect_rule(
-                require_nonblank(rule_id, label="rule_id")
-            )
+            view = rule_analysis_service.inspect_rule(require_nonblank(rule_id, label="rule_id"))
             if not view.production:
                 raise RuleApplicationError(
                     "Rule not found",
@@ -84,9 +82,7 @@ def register_rules_tools(
                     "Rule analysis service is not configured",
                     reason_code="rules_service_missing",
                 )
-            view = rule_analysis_service.inspect_rule(
-                require_nonblank(rule_id, label="rule_id")
-            )
+            view = rule_analysis_service.inspect_rule(require_nonblank(rule_id, label="rule_id"))
             if not view.production:
                 raise RuleApplicationError(
                     "Rule not found",
@@ -110,9 +106,7 @@ def register_rules_tools(
             from codestrata.domain.rules.enums import RuleCategory
 
             architecture_views = [
-                view
-                for view in views
-                if view.metadata.category is RuleCategory.ARCHITECTURE
+                view for view in views if view.metadata.category is RuleCategory.ARCHITECTURE
             ]
             pack = ArchitectureRulePack()
             return {

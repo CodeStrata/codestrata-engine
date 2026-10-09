@@ -127,8 +127,7 @@ def check_only_client_constructs_a_client(package_dir: Path) -> CheckResult:
     callers = sorted(
         filename
         for filename in _existing_modules(package_dir)
-        if f"aws_config.{AWS_CLIENT_FACTORY_NAME}"
-        in _attribute_accesses(package_dir, filename)
+        if f"aws_config.{AWS_CLIENT_FACTORY_NAME}" in _attribute_accesses(package_dir, filename)
         or AWS_CLIENT_FACTORY_NAME
         in _imported_names_from(package_dir, filename, _AWS_CONFIG_MODULE)
     )
@@ -148,23 +147,21 @@ def check_aws_config_is_imported_only_where_allowed(package_dir: Path) -> CheckR
         filename
         for filename in _existing_modules(package_dir)
         if any(
-            name == _AWS_CONFIG_MODULE or name.startswith(_AWS_CONFIG_MODULE + ".")
+            name == _AWS_CONFIG_MODULE
+            or name.startswith(_AWS_CONFIG_MODULE + ".")
             or name == "codestrata.ai"
             for name in _imports_of(package_dir, filename)
         )
     )
     unexpected = sorted(set(importers) - set(AWS_CONFIG_IMPORTERS))
-    bridge_symbols = _imported_names_from(
-        package_dir, "legacy_bridge.py", _AWS_CONFIG_MODULE
-    )
+    bridge_symbols = _imported_names_from(package_dir, "legacy_bridge.py", _AWS_CONFIG_MODULE)
     bridge_is_pure = bridge_symbols <= set(AWS_CONFIG_PURE_HELPERS)
     return CheckResult(
         name="aws_config_is_reached_only_by_the_client_module_and_the_bridges_pure_formatter",
         category="dependency_boundary",
         ok=not unexpected and bridge_is_pure,
         detail=(
-            f"unexpected_importers={unexpected} "
-            f"legacy_bridge_symbols={sorted(bridge_symbols)}"
+            f"unexpected_importers={unexpected} legacy_bridge_symbols={sorted(bridge_symbols)}"
         ),
         evidence={
             "allowed_importers": list(AWS_CONFIG_IMPORTERS),

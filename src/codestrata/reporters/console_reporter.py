@@ -337,7 +337,9 @@ class ConsoleReporter:
         if architecture is not None:
             for label, flag in (
                 ("API layer", architecture.has_api_layer),
+                ("Presentation layer", architecture.has_presentation_layer),
                 ("Service layer", architecture.has_service_layer),
+                ("State layer", architecture.has_state_layer),
                 ("Persistence layer", architecture.has_persistence_layer),
                 ("Domain layer", architecture.has_domain_layer),
                 ("Multi-application", architecture.is_multi_application),

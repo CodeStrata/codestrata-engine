@@ -64,18 +64,9 @@ def test_threshold_ratio_decimal_safe() -> None:
 
 
 def test_context_classifier() -> None:
-    assert (
-        classify_repository_context(("src/service.py",))
-        is RepositoryContextClass.PRODUCTION
-    )
-    assert (
-        classify_repository_context(("tests/unit/test_a.py",))
-        is RepositoryContextClass.TEST
-    )
-    assert (
-        classify_repository_context(("docs/guide.md",))
-        is RepositoryContextClass.DOCUMENTATION
-    )
+    assert classify_repository_context(("src/service.py",)) is RepositoryContextClass.PRODUCTION
+    assert classify_repository_context(("tests/unit/test_a.py",)) is RepositoryContextClass.TEST
+    assert classify_repository_context(("docs/guide.md",)) is RepositoryContextClass.DOCUMENTATION
 
 
 def test_placeholder_lower_than_credential() -> None:
@@ -131,8 +122,16 @@ def test_cloud_and_ai_capped() -> None:
         rule_id="ai_readiness.ai-051",
         emitted_severity=FindingSeverity.LOW,
     )
-    assert cloud.severity in {FindingSeverity.INFORMATIONAL, FindingSeverity.LOW, FindingSeverity.MEDIUM}
-    assert ai.severity in {FindingSeverity.INFORMATIONAL, FindingSeverity.LOW, FindingSeverity.MEDIUM}
+    assert cloud.severity in {
+        FindingSeverity.INFORMATIONAL,
+        FindingSeverity.LOW,
+        FindingSeverity.MEDIUM,
+    }
+    assert ai.severity in {
+        FindingSeverity.INFORMATIONAL,
+        FindingSeverity.LOW,
+        FindingSeverity.MEDIUM,
+    }
     assert FindingSeverity.CRITICAL not in (
         severity_policy_for_rule("cloud.cloud-061").allowed_severities  # type: ignore[union-attr]
     )
@@ -183,9 +182,7 @@ def test_correlation_does_not_change_severity() -> None:
         severity=FindingSeverity.HIGH,
         category=FindingCategory.SECURITY,
         subject_keys=("ssl.yml", "hostname"),
-        evidence=(
-            FindingEvidence(evidence_type="config", source_id="hostname", path="ssl.yml"),
-        ),
+        evidence=(FindingEvidence(evidence_type="config", source_id="hostname", path="ssl.yml"),),
         metadata={"subject_keys": "ssl.yml,hostname"},
     )
     before = {item.id: item.severity for item in (a, b)}

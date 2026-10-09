@@ -6,13 +6,13 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.domain.dependency.assessment.identifiers import (
     ARTIFACT_SCHEMA_ID,
     DEPENDENCY_ASSESSMENT_FILENAME,
 )
 from codestrata.domain.dependency.assessment.models import DependencyAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
-from codestrata.artifacts.heads import resolve_head_path
 
 
 class DependencyAssessmentArtifactWriteResult(BaseModel):

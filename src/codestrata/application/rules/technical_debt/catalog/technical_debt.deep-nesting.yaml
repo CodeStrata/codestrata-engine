@@ -1,0 +1,38 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: technical_debt.deep-nesting
+  version: 1.0.0
+  title: Deep nesting
+  category: technical_debt
+  owner: codestrata
+  measurement: M17
+  tags: [technical_debt, nesting]
+applies_to:
+  languages: [java, python, php, csharp, javascript, typescript]
+  requires:
+    facts: [complexity.callable]
+select:
+  source: complexity
+  callables:
+    all:
+      - max_nesting_depth_gt: 4
+condition:
+  operator: technical_debt.deep-nesting
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        Callable '{{qualified_signature}}' has max_nesting_depth={{value}}
+        which exceeds threshold {{threshold}}.
+      bindings:
+        qualified_signature: {type: string, evidence: qualified_signature}
+        value: {type: string, evidence: value}
+        threshold: {type: string, evidence: threshold}
+    documentation_url: docs/analysis-intelligence/technical-debt/complexity-rules.md
+  metric:
+    name: technical_debt_deep_nesting_count
+    operation: count
+parameters:
+  max_nesting_depth: {type: integer, default: 4, exclusive_min: true}

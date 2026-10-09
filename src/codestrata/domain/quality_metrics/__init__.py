@@ -4,6 +4,16 @@ Precision and Recall belong to the validation/calibration system —
 not customer assessment runtime reports.
 """
 
+from codestrata.domain.quality_metrics.common import (
+    QualityMetricAvailability,
+    QualityMetricClassificationStatus,
+    QualityMetricSample,
+    QualityMetricScope,
+    QualityMetricSource,
+    format_metric_display,
+    resolve_quality_metric_source,
+    source_from_matrix_label,
+)
 from codestrata.domain.quality_metrics.false_negatives import (
     FalseNegativeClassification,
     FalseNegativeEntityType,
@@ -30,16 +40,6 @@ from codestrata.domain.quality_metrics.false_positives import (
     build_false_positive_record,
     merge_false_positive_records,
     summarize_false_positives,
-)
-from codestrata.domain.quality_metrics.common import (
-    QualityMetricAvailability,
-    QualityMetricClassificationStatus,
-    QualityMetricSample,
-    QualityMetricScope,
-    QualityMetricSource,
-    format_metric_display,
-    resolve_quality_metric_source,
-    source_from_matrix_label,
 )
 from codestrata.domain.quality_metrics.precision import (
     PrecisionMetric,

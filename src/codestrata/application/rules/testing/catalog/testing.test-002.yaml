@@ -1,0 +1,34 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: testing.test-002
+  version: 1.0.0
+  title: Material test candidates lack structural confirmation
+  category: testing
+  owner: codestrata
+  measurement: M19
+  tags: [testing, candidates, unconfirmed]
+applies_to:
+  languages: [java, python, javascript, typescript, php, csharp]
+  requires:
+    facts: [repository_testing.file_candidates]
+select:
+  source: repository_testing
+  file_candidates:
+    all:
+      - unconfirmed_ratio_gte: 0
+condition:
+  operator: testing.test-002
+emit:
+  finding:
+    default_severity: medium
+    message:
+      template: >-
+        A material portion of discovered test candidates could not be
+        structurally confirmed as tests.
+      bindings: {}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: testing_unconfirmed_candidate_ratio
+    operation: ratio
+parameters: {}

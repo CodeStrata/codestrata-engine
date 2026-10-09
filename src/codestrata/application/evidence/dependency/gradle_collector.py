@@ -194,13 +194,10 @@ def parse_gradle_text(
         line = _line_number(text, match.start())
         if any(hint in coord for hint in ("$", "{", "(", ")")):
             unsupported.append(
-                _unsupported_interpolation(
-                    path=path, config=config, expression=coord, line=line
-                )
+                _unsupported_interpolation(path=path, config=config, expression=coord, line=line)
             )
             diagnostics.append(
-                "version_resolution_unsupported:gradle_property_or_dynamic:"
-                f"{path}:{config}:{coord}"
+                f"version_resolution_unsupported:gradle_property_or_dynamic:{path}:{config}:{coord}"
             )
             continue
         identity, version = _split_coord(coord)
@@ -421,19 +418,11 @@ def collect_gradle_dependency_bundle(
             ),
         )
     )
-    parsed = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.SUCCEEDED
-    )
+    parsed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.SUCCEEDED)
     partial = sum(
-        1
-        for item in manifests_t
-        if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
+        1 for item in manifests_t if item.parse_status is DependencyParseStatus.PARTIALLY_SUCCEEDED
     )
-    failed = sum(
-        1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED
-    )
+    failed = sum(1 for item in manifests_t if item.parse_status is DependencyParseStatus.FAILED)
     unsupported_count = sum(len(item.unsupported_constructs) for item in manifests_t)
     unresolved_count = sum(len(item.unresolved_expressions) for item in manifests_t)
     if manifests_t and (partial or failed or unsupported_count or unresolved_count):

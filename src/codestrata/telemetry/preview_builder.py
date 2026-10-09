@@ -47,9 +47,7 @@ def build_privacy_first_telemetry_preview(
         runtime_policy=default_runtime_policy(),
     )
     if not gate.accepted or gate.accepted_event is None:
-        raise PreviewPolicyError(
-            "illustrative event failed pre-transport privacy gate"
-        )
+        raise PreviewPolicyError("illustrative event failed pre-transport privacy gate")
     # Nested event is the accepted gated copy a future transport would receive.
     stable = gate.accepted_event.to_stable_dict()
     catalog = build_privacy_first_telemetry_catalog()

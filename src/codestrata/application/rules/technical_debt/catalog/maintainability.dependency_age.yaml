@@ -1,0 +1,53 @@
+api_version: codestrata.io/rules/v1
+kind: Rule
+metadata:
+  id: maintainability.dependency_age
+  version: 1.0.0
+  title: Installed dependency publication age exceeds advisory window
+  category: maintainability
+  owner: codestrata
+  measurement: M23
+  tags: [maintainability, dependency, age, advisory]
+applies_to:
+  languages: [java, javascript, typescript, python]
+  requires:
+    facts: [dependency.release_date, evaluation_time]
+select:
+  source: maintainability
+  staleness:
+    all:
+      - days_gt: 730
+condition:
+  operator: maintainability.dependency_age
+emit:
+  finding:
+    default_severity: low
+    message:
+      template: >-
+        Package '{{package_id}}' installed {{installed_version}} is
+        {{days}} days older than pinned evaluation_time ({{formula_version}},
+        snapshot={{source_snapshot_id}}). Age does not prove the package is
+        insecure or unsupported.
+      bindings:
+        package_id: {type: string, evidence: package_id}
+        installed_version: {type: string, evidence: installed_version}
+        days: {type: string, evidence: days}
+        formula_version: {type: string, evidence: formula_version}
+        source_snapshot_id: {type: string, evidence: source_snapshot_id}
+    documentation_url: docs/analysis-intelligence/shared-rule-platform.md
+  metric:
+    name: maintainability_dependency_age_days
+    operation: value
+evidence:
+  include:
+    - version
+    - publication_time
+    - evaluation_time
+    - source_snapshot
+parameters:
+  max_age_days: {type: integer, default: 730, exclusive_min: true}
+  unknown:
+    missing_release_date: unknown
+    future_or_invalid_timestamp: unknown
+    unpinned_evaluation_time: unknown
+  age_does_not_prove_insecure: true

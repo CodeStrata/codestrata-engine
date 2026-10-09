@@ -18,9 +18,7 @@ def test_cli_product_entry_is_facade() -> None:
     assert isinstance(get_telemetry_service(), DisabledTelemetryFacade)
 
 
-def test_K_legacy_enable_does_not_activate_product_runtime(
-    tmp_path: Path, monkeypatch
-) -> None:
+def test_K_legacy_enable_does_not_activate_product_runtime(tmp_path: Path, monkeypatch) -> None:
     home = tmp_path / "home"
     home.mkdir()
     monkeypatch.setenv("CODESTRATA_HOME", str(home))

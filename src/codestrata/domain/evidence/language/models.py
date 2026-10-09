@@ -36,11 +36,7 @@ class SourceUnitEvidence(BaseModel):
     @field_validator("paths", mode="before")
     @classmethod
     def normalize_paths(cls, value: object) -> tuple[str, ...]:
-        items = {
-            str(item).replace("\\", "/")
-            for item in as_tuple(value)
-            if str(item).strip()
-        }
+        items = {str(item).replace("\\", "/") for item in as_tuple(value) if str(item).strip()}
         return tuple(sorted(items))
 
 

@@ -6,13 +6,13 @@ from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from codestrata.artifacts.heads import resolve_head_path
 from codestrata.domain.ai_readiness.assessment.identifiers import (
     AI_READINESS_ASSESSMENT_FILENAME,
     ARTIFACT_SCHEMA_ID,
 )
 from codestrata.domain.ai_readiness.assessment.models import AiReadinessAssessmentSection
 from codestrata.services.artifact_serialization import dumps_stable_json
-from codestrata.artifacts.heads import resolve_head_path
 
 
 class AiReadinessAssessmentArtifactWriteResult(BaseModel):

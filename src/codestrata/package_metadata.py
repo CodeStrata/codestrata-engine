@@ -131,9 +131,7 @@ def format_version_details() -> str:
     try:
         from codestrata.config.settings import CodestrataSettings
 
-        settings = CodestrataSettings.model_validate(
-            {"repository": {"path": "."}, "ai": {}}
-        )
+        settings = CodestrataSettings.model_validate({"repository": {"path": "."}, "ai": {}})
         ai_provider = settings.ai.provider
         if ai_provider == "openai":
             ai_model = settings.ai.openai.answer_model or "gpt-4o-mini"
@@ -178,8 +176,7 @@ def format_about() -> str:
             "Edition: Community Edition",
             "AI is optional: connect your own supported provider; deterministic "
             "Engineering Assessment works without AI.",
-            "Source code is not retained by CodeStrata unless you explicitly "
-            "configure retention.",
+            "Source code is not retained by CodeStrata unless you explicitly configure retention.",
             "Privacy: anonymous telemetry is disabled by default and requires "
             "explicit opt-in (codestrata telemetry). Optional update notices "
             "require CODESTRATA_CLI_UPDATE_CHECK=1.",
@@ -190,4 +187,3 @@ def format_about() -> str:
             "Documentation: https://docs.codestrata.ai",
         )
     )
-
