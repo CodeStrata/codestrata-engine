@@ -2,16 +2,26 @@
 
 from __future__ import annotations
 
+import os
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
 
 from verification.hosted_worker.release import (
+    CANARY_COMPLETION_QUEUE,
+    PRODUCTION_COMPLETION_QUEUE,
     QUALIFIED_IMAGE,
     QUALIFIED_WHEEL,
+    canary_container_overrides,
     canary_errors,
     confirmed_digest,
     decide,
+    guarded_drill,
+    guarded_release,
+    isolated_canary_job,
     listed_versions,
     provenance_record,
     restored_dispatch,
@@ -199,6 +209,13 @@ def test_workflow_is_not_a_source_push_and_keeps_roles_separate() -> None:
     assert "codestrata-launch-engine-image-push" in text
     assert "codestrata-launch-engine-deploy" in text
     assert "cancel-in-progress: false" in text
+    assert "python -m verification.hosted_worker.workflow decide" in text
+    assert "python -m verification.hosted_worker.workflow retain" in text
+    assert "python -m verification.hosted_worker.workflow build" in text
+    assert "python -m verification.hosted_worker.workflow deploy" in text
+    assert "python -m verification.hosted_worker.workflow drill" in text
+    assert "CODESTRATA_HOSTED_DRILL" in text
+    assert "codestrata-launch-engine-deploy" in text.split("verify-deploy-role", 1)[1]
     assert "aws_access_key" not in text.lower()
     assert "AKIA" not in text
     publisher = PUBLISHER.read_text(encoding="utf-8")
@@ -208,3 +225,157 @@ def test_workflow_is_not_a_source_push_and_keeps_roles_separate() -> None:
     assert "ENGINE_WORKER_DISPATCH_TOKEN" in publisher
     workflows = list((ENGINE / ".github" / "workflows").glob("*.yml"))
     assert [path.name for path in workflows] == ["hosted-worker-release.yml"]
+
+
+def test_actions_module_command_reaches_every_entrypoint(tmp_path: Path) -> None:
+    shutil.copytree(ENGINE / "verification", tmp_path / "verification", ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
+    aws = tmp_path / "bin"
+    aws.mkdir()
+    executable = aws / "aws"
+    executable.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    executable.chmod(0o755)
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key
+        not in {
+            "PYTHONPATH",
+            "AWS_PROFILE",
+            "AWS_ACCESS_KEY_ID",
+            "AWS_SECRET_ACCESS_KEY",
+            "AWS_SESSION_TOKEN",
+            "AWS_DEFAULT_PROFILE",
+            "CODESTRATA_HOSTED_DRILL",
+        }
+    }
+    env["PATH"] = f"{aws}{os.pathsep}{env.get('PATH', '')}"
+    env["AWS_REGION"] = "us-west-2"
+    command = [sys.executable, "-m", "verification.hosted_worker.workflow"]
+    markers = {
+        "decide": "decide_release",
+        "retain": "retain_image",
+        "build": "build_image",
+        "deploy": "deploy_release",
+        "drill": "explicit verification mode",
+    }
+    for name, marker in markers.items():
+        completed = subprocess.run(
+            [*command, name],
+            cwd=tmp_path,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        assert completed.returncode != 0
+        assert "No module named 'verification'" not in completed.stderr
+        assert marker in completed.stderr
+    assert "working-directory:" not in WORKFLOW.read_text(encoding="utf-8")
+
+
+def test_failed_canary_does_not_change_production_dispatch() -> None:
+    calls: list[str] = []
+    production = {"dispatcher": "arn:old", "rollout": "enabled"}
+
+    def fail_canary(_revision: str) -> None:
+        calls.append("canary")
+        raise RuntimeError("canary failed")
+
+    with pytest.raises(RuntimeError, match="canary failed"):
+        guarded_release(
+            rollout_enabled=True,
+            production=lambda: production,
+            register=lambda: calls.append("register") or "arn:new",
+            canary=fail_canary,
+            promote=lambda _revision: calls.append("promote"),
+            verify_promotion=lambda _revision: calls.append("verify"),
+            restore=lambda _snapshot: calls.append("restore"),
+        )
+    assert calls == ["register", "canary"]
+    with pytest.raises(RuntimeError, match="production rollout is disabled"):
+        guarded_release(
+            rollout_enabled=False,
+            production=lambda: production,
+            register=lambda: calls.append("register-blocked") or "arn:new",
+            canary=fail_canary,
+            promote=lambda _revision: calls.append("promote"),
+            verify_promotion=lambda _revision: None,
+            restore=lambda _snapshot: calls.append("restore"),
+        )
+    assert "register-blocked" not in calls
+
+
+def test_failed_promotion_restores_the_recorded_snapshot() -> None:
+    snapshot = {"dispatcher": "arn:old", "rollout": "enabled"}
+    seen: list[dict[str, str]] = []
+
+    def verify(_revision: str) -> None:
+        raise RuntimeError("promotion mismatch")
+
+    with pytest.raises(RuntimeError, match="promotion mismatch"):
+        guarded_release(
+            rollout_enabled=True,
+            production=lambda: snapshot,
+            register=lambda: "arn:new",
+            canary=lambda _revision: None,
+            promote=lambda _revision: None,
+            verify_promotion=verify,
+            restore=lambda recorded: seen.append(dict(recorded)),
+        )
+    assert seen == [snapshot]
+
+
+def test_drill_promotes_only_the_qualified_image_and_restores_it() -> None:
+    snapshot = {"dispatcher": "arn:old", "rollout": "disabled"}
+    restored: list[dict[str, str]] = []
+    promoted: list[str] = []
+
+    revision = guarded_drill(
+        explicit=True,
+        image=QUALIFIED_IMAGE,
+        qualified_image=QUALIFIED_IMAGE,
+        production=lambda: snapshot,
+        register=lambda: "arn:new",
+        canary=lambda _revision: None,
+        promote=lambda registered: promoted.append(registered),
+        verify_promotion=lambda _revision: None,
+        restore=lambda recorded: restored.append(dict(recorded)),
+    )
+    assert revision == "arn:new"
+    assert promoted == ["arn:new"]
+    assert restored == [snapshot]
+    with pytest.raises(RuntimeError, match="explicit verification mode"):
+        guarded_drill(
+            explicit=False,
+            image=QUALIFIED_IMAGE,
+            qualified_image=QUALIFIED_IMAGE,
+            production=lambda: snapshot,
+            register=lambda: "arn:other",
+            canary=lambda _revision: None,
+            promote=lambda _revision: None,
+            verify_promotion=lambda _revision: None,
+            restore=lambda _recorded: None,
+        )
+    with pytest.raises(RuntimeError, match="production rollout is enabled"):
+        guarded_drill(
+            explicit=True,
+            image=QUALIFIED_IMAGE,
+            qualified_image=QUALIFIED_IMAGE,
+            production=lambda: {"dispatcher": "arn:old", "rollout": "enabled"},
+            register=lambda: "arn:other",
+            canary=lambda _revision: None,
+            promote=lambda _revision: None,
+            verify_promotion=lambda _revision: None,
+            restore=lambda _recorded: None,
+        )
+
+
+def test_canary_completion_cannot_use_the_production_queue() -> None:
+    job_id = isolated_canary_job("run-7")
+    overrides = canary_container_overrides(job_id)
+    rendered = str(overrides)
+    assert CANARY_COMPLETION_QUEUE in rendered
+    assert PRODUCTION_COMPLETION_QUEUE not in rendered
+    assert "codestrata-launch-delivery" not in rendered
+    with pytest.raises(ValueError):
+        canary_container_overrides("storage-smoke")

@@ -12,6 +12,7 @@ import json
 import re
 import ssl
 import urllib.request
+from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -254,6 +255,143 @@ def restored_dispatch(previous_arn: str, failed_arn: str) -> str:
     if not previous_arn.startswith(f"arn:aws:ecs:{REGION}:{ACCOUNT}:task-definition/codestrata-launch-worker:"):
         raise ValueError("previous dispatch ARN is not a hosted worker revision")
     return previous_arn
+
+
+PRODUCTION_COMPLETION_QUEUE = (
+    "https://sqs.us-west-2.amazonaws.com/373220260833/codestrata-launch-completion"
+)
+CANARY_COMPLETION_QUEUE = (
+    "https://sqs.us-west-2.amazonaws.com/373220260833/codestrata-launch-worker-canary"
+)
+
+
+def isolated_canary_job(run_id: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", run_id):
+        raise ValueError("canary run id is not isolated")
+    return f"canary-{run_id}"
+
+
+def is_canary_payload(payload: Mapping[str, Any]) -> bool:
+    job_id = str(payload.get("job_id", ""))
+    staging_key = str(payload.get("staging_key", ""))
+    return job_id.startswith("canary-") or staging_key.startswith("staging/canary-")
+
+
+def canary_container_overrides(job_id: str) -> dict[str, Any]:
+    """Canary completion stays on the canary queue and cannot start production delivery."""
+
+    if not job_id.startswith("canary-") or job_id == "canary-":
+        raise ValueError("canary job is not isolated")
+    identity = [
+        {"name": "CODESTRATA_JOB_ID", "value": job_id},
+        {"name": "CODESTRATA_ATTEMPT", "value": "1"},
+    ]
+    repository = {"name": "CODESTRATA_REPO_URL", "value": "https://github.com/octocat/Hello-World"}
+    completion = {"name": "CODESTRATA_HOSTED_COMPLETION_QUEUE_URL", "value": CANARY_COMPLETION_QUEUE}
+    overrides = {
+        "containerOverrides": [
+            {"name": "setup", "environment": [*identity, repository]},
+            {"name": "engine", "environment": [*identity, repository]},
+            {"name": "cleanup", "environment": [*identity, completion]},
+        ]
+    }
+    rendered = json.dumps(overrides)
+    if PRODUCTION_COMPLETION_QUEUE in rendered or "codestrata-launch-delivery" in rendered:
+        raise ValueError("canary targets production delivery")
+    return overrides
+
+
+def guarded_release(
+    *,
+    rollout_enabled: bool,
+    production: Callable[[], Mapping[str, str]],
+    register: Callable[[], str],
+    canary: Callable[[str], None],
+    promote: Callable[[str], None],
+    verify_promotion: Callable[[str], None],
+    restore: Callable[[Mapping[str, str]], None],
+) -> str:
+    """Register and canary first. Production dispatch changes only after the canary passes."""
+
+    if not rollout_enabled:
+        raise RuntimeError("production rollout is disabled")
+    before = dict(production())
+    revision = register()
+    try:
+        canary(revision)
+    except Exception:
+        _restore_if_changed(before, production, restore)
+        raise
+    _require_unchanged(before, production(), restore)
+    promote(revision)
+    try:
+        verify_promotion(revision)
+    except Exception:
+        restore(before)
+        _require_unchanged(before, production(), restore)
+        raise
+    return revision
+
+
+def guarded_drill(
+    *,
+    explicit: bool,
+    image: str,
+    qualified_image: str,
+    production: Callable[[], Mapping[str, str]],
+    register: Callable[[], str],
+    canary: Callable[[str], None],
+    promote: Callable[[str], None],
+    verify_promotion: Callable[[str], None],
+    restore: Callable[[Mapping[str, str]], None],
+) -> str:
+    """Exercise deploy permissions, then put the recorded production snapshot back."""
+
+    if not explicit:
+        raise RuntimeError("deploy-role drill requires explicit verification mode")
+    if image != qualified_image:
+        raise RuntimeError("drill uses only the qualified 0.3.0 image")
+    before = dict(production())
+    if before.get("rollout") != "disabled":
+        raise RuntimeError("drill does not run while production rollout is enabled")
+    revision = register()
+    try:
+        canary(revision)
+    except Exception:
+        _restore_if_changed(before, production, restore)
+        raise
+    _require_unchanged(before, production(), restore)
+    promote(revision)
+    try:
+        verify_promotion(revision)
+    except Exception:
+        restore(before)
+        _require_unchanged(before, production(), restore)
+        raise
+    restore(before)
+    _require_unchanged(before, production(), restore)
+    return revision
+
+
+def _require_unchanged(
+    before: Mapping[str, str],
+    after: Mapping[str, str],
+    restore: Callable[[Mapping[str, str]], None],
+) -> None:
+    if dict(after) != dict(before):
+        restore(before)
+        raise RuntimeError("production dispatch changed")
+
+
+def _restore_if_changed(
+    before: Mapping[str, str],
+    production: Callable[[], Mapping[str, str]],
+    restore: Callable[[Mapping[str, str]], None],
+) -> None:
+    if dict(production()) != dict(before):
+        restore(before)
+        if dict(production()) != dict(before):
+            raise RuntimeError("production dispatch changed")
 
 
 def canary_errors(*, task: dict[str, Any], message: dict[str, Any] | None, artifact_present: bool) -> list[str]:

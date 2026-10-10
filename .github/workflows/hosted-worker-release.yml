@@ -22,6 +22,11 @@ on:
         required: true
         type: boolean
         default: false
+      drill:
+        description: Exercise the deploy role and canary for 0.3.0, then restore production. Requires rollout false.
+        required: false
+        type: boolean
+        default: false
   repository_dispatch:
     types: [engine-package-published]
   schedule:
@@ -68,7 +73,7 @@ jobs:
           DISPATCH_SHA: ${{ github.event.client_payload.wheel_sha256 }}
           ROLLOUT_REQUESTED: ${{ inputs.rollout }}
           ROLLOUT_FLAG: ${{ vars.CODESTRATA_HOSTED_ROLLOUT }}
-        run: python verification/hosted_worker/workflow.py decide
+        run: python -m verification.hosted_worker.workflow decide
 
   retain:
     name: retain-qualified-engine
@@ -93,7 +98,7 @@ jobs:
         env:
           EXPECTED_IMAGE: ${{ needs.decide.outputs.image }}
           EXPECTED_SHA: ${{ needs.decide.outputs.wheel_sha256 }}
-        run: python verification/hosted_worker/workflow.py retain
+        run: python -m verification.hosted_worker.workflow retain
 
   build:
     name: build-and-qualify
@@ -124,7 +129,7 @@ jobs:
           GITHUB_RUN_ID: ${{ github.run_id }}
           GITHUB_WORKFLOW: ${{ github.workflow }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-        run: python verification/hosted_worker/workflow.py build
+        run: python -m verification.hosted_worker.workflow build
       - uses: actions/upload-artifact@v4
         with:
           name: engine-worker-provenance
@@ -149,10 +154,38 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::373220260833:role/codestrata-launch-engine-deploy
           aws-region: us-west-2
-      - name: Register the revision and run the canary
+      - name: Canary the candidate, then promote
         env:
           RELEASE_IMAGE: ${{ needs.build.outputs.image }}
           RELEASE_VERSION: ${{ needs.decide.outputs.version }}
           RELEASE_SHA: ${{ needs.decide.outputs.wheel_sha256 }}
           GITHUB_RUN_ID: ${{ github.run_id }}
-        run: python verification/hosted_worker/workflow.py deploy
+        run: python -m verification.hosted_worker.workflow deploy
+
+  drill:
+    name: verify-deploy-role
+    needs: [decide, retain]
+    if: github.event_name == 'workflow_dispatch' && inputs.drill == true && inputs.rollout == false && needs.decide.outputs.action == 'retain' && needs.retain.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: engine-worker-deploy
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::373220260833:role/codestrata-launch-engine-deploy
+          aws-region: us-west-2
+      - name: Canary the published image and restore production
+        env:
+          CODESTRATA_HOSTED_DRILL: "1"
+          RELEASE_IMAGE: ${{ needs.decide.outputs.image }}
+          RELEASE_VERSION: ${{ needs.decide.outputs.version }}
+          RELEASE_SHA: ${{ needs.decide.outputs.wheel_sha256 }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python -m verification.hosted_worker.workflow drill

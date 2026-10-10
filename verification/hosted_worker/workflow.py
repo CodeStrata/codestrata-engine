@@ -8,28 +8,34 @@ from __future__ import annotations
 
 import json
 import os
+import ssl
 import subprocess
 import sys
 import tempfile
 import urllib.request
-import ssl
+from collections.abc import Mapping
 from pathlib import Path
 
 from verification.hosted_worker.qualify import qualification_script
 from verification.hosted_worker.release import (
     ACCOUNT,
+    CANARY_COMPLETION_QUEUE,
     QUALIFIED_IMAGE,
+    QUALIFIED_WHEEL,
     REGION,
     REPOSITORY,
     WHEEL_HOST,
+    canary_container_overrides,
     canary_errors,
     confirmed_digest,
     decide,
     download_wheel,
     engine_image_uri,
+    guarded_drill,
+    guarded_release,
+    isolated_canary_job,
     listed_versions,
     provenance_record,
-    restored_dispatch,
     revise_task_definition,
     select_wheel_file,
     with_task_definition,
@@ -44,9 +50,7 @@ PARAMETER_WHEEL_PREVIOUS = "/codestrata/launch/hosted/engine-wheel-sha256-previo
 PARAMETER_IMAGE_PREVIOUS = "/codestrata/launch/hosted/engine-image-uri-previous"
 PARAMETER_TASK_PREVIOUS = "/codestrata/launch/hosted/engine-task-definition-arn-previous"
 PARAMETER_ROLLOUT = "/codestrata/launch/hosted/worker-rollout"
-CANARY_QUEUE_URL = (
-    "https://sqs.us-west-2.amazonaws.com/373220260833/codestrata-launch-worker-canary"
-)
+CANARY_QUEUE_URL = CANARY_COMPLETION_QUEUE
 REPORT_BUCKET = "codestrata-launch-report-artifacts-373220260833"
 DISPATCHER = "codestrata-launch-dispatcher"
 CLUSTER = "codestrata-launch-trial"
@@ -250,19 +254,24 @@ def _lambda_environment() -> dict[str, str]:
     return dict(payload.get("Environment", {}).get("Variables") or {})
 
 
-def _publish_release(image: str, version: str, wheel: str, task_arn: str, previous: dict[str, str]) -> None:
-    _put_parameter(PARAMETER_IMAGE_PREVIOUS, previous["image"])
-    _put_parameter(PARAMETER_TASK_PREVIOUS, previous["task"])
-    _put_parameter(PARAMETER_VERSION_PREVIOUS, previous["version"])
-    _put_parameter(PARAMETER_WHEEL_PREVIOUS, previous["wheel"])
-    _put_parameter(PARAMETER_IMAGE, image)
-    _put_parameter(PARAMETER_TASK, task_arn)
-    _put_parameter(PARAMETER_VERSION, version)
-    _put_parameter(PARAMETER_WHEEL, wheel)
+def _snapshot() -> dict[str, str]:
+    environment = _lambda_environment()
+    return {
+        "dispatcher": environment.get("CODESTRATA_HOSTED_TASK_DEFINITION", ""),
+        "image": _parameter(PARAMETER_IMAGE),
+        "task": _parameter(PARAMETER_TASK),
+        "version": _parameter(PARAMETER_VERSION),
+        "wheel": _parameter(PARAMETER_WHEEL),
+        "image_previous": _parameter(PARAMETER_IMAGE_PREVIOUS),
+        "task_previous": _parameter(PARAMETER_TASK_PREVIOUS),
+        "version_previous": _parameter(PARAMETER_VERSION_PREVIOUS),
+        "wheel_previous": _parameter(PARAMETER_WHEEL_PREVIOUS),
+        "rollout": _parameter(PARAMETER_ROLLOUT),
+    }
 
 
-def _restore(previous: dict[str, str], failed_arn: str) -> None:
-    environment = with_task_definition(_lambda_environment(), restored_dispatch(previous["task"], failed_arn))
+def _write_dispatcher(task_arn: str) -> None:
+    environment = with_task_definition(_lambda_environment(), task_arn)
     _aws(
         "lambda",
         "update-function-configuration",
@@ -271,82 +280,147 @@ def _restore(previous: dict[str, str], failed_arn: str) -> None:
         "--environment",
         json.dumps({"Variables": environment}),
     )
-    _put_parameter(PARAMETER_IMAGE, previous["image"])
-    _put_parameter(PARAMETER_TASK, previous["task"])
-    _put_parameter(PARAMETER_VERSION, previous["version"])
-    _put_parameter(PARAMETER_WHEEL, previous["wheel"])
 
 
-def deploy_release() -> None:
-    if _parameter(PARAMETER_ROLLOUT) != "enabled":
-        raise SystemExit("production rollout is disabled")
-    image = os.environ["RELEASE_IMAGE"]
-    version = os.environ["RELEASE_VERSION"]
-    wheel = os.environ["RELEASE_SHA"]
-    environment = _lambda_environment()
-    previous = {
-        "task": environment.get("CODESTRATA_HOSTED_TASK_DEFINITION", ""),
-        "image": _parameter(PARAMETER_IMAGE),
-        "version": _parameter(PARAMETER_VERSION),
-        "wheel": _parameter(PARAMETER_WHEEL),
-    }
-    if not previous["task"].startswith(f"arn:aws:ecs:{REGION}:{ACCOUNT}:task-definition/codestrata-launch-worker:"):
+def _write_snapshot(snapshot: Mapping[str, str]) -> None:
+    _write_dispatcher(snapshot["dispatcher"])
+    for name, key in (
+        (PARAMETER_IMAGE, "image"),
+        (PARAMETER_TASK, "task"),
+        (PARAMETER_VERSION, "version"),
+        (PARAMETER_WHEEL, "wheel"),
+        (PARAMETER_IMAGE_PREVIOUS, "image_previous"),
+        (PARAMETER_TASK_PREVIOUS, "task_previous"),
+        (PARAMETER_VERSION_PREVIOUS, "version_previous"),
+        (PARAMETER_WHEEL_PREVIOUS, "wheel_previous"),
+        (PARAMETER_ROLLOUT, "rollout"),
+    ):
+        _put_parameter(name, snapshot[key])
+
+
+def _promote(previous: Mapping[str, str], revision: str, image: str, version: str, wheel: str) -> None:
+    _put_parameter(PARAMETER_IMAGE_PREVIOUS, previous["image"])
+    _put_parameter(PARAMETER_TASK_PREVIOUS, previous["task"])
+    _put_parameter(PARAMETER_VERSION_PREVIOUS, previous["version"])
+    _put_parameter(PARAMETER_WHEEL_PREVIOUS, previous["wheel"])
+    _put_parameter(PARAMETER_IMAGE, image)
+    _put_parameter(PARAMETER_TASK, revision)
+    _put_parameter(PARAMETER_VERSION, version)
+    _put_parameter(PARAMETER_WHEEL, wheel)
+    _write_dispatcher(revision)
+
+
+def _matches(snapshot: Mapping[str, str], expected: Mapping[str, str]) -> bool:
+    return all(snapshot.get(key) == value for key, value in expected.items())
+
+
+def _wait_for(expected: Mapping[str, str]) -> None:
+    observed: dict[str, str] = {}
+    for attempt in range(6):
+        observed = _snapshot()
+        if _matches(observed, expected):
+            return
+        if attempt < 5:
+            subprocess.run(["sleep", "2"], check=True)
+    raise SystemExit("release records do not match the expected snapshot")
+
+
+def _register_revision(image: str, version: str, wheel: str) -> str:
+    current_arn = _lambda_environment().get("CODESTRATA_HOSTED_TASK_DEFINITION", "")
+    if not current_arn.startswith(f"arn:aws:ecs:{REGION}:{ACCOUNT}:task-definition/codestrata-launch-worker:"):
         raise SystemExit("dispatcher has no task definition; the runtime deployment is not complete")
-    current = json.loads(
-        _aws("ecs", "describe-task-definition", "--task-definition", previous["task"])
-    )["taskDefinition"]
+    current = json.loads(_aws("ecs", "describe-task-definition", "--task-definition", current_arn))["taskDefinition"]
     revised = revise_task_definition(current, image=image, version=version, wheel_sha256=wheel)
     registered = json.loads(
         _aws("ecs", "register-task-definition", "--cli-input-json", json.dumps(revised))
     )["taskDefinition"]["taskDefinitionArn"]
-    updated = with_task_definition(environment, registered)
-    _aws(
-        "lambda",
-        "update-function-configuration",
-        "--function-name",
-        DISPATCHER,
-        "--environment",
-        json.dumps({"Variables": updated}),
+    described = json.loads(_aws("ecs", "describe-task-definition", "--task-definition", registered))["taskDefinition"]
+    engine = next(item for item in described["containerDefinitions"] if item.get("name") == "engine")
+    if engine.get("image") != image:
+        raise SystemExit("registered revision does not contain the candidate image")
+    return registered
+
+
+def deploy_release() -> None:
+    if os.environ.get("CODESTRATA_HOSTED_DRILL") == "1":
+        raise SystemExit("production deploy is not the verification drill")
+    image = os.environ["RELEASE_IMAGE"]
+    version = os.environ["RELEASE_VERSION"]
+    wheel = os.environ["RELEASE_SHA"]
+    rollout_enabled = _parameter(PARAMETER_ROLLOUT) == "enabled"
+
+    def promote(revision: str) -> None:
+        _promote(_snapshot(), revision, image, version, wheel)
+
+    def verify_promotion(revision: str) -> None:
+        _wait_for(
+            {
+                "dispatcher": revision,
+                "task": revision,
+                "image": image,
+                "version": version,
+                "wheel": wheel,
+                "rollout": "enabled",
+            }
+        )
+
+    revision = guarded_release(
+        rollout_enabled=rollout_enabled,
+        production=_snapshot,
+        register=lambda: _register_revision(image, version, wheel),
+        canary=lambda registered: _run_canary(registered, _lambda_environment(), isolated_canary_job(os.environ["GITHUB_RUN_ID"])),
+        promote=promote,
+        verify_promotion=verify_promotion,
+        restore=_restore,
     )
-    _publish_release(image, version, wheel, registered, previous)
-    job_id = f"canary-{os.environ['GITHUB_RUN_ID']}"
-    try:
-        _run_canary(registered, environment, job_id)
-    except SystemExit:
-        _restore(previous, registered)
-        raise
-    print("deployed", registered)
+    print("deployed", revision)
+
+
+def _restore(snapshot: Mapping[str, str]) -> None:
+    _write_snapshot(snapshot)
+    _wait_for(snapshot)
+
+
+def drill_release() -> None:
+    if os.environ.get("CODESTRATA_HOSTED_DRILL") != "1":
+        raise SystemExit("deploy-role drill requires explicit verification mode")
+    image = os.environ["RELEASE_IMAGE"]
+    version = os.environ["RELEASE_VERSION"]
+    wheel = os.environ["RELEASE_SHA"]
+    if version != "0.3.0" or wheel != QUALIFIED_WHEEL:
+        raise SystemExit("drill uses only the published 0.3.0 release")
+
+    def promote(revision: str) -> None:
+        _promote(_snapshot(), revision, image, version, wheel)
+
+    def verify_promotion(revision: str) -> None:
+        _wait_for(
+            {
+                "dispatcher": revision,
+                "task": revision,
+                "image": image,
+                "version": version,
+                "wheel": wheel,
+                "rollout": "disabled",
+            }
+        )
+
+    revision = guarded_drill(
+        explicit=os.environ.get("CODESTRATA_HOSTED_DRILL") == "1",
+        image=image,
+        qualified_image=QUALIFIED_IMAGE,
+        production=_snapshot,
+        register=lambda: _register_revision(image, version, wheel),
+        canary=lambda registered: _run_canary(registered, _lambda_environment(), isolated_canary_job(os.environ["GITHUB_RUN_ID"])),
+        promote=promote,
+        verify_promotion=verify_promotion,
+        restore=_restore,
+    )
+    print("drill-restored", revision)
 
 
 def _run_canary(task_arn: str, environment: dict[str, str], job_id: str) -> None:
-    overrides = {
-        "containerOverrides": [
-            {
-                "name": "setup",
-                "environment": [
-                    {"name": "CODESTRATA_JOB_ID", "value": job_id},
-                    {"name": "CODESTRATA_ATTEMPT", "value": "1"},
-                    {"name": "CODESTRATA_REPO_URL", "value": "https://github.com/octocat/Hello-World.git"},
-                ],
-            },
-            {
-                "name": "engine",
-                "environment": [
-                    {"name": "CODESTRATA_JOB_ID", "value": job_id},
-                    {"name": "CODESTRATA_ATTEMPT", "value": "1"},
-                    {"name": "CODESTRATA_REPO_URL", "value": "https://github.com/octocat/Hello-World.git"},
-                ],
-            },
-            {
-                "name": "cleanup",
-                "environment": [
-                    {"name": "CODESTRATA_JOB_ID", "value": job_id},
-                    {"name": "CODESTRATA_ATTEMPT", "value": "1"},
-                    {"name": "CODESTRATA_HOSTED_COMPLETION_QUEUE_URL", "value": CANARY_QUEUE_URL},
-                ],
-            },
-        ]
-    }
+    overrides = canary_container_overrides(job_id)
     started = json.loads(
         _aws(
             "ecs",
@@ -435,6 +509,8 @@ def main() -> None:
         build_image()
     elif command == "deploy":
         deploy_release()
+    elif command == "drill":
+        drill_release()
     else:
         raise SystemExit(f"unknown command: {command}")
 
