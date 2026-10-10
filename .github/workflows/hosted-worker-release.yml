@@ -1,0 +1,158 @@
+# Hosted Engine worker release.
+# Runs in CodeStrata/codestrata-engine after a stable PyPI publication.
+# Package publication is workflow_dispatch and does not create a GitHub release,
+# so this workflow also reconciles the package index on a schedule.
+# It does not run on source pushes.
+
+name: hosted-worker-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Stable package version, including the published 0.3.0 release
+        required: true
+        type: string
+      wheel_sha256:
+        description: SHA-256 of the published wheel
+        required: true
+        type: string
+      rollout:
+        description: Request production rollout. SSM must also be enabled.
+        required: true
+        type: boolean
+        default: false
+  repository_dispatch:
+    types: [engine-package-published]
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codestrata-hosted-worker-release
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    name: decide
+    if: github.event_name != 'schedule' || vars.CODESTRATA_HOSTED_ROLLOUT == 'enabled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: engine-worker-build
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      action: ${{ steps.decision.outputs.action }}
+      version: ${{ steps.decision.outputs.version }}
+      wheel_sha256: ${{ steps.decision.outputs.wheel_sha256 }}
+      image: ${{ steps.decision.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::373220260833:role/codestrata-launch-engine-image-push
+          aws-region: us-west-2
+      - name: Choose the release action
+        id: decision
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_VERSION: ${{ inputs.version }}
+          INPUT_SHA: ${{ inputs.wheel_sha256 }}
+          DISPATCH_VERSION: ${{ github.event.client_payload.version }}
+          DISPATCH_SHA: ${{ github.event.client_payload.wheel_sha256 }}
+          ROLLOUT_REQUESTED: ${{ inputs.rollout }}
+          ROLLOUT_FLAG: ${{ vars.CODESTRATA_HOSTED_ROLLOUT }}
+        run: python verification/hosted_worker/workflow.py decide
+
+  retain:
+    name: retain-qualified-engine
+    needs: decide
+    if: needs.decide.outputs.action == 'retain'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: engine-worker-build
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::373220260833:role/codestrata-launch-engine-image-push
+          aws-region: us-west-2
+      - name: Confirm the published 0.3.0 image without pushing
+        env:
+          EXPECTED_IMAGE: ${{ needs.decide.outputs.image }}
+          EXPECTED_SHA: ${{ needs.decide.outputs.wheel_sha256 }}
+        run: python verification/hosted_worker/workflow.py retain
+
+  build:
+    name: build-and-qualify
+    needs: decide
+    if: needs.decide.outputs.action == 'release'
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 40
+    environment: engine-worker-build
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image: ${{ steps.build.outputs.image }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::373220260833:role/codestrata-launch-engine-image-push
+          aws-region: us-west-2
+      - name: Build from the published wheel
+        id: build
+        env:
+          RELEASE_VERSION: ${{ needs.decide.outputs.version }}
+          RELEASE_SHA: ${{ needs.decide.outputs.wheel_sha256 }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_WORKFLOW: ${{ github.workflow }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: python verification/hosted_worker/workflow.py build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: engine-worker-provenance
+          path: provenance.json
+
+  deploy:
+    name: roll-out
+    needs: [decide, build]
+    if: needs.decide.outputs.action == 'release' && needs.build.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: engine-worker-deploy
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::373220260833:role/codestrata-launch-engine-deploy
+          aws-region: us-west-2
+      - name: Register the revision and run the canary
+        env:
+          RELEASE_IMAGE: ${{ needs.build.outputs.image }}
+          RELEASE_VERSION: ${{ needs.decide.outputs.version }}
+          RELEASE_SHA: ${{ needs.decide.outputs.wheel_sha256 }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: python verification/hosted_worker/workflow.py deploy
