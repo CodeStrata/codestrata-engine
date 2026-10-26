@@ -105,7 +105,12 @@ class FileSnapshotStore:
         racing = self._find_by_fingerprint(repository_id, branch_key, fingerprint)
         if racing is not None:
             return racing
-        atomic_write_json(destination, snapshot_document(record), tmp_directory=self._paths.tmp)
+        atomic_write_json(
+            destination,
+            snapshot_document(record),
+            tmp_directory=self._paths.tmp,
+            max_bytes=self._paths.max_json_bytes,
+        )
         self._on_change()
         created = self.get_snapshot(snapshot_id)
         if created is None:
@@ -119,7 +124,11 @@ class FileSnapshotStore:
             if not path.is_file() or path.is_symlink():
                 continue
             try:
-                return snapshot_from_document(read_json_file(path, root=self._paths.root))
+                return snapshot_from_document(read_json_file(
+                    path,
+                    root=self._paths.root,
+                    max_bytes=self._paths.max_json_bytes,
+                ))
             except (KnowledgeStoreError, KeyError, ValueError, TypeError):
                 raise KnowledgeStoreCorruptionError(
                     f"Corrupt snapshot manifest: {wanted}"
@@ -168,7 +177,11 @@ class FileSnapshotStore:
             if not path.is_file() or path.is_symlink():
                 continue
             try:
-                record = snapshot_from_document(read_json_file(path, root=self._paths.root))
+                record = snapshot_from_document(read_json_file(
+                    path,
+                    root=self._paths.root,
+                    max_bytes=self._paths.max_json_bytes,
+                ))
             except (KnowledgeStoreError, KeyError, ValueError, TypeError):
                 continue
             if branch is not None and normalize_branch_key(record.branch) != normalize_branch_key(

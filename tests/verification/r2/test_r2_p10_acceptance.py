@@ -76,7 +76,7 @@ def _fake_assess(calls: list[dict[str, Any]], *, fail_slot_sha: str | None = Non
 
 
 def test_selected_package_keeps_four_outcomes_and_primary_commands() -> None:
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.3.1"
     assert RULESET_VERSION == "1.2.0"
     assert [member.value for member in OutcomeFamily] == [
         "architecture",

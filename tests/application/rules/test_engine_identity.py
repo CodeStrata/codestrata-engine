@@ -14,7 +14,7 @@ from codestrata.domain.contracts.serialization import digest_canonical
 
 def test_pinned_catalog_identity_is_not_the_runtime_version() -> None:
     assert ENGINE_VERSION == "0.2.1"
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.3.1"
     assert engine_digest() == digest_canonical({"engine": ENGINE_VERSION})
     assert engine_digest() != digest_canonical({"engine": __version__})
 

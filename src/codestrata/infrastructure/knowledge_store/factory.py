@@ -13,6 +13,7 @@ from codestrata.infrastructure.knowledge_store.defaults import (
     default_knowledge_directory,
 )
 from codestrata.infrastructure.knowledge_store.file.store import FileKnowledgeStore
+from codestrata.infrastructure.knowledge_store.io import DEFAULT_MAX_JSON_BYTES
 
 
 def knowledge_directory_from_settings(settings: CodestrataSettings | None) -> Path:
@@ -27,6 +28,14 @@ def knowledge_directory_from_settings(settings: CodestrataSettings | None) -> Pa
     return resolved
 
 
+def max_json_bytes_from_settings(settings: CodestrataSettings | None) -> int:
+    """Return configured knowledge JSON bound (default 16 MiB when settings omitted)."""
+
+    if settings is None:
+        return DEFAULT_MAX_JSON_BYTES
+    return int(settings.knowledge.max_json_bytes)
+
+
 def create_knowledge_store(
     directory: Path | None = None,
     *,
@@ -35,7 +44,7 @@ def create_knowledge_store(
     """Create an unopened file knowledge store for application use."""
 
     resolved = directory if directory is not None else knowledge_directory_from_settings(settings)
-    return FileKnowledgeStore(resolved)
+    return FileKnowledgeStore(resolved, max_json_bytes=max_json_bytes_from_settings(settings))
 
 
 def create_knowledge_query_service(

@@ -628,7 +628,7 @@ def test_no_external_assets_or_scripts(tmp_path: Path) -> None:
     # Favicon is the only <link>; must be embedded data URI (Slice 20.13A).
     assert lowered.count("<link ") == 1
     assert 'rel="icon"' in lowered
-    assert "data:image/png;base64," in lowered
+    assert "data:image/svg+xml;base64," in lowered
     assert "cdn." not in lowered
     assert "@import" not in lowered
     assert 'src="http' not in lowered

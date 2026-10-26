@@ -12,6 +12,17 @@ Open-source CLI that assesses a software repository and produces deterministic
 findings, recommendations, and a self-contained HTML/JSON **Engineering
 Assessment** report.
 
+**Version in this tree: 0.3.1.** An editable install of this tree reports
+0.3.1. Public PyPI does not have 0.3.1. Public installs use
+`pip install 'codestrata==0.3.0'`. Public `codestrata-engine` `main` is 0.3.0,
+and the latest GitHub Release is
+[v0.2.1](https://github.com/CodeStrata/codestrata-engine/releases/tag/v0.2.1).
+Hosted workers use the unpublished 0.3.1 wheel
+`ab10df61c5bb3124dcce742f9465bb8acba4702be9d9704a5bd3a6b1c5c427fb`.
+Local `knowledge.max_json_bytes` defaults to 16 MiB; the hosted worker sets
+32 MiB. Reports from this tree embed the website SVG favicon. Hosted Try is
+owner-restricted while public opening is disabled.
+
 **Audience:** engineers and engineering leaders evaluating a codebase for
 modernization, due diligence, or portfolio discovery.
 

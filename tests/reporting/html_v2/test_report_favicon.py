@@ -14,6 +14,7 @@ from codestrata.community_cloud import report_publishing
 from codestrata.reporting.assessment_json import build_assessment_json_document
 from codestrata.reporting.branding import (
     BRAND_FAVICON_ASSET,
+    WEBSITE_FAVICON_SHA256,
     brand_favicon_data_uri,
     brand_favicon_link_tag,
 )
@@ -38,7 +39,7 @@ def test_report_favicon_01_generated_html_contains_favicon_declaration(tmp_path:
     html = _render(tmp_path)
     assert "<head>" in html
     assert 'rel="icon"' in html
-    assert 'type="image/png"' in html
+    assert 'type="image/svg+xml"' in html
     assert brand_favicon_link_tag() in html
     assert html.index("<head>") < html.index('rel="icon"') < html.index("</head>")
 
@@ -53,16 +54,17 @@ def test_report_favicon_02_no_developer_local_or_private_path(tmp_path: Path) ->
     tag_lower = tag.lower()
     for marker in _FORBIDDEN_PATH_MARKERS:
         assert marker.lower() not in tag_lower
-    assert 'href="data:image/png;base64,' in tag
+    assert 'href="data:image/svg+xml;base64,' in tag
     assert "http://" not in tag
     assert "https://" not in tag
-    # Syntactically valid bounded base64 payload.
     uri = brand_favicon_data_uri()
-    assert uri.startswith("data:image/png;base64,")
+    assert uri.startswith("data:image/svg+xml;base64,")
     raw = base64.standard_b64decode(uri.split(",", 1)[1])
-    assert raw[:8] == b"\x89PNG\r\n\x1a\n"
+    import hashlib
+
+    assert hashlib.sha256(raw).hexdigest() == WEBSITE_FAVICON_SHA256
     assert 0 < len(raw) <= 4096
-    assert BRAND_FAVICON_ASSET.endswith(".png")
+    assert BRAND_FAVICON_ASSET.endswith(".svg")
 
 
 def test_report_favicon_03_packaged_asset_resolves_via_importlib(tmp_path: Path) -> None:
@@ -104,7 +106,7 @@ def test_report_favicon_04_public_publish_uploads_raw_html_bytes(tmp_path: Path)
         )
     raw = html_path.read_bytes()
     assert b'rel="icon"' in raw
-    assert b"data:image/png;base64," in raw
+    assert b"data:image/svg+xml;base64," in raw
     assert raw == html.encode("utf-8")
 
 

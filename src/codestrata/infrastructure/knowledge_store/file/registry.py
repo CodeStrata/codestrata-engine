@@ -122,7 +122,11 @@ class FileRepositoryRegistry:
         if not path.is_file():
             return ()
         try:
-            document = read_json_file(path, root=self._paths.root)
+            document = read_json_file(
+                path,
+                root=self._paths.root,
+                max_bytes=self._paths.max_json_bytes,
+            )
             return aliases_from_document(document)
         except (KnowledgeStoreError, KeyError, ValueError, TypeError):
             return ()
@@ -287,6 +291,7 @@ class FileRepositoryRegistry:
             self._paths.repository_manifest(record.repository_id),
             repository_document(record),
             tmp_directory=self._paths.tmp,
+            max_bytes=self._paths.max_json_bytes,
         )
 
     def _write_aliases(self, repository_id: str, records: Sequence[RepositoryAliasRecord]) -> None:
@@ -294,6 +299,7 @@ class FileRepositoryRegistry:
             self._paths.aliases_path(repository_id),
             aliases_document(records),
             tmp_directory=self._paths.tmp,
+            max_bytes=self._paths.max_json_bytes,
         )
 
     def _normalize_alias_value(

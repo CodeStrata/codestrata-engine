@@ -159,6 +159,7 @@ class FileAssessmentRunStore:
             self._paths.artifacts_manifest(run.repository_id, run_id),
             artifacts_document(staged),
             tmp_directory=self._paths.tmp,
+            max_bytes=self._paths.max_json_bytes,
         )
         completed = run.model_copy(
             update={
@@ -235,7 +236,11 @@ class FileAssessmentRunStore:
             if not path.is_file() or path.is_symlink():
                 continue
             try:
-                run = run_from_document(read_json_file(path, root=self._paths.root))
+                run = run_from_document(read_json_file(
+                    path,
+                    root=self._paths.root,
+                    max_bytes=self._paths.max_json_bytes,
+                ))
             except (KnowledgeStoreError, KeyError, ValueError, TypeError):
                 raise KnowledgeStoreCorruptionError(f"Corrupt run manifest: {wanted}") from None
             if run.status is AssessmentRunStatus.COMPLETED:
@@ -295,7 +300,11 @@ class FileAssessmentRunStore:
             if not run_file.is_file() or run_file.is_symlink():
                 continue
             try:
-                run = run_from_document(read_json_file(run_file, root=self._paths.root))
+                run = run_from_document(read_json_file(
+                    run_file,
+                    root=self._paths.root,
+                    max_bytes=self._paths.max_json_bytes,
+                ))
             except (KnowledgeStoreError, KeyError, ValueError, TypeError):
                 continue
             if run.status is AssessmentRunStatus.COMPLETED:
@@ -316,7 +325,11 @@ class FileAssessmentRunStore:
         if not path.is_file():
             return ()
         try:
-            records = artifacts_from_document(read_json_file(path, root=self._paths.root))
+            records = artifacts_from_document(read_json_file(
+                    path,
+                    root=self._paths.root,
+                    max_bytes=self._paths.max_json_bytes,
+                ))
         except (KnowledgeStoreError, KeyError, ValueError, TypeError) as error:
             raise KnowledgeStoreCorruptionError(
                 f"Corrupt artifacts manifest for {run_id}"
@@ -365,6 +378,7 @@ class FileAssessmentRunStore:
             self._paths.run_manifest(record.repository_id, record.run_id),
             run_document(record),
             tmp_directory=self._paths.tmp,
+            max_bytes=self._paths.max_json_bytes,
         )
 
     def _require_run(self, run_id: str) -> AssessmentRunRecord:

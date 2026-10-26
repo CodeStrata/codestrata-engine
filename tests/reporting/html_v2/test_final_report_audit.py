@@ -377,7 +377,7 @@ def test_html_csp_print_schema(tmp_path: Path) -> None:
     assert html.lower().count("<script") == 1
     assert html.lower().count("<link ") == 1
     assert 'rel="icon"' in html
-    assert "data:image/png;base64," in html
+    assert "data:image/svg+xml;base64," in html
     assert "@media print" in html
     assert ASSESSMENT_JSON_SCHEMA_VERSION == "1.2"
 

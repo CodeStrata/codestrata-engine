@@ -8,6 +8,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-22
+
+### Changed
+
+* Package version in this tree is **0.3.1**. It is not a PyPI release. Public
+  installs remain `pip install 'codestrata==0.3.0'`.
+* `knowledge.max_json_bytes` configures the file knowledge-store JSON document
+  bound. The local default stays **16 MiB** (`16777216`). Hosted worker
+  configuration sets **32 MiB** (`33554432`) and does not change the local
+  default. The hosted completion persistence cap is a separate **32 MiB** limit.
+* Generated HTML reports embed the current website SVG favicon
+  (`sha256 cd5eac6e9a8ff66d77b61e8523ee1d280c56d63082a4909902685b72471e008a`)
+  as `data:image/svg+xml`. The 0.2.1 favicon was a PNG data URI. Report schema
+  remains **1.2**.
+
+### Notes
+
+* Hosted workers consume unpublished wheel
+  `ab10df61c5bb3124dcce742f9465bb8acba4702be9d9704a5bd3a6b1c5c427fb`
+  built from source commit `51cf17da03076658a6e92038c784ad56b24f8ca0`.
+  That wheel is not the public GitHub Release. The latest GitHub Release
+  remains **v0.2.1**, and public `codestrata-engine` `main` remains **0.3.0**.
+* Hosted Try stays limited to the qualification recipient while public opening
+  is disabled.
+* The **0.3.0** section below keeps the publication status written for that
+  cut. PyPI later received **0.3.0**. This **0.3.1** section does not rewrite
+  that cut.
+
 ## [0.3.0] - 2026-10-08
 
 ### Changed

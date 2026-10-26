@@ -249,6 +249,23 @@ def with_task_definition(environment: dict[str, str], task_arn: str) -> dict[str
     return updated
 
 
+def live_rollback_target(snapshot: Mapping[str, str]) -> str:
+    """Return the dispatcher revision recorded in the live snapshot.
+
+    A drill restores that revision. It does not substitute a fixed revision such
+    as an inactive historical task definition.
+    """
+
+    current = str(snapshot.get("dispatcher") or "")
+    prefix = f"arn:aws:ecs:{REGION}:{ACCOUNT}:task-definition/codestrata-launch-worker:"
+    if not current.startswith(prefix):
+        raise ValueError("rollback requires the live dispatcher revision")
+    revision = current.rsplit(":", 1)[-1]
+    if not revision.isdigit():
+        raise ValueError("rollback revision is not numeric")
+    return current
+
+
 def restored_dispatch(previous_arn: str, failed_arn: str) -> str:
     if previous_arn in {"", "unset"} or previous_arn == failed_arn:
         raise ValueError("there is no previous dispatch revision to restore")
@@ -263,6 +280,14 @@ PRODUCTION_COMPLETION_QUEUE = (
 CANARY_COMPLETION_QUEUE = (
     "https://sqs.us-west-2.amazonaws.com/373220260833/codestrata-launch-worker-canary"
 )
+CANARY_TASK_TAG_KEY = "codestrata-canary"
+CANARY_TASK_TAG_VALUE = "true"
+
+
+def canary_run_task_tags() -> str:
+    """The only tag RunTask applies. Deploy-role tagging allows this pair at creation."""
+
+    return f"key={CANARY_TASK_TAG_KEY},value={CANARY_TASK_TAG_VALUE}"
 
 
 def isolated_canary_job(run_id: str) -> str:
@@ -354,6 +379,7 @@ def guarded_drill(
     before = dict(production())
     if before.get("rollout") != "disabled":
         raise RuntimeError("drill does not run while production rollout is enabled")
+    live_rollback_target(before)
     revision = register()
     try:
         canary(revision)

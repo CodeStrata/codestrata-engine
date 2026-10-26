@@ -52,7 +52,7 @@ def test_provenance_binds_wheel_and_sdist_digests(tmp_path: Path) -> None:
     assert manifest.primary_artifact_digest("wheel") is not None
     assert manifest.primary_artifact_digest("sdist") is not None
     assert manifest.sbom_digest == sbom_digest(build_runtime_sbom())
-    assert manifest.engine_version == __version__ == "0.3.0"
+    assert manifest.engine_version == __version__ == "0.3.1"
     assert manifest.catalog_package_revision == "ENGINE-2026-09-15-R1"
     assert manifest.source_binding.status == "development"
     assert manifest.source_binding.source_sha is None

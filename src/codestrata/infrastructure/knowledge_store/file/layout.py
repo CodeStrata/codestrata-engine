@@ -12,6 +12,7 @@ from codestrata.infrastructure.knowledge_store.defaults import (
     LOCKS_DIRECTORY_NAME,
     TMP_DIRECTORY_NAME,
 )
+from codestrata.infrastructure.knowledge_store.io import DEFAULT_MAX_JSON_BYTES
 
 STORE_MANIFEST_NAME = "store.json"
 REPOSITORIES_DIRNAME = "repositories"
@@ -48,6 +49,7 @@ class FileStorePaths:
     """Resolved directories under a knowledge root."""
 
     root: Path
+    max_json_bytes: int = DEFAULT_MAX_JSON_BYTES
 
     @property
     def store_manifest(self) -> Path:
