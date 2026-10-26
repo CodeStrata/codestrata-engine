@@ -778,6 +778,7 @@ class KnowledgeSettings(BaseModel):
 
     directory: Path = Path(".codestrata/knowledge")
     enabled: bool = False
+    max_json_bytes: int = 16 * 1024 * 1024
     projection: KnowledgeProjectionSettings = Field(default_factory=KnowledgeProjectionSettings)
     chunking: KnowledgeChunkingSettings = Field(default_factory=KnowledgeChunkingSettings)
     embedding: KnowledgeEmbeddingSettings = Field(default_factory=KnowledgeEmbeddingSettings)
@@ -785,6 +786,13 @@ class KnowledgeSettings(BaseModel):
     vector_store: KnowledgeVectorStoreSettings = Field(default_factory=KnowledgeVectorStoreSettings)
     retrieval: KnowledgeRetrievalSettings = Field(default_factory=KnowledgeRetrievalSettings)
     answering: KnowledgeAnsweringSettings = Field(default_factory=KnowledgeAnsweringSettings)
+
+    @field_validator("max_json_bytes")
+    @classmethod
+    def validate_max_json_bytes(cls, value: int) -> int:
+        if value < 1:
+            raise ValueError("knowledge.max_json_bytes must be positive")
+        return value
 
 
 class McpToolsSettings(BaseModel):

@@ -27,6 +27,7 @@ from verification.hosted_worker.release import (
     WHEEL_HOST,
     canary_container_overrides,
     canary_errors,
+    canary_run_task_tags,
     confirmed_digest,
     decide,
     download_wheel,
@@ -446,7 +447,7 @@ def _run_canary(task_arn: str, environment: dict[str, str], job_id: str) -> None
             "--overrides",
             json.dumps(overrides),
             "--tags",
-            "key=codestrata-canary,value=true",
+            canary_run_task_tags(),
         )
     )
     tasks = started.get("tasks") or []

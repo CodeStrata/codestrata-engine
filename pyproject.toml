@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "codestrata"
-version = "0.3.0"
+version = "0.3.1"
 description = "CodeStrata Engine: deterministic Engineering Assessment for repositories; portfolio Engineering Intelligence Reports (EIR) where applicable."
 readme = "README.md"
 requires-python = ">=3.12"
@@ -71,6 +71,9 @@ development = [
     "types-PyYAML>=6.0,<7.0",
     # E00.2: pin pip-audit in Engine extras only. Missing module is BLOCKED, not PASS.
     "pip-audit>=2.7,<3.0",
+    # Must match scripts/build_google_sans_flex_report_subset.py REQUIRED_FONTTOOLS.
+    "fonttools==4.66.1",
+    "brotli>=1.0,<2.0",
 ]
 # Alias kept for existing docs/CI.
 dev = [
@@ -86,6 +89,8 @@ dev = [
     "ruff>=0.9,<1.0",
     "types-PyYAML>=6.0,<7.0",
     "pip-audit>=2.7,<3.0",
+    "fonttools==4.66.1",
+    "brotli>=1.0,<2.0",
 ]
 
 

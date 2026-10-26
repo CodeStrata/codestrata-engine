@@ -124,6 +124,7 @@ def test_load_settings_uses_knowledge_defaults(tmp_path: Path) -> None:
     )
     settings = load_settings(config_file)
     assert settings.knowledge.directory == Path(".codestrata/knowledge")
+    assert settings.knowledge.max_json_bytes == 16 * 1024 * 1024
 
 
 def test_load_settings_reads_knowledge_directory(tmp_path: Path) -> None:

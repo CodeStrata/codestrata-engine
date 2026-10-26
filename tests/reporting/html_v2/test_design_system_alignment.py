@@ -78,7 +78,7 @@ def test_generated_html_embeds_tokens_and_keeps_csp_offline(tmp_path: Path) -> N
     # Standalone favicon only (data URI); no external stylesheets.
     assert html.lower().count("<link ") == 1
     assert 'rel="icon"' in html
-    assert "data:image/png;base64," in html
+    assert "data:image/svg+xml;base64," in html
 
 
 def test_ai_variant_also_uses_design_system_css(tmp_path: Path) -> None:

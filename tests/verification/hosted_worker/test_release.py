@@ -17,12 +17,14 @@ from verification.hosted_worker.release import (
     QUALIFIED_WHEEL,
     canary_container_overrides,
     canary_errors,
+    canary_run_task_tags,
     confirmed_digest,
     decide,
     guarded_drill,
     guarded_release,
     isolated_canary_job,
     listed_versions,
+    live_rollback_target,
     provenance_record,
     restored_dispatch,
     revise_task_definition,
@@ -218,13 +220,20 @@ def test_workflow_is_not_a_source_push_and_keeps_roles_separate() -> None:
     assert "codestrata-launch-engine-deploy" in text.split("verify-deploy-role", 1)[1]
     assert "aws_access_key" not in text.lower()
     assert "AKIA" not in text
+    workflows = list((ENGINE / ".github" / "workflows").glob("*.yml"))
+    assert [path.name for path in workflows] == ["hosted-worker-release.yml"]
+
+
+@pytest.mark.skipif(
+    not (ENGINE.parent / "public-export-manifest.yaml").is_file(),
+    reason="The PyPI publisher workflow belongs to the platform repository, outside the Engine export.",
+)
+def test_platform_publisher_dispatch_is_manual_and_token_scoped() -> None:
     publisher = PUBLISHER.read_text(encoding="utf-8")
     assert "workflow_dispatch:" in publisher
     assert "\n  push:" not in publisher
     assert "engine-package-published" in publisher
     assert "ENGINE_WORKER_DISPATCH_TOKEN" in publisher
-    workflows = list((ENGINE / ".github" / "workflows").glob("*.yml"))
-    assert [path.name for path in workflows] == ["hosted-worker-release.yml"]
 
 
 def test_actions_module_command_reaches_every_entrypoint(tmp_path: Path) -> None:
@@ -326,7 +335,8 @@ def test_failed_promotion_restores_the_recorded_snapshot() -> None:
 
 
 def test_drill_promotes_only_the_qualified_image_and_restores_it() -> None:
-    snapshot = {"dispatcher": "arn:old", "rollout": "disabled"}
+    live = "arn:aws:ecs:us-west-2:373220260833:task-definition/codestrata-launch-worker:4"
+    snapshot = {"dispatcher": live, "task": live, "rollout": "disabled"}
     restored: list[dict[str, str]] = []
     promoted: list[str] = []
 
@@ -344,6 +354,18 @@ def test_drill_promotes_only_the_qualified_image_and_restores_it() -> None:
     assert revision == "arn:new"
     assert promoted == ["arn:new"]
     assert restored == [snapshot]
+    assert restored[0]["dispatcher"] == live
+    assert live_rollback_target(snapshot) == live
+    source = (ENGINE / "verification" / "hosted_worker" / "release.py").read_text(
+        encoding="utf-8"
+    )
+    workflow = (ENGINE / "verification" / "hosted_worker" / "workflow.py").read_text(
+        encoding="utf-8"
+    )
+    assert "codestrata-launch-worker:1" not in source
+    assert "codestrata-launch-worker:1" not in workflow
+    with pytest.raises(ValueError, match="live dispatcher"):
+        live_rollback_target({"dispatcher": "unset", "rollout": "disabled"})
     with pytest.raises(RuntimeError, match="explicit verification mode"):
         guarded_drill(
             explicit=False,
@@ -368,6 +390,14 @@ def test_drill_promotes_only_the_qualified_image_and_restores_it() -> None:
             verify_promotion=lambda _revision: None,
             restore=lambda _recorded: None,
         )
+
+
+def test_canary_run_task_sends_only_the_identifying_tag() -> None:
+    assert canary_run_task_tags() == "key=codestrata-canary,value=true"
+    source = (ENGINE / "verification" / "hosted_worker" / "workflow.py").read_text(encoding="utf-8")
+    assert source.count('"--tags"') == 1
+    assert "canary_run_task_tags()" in source
+    assert "key=codestrata-canary,value=true" not in source
 
 
 def test_canary_completion_cannot_use_the_production_queue() -> None:

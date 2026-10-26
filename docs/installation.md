@@ -10,6 +10,12 @@ Install CodeStrata Engine (Community Edition) for local development or
 day-to-day assessment use. Portal steps are canonical; Engine notes for editable
 installs, wheels, and packaged resources remain below.
 
+Public day-to-day installs use `pip install 'codestrata==0.3.0'`. This tree's
+package version is **0.3.1** and is not on PyPI. Cloning public
+`codestrata-engine` `main` today installs **0.3.0**. An editable install of a
+tree reports that tree's version. Local `knowledge.max_json_bytes` defaults to
+16 MiB. The hosted worker sets 32 MiB and is not applied by a local install.
+
 ## Requirements
 
 | Requirement | Notes |

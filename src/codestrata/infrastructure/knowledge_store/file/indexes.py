@@ -54,7 +54,11 @@ def load_valid_repository(paths: FileStorePaths, repository_id: str) -> dict[str
     if not manifest.is_file() or manifest.is_symlink():
         return None
     try:
-        document = read_json_file(manifest, root=paths.root)
+        document = read_json_file(
+            manifest,
+            root=paths.root,
+            max_bytes=paths.max_json_bytes,
+        )
         if not isinstance(document, dict):
             return None
         record = repository_from_document(document)
@@ -90,7 +94,11 @@ def _rebuild_derived_indexes_unlocked(
         aliases_path = paths.aliases_path(repository_id)
         if aliases_path.is_file() and not aliases_path.is_symlink():
             try:
-                aliases = aliases_from_document(read_json_file(aliases_path, root=paths.root))
+                aliases = aliases_from_document(read_json_file(
+                    aliases_path,
+                    root=paths.root,
+                    max_bytes=paths.max_json_bytes,
+                ))
             except (KnowledgeStoreError, OSError, KeyError, ValueError, TypeError):
                 aliases = ()
             for alias in aliases:
@@ -108,7 +116,11 @@ def _rebuild_derived_indexes_unlocked(
                 if snap_file.is_symlink() or not snap_file.is_file():
                     continue
                 try:
-                    snap_doc = read_json_file(snap_file, root=paths.root)
+                    snap_doc = read_json_file(
+                        snap_file,
+                        root=paths.root,
+                        max_bytes=paths.max_json_bytes,
+                    )
                     record = snapshot_from_document(snap_doc)
                 except (KnowledgeStoreError, OSError, KeyError, ValueError, TypeError):
                     continue
@@ -122,7 +134,11 @@ def _rebuild_derived_indexes_unlocked(
                 if not run_file.is_file() or run_file.is_symlink():
                     continue
                 try:
-                    run_doc = read_json_file(run_file, root=paths.root)
+                    run_doc = read_json_file(
+                        run_file,
+                        root=paths.root,
+                        max_bytes=paths.max_json_bytes,
+                    )
                     run = run_from_document(run_doc)
                 except (KnowledgeStoreError, OSError, KeyError, ValueError, TypeError):
                     continue
@@ -132,7 +148,13 @@ def _rebuild_derived_indexes_unlocked(
                         # Incomplete finalize — do not advertise as completed.
                         continue
                     try:
-                        artifacts_from_document(read_json_file(artifacts_path, root=paths.root))
+                        artifacts_from_document(
+                            read_json_file(
+                                artifacts_path,
+                                root=paths.root,
+                                max_bytes=paths.max_json_bytes,
+                            )
+                        )
                     except (KnowledgeStoreError, OSError, KeyError, ValueError, TypeError):
                         continue
                 run_rows.append(run_document(run))
@@ -174,5 +196,10 @@ def _rebuild_derived_indexes_unlocked(
             for source in (repo_rows, alias_rows, snapshot_rows, run_rows)
         ),
     }
-    atomic_write_json(paths.indexes / "rebuild-marker.json", marker, tmp_directory=tmp)
+    atomic_write_json(
+        paths.indexes / "rebuild-marker.json",
+        marker,
+        tmp_directory=tmp,
+        max_bytes=paths.max_json_bytes,
+    )
     return len(repo_rows)

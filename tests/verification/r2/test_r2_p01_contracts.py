@@ -93,7 +93,7 @@ R2_SELECTED_FIXTURES = (
 
 
 def test_selected_package_version_is_0_3_0_and_ruleset_stays_1_2_0() -> None:
-    assert __version__ == "0.3.0"
+    assert __version__ == "0.3.1"
     assert RULESET_VERSION == "1.2.0"
 
 

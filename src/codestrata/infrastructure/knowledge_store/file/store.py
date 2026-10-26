@@ -78,7 +78,7 @@ class FileKnowledgeStore:
         )
         if self._max_json_bytes < 1:
             raise ValueError("max_json_bytes must be positive")
-        self._paths = FileStorePaths(self._directory)
+        self._paths = FileStorePaths(self._directory, max_json_bytes=self._max_json_bytes)
         self._open = False
         self._registry: FileRepositoryRegistry | None = None
         self._snapshots: FileSnapshotStore | None = None
@@ -282,9 +282,14 @@ class FileKnowledgeStore:
                     "destructive_auto_migration": False,
                 },
                 tmp_directory=self._paths.tmp,
+                max_bytes=self._paths.max_json_bytes,
             )
             return
-        document = read_json_file(manifest, root=self._directory)
+        document = read_json_file(
+            manifest,
+            root=self._directory,
+            max_bytes=self._paths.max_json_bytes,
+        )
         try:
             version = int(document["schema_version"])
         except (KeyError, TypeError, ValueError) as error:

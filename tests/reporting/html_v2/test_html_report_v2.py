@@ -371,7 +371,7 @@ def test_customer_report_experience_hierarchy_and_metadata(tmp_path: Path) -> No
     # Self-contained: no external stylesheets or scripts.
     # Favicon is embedded as a data URI (presentation-only; Slice 20.13A).
     assert 'rel="icon"' in html
-    assert "data:image/png;base64," in html
+    assert "data:image/svg+xml;base64," in html
     assert html.lower().count("<link ") == 1
     assert "<script src" not in html
     assert html.lower().count("<script") == 1
